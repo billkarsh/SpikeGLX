@@ -41,6 +41,7 @@ private slots:
 private:
     void write( const QString &s );
     void writeMapMsg( int slot );
+    bool okVersions();
     bool _openSlot();
     void _closeSlots();
     bool _openProbe();

@@ -4,6 +4,7 @@
 20231207
 --------
 + imErrFlags(ip) reported per probe.
++ Firmware version test added to BIST and HST.
 
 20230905
 --------

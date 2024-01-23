@@ -8,6 +8,7 @@
 #include "HelpButDialog.h"
 #include "Util.h"
 #include "MainApp.h"
+#include "Version.h"
 
 #include <QFileDialog>
 #include <QThread>
@@ -76,6 +77,9 @@ void IMBISTCtl::go()
     int itest = bistUI->testCB->currentIndex();
 
     if( !itest ) {
+
+        if( !okVersions() )
+            return;
 
         if( !test_bistBS() )
             return;
@@ -155,6 +159,63 @@ void IMBISTCtl::writeMapMsg( int slot )
             "Click 'Detect' in the 'Configure Acquisition' dialog\n"
             "before running the BISTs. This will assign slots to\n"
             "your OneBoxes." );
+    }
+}
+
+
+bool IMBISTCtl::okVersions()
+{
+    basestationID   bs;
+    firmware_Info   info;
+    QString         bsfw, bscfw;
+    NP_ErrorCode    err;
+    int             slot = bistUI->slotSB->value();
+
+    np_getDeviceInfo( slot, &bs );
+
+    if( bs.platformid != NPPlatform_PXI )
+        return true;
+
+    err = np_bs_getFirmwareInfo( slot, &info );
+
+    if( err != SUCCESS ) {
+        write( "Error checking firmware:" );
+        write(
+            QString("IMEC bs_getFirmwareInfo(slot %1) error %2:")
+            .arg( slot ).arg( err ) );
+        write( getNPErrorString() );
+        return false;
+    }
+
+    bsfw = QString("%1.%2.%3")
+            .arg( info.major ).arg( info.minor ).arg( info.build );
+
+    err = np_bsc_getFirmwareInfo( slot, &info );
+
+    if( err != SUCCESS ) {
+        write( "Error checking firmware:" );
+        write(
+            QString("IMEC bsc_getFirmwareInfo(slot %1) error %2:")
+            .arg( slot ).arg( err ) );
+        write( getNPErrorString() );
+        return false;
+    }
+
+    bscfw = QString("%1.%2.%3")
+            .arg( info.major ).arg( info.minor ).arg( info.build );
+
+    if( bsfw != VERS_IMEC_BS || bscfw != VERS_IMEC_BSC ) {
+        write( "ERROR: Wrong IMEC Firmware Version(s) ---" );
+        if( bsfw != VERS_IMEC_BS )
+            write( QString("   - BS(slot %1) Has: %2 Requires: %3")
+                    .arg( slot ).arg( bsfw ).arg( VERS_IMEC_BS ) );
+        if( bscfw != VERS_IMEC_BSC )
+            write( QString("   - BSC(slot %1) Has: %2 Requires: %3")
+                    .arg( slot ).arg( bscfw ).arg( VERS_IMEC_BSC ) );
+        write("(1) Select menu item 'Tools/Update Imec PXIe Firmware'.");
+        write("(2) Read the help for that dialog (click '?' in title bar).");
+        write("(3) Required files are in the download package 'Firmware' folder.");
+        return false;
     }
 }
 
@@ -329,6 +390,9 @@ bool IMBISTCtl::EEPROMCheck()
 
 bool IMBISTCtl::stdStart( int itest, int secs )
 {
+    if( !okVersions() )
+        return false;
+
     write( "-----------------------------------" );
     write( QString("Test %1").arg( bistUI->testCB->itemText( itest ) ) );
 

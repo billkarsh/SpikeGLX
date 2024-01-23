@@ -38,6 +38,7 @@ private slots:
 
 private:
     QString getErrorStr();
+    bool okVersions();
     void write( const QString &s );
     bool _openSlot();
     void _closeSlots();

@@ -793,6 +793,10 @@ void Config_nitab::newSourceBut()
         sourceUI->divSB->setMinimum(
             ceil( nisrc.base/qMin( nisrc.maxrate, SGLX_NI_MAXRATE ) ) );
         sourceUI->divSB->setMaximum( nisrc.base / SGLX_NI_MINRATE );
+        sourceUI->intRadio->setText(
+            QString("Other internal (set integer divisor [%1, %2])")
+                .arg( sourceUI->divSB->minimum() )
+                .arg( sourceUI->divSB->maximum() ) );
         Connect( sourceUI->divSB, SIGNAL(valueChanged(int)), this, SLOT(sourceDivChanged(int)), Qt::DirectConnection );
     }
 
