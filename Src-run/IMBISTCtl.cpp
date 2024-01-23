@@ -30,7 +30,12 @@ static QString getNPErrorString()
 
     buf[n] = 0;
 
-    return buf;
+    QString s( buf );
+
+    if( s.startsWith( "NOTSUP" ) )
+        s = "Selected test is inapplicable for this probe type";
+
+    return s;
 }
 
 /* ---------------------------------------------------------------- */
@@ -217,6 +222,8 @@ bool IMBISTCtl::okVersions()
         write("(3) Required files are in the download package 'Firmware' folder.");
         return false;
     }
+
+    return true;
 }
 
 

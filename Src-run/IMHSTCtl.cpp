@@ -194,6 +194,8 @@ bool IMHSTCtl::okVersions()
         write("(3) Required files are in the download package 'Firmware' folder.");
         return false;
     }
+
+    return true;
 }
 
 
