@@ -3,6 +3,8 @@
 
 20231207
 --------
++ API 3.62.1.
++ Support probe NP1016.
 + imErrFlags(ip) reported per probe.
 + Firmware version test added to BIST and HST.
 
