@@ -2710,7 +2710,8 @@ bool CimAcqImec::configure()
 void CimAcqImec::createAcqWorkerThreads()
 {
 // @@@ FIX Tune streams per thread here and in triggers
-    const int                   nStrPerThd = 3;
+// @@@ Change from 3 to 1 stream per worker until API 3.63+
+    const int                   nStrPerThd = 1;
     std::vector<ImAcqStream>    streams;
 
     for( int ip = 0, np = p.stream_nIM(); ip < np; ++ip ) {
