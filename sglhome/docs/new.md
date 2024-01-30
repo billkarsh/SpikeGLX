@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+January 29, 2024
+
+* SpikeGLX 20231207-phase30 (NP1016, imec 3.62.1).
+
 December 18, 2023
 
 * CatGT 4.3 (Supercat can join runs with varied sample rates).

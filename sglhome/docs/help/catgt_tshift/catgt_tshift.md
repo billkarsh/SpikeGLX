@@ -38,7 +38,7 @@ channels and that haven't saturated on any channels.
 **Zeroing (CatGT -gfix option)**
 
 Sometimes the hardware experiences a large electrical insult that affects
-all channels in a nonunifom way. This may arise from licking, chewing,
+all channels in a nonuniform way. This may arise from licking, chewing,
 head banging or laser stimulation events. In these cases CAR won't
 work as well. CatGT can detect these events and replace them with zeros.
 
@@ -69,20 +69,37 @@ Figure panels (from SpikeGLX FileViewer):
 
 ![<BR/>](car.jpg)
 
-## What Happened to Global Demux?
+## What is global demux (gbldmx)?
 
-Before version 2.2, and before tshift was implemented, CatGT offered a
--gbldmx option. This separated the channels into groups that are sampled
-concurrently so suffer no time shifts within the group. CAR was performed
-on a group by group basis which often outperformed CAR on all channels.
-Because the number of channels in a multiplex group was small the averages
-were noisier than we can achieve by tshifting all channels into one large
+The CatGT gbldmx option separates the channels into groups that are sampled
+concurrently so suffer no time shifts within the group. CAR is then performed
+on a group by group basis which has advantages and disadvantages compared to
+doing (tshift + gblcar).
+
+Disadvantages:
+
+- Because the number of channels in a multiplex group is small the averages
+are noisier than we can achieve by tshifting all channels into one large
 group and applying CAR after that.
 
-Moreover, tshifting the data improves the results of other downstream
-operations like whitening and average waveform spread.
+- Outlier channels have a stronger biasing effect with smaller sample sizes.
 
-## What about CatGT loccar?
+- The correction factors tend to be larger (small channel count in denominator)
+than with CAR, and that can produce overcorrection artifacts that look like
+spikes (often small inverted spikes).
+
+When to use gbldmx:
+
+- The probe sampling rate is 30 kHz, so noise faster than 15 kHz is not
+adequately sampled, and therefore, not accurately propagated to other
+channel groups by the tshift operation. So for very fast noise artifacts,
+gbldmx may produce better cancellation within each subsampling group.
+
+- gbldmx usually outperforms gblcar when tshift is omitted. You may want
+to omit tshift in CatGT, using the -no_tshift option, if tshift will be
+applied by some later component in your analysis pipeline.
+
+## What is local CAR (loccar)?
 
 CatGT offers the option to do local CAR over a ring of channels. The idea
 is that for each channel a disk is used to average the signal of neighbor
@@ -110,7 +127,7 @@ setting a fairly large outer radius to balance locality vs smoothness.
 ## What about LFP?
 
 Tshift is valuable for aligning LFP channels. CAR is not recommended when
-analyzing low freqencies: LFP varies slowly over the whole shank, making
+analyzing low frequencies: LFP varies slowly over the whole shank, making
 distant channels a bad reference for correcting noise.
 
 

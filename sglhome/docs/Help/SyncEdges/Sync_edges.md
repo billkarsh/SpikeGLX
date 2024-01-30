@@ -375,7 +375,7 @@ level and deflect toward lower values.
 
 The -xd and -xid options treat each bit of a digital word as an individual
 line. In contrast, the -bf option interprets a contiguous group of bits
-as a non-negative n-bit binary number. The -bf extactor reports value
+as a non-negative n-bit binary number. The -bf extractor reports value
 transitions: the newest value and the time it changed, in two separate files.
 Following **-xa=js,ip,word**, the parameters are:
 

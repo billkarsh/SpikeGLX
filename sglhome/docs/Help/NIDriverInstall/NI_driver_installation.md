@@ -4,7 +4,7 @@
 
 This document covers the steps to install the necessary software for an NI
 chassis, NI remote control module, and an NI acquisition device for
-non-neural signals. We've selected a PXI-6133 module in these example.
+non-neural signals. We've selected a PXI-6133 module in these examples.
 
 >SpikeGLX will work with multifunction IO S-series 61XX, M-series 62XX,
 X-series 63XX devices, and with digital-only 653X devices. Moreover, you
