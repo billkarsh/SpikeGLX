@@ -5,6 +5,8 @@
 #include "GateTCP.h"
 #include "TrigBase.h"
 #include "Util.h"
+#include "MainApp.h"
+#include "ConfigCtl.h"
 
 #include <QThread>
 
@@ -184,8 +186,9 @@ samples_loop_again:;
 
         double  tSync0 = getTime();
 
-        std::vector<SyncStream> vS( (ni != 0) + nOB + nIM );
-        int                     nq = 0;
+        const CimCfg::ImProbeTable  &T = mainApp()->cfgCtl()->prbTab;
+        std::vector<SyncStream>     vS( (ni != 0) + nOB + nIM );
+        int                         nq = 0;
 
         if( ni )
             vS[nq++].init( ni->worker->getAIQ(), jsNI, 0, p );
@@ -208,7 +211,13 @@ samples_loop_again:;
 
             for( int is = vS.size() - 1; is > 0; --is ) {
 
-                const SyncStream    &dst = vS[is];
+                SyncStream  &dst = vS[is];
+
+                if( dst.js == jsIM ) {
+                    const CimCfg::ImProbeDat    &P = T.get_iProbe( dst.ip );
+                    if( T.simprb.isSimProbe( P.slot, P.port, P.dock ) )
+                        dst.bySync = true;
+                }
 
                 if( dst.bySync ) {
 
