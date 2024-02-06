@@ -1,9 +1,10 @@
 ## System Requirements for Neuropixels
 
-**>> Updated: April 03, 2023 <<**
+**>> Updated: February 05, 2024 <<**
 
 What's new:
 
+* [OneBox will require USB 3.0](#acquisition-computer)
 * [Spike sorting hardware section.](#spike-sorting-requirements)
 * [Thunderbolt 3 and 4 pass our tests, with caveats.](#thunderbolt)
 * [250 MB/s controller handles 8 probes.](#acquisition-pxi-chassis)
@@ -123,6 +124,7 @@ need to) buy any other controller.
 * Graphics Card: [PassMark G3D score](https://www.videocardbenchmark.net/high_end_gpus.html) > 10000.
 * Dedicated data drive (SSD or NVMe, 500+ MB/s)
 * PCIe 8X slot for PXIe controller (or Thunderbolt port).
+* USB 3.0 port for OneBox.
 
 Notes:
 
