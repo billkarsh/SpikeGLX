@@ -66,12 +66,12 @@ void GeomMap::andOutImStdby(
     const QVector<uint> &saved,
     int                 offset )
 {
-    for( int i = 0, nI = saved.size(); i < nI; ++i ) {
+    for( int i = 0, nI = saved.size(), nS = stdbyBits.size(); i < nI; ++i ) {
 
         int ic = saved[i] - offset;
 
-        if( stdbyBits.testBit( ic ) )
-            e[ic].u = 0;
+        if( ic < nS && stdbyBits.testBit( ic ) )
+            e[i].u = 0;
     }
 }
 

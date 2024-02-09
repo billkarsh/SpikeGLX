@@ -149,10 +149,10 @@ void ShankMap::andOutImStdby( const QBitArray &stdbyBits )
 {
     int n = qMin( int(e.size()), stdbyBits.size() );
 
-    for( int ic = 0; ic < n; ++ic ) {
+    for( int i = 0; i < n; ++i ) {
 
-        if( stdbyBits.testBit( ic ) )
-            e[ic].u = 0;
+        if( stdbyBits.testBit( i ) )
+            e[i].u = 0;
     }
 }
 
