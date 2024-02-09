@@ -102,6 +102,9 @@ which hosts a community of over 1600 users.
 To install SpikeGLX on a new system, just copy a virgin SpikeGLX folder
 to your C-drive and double click SpikeGLX.exe to begin.
 
+>*Do **not** put the SpikeGLX folder within the Windows `Program Files` folder
+or any other location that requires administrator permissions.*
+
 The contents of a virgin (see below) SpikeGLX folder:
 
 ```

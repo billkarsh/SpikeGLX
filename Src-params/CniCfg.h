@@ -191,7 +191,6 @@ public:
     static double maxDigitalRate( const QString &dev );
     static double maxSampleRate( const QString &dev, int nChans = 1 );
     static double minSampleRate( const QString &dev );
-
     static int nWaveformLines( const QString &dev );
 
     static bool wrongTermConfig(
