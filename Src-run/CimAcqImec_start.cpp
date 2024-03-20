@@ -5,10 +5,52 @@
 #include "Util.h"
 
 
-#define STOPCHECK   if( isStopped() ) return false;
+#define STOPCHECK       if( isStopped() ) return false;
+#define TRIGSOFTONLY    1
 
 
-// Set all to software trigger.
+// Set all hardware slots to software trigger.
+//
+bool CimAcqImec::_st_setHwrTriggers()
+{
+    QVector<int>    vslot;
+    int             ns = T.getTypedSlots( vslot, NPPlatform_ALL );
+
+    for( int is = 0; is < ns; ++is ) {
+
+        int             slot;
+        NP_ErrorCode    err;
+
+        // IN = software
+
+        slot = vslot[is];
+
+        err = np_switchmatrix_set( slot, SM_Output_AcquisitionTrigger, SM_Input_SWTrigger1, true );
+
+        if( err != SUCCESS ) {
+            runError(
+                QString("IMEC switchmatrix_set(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
+            return false;
+        }
+
+        // EDGE = rising
+
+        err = np_setTriggerEdge( slot, true );
+
+        if( err != SUCCESS ) {
+            runError(
+                QString("IMEC setTriggerEdge(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+// Set all Obx to software trigger.
 //
 bool CimAcqImec::_st_setObxTriggers()
 {
@@ -24,14 +66,22 @@ bool CimAcqImec::_st_setObxTriggers()
 
         slot = vslot[is];
 
-        if( T.simprb.isSimSlot( slot ) )
-            continue;
-
         err = np_switchmatrix_set( slot, SM_Output_AcquisitionTrigger, SM_Input_SWTrigger1, true );
 
         if( err != SUCCESS ) {
             runError(
                 QString("IMEC switchmatrix_set(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
+            return false;
+        }
+
+        // EDGE = rising
+
+        err = np_setTriggerEdge( slot, true );
+
+        if( err != SUCCESS ) {
+            runError(
+                QString("IMEC setTriggerEdge(slot %1)%2")
                 .arg( slot ).arg( makeErrorString( err ) ) );
             return false;
         }
@@ -47,8 +97,8 @@ bool CimAcqImec::_st_setObxTriggers()
 bool CimAcqImec::_st_setPXITriggers()
 {
     QVector<int>    vslot;
-    int             ns      = T.getTypedSlots( vslot, NPPlatform_PXI ),
-                    slot0   = -1;
+    int             ns  = T.getTypedSlots( vslot, NPPlatform_PXI ),
+                    slot0;
     NP_ErrorCode    err;
 
     if( !ns )
@@ -58,17 +108,9 @@ bool CimAcqImec::_st_setPXITriggers()
 // Lowest slot
 // -----------
 
+    slot0 = vslot[0];
+
 // IN = software
-
-    for( int is = 0; is < ns; ++is ) {
-        if( !T.simprb.isSimSlot( vslot[is] ) ) {
-            slot0 = vslot[is];
-            break;
-        }
-    }
-
-    if( slot0 == -1 )
-        return true;
 
     err = np_switchmatrix_set( slot0, SM_Output_AcquisitionTrigger, SM_Input_SWTrigger1, true );
 
@@ -113,7 +155,7 @@ bool CimAcqImec::_st_setPXITriggers()
 
         int slot = vslot[is];
 
-        if( slot == slot0 || T.simprb.isSimSlot( slot ) )
+        if( slot == slot0 )
             continue;
 
         err = np_switchmatrix_set( slot, SM_Output_AcquisitionTrigger, SM_Input_PXI1, true );
@@ -143,8 +185,15 @@ bool CimAcqImec::_st_setPXITriggers()
 
 bool CimAcqImec::_st_setTriggers()
 {
+//@OBX Try software trigger all modules since PXIe chassis
+//@OBX backplane bridge blocks signalling across slots 6-to-7.
+#if TRIGSOFTONLY
+    if( !_st_setHwrTriggers() )
+        return false;
+#else
     if( !_st_setObxTriggers() || !_st_setPXITriggers() )
         return false;
+#endif
 
     Log()
         << "IMEC Trigger source: "
@@ -177,6 +226,30 @@ bool CimAcqImec::_st_setArm()
 }
 
 
+#if TRIGSOFTONLY
+bool CimAcqImec::_st_softStart()
+{
+    QVector<int>    vs;
+    int             ns  = T.getTypedSlots( vs, NPPlatform_ALL );
+    NP_ErrorCode    err;
+
+    for( int is = 0; is < ns; ++is ) {
+
+        int slot = vs[is];
+
+        err = np_setSWTrigger( slot );
+
+        if( err != SUCCESS ) {
+            runError(
+                QString("IMEC setSWTrigger(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
+            return false;
+        }
+    }
+
+    return true;
+}
+#else
 bool CimAcqImec::_st_softStart()
 {
     QVector<int>    v1b;
@@ -187,9 +260,6 @@ bool CimAcqImec::_st_softStart()
     for( int is = 0; is < n1b; ++is ) {
 
         int s1b = v1b[is];
-
-        if( T.simprb.isSimSlot( s1b ) )
-            continue;
 
         err = np_setSWTrigger( s1b );
 
@@ -216,6 +286,7 @@ bool CimAcqImec::_st_softStart()
 
     return true;
 }
+#endif
 
 
 bool CimAcqImec::_st_config()

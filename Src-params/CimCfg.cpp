@@ -540,6 +540,8 @@ bool CimCfg::ImProbeTable::isSlotUSBType( int slot ) const
 }
 
 
+// List non-sim slots with bstype: NPPlatform_{PXI, USB, ALL}.
+//
 int CimCfg::ImProbeTable::getTypedSlots( QVector<int> &vslot, int bstype ) const
 {
     vslot.clear();
@@ -548,7 +550,7 @@ int CimCfg::ImProbeTable::getTypedSlots( QVector<int> &vslot, int bstype ) const
 
         int slot = slotsUsed[is];
 
-        if( slot2type[slot] == bstype )
+        if( !simprb.isSimSlot( slot ) && (slot2type[slot] & bstype) )
             vslot.push_back( slot );
     }
 

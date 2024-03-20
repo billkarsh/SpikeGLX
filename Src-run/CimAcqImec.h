@@ -471,6 +471,7 @@ private:
     bool _mt_configProbes( const CimCfg::ImProbeTable &T );
 
 // Config common trigger/start
+    bool _st_setHwrTriggers();
     bool _st_setObxTriggers();
     bool _st_setPXITriggers();
     bool _st_setTriggers();

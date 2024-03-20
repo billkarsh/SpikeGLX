@@ -317,9 +317,6 @@ bool CimAcqImec::_aux_setSync( const CimCfg::ImProbeTable &T )
 
         int slot = vslots[is];
 
-        if( T.simprb.isSimSlot( slot ) )
-            continue;
-
         ok = true;  // listener automatically
 
         if( slot == srcSlot )
@@ -338,9 +335,6 @@ bool CimAcqImec::_aux_setSync( const CimCfg::ImProbeTable &T )
     for( int is = 0; is < ns; ++is ) {
 
         int slot = vslots[is];
-
-        if( T.simprb.isSimSlot( slot ) )
-            continue;
 
         if( slot == srcSlot )
             ok = _aux_setObxSyncAsOutput( srcSlot );
