@@ -4,6 +4,7 @@
 20240129
 --------
 + Fix geomMap indexing error.
++ Improve selection in Configure Slots dialog.
 
 20231207
 --------

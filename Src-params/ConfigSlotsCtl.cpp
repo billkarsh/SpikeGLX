@@ -148,6 +148,53 @@ none:
 }
 
 
+void ConfigSlotsCtl::slotCBChanged( int sel )
+{
+// get selection
+
+    QTableWidget        *T  = csUI->tableWidget;
+    QTableWidgetItem    *ti = T->currentItem();
+    int                 row = -1;
+
+    if( ti ) {
+        row = ti->row();
+        csUI->statusLbl->setText( "" );
+    }
+    else {
+        csUI->statusLbl->setText( "Select a row in table" );
+        return;
+    }
+
+// Slot
+
+    CimCfg::CfgSlot &CS = vCS[row];
+    int             ID  = CS.ID;
+
+    if( ID ) {
+
+        if( !sel ) {
+            csUI->statusLbl->setText( "Assign a slot for this OneBox" );
+            return;
+        }
+
+        CS.slot = sel + CimCfg::imSlotNone;
+    }
+
+    qSort( vCS.begin(), vCS.end() );
+    toGUI();
+
+// Reselect item
+
+    for( int ir = 0, nr = vCS.size(); ir < nr; ++ir ) {
+
+        if( vCS[ir].ID == ID ) {
+            T->setCurrentCell( ir, TBL_SLOT );
+            break;
+        }
+    }
+}
+
+
 void ConfigSlotsCtl::showCBChanged( int sel )
 {
 // get selection
@@ -169,42 +216,6 @@ void ConfigSlotsCtl::showCBChanged( int sel )
 
     vCS[row].show = qint16(sel);
 
-    toGUI();
-}
-
-
-void ConfigSlotsCtl::slotCBChanged( int sel )
-{
-// get selection
-
-    QTableWidget        *T  = csUI->tableWidget;
-    QTableWidgetItem    *ti = T->currentItem();
-    int                 row = -1;
-
-    if( ti ) {
-        row = ti->row();
-        csUI->statusLbl->setText( "" );
-    }
-    else {
-        csUI->statusLbl->setText( "Select a row in table" );
-        return;
-    }
-
-// Slot
-
-    CimCfg::CfgSlot &CS = vCS[row];
-
-    if( CS.ID ) {
-
-        if( !sel ) {
-            csUI->statusLbl->setText( "Assign a slot for this OneBox" );
-            return;
-        }
-
-        CS.slot = sel + CimCfg::imSlotNone;
-    }
-
-    qSort( vCS.begin(), vCS.end() );
     toGUI();
 }
 

@@ -75,7 +75,15 @@ public:
 
         bool operator<( const CfgSlot &rhs ) const
             {
-                if( slot < rhs.slot )
+                if( slot == imSlotNone ) {
+                    if( rhs.slot != imSlotNone )
+                        return false;
+                    else
+                        return ID < rhs.ID;
+                }
+                else if( rhs.slot == imSlotNone )
+                    return true;
+                else if( slot < rhs.slot )
                     return true;
                 else if( slot == rhs.slot )
                     return ID < rhs.ID;
