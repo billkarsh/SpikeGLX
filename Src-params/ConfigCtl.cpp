@@ -235,12 +235,8 @@ void ConfigCtl::graphSetsImroFile( const QString &file, int ip )
 
     if( validImROTbl( err, E, ip ) ) {
 
-        if( !E.roTbl->isConnectedSame( T_old ) ) {
-
-            // Force default maps from imro
-            validImShankMap( err, E, ip );
-            validImChanMap( err, E, ip );
-        }
+        if( !E.roTbl->isConnectedSame( T_old ) )
+            validImMaps( err, E, ip );
 
         imTab->updateProbe( E, ip );
         imTab->saveSettings();
@@ -691,6 +687,14 @@ bool ConfigCtl::validImROTbl( QString &err, CimCfg::PrbEach &E, int ip ) const
     }
 
     return true;
+}
+
+
+bool ConfigCtl::validImMaps( QString &err, CimCfg::PrbEach &E, int ip ) const
+{
+    validImShankMap( err, E, ip );
+
+    return  validImChanMap( err, E, ip );
 }
 
 
@@ -2828,9 +2832,7 @@ bool ConfigCtl::valid( QString &err, QWidget *parent, int iprb )
         if( !validImStdbyBits( err, E, ip ) )
             return false;
 
-        validImShankMap( err, E, ip );
-
-        if( !validImChanMap( err, E, ip ) )
+        if( !validImMaps( err, E, ip ) )
             return false;
 
         if( !validImSaveBits( err, q, ip ) )

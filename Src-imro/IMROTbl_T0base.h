@@ -82,9 +82,6 @@ struct IMROTbl_T0base : public IMROTbl
     virtual QString toString() const;
     virtual bool fromString( QString *msg, const QString &s );
 
-    virtual bool loadFile( QString &msg, const QString &path );
-    virtual bool saveFile( QString &msg, const QString &path ) const;
-
     virtual int shnk( int /* ch */ ) const  {return 0;}
     virtual int bank( int ch ) const        {return e[ch].bank;}
     virtual int elShankAndBank( int &bank, int ch ) const;

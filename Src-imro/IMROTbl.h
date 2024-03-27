@@ -97,6 +97,7 @@ public:
 
     virtual int nElec() const = 0;
     virtual int nShank() const = 0;
+    virtual int nSvyShank() const       {return nShank();}
             int nElecPerShank() const   {return nElec()/nShank();}
             float tipLength() const     {return _tiplength;}
             float zPitch() const        {return _zpitch;}
@@ -116,7 +117,7 @@ public:
     // {0=NP1000, 1=NP2000, 2=NP2010, 3=NP1110}-like
     virtual int chanMapping() const     {return 0;}
 
-    // {0=NP1000, 2=NP2000}-like
+    // {0=NP1000, 2=NP2000, 4=NP2020}-like
     virtual int apiFetchType() const    {return 0;}
 
     virtual bool operator==( const IMROTbl &rhs ) const = 0;
@@ -127,8 +128,8 @@ public:
     virtual QString toString() const = 0;
     virtual bool fromString( QString *msg, const QString &s ) = 0;
 
-    virtual bool loadFile( QString &msg, const QString &path ) = 0;
-    virtual bool saveFile( QString &msg, const QString &path ) const = 0;
+    virtual bool loadFile( QString &msg, const QString &path );
+    virtual bool saveFile( QString &msg, const QString &path ) const;
 
     void toShankMap_hwr( ShankMap &S ) const;
     void toShankMap_vis( ShankMap &S ) const;

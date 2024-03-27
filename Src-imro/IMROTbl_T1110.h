@@ -114,9 +114,6 @@ struct IMROTbl_T1110 : public IMROTbl
     virtual QString toString() const;
     virtual bool fromString( QString *msg, const QString &s );
 
-    virtual bool loadFile( QString &msg, const QString &path );
-    virtual bool saveFile( QString &msg, const QString &path ) const;
-
     virtual int shnk( int /* ch */ ) const          {return 0;}
     virtual int bank( int ch ) const;
     virtual int elShankAndBank( int &bank, int ch ) const;

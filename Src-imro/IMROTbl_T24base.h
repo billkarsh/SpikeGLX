@@ -55,6 +55,7 @@ struct IMROTbl_T24base : public IMROTbl
 
     IMROTbl_T24base( const QString &pn, int type )
         :   IMROTbl(pn, type)   {}
+    virtual ~IMROTbl_T24base()  {}
 
     void setElecs();
 
@@ -81,7 +82,7 @@ struct IMROTbl_T24base : public IMROTbl
     // {0=NP1000, 1=NP2000, 2=NP2010, 3=NP1110}-like
     virtual int chanMapping() const     {return 2;}
 
-    // {0=NP1000, 2=NP2000}-like
+    // {0=NP1000, 2=NP2000, 4=NP2020}-like
     virtual int apiFetchType() const    {return 2;}
 
     virtual bool operator==( const IMROTbl &rhs ) const
@@ -93,9 +94,6 @@ struct IMROTbl_T24base : public IMROTbl
 
     virtual QString toString() const;
     virtual bool fromString( QString *msg, const QString &s );
-
-    virtual bool loadFile( QString &msg, const QString &path );
-    virtual bool saveFile( QString &msg, const QString &path ) const;
 
     virtual int shnk( int ch ) const                {return e[ch].shnk;}
     virtual int bank( int ch ) const                {return e[ch].bank;}

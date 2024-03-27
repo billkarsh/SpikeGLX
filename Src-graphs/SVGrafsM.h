@@ -132,8 +132,8 @@ public:
     void eraseGraphs();
     virtual void putSamps( vec_i16 &data, quint64 headCt ) = 0;
     virtual void updateRHSFlags() = 0;
-    virtual void updateProbe( bool shankMap, bool chanMap )     {}
-    virtual void setAnatomyPP( const QString &elems, int sk )   {}
+    virtual void updateProbe( bool /*shankMap*/, bool /*chanMap*/ )     {}
+    virtual void setAnatomyPP( const QString& /*elems*/, int /*sk*/ )   {}
 
     virtual int chanCount()     const = 0;
     virtual int neurChanCount() const = 0;
@@ -152,7 +152,7 @@ public:
     QColor getSelColor() const;
     virtual bool isSelAnalog() const = 0;
     virtual void setRecordingEnabled( bool checked ) = 0;
-    virtual void nameLocalFilters( QComboBox *CB ) const    {}
+    virtual void nameLocalFilters( QComboBox* /*CB*/ ) const    {}
     virtual void setLocalFilters( int &rin, int &rout, int iflt ) = 0;
 
 public slots:
@@ -171,8 +171,8 @@ public slots:
     void tnChkClicked( bool checked );
     void txChkClicked( bool checked );
     void binMaxChkClicked( bool checked );
-    virtual void bandSelChanged( int sel )  {}
-    virtual void sAveSelChanged( int sel )  {}
+    virtual void bandSelChanged( int /*sel*/ )  {}
+    virtual void sAveSelChanged( int /*sel*/ )  {}
     // Right-click
     void refresh();
     void colorTTL();

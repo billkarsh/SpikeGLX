@@ -27,8 +27,6 @@ class ConfigCtl : public QObject
 {
     Q_OBJECT
 
-    friend class SvyPrbRun;
-
 private:
     Ui::ConfigureDialog     *cfgUI;
     Config_devtab           *devTab;
@@ -98,6 +96,7 @@ public:
         {syncTab->syncSourceCBChanged();}
 
     bool validImROTbl( QString &err, CimCfg::PrbEach &E, int ip ) const;
+    bool validImMaps( QString &err, CimCfg::PrbEach &E, int ip ) const;
     bool validDataDir( QString &err ) const;
     bool diskParamsToQ( QString &err, DAQ::Params &q ) const;
 

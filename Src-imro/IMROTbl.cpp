@@ -17,14 +17,15 @@
 #include "IMROTbl_T3A.h"
 #include "GeomMap.h"
 #include "ShankMap.h"
-
-#include <QSet>
+#include "Util.h"
 
 #ifdef HAVE_IMEC
 #include "IMEC/NeuropixAPI.h"
 using namespace Neuropixels;
 #endif
 
+#include <QFileInfo>
+#include <QSet>
 
 /* ---------------------------------------------------------------- */
 /* IMRO_Site ------------------------------------------------------ */
@@ -435,6 +436,67 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
         _x0_od      = 11;
         _xpitch     = 32;
         _zpitch     = 20;
+    }
+}
+
+
+bool IMROTbl::loadFile( QString &msg, const QString &path )
+{
+    QFile       f( path );
+    QFileInfo   fi( path );
+
+    if( !fi.exists() ) {
+
+        msg = QString("Can't find '%1'").arg( fi.fileName() );
+        return false;
+    }
+    else if( f.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
+
+        QString reason;
+
+        if( fromString( &reason, f.readAll() ) ) {
+
+            msg = QString("Loaded (type=%1) file '%2'")
+                    .arg( type ).arg( fi.fileName() );
+            return true;
+        }
+        else {
+            msg = QString("Error: %1 in file '%2'")
+                    .arg( reason ).arg( fi.fileName() );
+            return false;
+        }
+    }
+    else {
+        msg = QString("Error opening '%1'").arg( fi.fileName() );
+        return false;
+    }
+}
+
+
+bool IMROTbl::saveFile( QString &msg, const QString &path ) const
+{
+    QFile       f( path );
+    QFileInfo   fi( path );
+
+    if( f.open( QIODevice::WriteOnly | QIODevice::Text ) ) {
+
+        int n = f.write( STR2CHR( toString() ) );
+
+        if( n > 0 ) {
+
+            msg = QString("Saved (type=%1) file '%2'")
+                    .arg( type )
+                    .arg( fi.fileName() );
+            return true;
+        }
+        else {
+            msg = QString("Error writing '%1'").arg( fi.fileName() );
+            return false;
+        }
+    }
+    else {
+        msg = QString("Error opening '%1'").arg( fi.fileName() );
+        return false;
     }
 }
 

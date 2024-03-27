@@ -1,15 +1,11 @@
 
 #include "IMROTbl_T1110.h"
-#include "Util.h"
 
 #ifdef HAVE_IMEC
 #include "IMEC/NeuropixAPI.h"
 using namespace Neuropixels;
 #endif
 
-#include <QFileInfo>
-#include <QStringList>
-#include <QRegExp>
 #include <QTextStream>
 
 /* ---------------------------------------------------------------- */
@@ -198,67 +194,6 @@ bool IMROTbl_T1110::fromString( QString *msg, const QString &s )
 }
 
 
-bool IMROTbl_T1110::loadFile( QString &msg, const QString &path )
-{
-    QFile       f( path );
-    QFileInfo   fi( path );
-
-    if( !fi.exists() ) {
-
-        msg = QString("Can't find '%1'").arg( fi.fileName() );
-        return false;
-    }
-    else if( f.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
-
-        QString reason;
-
-        if( fromString( &reason, f.readAll() ) ) {
-
-            msg = QString("Loaded (type=%1) file '%2'")
-                    .arg( type ).arg( fi.fileName() );
-            return true;
-        }
-        else {
-            msg = QString("Error: %1 in file '%2'")
-                    .arg( reason ).arg( fi.fileName() );
-            return false;
-        }
-    }
-    else {
-        msg = QString("Error opening '%1'").arg( fi.fileName() );
-        return false;
-    }
-}
-
-
-bool IMROTbl_T1110::saveFile( QString &msg, const QString &path ) const
-{
-    QFile       f( path );
-    QFileInfo   fi( path );
-
-    if( f.open( QIODevice::WriteOnly | QIODevice::Text ) ) {
-
-        int n = f.write( STR2CHR( toString() ) );
-
-        if( n > 0 ) {
-
-            msg = QString("Saved (type=%1) file '%2'")
-                    .arg( type )
-                    .arg( fi.fileName() );
-            return true;
-        }
-        else {
-            msg = QString("Error writing '%1'").arg( fi.fileName() );
-            return false;
-        }
-    }
-    else {
-        msg = QString("Error opening '%1'").arg( fi.fileName() );
-        return false;
-    }
-}
-
-
 // In ALL mode bankA and bankB are the same.
 // In OUTER mode upper cols are even and lower cols are odd.
 // In INNER mode upper cols are odd  and lower cols are even.
@@ -318,8 +253,8 @@ int IMROTbl_T1110::elShankColRow( int &col, int &row, int ch ) const
 void IMROTbl_T1110::eaChansOrder( QVector<int> &v ) const
 {
     QMap<int,int>   el2Ch;
-    int             order   = 0,
-                    _nAP    = nAP();
+    int             _nAP    = nAP(),
+                    order   = 0;
 
     v.resize( 2 * _nAP + 1 );
 

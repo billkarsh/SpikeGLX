@@ -387,12 +387,9 @@ void Config_imtab::editIMRO()
     CimCfg::PrbEach &E  = each[ip];
     QString         err;
 
+// Validate IMRO
+
     fromTbl( ip );
-
-// -------------
-// Launch editor
-// -------------
-
     imro_cancelName.clear();
     imro_ip = ip;
 
@@ -406,6 +403,10 @@ void Config_imtab::editIMRO()
         cfg->validImROTbl( err, E, ip );
     }
 
+// -------------
+// Launch editor
+// -------------
+
     ShankCtlBase*   shankCtl = new ShankCtlBase( cfg->dialog(), true );
     ConnectUI( shankCtl, SIGNAL(modal_done(ShankCtlBase*,QString,bool)), this, SLOT(imro_done(ShankCtlBase*,QString,bool)) );
     shankCtl->baseInit( E.roTbl, false );
@@ -418,8 +419,23 @@ void Config_imtab::editChan()
 {
     int             ip = curProbe();
     CimCfg::PrbEach &E = each[ip];
+    QString         err;
+
+// Validate IMRO
 
     fromTbl( ip );
+    imro_cancelName.clear();
+    imro_ip = ip;
+
+    if( !cfg->validImROTbl( err, E, ip ) && !err.isEmpty() ) {
+
+        err += "\r\n\r\nReverting to default imro.";
+        QMessageBox::critical( cfg->dialog(), "IMRO File Error", err );
+
+        imro_cancelName = E.imroFile;
+        E.imroFile.clear();
+        cfg->validImROTbl( err, E, ip );
+    }
 
 // ---------------------------------------
 // Calculate channel usage from current UI

@@ -1,17 +1,12 @@
 
 #include "IMROTbl_T21base.h"
-#include "Util.h"
 
 #ifdef HAVE_IMEC
 #include "IMEC/NeuropixAPI.h"
 using namespace Neuropixels;
 #endif
 
-#include <QFileInfo>
-#include <QStringList>
-#include <QRegExp>
 #include <QTextStream>
-
 
 /* ---------------------------------------------------------------- */
 /* struct IMRODesc ------------------------------------------------ */
@@ -140,7 +135,7 @@ void IMROTbl_T21base::fillShankAndBank( int shank, int bank )
 bool IMROTbl_T21base::isConnectedSame( const IMROTbl *rhs ) const
 {
     const IMROTbl_T21base   *RHS    = (const IMROTbl_T21base*)rhs;
-    int                 n       = nChan();
+    int                     n       = nChan();
 
     for( int i = 0; i < n; ++i ) {
 
@@ -210,10 +205,10 @@ bool IMROTbl_T21base::fromString( QString *msg, const QString &s )
     for( int i = 1; i < n; ++i )
         e.push_back( IMRODesc_T21base::fromString( sl[i] ) );
 
-    if( e.size() != imType21baseChan ) {
+    if( e.size() != nAP() ) {
         if( msg ) {
             *msg = QString("Wrong imro entry count [%1] (should be %2)")
-                    .arg( e.size() ).arg( imType21baseChan );
+                    .arg( e.size() ).arg( nAP() );
         }
         return false;
     }
@@ -221,67 +216,6 @@ bool IMROTbl_T21base::fromString( QString *msg, const QString &s )
     setElecs();
 
     return true;
-}
-
-
-bool IMROTbl_T21base::loadFile( QString &msg, const QString &path )
-{
-    QFile       f( path );
-    QFileInfo   fi( path );
-
-    if( !fi.exists() ) {
-
-        msg = QString("Can't find '%1'").arg( fi.fileName() );
-        return false;
-    }
-    else if( f.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
-
-        QString reason;
-
-        if( fromString( &reason, f.readAll() ) ) {
-
-            msg = QString("Loaded (type=%1) file '%2'")
-                    .arg( type ).arg( fi.fileName() );
-            return true;
-        }
-        else {
-            msg = QString("Error: %1 in file '%2'")
-                    .arg( reason ).arg( fi.fileName() );
-            return false;
-        }
-    }
-    else {
-        msg = QString("Error opening '%1'").arg( fi.fileName() );
-        return false;
-    }
-}
-
-
-bool IMROTbl_T21base::saveFile( QString &msg, const QString &path ) const
-{
-    QFile       f( path );
-    QFileInfo   fi( path );
-
-    if( f.open( QIODevice::WriteOnly | QIODevice::Text ) ) {
-
-        int n = f.write( STR2CHR( toString() ) );
-
-        if( n > 0 ) {
-
-            msg = QString("Saved (type=%1) file '%2'")
-                    .arg( type )
-                    .arg( fi.fileName() );
-            return true;
-        }
-        else {
-            msg = QString("Error writing '%1'").arg( fi.fileName() );
-            return false;
-        }
-    }
-    else {
-        msg = QString("Error opening '%1'").arg( fi.fileName() );
-        return false;
-    }
 }
 
 
@@ -306,13 +240,14 @@ int IMROTbl_T21base::elShankColRow( int &col, int &row, int ch ) const
 void IMROTbl_T21base::eaChansOrder( QVector<int> &v ) const
 {
     QMap<int,int>   el2Ch;
-    int             order = 0;
+    int             _nAP    = nAP(),
+                    order   = 0;
 
-    v.resize( imType21baseChan + 1 );
+    v.resize( _nAP + 1 );
 
 // Order the AP set
 
-    for( int ic = 0; ic < imType21baseChan; ++ic )
+    for( int ic = 0; ic < _nAP; ++ic )
         el2Ch[e[ic].elec] = ic;
 
     QMap<int,int>::iterator it;

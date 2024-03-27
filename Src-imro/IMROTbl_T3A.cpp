@@ -3,9 +3,6 @@
 #include "Util.h"
 
 #include <QFileInfo>
-#include <QStringList>
-#include <QRegExp>
-#include <QTextStream>
 
 /* ---------------------------------------------------------------- */
 /* struct IMRODesc_T3A -------------------------------------------- */
@@ -222,8 +219,8 @@ int IMROTbl_T3A::elShankColRow( int &col, int &row, int ch ) const
 void IMROTbl_T3A::eaChansOrder( QVector<int> &v ) const
 {
     QMap<int,int>   el2Ch;
-    int             order   = 0,
-                    _nAP    = nAP();
+    int             _nAP    = nAP(),
+                    order   = 0;
 
     v.resize( 2 * _nAP + 1 );
 

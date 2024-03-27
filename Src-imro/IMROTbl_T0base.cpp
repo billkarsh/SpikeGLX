@@ -1,10 +1,6 @@
 
 #include "IMROTbl_T0base.h"
-#include "Util.h"
 
-#include <QFileInfo>
-#include <QStringList>
-#include <QRegExp>
 #include <QTextStream>
 
 /* ---------------------------------------------------------------- */
@@ -164,67 +160,6 @@ bool IMROTbl_T0base::fromString( QString *msg, const QString &s )
     }
 
     return true;
-}
-
-
-bool IMROTbl_T0base::loadFile( QString &msg, const QString &path )
-{
-    QFile       f( path );
-    QFileInfo   fi( path );
-
-    if( !fi.exists() ) {
-
-        msg = QString("Can't find '%1'").arg( fi.fileName() );
-        return false;
-    }
-    else if( f.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
-
-        QString reason;
-
-        if( fromString( &reason, f.readAll() ) ) {
-
-            msg = QString("Loaded (type=%1) file '%2'")
-                    .arg( type ).arg( fi.fileName() );
-            return true;
-        }
-        else {
-            msg = QString("Error: %1 in file '%2'")
-                    .arg( reason ).arg( fi.fileName() );
-            return false;
-        }
-    }
-    else {
-        msg = QString("Error opening '%1'").arg( fi.fileName() );
-        return false;
-    }
-}
-
-
-bool IMROTbl_T0base::saveFile( QString &msg, const QString &path ) const
-{
-    QFile       f( path );
-    QFileInfo   fi( path );
-
-    if( f.open( QIODevice::WriteOnly | QIODevice::Text ) ) {
-
-        int n = f.write( STR2CHR( toString() ) );
-
-        if( n > 0 ) {
-
-            msg = QString("Saved (type=%1) file '%2'")
-                    .arg( type )
-                    .arg( fi.fileName() );
-            return true;
-        }
-        else {
-            msg = QString("Error writing '%1'").arg( fi.fileName() );
-            return false;
-        }
-    }
-    else {
-        msg = QString("Error opening '%1'").arg( fi.fileName() );
-        return false;
-    }
 }
 
 

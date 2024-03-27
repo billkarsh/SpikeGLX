@@ -24,14 +24,14 @@ public:
     // Metadata
     // --------
 
-    virtual int numNeuralChans() const          {return 0;}
-    virtual const IMROTbl* imro() const         {return 0;}
+    virtual int numNeuralChans() const              {return 0;}
+    virtual const IMROTbl* imro() const             {return 0;}
     virtual int origID2Type( int ic ) const;
-    virtual const int *cumTypCnt() const        {return obCumTypCnt;}
-    virtual double origID2Gain( int ic ) const  {return 1.0;}
+    virtual const int *cumTypCnt() const            {return obCumTypCnt;}
+    virtual double origID2Gain( int /*ic*/ ) const  {return 1.0;}
     virtual void locFltRadii( int &rin, int &rout, int iflt ) const;
-    virtual ShankMap* shankMap_svy( int, int )  {return 0;}
-    virtual ShankMap* shankMap( bool ) const    {return 0;}
+    virtual ShankMap* shankMap_svy( int, int )      {return 0;}
+    virtual ShankMap* shankMap( bool ) const        {return 0;}
     virtual ChanMap* chanMap() const;
 
 protected:
