@@ -399,6 +399,7 @@ private:
     std::vector<ImAcqThread*>   acqThd;
     std::vector<int>            ip2simdat;
     ImSimPrbThread              *simThd;
+    npcallbackhandle_t          hSampler;
 #ifdef PAUSEWHOLESLOT
     QSet<int>                   pausStreamsReported;
     int                         pausStreamsRequired,
@@ -430,6 +431,12 @@ private:
     bool fetchD_T2( int &nT, PacketInfo* H, qint16* D, const ImAcqStream &S );
     bool fetch_obx( int &nT, PacketInfo* H, qint16* D, const ImAcqStream &S );
     int fifoPct( int *packets, const ImAcqStream &S ) const;
+
+// --------
+// Callback
+// --------
+
+    static void NP_CALLBACK sampler( const np_packet_t& packet, const void* user );
 
 // ----------------
 // Config and start

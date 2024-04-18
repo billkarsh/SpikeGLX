@@ -20,6 +20,7 @@
 #define MAXE            24
 
 // Experiment switches
+//#define CALLBACK_X
 //#define TESTDUPSAMPS
 //#define DUPREMOVER
 //#define READ60
@@ -1804,6 +1805,13 @@ CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
 
 CimAcqImec::~CimAcqImec()
 {
+#ifdef CALLBACK_X
+    if( hSampler ) {
+        np_destroyHandle( &hSampler );
+        hSampler = 0;
+    }
+#endif
+
     for( int iThd = 0, nThd = cfgThd.size(); iThd < nThd; ++iThd ) {
         ImCfgThread *T = cfgThd[iThd];
         if( T ) {
@@ -2665,6 +2673,24 @@ int CimAcqImec::fifoPct( int *packets, const ImAcqStream &S ) const
 }
 
 /* ---------------------------------------------------------------- */
+/* Callback ------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+#ifdef CALLBACK_X
+void NP_CALLBACK CimAcqImec::sampler( const np_packet_t& packet, const void* user )
+{
+    static double t0 = getTime();
+    if( getTime() - t0 > 1 ) {
+        qint16  buf[ MAXE * TPNTPERFETCH ];
+        int     nT = 0;
+        np_unpackData( &packet, buf, MAXE * TPNTPERFETCH, &nT );
+        Log()<<nT;
+        t0 = getTime();
+    }
+}
+#endif
+
+/* ---------------------------------------------------------------- */
 /* configure ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
@@ -2745,6 +2771,21 @@ void CimAcqImec::createAcqWorkerThreads()
 
     if( streams.size() )
         acqThd.push_back( new ImAcqThread( this, acqShr, streams ) );
+
+#ifdef CALLBACK_X
+    for( int ip = 0, np = p.stream_nIM(); ip < np; ++ip ) {
+        const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
+        NP_ErrorCode                err;
+        err = np_createProbePacketCallback( P.slot, P.port, P.dock,
+                SourceAP, &hSampler, sampler, 0 );
+        if( err != SUCCESS ) {
+            Warning() <<
+                QString("IMEC createProbePacketCallback(slot %1, port %2, dock %3)%4")
+                .arg( P.slot ).arg( P.port ).arg( P.dock )
+                .arg( makeErrorString( err ) );
+        }
+    }
+#endif
 }
 
 /* ---------------------------------------------------------------- */
