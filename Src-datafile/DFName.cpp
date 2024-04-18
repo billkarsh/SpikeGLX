@@ -1,6 +1,7 @@
 
 #include "DFName.h"
 #include "KVParams.h"
+#include "IMROTbl.h"
 
 #include <QDir>
 
@@ -324,12 +325,14 @@ bool DFName::isValidInputFile(
     const QString       &name,
     const QStringList   &reqKeys )
 {
+    int type;
     error.clear();
 
     {
         int ip;
+        type = typeAndIP( ip, name, &error );
 
-        if( -1 == typeAndIP( ip, name, &error ) )
+        if( type == -1 )
             return false;
     }
 
@@ -441,6 +444,28 @@ bool DFName::isValidInputFile(
 
             error =
                 QString("Metafile missing required key <%1> '%2'.")
+                .arg( key )
+                .arg( fi.fileName() );
+            return false;
+        }
+    }
+
+// -----------------
+// Known Imro table?
+// -----------------
+
+    if( type <= 1 ) {
+
+        QString pn( "Probe3A" );
+        if( kvp.contains( "imDatPrb_pn" ) )
+            pn = kvp["imDatPrb_pn"].toString();
+
+        IMROTbl *roTbl = IMROTbl::alloc( pn );
+        if( roTbl )
+            delete roTbl;
+        else {
+            error =
+                QString("Unknown probe type [%1] in file '%2'.")
                 .arg( key )
                 .arg( fi.fileName() );
             return false;

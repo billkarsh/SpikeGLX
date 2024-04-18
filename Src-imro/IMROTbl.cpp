@@ -1237,15 +1237,13 @@ IMROTbl* IMROTbl::alloc( const QString &pn )
             case 2014:  // Neuropixels 2.0 multishank probe with cap
                 return new IMROTbl_T2013( pn );
             default:
-                // likely early model 1.0
-                return new IMROTbl_T0( pn );
+                return 0;
         }
     }
     else if( pn == "Probe3A" )
         return new IMROTbl_T3A( pn );
 
-// likely early model 1.0
-    return new IMROTbl_T0( pn );
+    return 0;
 }
 
 
