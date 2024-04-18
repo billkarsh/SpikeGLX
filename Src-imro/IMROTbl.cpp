@@ -1048,7 +1048,7 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
 {
     bool    supp = false;
 
-    type = 0;       // NP 1.0 SS el 960
+    type = -1;
 
 // Old codes ---------------------------------
     if( pn.startsWith( "PRB_1_4" ) ) {
@@ -1153,14 +1153,7 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
                 type = 1200;
                 supp = true;
                 break;
-            default:    // likely early model 1.0
-                supp = true;
-                break;
         }
-    }
-    else {
-        // likely early model 1.0
-        supp = true;
     }
 
     return supp;

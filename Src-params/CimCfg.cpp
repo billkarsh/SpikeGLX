@@ -2500,8 +2500,8 @@ bool CimCfg::detect_simProbe(
 
     if( !kvp.fromMetaFile( name ) ) {
         slVers.append(
-            QString("Probe metafile(slot %1, port %2, dock %3)"
-            " corrupt '%4'.")
+            QString("Sim probe(slot %1, port %2, dock %3)"
+            " corrupt metafile '%4'.")
             .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( name ) );
         return false;
     }
@@ -2516,7 +2516,14 @@ bool CimCfg::detect_simProbe(
     P.sn   = kvp["imDatPrb_sn"].toULongLong();
     P.cal  = kvp["imCalibrated"].toBool();
 
-    IMROTbl::pnToType( P.type, P.pn );
+    if( !IMROTbl::pnToType( P.type, P.pn ) ) {
+        slVers.append(
+            QString("Sim probe(slot %1, port %2, dock %3)"
+            " unsupported type '%4'.")
+            .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( P.pn ) );
+        slVers.append("Try updating to a newer SpikeGLX/API version.");
+        return false;
+    }
 
     slVers.append(
         QString("HS(slot %1, port %2) part number %3")

@@ -465,8 +465,8 @@ bool DFName::isValidInputFile(
             delete roTbl;
         else {
             error =
-                QString("Unknown probe type [%1] in file '%2'.")
-                .arg( key )
+                QString("Unknown probe type <%1> in file '%2'.")
+                .arg( pn )
                 .arg( fi.fileName() );
             return false;
         }
