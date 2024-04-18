@@ -13,8 +13,8 @@ class DataFile;
 
 struct SvySBTT
 {
-    qint64  t1, t2;
-    int     s,  b;
+    qint64  t1, t2; // transition start, end
+    int     s,  b;  // new shank, bank
 
     SvySBTT() : t1(0), t2(0), s(0), b(0)    {}
     SvySBTT( int s, int b, qint64 t1, qint64 t2 )

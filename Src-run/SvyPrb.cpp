@@ -12,7 +12,7 @@
 /* SvySBTT -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// Pattern: "s c t1 t2"
+// Pattern: "s b t1 t2"
 //
 SvySBTT SvySBTT::fromString( const QString &s_in )
 {
@@ -31,7 +31,7 @@ SvySBTT SvySBTT::fromString( const QString &s_in )
 /* SvyVSBTT ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// Pattern: (s c t1 t2)(s c t1 t2)()()...
+// Pattern: (s b t1 t2)(s b t1 t2)()()...
 //
 void SvyVSBTT::fromMeta( const DataFile *df )
 {
@@ -199,9 +199,9 @@ bool SvyPrbRun::nextBank()
         E.roTbl->selectSites( P.slot, P.port, P.dock, true );
         E.sns.chanMapFile.clear();
         cfg->validImMaps( err, E, ip );
-        run->grfHardPause( false );
-
         run->grfUpdateProbe( ip, true, true );
+
+        run->grfHardPause( false );
 
         // Record (S B t1 t2) transition times.
         // t2 = resume time + 1.0 sec margin
