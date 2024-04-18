@@ -42,7 +42,7 @@ SaveChansCtl::SaveChansCtl( QWidget *parent, const CimCfg::PrbEach &E, int ip )
         s += QString(", LF[%1:%2]").arg( nAP ).arg( nAP + nLF - 1 );
 
     if( nSY )
-        s += QString(", SY[%1]").arg( nAP + nLF );
+        s += QString(", SY[%1:%2]").arg( nAP + nLF ).arg( nAP + nLF + nSY - 1 );
 
     svUI->rngLbl->setText( s );
     svUI->saveChansLE->setText( E.sns.uiSaveChanStr );
@@ -94,7 +94,7 @@ bool SaveChansCtl::edit( QString &out_uistr, bool &lfPairChk )
 
             if( sns.deriveSaveData(
                     err, DAQ::Params::jsip2stream( jsIM, ip ),
-                    nAP+nLF+nSY, _nAP ) ) {
+                    nAP+nLF+nSY, _nAP, nSY ) ) {
 
                 lfPairChk = svUI->pairChk->isChecked();
 

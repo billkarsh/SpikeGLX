@@ -197,7 +197,7 @@ bool IMROTbl_T24base::fromString( QString *msg, const QString &s )
 }
 
 
-int IMROTbl_T24base::maxBank( int ch, int shank )
+int IMROTbl_T24base::maxBank( int ch, int shank ) const
 {
     int maxBank = imType24baseBanks - 1;
 

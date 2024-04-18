@@ -69,16 +69,18 @@ bool SnsChansImec::deriveSaveData(
     QString         &err,
     const QString   &stream,
     int             nC,
-    int             nAP )
+    int             nAP,
+    int             nSY )
 {
     if( !deriveSaveBits( err, stream, nC ) )
         return false;
 
     QBitArray   &B = saveBits;
 
-// Always add sync
+// Always add sync(s)
 
-    B.setBit( nC - 1 );
+    for( int ic = nC - nSY; ic < nC; ++ic )
+        B.setBit( ic );
 
 // Pair LF to AP
 

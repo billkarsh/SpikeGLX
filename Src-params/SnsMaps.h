@@ -35,7 +35,8 @@ struct SnsChansImec : public SnsChansBase {
         QString         &err,
         const QString   &stream,
         int             nC,
-        int             nAP );
+        int             nAP,
+        int             nSY );
 };
 
 struct SnsChansObx : public SnsChansBase {

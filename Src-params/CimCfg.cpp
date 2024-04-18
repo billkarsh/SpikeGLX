@@ -1356,7 +1356,7 @@ bool CimCfg::PrbEach::lfIsSaving() const
 {
     QBitArray   lfBits;
     lfSaveBits( lfBits );
-    lfBits.clearBit( imCumTypCnt[imSumAll] - 1 );
+    lfBits.fill( 0, imCumTypCnt[imTypeLF], imCumTypCnt[imSumAll] );
     return lfBits.count( true );
 }
 

@@ -91,6 +91,9 @@ bool ImSimLfDat::init( QString &err, const QString pfName )
         Subset::rngStr2Vec( ig2ic, kvp["snsSaveChanSubset"].toString() );
         ibuf_ig.resize( nG );
 
+        // LF & SY indices consecutively follow AP indices,
+        // so offset everything after AP back to zero.
+
         for( int ig = 0; ig < nG; ++ig )
             ig2ic[ig] -= acq[0];
     }
@@ -207,8 +210,15 @@ bool ImSimApDat::init( QString &err, const QString pfName )
         Subset::rngStr2Vec( ig2ic, kvp["snsSaveChanSubset"].toString() );
         ibuf_ig.resize( nG );
 
-        if( acq[1] && ig2ic[nG-1] > acq[0] )
-            ig2ic[nG-1] = acq[0];
+        // If a gap (acq[1]) between AP and SY indices
+        // then make SY indices consecutively follow AP
+
+        if( acq[1] ) {
+            for( int sy = acq[2]; sy > 0; --sy ) {
+                if( ig2ic[nG-sy] > acq[0] )
+                    ig2ic[nG-sy] = acq[0] + acq[2] - sy;
+            }
+        }
     }
 
     f = new QFile( pfName + ".ap.bin" );

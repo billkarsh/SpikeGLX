@@ -1926,7 +1926,8 @@ bool ConfigCtl::validImSaveBits( QString &err, DAQ::Params &q, int ip ) const
     if( !q.sns.lfPairChk || E.roTbl->nLF() != nAP )
         nAP = 0;
 
-    ok = E.sns.deriveSaveData( err, q.jsip2stream( jsIM, ip ), nC, nAP );
+    ok = E.sns.deriveSaveData( err, q.jsip2stream( jsIM, ip ),
+            nC, nAP, E.roTbl->nSY() );
 
     if( ok )
         imTab->updateSaveChans( E, ip );
