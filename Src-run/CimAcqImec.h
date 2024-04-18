@@ -437,7 +437,7 @@ private:
 
 // Config progress dialog
     void STEPAUX();
-    void STEPPROBE( int ip );
+    void STEPPROBE();
     void STEPSTART();
 
 // Config common aux
@@ -457,7 +457,6 @@ private:
     bool _1t_calibrateADC( const CimCfg::ImProbeDat &P );
     bool _1t_calibrateGain( const CimCfg::ImProbeDat &P );
     bool _1t_calibrateOpto( const CimCfg::ImProbeDat &P );
-    bool _1t_dataGenerator( const CimCfg::ImProbeDat &P );
     bool _1t_setLEDs( const CimCfg::ImProbeDat &P );
     bool _1t_selectElectrodes( const CimCfg::ImProbeDat &P );
     bool _1t_selectReferences( const CimCfg::ImProbeDat &P );

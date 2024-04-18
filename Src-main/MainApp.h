@@ -219,7 +219,7 @@ public slots:
 // Run synchronizes with app
     void rsInit();
     void rsAuxStep();
-    void rsProbeStep( int ip );
+    void rsProbeStep();
     void rsStartStep();
     void rsAbort();
     void rsStarted();

@@ -151,8 +151,6 @@ bool CimAcqImec::_st_setPXITriggers()
 
     for( int is = 0; is < ns; ++is ) {
 
-        STEPPROBE( is*66/ns );
-
         int slot = vslot[is];
 
         if( slot == slot0 )

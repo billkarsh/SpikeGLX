@@ -1341,7 +1341,7 @@ void MainApp::help_About()
         "<h2>" VERS_SGLX_STR "</h2>"
         "<h3>Author: <a href=\"mailto:karshb@janelia.hhmi.org\">Bill Karsh</a></h3>"
         "<p>Based on the SpikeGL extracellular data acquisition system originally developed by Calin A. Culianu.</p>"
-        "<p>Copyright (c) 2020, Howard Hughes Medical Institute, All rights reserved.</p>"
+        "<p>Copyright (c) 2024, Howard Hughes Medical Institute, All rights reserved.</p>"
         "<p>Use is subject to Janelia Research Campus Software Copyright 1.2 license terms:<br><a href=\"http://license.janelia.org/license\">http://license.janelia.org/license</a>.</p>"
         "<p>QLed components are subject to GNU Library GPL v2.0 terms:<br><a href=\"https://github.com/billkarsh/SpikeGLX/blob/master/QLed-LGPLv2-LICENSE.txt\">https://github.com/billkarsh/SpikeGLX/blob/master/QLed-LGPLv2-LICENSE.txt</a>.</p>"
         "</body>"
@@ -1477,25 +1477,10 @@ void MainApp::rsInit()
     rsUI->auxBar->setMaximum( p.stream_nNI() + 3 * p.im.enabled );
 
     int np = p.stream_nIM();
-
     if( np ) {
-
+        rsUI->label->setText( QString("%1").arg( np ) );
         rsUI->prb0->setValue( 0 );
-        rsUI->prb0->setMaximum( 11 );
-
-        for( int ip = 1; ip < np; ++ip ) {
-
-            QLabel  *L = new QLabel( rsUI->probesBox );
-            L->setText( QString("%1").arg( ip ) );
-
-            QProgressBar    *P = new QProgressBar( rsUI->probesBox );
-            P->setObjectName( QString("prb%1").arg( ip ) );
-            P->setValue( 0 );
-            P->setMaximum( 11 );
-
-            rsUI->probesGrid->addWidget( L, ip, 0, 1, 1 );
-            rsUI->probesGrid->addWidget( P, ip, 1, 1, 1 );
-        }
+        rsUI->prb0->setMaximum( 11 * np );
     }
     else {
         QSize   sz = rsUI->probesBox->sizeHint();
@@ -1541,15 +1526,10 @@ void MainApp::rsAuxStep()
 }
 
 
-void MainApp::rsProbeStep( int ip )
+void MainApp::rsProbeStep()
 {
-    if( rsWin ) {
-        QProgressBar    *P;
-        P = rsWin->findChild<QProgressBar*>( QString("prb%1").arg( ip ) );
-
-        if( P )
-            P->setValue( 1 + P->value() );
-    }
+    if( rsWin )
+        rsUI->prb0->setValue( 1 + rsUI->prb0->value() );
 }
 
 

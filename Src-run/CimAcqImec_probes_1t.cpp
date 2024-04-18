@@ -25,7 +25,7 @@ bool CimAcqImec::_1t_simProbe( const CimCfg::ImProbeDat &P )
     }
 
     for( int i = 0; i < 11; ++i )
-        STEPPROBE( P.ip );
+        STEPPROBE();
 
     return true;
 }
@@ -246,32 +246,6 @@ warn:
 }
 
 
-#if 0   // selectDataSource now private in NeuropixAPI.h
-// Synthetic data generation for testing:
-// 0 = normal
-// 1 = each chan is ADC id num
-// 2 = each chan is chan id num
-// 3 = each chan linear ramping
-//
-bool CimAcqImec::_1t_dataGenerator( const CimCfg::ImProbeDat &P )
-{
-    NP_ErrorCode    err = IM.selectDataSource( P.slot, P.port, 3 );
-
-    if( err != SUCCESS ) {
-        runError(
-            QString(
-            "IMEC selectDataSource(slot %1, port %2)%3")
-            .arg( P.slot ).arg( P.port )
-            .arg( makeErrorString( err ) ) );
-        return false;
-    }
-
-    Log() << QString("IMEC probe %1 generating synthetic data").arg( P.ip );
-    return true;
-}
-#endif
-
-
 bool CimAcqImec::_1t_setLEDs( const CimCfg::ImProbeDat &P )
 {
     NP_ErrorCode    err;
@@ -444,73 +418,67 @@ bool CimAcqImec::_1t_configProbes( const CimCfg::ImProbeTable &T )
         if( !_1t_openProbe( P ) )
             return false;
 
-        STEPPROBE( P.ip );
+        STEPPROBE();
         STOPCHECK;
 
         if( !_1t_calibrateADC( P ) )
             return false;
 
-        STEPPROBE( P.ip );
+        STEPPROBE();
         STOPCHECK;
 
         if( !_1t_calibrateGain( P ) )
             return false;
 
-        STEPPROBE( P.ip );
+        STEPPROBE();
         STOPCHECK;
 
         if( !_1t_calibrateOpto( P ) )
             return false;
 
-//        STEPPROBE( P.ip );
-//        STOPCHECK;
-
-//        if( !_dataGenerator( P ) )
-//            return false;
-
-        STEPPROBE( P.ip );
+        STEPPROBE();
         STOPCHECK;
 
         if( !_1t_setLEDs( P ) )
             return false;
 
-        STEPPROBE( P.ip );
+        STEPPROBE();
         STOPCHECK;
 
         if( !_1t_selectElectrodes( P ) )
             return false;
 
-        STEPPROBE( P.ip );
+        STEPPROBE();
         STOPCHECK;
 
         if( !_1t_selectReferences( P ) )
             return false;
 
-        STEPPROBE( P.ip );
+        STEPPROBE();
         STOPCHECK;
 
         if( !_1t_selectGains( P ) )
             return false;
 
-        STEPPROBE( P.ip );
+        STEPPROBE();
         STOPCHECK;
 
         if( !_1t_selectAPFilters( P ) )
             return false;
 
-        STEPPROBE( P.ip );
+        STEPPROBE();
         STOPCHECK;
 
         if( !_1t_setStandby( P ) )
             return false;
 
-        STEPPROBE( P.ip );
+        STEPPROBE();
         STOPCHECK;
 
         if( !_1t_writeProbe( P ) )
             return false;
 
-        STEPPROBE( P.ip );
+        STEPPROBE();
     }
 
     return true;

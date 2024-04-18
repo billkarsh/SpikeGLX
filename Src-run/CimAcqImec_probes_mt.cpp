@@ -33,67 +33,67 @@ void ImCfgWorker::run()
         if( !_mt_openProbe( P ) )
             break;
 
-        acq->STEPPROBE( P.ip );
+        acq->STEPPROBE();
         TSTOPCHECK;
 
         if( !_mt_calibrateADC( P ) )
             break;
 
-        acq->STEPPROBE( P.ip );
+        acq->STEPPROBE();
         TSTOPCHECK;
 
         if( !_mt_calibrateGain( P ) )
             break;
 
-        acq->STEPPROBE( P.ip );
+        acq->STEPPROBE();
         TSTOPCHECK;
 
         if( !_mt_calibrateOpto( P ) )
             break;
 
-        acq->STEPPROBE( P.ip );
+        acq->STEPPROBE();
         TSTOPCHECK;
 
         if( !_mt_setLEDs( P ) )
             break;
 
-        acq->STEPPROBE( P.ip );
+        acq->STEPPROBE();
         TSTOPCHECK;
 
         if( !_mt_selectElectrodes( P ) )
             break;
 
-        acq->STEPPROBE( P.ip );
+        acq->STEPPROBE();
         TSTOPCHECK;
 
         if( !_mt_selectReferences( P ) )
             break;
 
-        acq->STEPPROBE( P.ip );
+        acq->STEPPROBE();
         TSTOPCHECK;
 
         if( !_mt_selectGains( P ) )
             break;
 
-        acq->STEPPROBE( P.ip );
+        acq->STEPPROBE();
         TSTOPCHECK;
 
         if( !_mt_selectAPFiltes( P ) )
             break;
 
-        acq->STEPPROBE( P.ip );
+        acq->STEPPROBE();
         TSTOPCHECK;
 
         if( !_mt_setStandby( P ) )
             break;
 
-        acq->STEPPROBE( P.ip );
+        acq->STEPPROBE();
         TSTOPCHECK;
 
         if( !_mt_writeProbe( P ) )
             break;
 
-        acq->STEPPROBE( P.ip );
+        acq->STEPPROBE();
     }
 
     emit finished();
@@ -115,7 +115,7 @@ bool ImCfgWorker::_mt_simProbe( const CimCfg::ImProbeDat &P )
     }
 
     for( int i = 0; i < 11; ++i )
-        acq->STEPPROBE( P.ip );
+        acq->STEPPROBE();
 
     return true;
 }

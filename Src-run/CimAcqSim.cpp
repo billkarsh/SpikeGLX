@@ -357,8 +357,7 @@ void CimAcqSim::run()
             for( int i = 0; i < 11; ++i ) {
                 QMetaObject::invokeMethod(
                     mainApp(), "rsProbeStep",
-                    Qt::QueuedConnection,
-                    Q_ARG(int, ip) );
+                    Qt::QueuedConnection );
             }
 
             if( probes.size() >= nStrPerThd ) {

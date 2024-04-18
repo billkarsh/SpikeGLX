@@ -2679,12 +2679,11 @@ void CimAcqImec::STEPAUX()
 }
 
 
-void CimAcqImec::STEPPROBE( int ip )
+void CimAcqImec::STEPPROBE()
 {
     QMetaObject::invokeMethod(
         mainApp(), "rsProbeStep",
-        Qt::QueuedConnection,
-        Q_ARG(int, ip) );
+        Qt::QueuedConnection );
 }
 
 
