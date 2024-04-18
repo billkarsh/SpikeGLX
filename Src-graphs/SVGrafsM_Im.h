@@ -15,14 +15,11 @@ class SVGrafsM_Im : public SVGrafsM
     Q_OBJECT
 
 private:
-    QAction             *spike1Action,
-                        *spike2Action,
-                        *spike3Action,
-                        *spike4Action,
-                        *stdbyAction;
-    std::vector<int>    muxTbl;
-    int                 nADC,
-                        nGrp;
+    QAction *spike1Action,
+            *spike2Action,
+            *spike3Action,
+            *spike4Action,
+            *stdbyAction;
 
 public:
     SVGrafsM_Im(
@@ -82,13 +79,6 @@ protected:
 private:
     void setAudio( int LBR );
     void setSpike( int gp );
-    void sAveApplyDmxTbl(
-        const ShankMap  &SM,
-        qint16          *d,
-        int             ntpts,
-        int             nC,
-        int             nAP,
-        int             dwnSmp );
     double scalePlotValue( double v, double gain ) const;
     void computeGraphMouseOverVars(
         int         ic,

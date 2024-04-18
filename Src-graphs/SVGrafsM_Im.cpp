@@ -76,7 +76,9 @@ SVGrafsM_Im::SVGrafsM_Im(
     cTTLAction = new QAction( "Color TTL Events...", this );
     ConnectUI( cTTLAction, SIGNAL(triggered()), this, SLOT(colorTTL()) );
 
-    p.im.prbj[ip].roTbl->muxTable( nADC, nGrp, muxTbl );
+    car.setAuto( p.im.prbj[ip].roTbl );
+    car.setChans( chanCount(), neurChanCount() );
+    car.setSU( &p.im.prbj[ip].sns.shankMap );
 }
 
 /* ---------------------------------------------------------------- */
@@ -118,8 +120,8 @@ static void addLF2AP(
     Rather, min_x and max_x suggest only the span of depicted data.
 */
 
-#define V_S_AVE( d_ic )                                         \
-    (sAveLocal ? sAveApplyLocal( d_ic, ic ) : *d_ic)
+#define V_S_AVE( d_ic )                         \
+    (sAveLocal ? car.lcl_1( d_ic, ic ) : *d_ic)
 
 
 void SVGrafsM_Im::putSamps( vec_i16 &data, quint64 headCt )
@@ -218,22 +220,18 @@ void SVGrafsM_Im::putSamps( vec_i16 &data, quint64 headCt )
     // -<S>
     // ----
 
+    car.setChans( nC, nAP, (drawBinMax ? 1 : dwnSmp) );
+
     switch( set.sAveSel ) {
         case 1:
         case 2:
             sAveLocal = true;
             break;
         case 3:
-            sAveApplyGlobal(
-                E.sns.shankMap,
-                &data[0], ntpts, nC, nAP,
-                (drawBinMax ? 1 : dwnSmp) );
+            car.gbl_ave_auto( &data[0], ntpts );
             break;
         case 4:
-            sAveApplyDmxTbl(
-                E.sns.shankMap,
-                &data[0], ntpts, nC, nAP,
-                (drawBinMax ? 1 : dwnSmp) );
+            car.gbl_dmx_tbl_auto( &data[0], ntpts );
             break;
         default:
             ;
@@ -340,7 +338,7 @@ void SVGrafsM_Im::putSamps( vec_i16 &data, quint64 headCt )
 
                 for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
-                    int val = sAveApplyLocal( d, ic );
+                    int val = car.lcl_1( d, ic );
 
                     stat.add( val );
                     ybuf[ny++] = val * ysc;
@@ -470,6 +468,7 @@ void SVGrafsM_Im::updateRHSFlags()
 void SVGrafsM_Im::updateProbe( bool shankMap, bool chanMap )
 {
     if( shankMap ) {
+        car.setSU( &p.im.prbj[ip].sns.shankMap );
         sAveSelChanged( set.sAveSel );
         shankCtl->mapChanged();
     }
@@ -763,26 +762,16 @@ void SVGrafsM_Im::editStdby()
 
     if( changed ) {
 
-        const CimCfg::ImProbeTable  &T   = mainApp()->cfgCtl()->prbTab;
-        const CimCfg::ImProbeDat    &P   = T.get_iProbe( ip );
-        Run                         *run = mainApp()->getRun();
-        bool                        hwr;
+        Run *run = mainApp()->getRun();
 
-        hwr = !T.simprb.isSimProbe( P.slot, P.port, P.dock );
-
-        if( hwr ) {
-            run->grfHardPause( true );
-            run->grfWaitPaused();
-        }
+        run->grfHardPause( true );
+        run->grfWaitPaused();
 
         mainApp()->cfgCtl()->graphSetsStdbyStr( stdbyStr, ip );
-
-        if( hwr ) {
-            run->grfHardPause( false );
-            run->imecUpdate( ip );
-        }
-
         updateProbe( true, false );
+        run->imecUpdate( ip );
+
+        run->grfHardPause( false );
     }
 }
 
@@ -977,143 +966,6 @@ void SVGrafsM_Im::setSpike( int gp )
     mainApp()->getRun()->grfShowSpikes( gp, ip,
         lastMouseOverChan % p.im.prbj[ip].roTbl->nAP() );
 }
-
-
-// Space averaging for all values.
-//
-#if 0
-// ----------------
-// Per-shank method
-// ----------------
-void SVGrafsM_Im::sAveApplyDmxTbl(
-    const ShankMap  &SM,
-    qint16          *d,
-    int             ntpts,
-    int             nC,
-    int             nAP,
-    int             dwnSmp )
-{
-    if( nAP <= 0 )
-        return;
-
-    const ShankMapDesc  *E = &SM.e[0];
-
-    int                 ns      = SM.ns,
-                        dStep   = nC * dwnSmp;
-    std::vector<int>    _A( ns ),
-                        _N( ns );
-    std::vector<float>  _S( ns );
-    int                 *T  = &muxTbl[0],
-                        *A  = &_A[0],
-                        *N  = &_N[0];
-    float               *S  = &_S[0];
-
-    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
-
-        for( int irow = 0; irow < nGrp; ++irow ) {
-
-            for( int is = 0; is < ns; ++is ) {
-                S[is] = 0;
-                N[is] = 0;
-                A[is] = 0;
-            }
-
-            for( int icol = 0; icol < nADC; ++icol ) {
-
-                int ic = T[nADC*irow + icol];
-
-                if( ic < nAP ) {
-
-                    const ShankMapDesc  *e = &E[ic];
-
-                    if( e->u ) {
-                        S[e->s] += d[ic];
-                        ++N[e->s];
-                    }
-                }
-                else
-                    break;
-            }
-
-            for( int is = 0; is < ns; ++is ) {
-
-                if( N[is] > 1 )
-                    A[is] = S[is] / N[is];
-            }
-
-            for( int icol = 0; icol < nADC; ++icol ) {
-
-                int ic = T[nADC*irow + icol];
-
-                if( ic < nAP )
-                    d[ic] -= A[E[ic].s];
-                else
-                    break;
-            }
-        }
-    }
-}
-#else
-// ------------------
-// Whole-probe method
-// ------------------
-void SVGrafsM_Im::sAveApplyDmxTbl(
-    const ShankMap  &SM,
-    qint16          *d,
-    int             ntpts,
-    int             nC,
-    int             nAP,
-    int             dwnSmp )
-{
-    if( nAP <= 0 )
-        return;
-
-    const ShankMapDesc  *E = &SM.e[0];
-
-    int *T      = &muxTbl[0];
-    int dStep   = nC * dwnSmp;
-
-    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
-
-        for( int irow = 0; irow < nGrp; ++irow ) {
-
-            double  S = 0;
-            int     A = 0,
-                    N = 0;
-
-            for( int icol = 0; icol < nADC; ++icol ) {
-
-                int ic = T[nADC*irow + icol];
-
-                if( ic < nAP ) {
-
-                    if( E[ic].u ) {
-                        S += d[ic];
-                        ++N;
-                    }
-                }
-                else
-                    break;
-            }
-
-            if( N > 1 )
-                A = int(S / N);
-
-            for( int icol = 0; icol < nADC; ++icol ) {
-
-                int ic = T[nADC*irow + icol];
-
-                if( ic < nAP ) {
-                    if( E[ic].u )
-                        d[ic] -= A;
-                }
-                else
-                    break;
-            }
-        }
-    }
-}
-#endif
 
 
 // Values (v) are in range [-1,1].

@@ -2,8 +2,8 @@
 #define FILEVIEWERWINDOW_H
 
 #include "DFName.h"
+#include "CAR.h"
 #include "GraphStats.h"
-#include "SGLTypes.h"
 #include "SvyPrb.h"
 
 #include <QMainWindow>
@@ -293,6 +293,7 @@ private:
     MGScroll                *mscroll;
     TaggableLabel           *closeLbl;
     QTimer                  *hideCloseTimer;
+    CAR                     car;
     std::vector<MGraphY>    grfY;
     std::vector<GraphParams>grfParams;          // per-graph params
     std::vector<GraphStats> grfStats;           // per-graph voltage stats
@@ -305,11 +306,7 @@ private:
                             ig2ic,              // saved to acquired
                             ic2ig;              // acq to saved or -1
     QBitArray               grfVisBits;
-    std::vector<std::vector<int> >  TSM;
-    std::vector<int>        muxTbl;
-    int                     nADC,
-                            nGrp,
-                            fType,              // {0=AP, 1=LF, 2=OB, 3=NI}
+    int                     fType,              // {0=AP, 1=LF, 2=OB, 3=NI}
                             igSelected,         // if >= 0
                             igMaximized,        // if >= 0
                             igMouseOver,        // if >= 0
@@ -518,26 +515,6 @@ private:
     void shankMapChanged();
     void toggleMaximized();
     void sAveTable( int sel );
-    int sAveApplyLocal( const qint16 *d_ig, int ig );
-    void sAveApplyGlobal(
-        qint16  *d,
-        int     ntpts,
-        int     nC,
-        int     nAP,
-        int     dwnSmp );
-    void sAveApplyGlobalStride(
-        qint16  *d,
-        int     ntpts,
-        int     nC,
-        int     nAP,
-        int     stride,
-        int     dwnSmp );
-    void sAveApplyDmxTbl(
-        qint16  *d,
-        int     ntpts,
-        int     nC,
-        int     nAP,
-        int     dwnSmp );
     void updateXSel();
     void zoomTime();
     void updateGraphs();

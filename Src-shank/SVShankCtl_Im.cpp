@@ -44,7 +44,9 @@ void SVShankCtl_Im::init()
 
 void SVShankCtl_Im::mapChanged()
 {
-    view()->setShankMap( &p.im.prbj[ip].sns.shankMap );
+    const ShankMap *S = &p.im.prbj[ip].sns.shankMap;
+    svTab->mapChanged( S );
+    view()->setShankMap( S );
 }
 
 
@@ -108,21 +110,14 @@ void SVShankCtl_Im::imroChanged( QString newName )
 
     if( !run->dfIsSaving() ) {
 
-        const CimCfg::ImProbeTable  &T = mainApp()->cfgCtl()->prbTab;
-        const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
+        run->grfHardPause( true );
+        run->grfWaitPaused();
 
-        if( !T.simprb.isSimProbe( P.slot, P.port, P.dock ) ) {
-
-            run->grfHardPause( true );
-            run->grfWaitPaused();
-            mainApp()->cfgCtl()->graphSetsImroFile( newName, ip );
-            run->grfHardPause( false );
-            run->imecUpdate( ip );
-        }
-        else
-            mainApp()->cfgCtl()->graphSetsImroFile( newName, ip );
-
+        mainApp()->cfgCtl()->graphSetsImroFile( newName, ip );
         run->grfUpdateProbe( ip, true, true );
+        run->imecUpdate( ip );
+
+        run->grfHardPause( false );
     }
     else {
         seTab->beep( "Recording in progress!" );

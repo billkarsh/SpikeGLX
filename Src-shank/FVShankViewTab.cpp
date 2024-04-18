@@ -161,8 +161,10 @@ void FVShankViewTab::colorTraces( MGraphX *theX, std::vector<MGraphY> &vY )
 
 void FVShankViewTab::mapChanged( const ShankMap *map )
 {
-    if( !fvTabUI->howCB->currentIndex() )
+    if( !fvTabUI->howCB->currentIndex() ) {
+        heat.updateMap( map );
         SC->view()->setShankMap( map );
+    }
 }
 
 
@@ -202,7 +204,7 @@ void FVShankViewTab::putInit()
 }
 
 
-void FVShankViewTab::putSamps( const vec_i16 &_data, const ShankMap *S )
+void FVShankViewTab::putSamps( const vec_i16 &_data )
 {
     if( fvTabUI->howCB->currentIndex() )
         return;
@@ -212,11 +214,11 @@ void FVShankViewTab::putSamps( const vec_i16 &_data, const ShankMap *S )
     SC->drawMtx.lock();
         switch( set.what ) {
             case 0:
-                heat.apFilter( data, _data, 0, S );
+                heat.apFilter( data, _data, 0 );
                 heat.accumSpikes( data, set.thresh, set.inarow );
                 break;
             case 1:
-                heat.apFilter( data, _data, 0, S );
+                heat.apFilter( data, _data, 0 );
                 heat.accumPkPk( data );
                 break;
             default:
@@ -236,9 +238,8 @@ void FVShankViewTab::putDone()
     SC->drawMtx.lock();
         if( set.what == 0 )
             heat.normSpikes();
-        else
-            heat.normPkPk( set.what );
-
+        else if( !heat.normPkPk( set.what ) )
+            SC->setStatus( "Set LFP time span > 48 ms" );
         color();
     SC->drawMtx.unlock();
 }
@@ -435,33 +436,33 @@ void FVShankViewTab::makeWorldMap()
     IMROTbl             *Q = IMROTbl::alloc( R->pn );
     ShankMap            *m = new ShankMap;
     int                 nC = R->nAP(),
-                        ns = R->nShank(),
+                        ns = R->nSvyShank(),
                         nb = 1 + f->svyMaxbank(),
-                        ng = 0;
+                        ng = 0,
+                        // nBK = number of full banks
+                        // nRW = number of rows in full banks
+                        nBK = R->nElecPerShank() / R->nChanPerBank(),
+                        nRW = nBK * R->nChanPerBank() / R->nCol_hwr();
 
     Q->fillDefault();
 
-    MW = new ShankMap( ns, R->nCol_vis(), R->nRow() );
+    MW = new ShankMap( R->nShank(), R->nCol_vis(), R->nRow() );
 
     for( int is = 0; is < ns; ++is ) {
-
-        int rem = Q->nElecPerShank();
 
         for( int ib = 0; ib < nb; ++ib ) {
 
             Q->fillShankAndBank( is, ib );
             Q->toShankMap_vis( *m );
 
-            if( rem >= nC ) {
+            if( ib < nBK ) {
                 MW->e.insert( MW->e.end(), m->e.begin(), m->e.end() );
-                rem -= nC;
                 for( int ic = 0; ic < nC; ++ic )
                     w_ig2sbg[ng++] = SBG( is, ib, ic );
             }
             else {
-                int rowMin = R->nRow() - rem / R->nCol_hwr();
                 for( int ic = 0; ic < nC; ++ic ) {
-                    if( m->e[ic].r >= rowMin ) {
+                    if( m->e[ic].r >= nRW ) {
                         MW->e.push_back( m->e[ic] );
                         w_ig2sbg[ng++] = SBG( is, ib, ic );
                     }

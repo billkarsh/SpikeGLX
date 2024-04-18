@@ -1,7 +1,7 @@
 #ifndef HEATMAP_H
 #define HEATMAP_H
 
-#include "SGLTypes.h"
+#include "CAR.h"
 
 namespace DAQ {
 struct Params;
@@ -32,11 +32,14 @@ private:
     Biquad              *aphipass,
                         *lfhipass,
                         *lflopass;
-    int                 maxInt,
+    CAR                 car;
+    int                 js,
+                        maxInt,
                         nzero,
                         nAP,
                         nLF,
                         nC;
+    bool                offline;
 
 public:
     Heatmap() : niGain(0), Qf(0), aphipass(0), lfhipass(0), lflopass(0) {}
@@ -45,25 +48,22 @@ public:
     void setStream( const DAQ::Params &p, int js, int ip );
     void setStream( const DataFile *df );
 
+    void updateMap( const ShankMap *S );
+
     void resetFilter();
-    void apFilter(
-        vec_i16         &odata,
-        const vec_i16   &idata,
-        quint64         headCt,
-        const ShankMap  *S );
+    void apFilter( vec_i16 &odata, const vec_i16 &idata, quint64 headCt );
     void lfFilter( vec_i16 &odata, const vec_i16 &idata );
 
     void accumReset( bool resetFlt );
     void accumSpikes( const vec_i16 &data, int thresh, int inarow );
     void accumPkPk( const vec_i16 &data );
     void normSpikes();
-    void normPkPk( int what );
+    bool normPkPk( int what );
     const double* sums()        {return &vsum[0];}
 
 private:
     void zeroFilterTransient( short *data, int ntpts, int nchans );
     void zeroData();
-    void gblcar( qint16 *D, const ShankMap *S, int ntpts );
 };
 
 #endif  // HEATMAP_H

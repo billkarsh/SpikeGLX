@@ -27,6 +27,8 @@ void Heatmap::setStream( const DAQ::Params &p, int js, int ip )
 {
     srate = p.stream_rate( js, ip );
 
+    this->js = js;
+
     switch( js ) {
         case jsNI:
             VMAX    = p.ni.range.rmax;
@@ -45,6 +47,7 @@ void Heatmap::setStream( const DAQ::Params &p, int js, int ip )
             break;
         case jsIM:
             const IMROTbl   *R = p.im.prbj[ip].roTbl;
+            car.setAuto( R );
             VMAX    = R->maxVolts();
             maxInt  = R->maxInt();
             nAP     = R->nAP();
@@ -64,8 +67,12 @@ void Heatmap::setStream( const DAQ::Params &p, int js, int ip )
     lfhipass = new Biquad( bq_type_highpass, 0.2/srate );
     lflopass = new Biquad( bq_type_lowpass,  300/srate );
 
+    car.setChans( nAP, nAP );
+
     zeroData();
     resetFilter();
+
+    offline = false;
 }
 
 
@@ -78,13 +85,17 @@ void Heatmap::setStream( const DataFile *df )
     nC      = df->numChans();
 
     if( df->streamFromObj().startsWith( "i" ) ) {
+        const IMROTbl   *R =df->imro();
+        car.setAuto( R );
         for( int ic = 0; ic < nAP; ++ic )
             vapg.push_back( int(df->ig2Gain( ic )) );
         vlfg    = vapg;
-        maxInt  = qMax( df->imro()->maxInt(), 512 ) - 1;
+        js      = jsIM;
+        maxInt  = qMax( R->maxInt(), 512 ) - 1;
     }
     else {
         niGain  = df->ig2Gain( 0 );
+        js      = jsNI;
         maxInt  = SHRT_MAX;
     }
 
@@ -92,8 +103,18 @@ void Heatmap::setStream( const DataFile *df )
     lfhipass = new Biquad( bq_type_highpass, 0.2/srate );
     lflopass = new Biquad( bq_type_lowpass,  300/srate );
 
+    car.setChans( nAP, nAP );
+
     zeroData();
     resetFilter();
+
+    offline = true;
+}
+
+
+void Heatmap::updateMap( const ShankMap *S )
+{
+    car.setSU( S );
 }
 
 
@@ -103,11 +124,7 @@ void Heatmap::resetFilter()
 }
 
 
-void Heatmap::apFilter(
-    vec_i16         &odata,
-    const vec_i16   &idata,
-    quint64         headCt,
-    const ShankMap  *S )
+void Heatmap::apFilter( vec_i16 &odata, const vec_i16 &idata, quint64 headCt )
 {
     int ntpts = int(idata.size()) / nC;
 
@@ -140,8 +157,16 @@ use_raw:
         Subset::subsetBlock( odata, *(vec_i16*)&idata, 0, nAP, nC );
         aphipass->applyBlockwiseMem( &odata[0], maxInt, ntpts, nAP, 0, nAP );
 
-        if( S )
-            gblcar( &odata[0], S, ntpts );
+        if( js == jsIM ) {
+            if( offline ) {
+                // For online, allow user to enable global demux or not
+                // via the Qf option. Probe diagnostics and visualization
+                // of brain/air boundary are clearer with demux off.
+                car.gbl_dmx_tbl_auto( &odata[0], ntpts );
+            }
+        }
+        else
+            car.gbl_ave_all( &odata[0], ntpts );
     }
 
     zeroFilterTransient( &odata[0], ntpts, nAP );
@@ -151,6 +176,8 @@ use_raw:
 void Heatmap::lfFilter( vec_i16 &odata, const vec_i16 &idata )
 {
     int ntpts = int(idata.size()) / nC;
+
+    nSmp += ntpts;
 
     if( !nLF )
         Subset::subsetBlock( odata, *(vec_i16*)&idata, 0, nAP, nC );
@@ -248,7 +275,9 @@ void Heatmap::normSpikes()
 }
 
 
-void Heatmap::normPkPk( int what )
+// Return true if more data than filter transient.
+//
+bool Heatmap::normPkPk( int what )
 {
     double      i2v  = 1e6 * VMAX / maxInt;
     double      *dst = &vsum[0];
@@ -269,6 +298,8 @@ void Heatmap::normPkPk( int what )
         for( int i = 0; i < nAP; ++i )
             dst[i] = (vmx[i] - vmn[i]) * i2v / niGain;
     }
+
+    return (what == 2 ? nSmp > BIQUAD_TRANS_WIDE : true);
 }
 
 /* ---------------------------------------------------------------- */
@@ -296,35 +327,6 @@ void Heatmap::zeroData()
     vmax.assign( nAP, -99000 );
     vsum.assign( nAP,  0 );
     nSmp = 0;
-}
-
-
-void Heatmap::gblcar( qint16 *D, const ShankMap *S, int ntpts )
-{
-    const ShankMapDesc  *E = &S->e[0];
-
-    for( int it = 0; it < ntpts; ++it, D += nAP ) {
-
-        double  S = 0;
-        int     A = 0,
-                N = 0;
-
-        for( int ig = 0; ig < nAP; ++ig ) {
-
-            if( E[ig].u ) {
-                S += D[ig];
-                ++N;
-            }
-        }
-
-        if( N > 1 )
-            A = S / N;
-
-        for( int ig = 0; ig < nAP; ++ig ) {
-            if( E[ig].u )
-                D[ig] -= A;
-        }
-    }
 }
 
 

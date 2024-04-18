@@ -478,7 +478,7 @@ ImSimPrbThread::~ImSimPrbThread()
 /* ---------------------------------------------------------------- */
 
 ImAcqShared::ImAcqShared()
-    :   awake(0), asleep(0), stop(false)
+    :   awake(0), asleep(0), ip_CAR(-1), stop(false)
 {
 // Experiment to histogram successive timestamp differences.
     tStampBins.assign( 34, 0 );
@@ -637,12 +637,13 @@ ImAcqQFlt::ImAcqQFlt( const DAQ::Params &p, AIQ *Qf, int ip ) : Qf(Qf)
                         p.im.prbAll.qf_hiCutStr.toDouble() / E.srate );
     }
 
-    E.roTbl->muxTable( nADC, nGrp, muxTbl );
+    maxInt  = E.roTbl->maxInt();
+    nC      = p.stream_nChans( jsIM, ip );
+    nAP     = E.imCumTypCnt[CimCfg::imSumAP];
 
-    shankMap    = &E.sns.shankMap;
-    maxInt      = E.roTbl->maxInt();
-    nC          = p.stream_nChans( jsIM, ip );
-    nAP         = E.imCumTypCnt[CimCfg::imSumAP];
+    car.setAuto( E.roTbl );
+    car.setChans( nC, nAP, 1 );
+    car.setSU( &E.sns.shankMap );
 }
 
 
@@ -660,50 +661,11 @@ ImAcqQFlt::~ImAcqQFlt()
 }
 
 
-void ImAcqQFlt::gbldmx( qint16 *D, int ntpts ) const
+void ImAcqQFlt::mapChanged( const DAQ::Params &p, int ip )
 {
-    const ShankMapDesc  *E = &shankMap->e[0];
-    const int           *T = &muxTbl[0];
-
-    for( int it = 0; it < ntpts; ++it, D += nC ) {
-
-        for( int irow = 0; irow < nGrp; ++irow ) {
-
-            double  S = 0;
-            int     A = 0,
-                    N = 0;
-
-            for( int icol = 0; icol < nADC; ++icol ) {
-
-                int ic = T[nADC*irow + icol];
-
-                if( ic < nAP ) {
-
-                    if( E[ic].u ) {
-                        S += D[ic];
-                        ++N;
-                    }
-                }
-                else
-                    break;
-            }
-
-            if( N > 1 )
-                A = int(S / N);
-
-            for( int icol = 0; icol < nADC; ++icol ) {
-
-                int ic = T[nADC*irow + icol];
-
-                if( ic < nAP ) {
-                    if( E[ic].u )
-                        D[ic] -= A;
-                }
-                else
-                    break;
-            }
-        }
-    }
+    carMtx.lock();
+        car.setSU( &p.im.prbj[ip].sns.shankMap );
+    carMtx.unlock();
 }
 
 
@@ -715,7 +677,10 @@ void ImAcqQFlt::enqueue( qint16 *D, int ntpts ) const
     if( lopass )
         lopass->applyBlockwiseMem( D, maxInt, ntpts, nC, 0, nAP );
 
-    gbldmx( D, ntpts );
+    carMtx.lock();
+        car.gbl_dmx_tbl_auto( D, ntpts );
+    carMtx.unlock();
+
     Qf->enqueue( D, ntpts );
 }
 
@@ -1024,6 +989,11 @@ void ImAcqWorker::run()
 
             if( !S.totPts )
                 S.Q->setTZero( loopT );
+
+            if( S.QFlt && S.ip == shr.checkCAR() ) {
+                shr.updateCAR( -1 );
+                S.QFlt->mapChanged( acq->p, S.ip );
+            }
 
             double  dtTot = getTime();
             bool    ok;
@@ -1792,7 +1762,8 @@ ImAcqThread::~ImAcqThread()
 /* ---------------------------------------------------------------- */
 
 CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
-    :   CimAcq(owner, p), T(mainApp()->cfgCtl()->prbTab), simThd(0)
+    :   CimAcq(owner, p), T(mainApp()->cfgCtl()->prbTab), simThd(0),
+        hSampler(0)
 #ifdef PAUSEWHOLESLOT
         , pausStreamsRequired(0), pausSlot(-1)
 #endif
@@ -2046,6 +2017,12 @@ void CimAcqImec::update( int ip )
 // --------------------------
 // Update settings this probe
 // --------------------------
+
+    if( p.im.prbAll.qf_on )
+        acqShr.updateCAR( ip );
+
+    if( T.simprb.isSimProbe( P.slot, P.port, P.dock ) )
+        return;
 
     if( !_1t_selectElectrodes( P ) )
         return;

@@ -61,6 +61,7 @@ public:
     void colorTraces( MGraphX *theX, std::vector<MGraphY> &vY );
 
     void setWhat( int what )    {set.what = what;}
+    void mapChanged( const ShankMap *S );
     void selChan( int ic, const QString &name );
 
     void putSamps( const vec_i16 &_data, quint64 headCt );

@@ -5,6 +5,7 @@
 
 #include "CimAcq.h"
 #include "IMEC/NeuropixAPI.h"
+#include "CAR.h"
 
 class CimAcqImec;
 class Biquad;
@@ -199,10 +200,12 @@ struct ImAcqShared {
 // Experiment to histogram successive timestamp differences.
     std::vector<quint64>    tStampBins,
                             tStampEvtByPrb;
-    QMutex                  runMtx;
+    QMutex                  runMtx,
+                            carMtx;
     QWaitCondition          condWake;
     int                     awake,
-                            asleep;
+                            asleep,
+                            ip_CAR;
     bool                    stop;
 
     ImAcqShared();
@@ -211,6 +214,22 @@ struct ImAcqShared {
     virtual ~ImAcqShared();
     void tStampHist_EPack( const electrodePacket* E, int ip, int ie, int it );
     void tStampHist_PInfo( const PacketInfo* H, int ip, int it );
+
+    void updateCAR( int ip )
+    {
+        carMtx.lock();
+            ip_CAR = ip;
+        carMtx.unlock();
+    }
+
+    int checkCAR()
+    {
+        int ip;
+        carMtx.lock();
+            ip = ip_CAR;
+        carMtx.unlock();
+        return ip;
+    }
 
     bool wait()
     {
@@ -244,20 +263,18 @@ struct ImAcqShared {
 
 
 struct ImAcqQFlt {
-    mutable AIQ         *Qf;
-    Biquad              *hipass,
-                        *lopass;
-    const ShankMap      *shankMap;
-    std::vector<int>    muxTbl;
-    int                 nADC,
-                        nGrp,
-                        maxInt,
-                        nC,
-                        nAP;
+    mutable AIQ     *Qf;
+    Biquad          *hipass,
+                    *lopass;
+    CAR             car;
+    mutable QMutex  carMtx;
+    int             maxInt,
+                    nC,
+                    nAP;
 
     ImAcqQFlt( const DAQ::Params &p, AIQ *Qf, int ip );
     virtual ~ImAcqQFlt();
-    void gbldmx( qint16 *D, int ntpts ) const;
+    void mapChanged( const DAQ::Params &p, int ip );
     void enqueue( qint16 *D, int ntpts ) const;
 };
 

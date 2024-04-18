@@ -683,8 +683,8 @@ bool FileViewerWindow::viewFile( QString &error, const QString &fname )
     switch( fType ) {
         case fvAP:
         case fvLF:
-            df->imro()->muxTable( nADC, nGrp, muxTbl );
-            ic2ig.fill( -1, qMax( df->cumTypCnt()[CimCfg::imSumAll], nADC * nGrp ) );
+            car.setAuto( df->imro() );
+            ic2ig.fill( -1, qMax( df->cumTypCnt()[CimCfg::imSumAll], car.getMuxTblSize() ) );
             break;
         case fvOB:
             ic2ig.fill( -1, df->cumTypCnt()[CimCfg::obSumAll] );
@@ -711,7 +711,7 @@ bool FileViewerWindow::viewFile( QString &error, const QString &fname )
                 a->setEnabled( false );
         }
     }
-    else if( shankMap && nNeurChans ) {
+    else if( nNeurChans ) {
 
         switch( fType ) {
             case fvAP:
@@ -728,6 +728,7 @@ bool FileViewerWindow::viewFile( QString &error, const QString &fname )
 
         if( shankCtl ) {
 
+            car.setSU( shankMap );
             shankCtl->init( shankMap );
 
             const IMROTbl *R = df->imro();
@@ -850,6 +851,11 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
     const double    *sums;
     const IMROTbl   *R = df->imro();
     const ShankMap  *m = df->shankMap_svy( 0, 0 );
+                    // f0 = file pos, where to read, start 2 seconds in
+                    // fL = limit for this bank (transition start, or EOF)
+                    // fr = read length = 0.5 seconds
+                    // fd = delta, step to next read = 1.5 seconds
+                    // fn = number of reads per bank (4 max)
     qint64          f0 = int(2.0*df->samplingRateHz()),
                     fL = (SVY.nmaps > 1 ? SVY.e[0].t1 : qint64(df->sampCount()));
     int             fr = int(0.5*df->samplingRateHz()),
@@ -858,10 +864,13 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
                     is = 0,
                     ib = 0,
                     nC = R->nAP(),
-                    nE = R->nElecPerShank(),
-                    rem = nE;
+                    // nBK = number of full banks
+                    // nRW = number of rows in full banks
+                    nBK = R->nElecPerShank() / R->nChanPerBank(),
+                    nRW = nBK * R->nChanPerBank() / R->nCol_hwr();
 
     heat.setStream( df );
+    heat.updateMap( m );
     sums = heat.sums();
 
     std::vector<double> *S = 0;
@@ -885,14 +894,11 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
             for( int i = 0; i < nC; ++i )
                 d[i] /= fn;
 
-            if( rem >= nC ) {
+            if( ib < nBK )
                 S->insert( S->end(), D.begin(), D.end() );
-                rem -= nC;
-            }
             else {
-                int rowMin = R->nRow() - rem / R->nCol_hwr();
                 for( int ic = 0; ic < nC; ++ic ) {
-                    if( m->e[ic].r >= rowMin )
+                    if( m->e[ic].r >= nRW )
                         S->push_back( d[ic] );
                 }
             }
@@ -905,10 +911,8 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
             fn  = 0;
             ib  = M.b;
 
-            if( M.s != is ) {
+            if( M.s != is )
                 is  = M.s;
-                rem = nE;
-            }
 
             if( m )
                 delete m;
@@ -916,7 +920,11 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
             m = df->shankMap_svy( is, ib );
         }
 
+        // zero result vector
+
         memset( d, 0, nC*sizeof(double) );
+
+        // sample and accumulate up to 4 times
 
         do {
             DS.read( idata, f0, fr );
@@ -926,12 +934,12 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
 
             switch( what ) {
                 case 0:
-                    heat.apFilter( odata, idata, 0, m );
+                    heat.apFilter( odata, idata, 0 );
                     heat.accumSpikes( odata, T, inarow );
                     heat.normSpikes();
                     break;
                 case 1:
-                    heat.apFilter( odata, idata, 0, m );
+                    heat.apFilter( odata, idata, 0 );
                     heat.accumPkPk( odata );
                     heat.normPkPk( 1 );
                     break;
@@ -952,12 +960,11 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
     for( int i = 0; i < nC; ++i )
         d[i] /= fn;
 
-    if( rem >= nC )
+    if( ib < nBK )
         S->insert( S->end(), D.begin(), D.end() );
     else {
-        int rowMin = R->nRow() - rem / R->nCol_hwr();
         for( int ic = 0; ic < nC; ++ic ) {
-            if( m->e[ic].r >= rowMin )
+            if( m->e[ic].r >= nRW )
                 S->push_back( d[ic] );
         }
     }
@@ -2011,7 +2018,7 @@ void FileViewerWindow::shankmap_Restore()
 void FileViewerWindow::mouseOutside()
 {
     statusBar()->showMessage(
-        "Ctrl+click to zoom, shift+click to set export range" );
+        "Ctrl+click to zoom, shift+click to measure time span" );
 }
 
 
@@ -2814,6 +2821,8 @@ void FileViewerWindow::initGraphs()
         grfActShowHide[ig]  = a;
         order2ig[ig]        = ig; // default is acqsort
     }
+
+    car.setChans( nG, nSpikeChans );
 }
 
 /* ---------------------------------------------------------------- */
@@ -3070,6 +3079,8 @@ void FileViewerWindow::selectShankMap( qint64 pos )
 
 void FileViewerWindow::shankMapChanged()
 {
+    car.setSU( shankMap );
+
     if( shankCtl ) {
         shankCtl->mapChanged( shankMap );
         selectGraph( igSelected, false );
@@ -3111,478 +3122,13 @@ void FileViewerWindow::toggleMaximized()
 //
 void FileViewerWindow::sAveTable( int sel )
 {
-    TSM.clear();
+    if( nSpikeChans > 0 && (sel == 1 || sel == 2) ) {
 
-    if( !(sel == 1 || sel == 2) || nSpikeChans <= 0 )
-        return;
-
-    TSM.resize( nSpikeChans );
-
-    QMap<ShankMapDesc,uint> ISM;
-    shankMap->inverseMap( ISM );
-
-    int rin, rout;
-    df->locFltRadii( rin, rout, sel );
-
-    for( int ig = 0; ig < nSpikeChans; ++ig ) {
-
-        const ShankMapDesc  &E = shankMap->e[ig];
-
-        if( !E.u )
-            continue;
-
-        // ----------------------------------
-        // Form set of excluded inner indices
-        // ----------------------------------
-
-        QSet<int>   inner;
-
-        int xL  = qMax( int(E.c)  - rin, 0 ),
-            xH  = qMin( uint(E.c) + rin + 1, shankMap->nc ),
-            yL  = qMax( int(E.r)  - rin, 0 ),
-            yH  = qMin( uint(E.r) + rin + 1, shankMap->nr );
-
-        for( int ix = xL; ix < xH; ++ix ) {
-
-            for( int iy = yL; iy < yH; ++iy ) {
-
-                QMap<ShankMapDesc,uint>::iterator   it;
-
-                it = ISM.find( ShankMapDesc( E.s, ix, iy, 1 ) );
-
-                if( it != ISM.end() )
-                    inner.insert( it.value() );
-            }
-        }
-
-        // -------------------------
-        // Fill with annulus members
-        // -------------------------
-
-        std::vector<int>    &V = TSM[ig];
-
-        xL  = qMax( int(E.c)  - rout, 0 );
-        xH  = qMin( uint(E.c) + rout + 1, shankMap->nc );
-        yL  = qMax( int(E.r)  - rout, 0 );
-        yH  = qMin( uint(E.r) + rout + 1, shankMap->nr );
-
-        for( int ix = xL; ix < xH; ++ix ) {
-
-            for( int iy = yL; iy < yH; ++iy ) {
-
-                QMap<ShankMapDesc,uint>::iterator   it;
-
-                it = ISM.find( ShankMapDesc( E.s, ix, iy, 1 ) );
-
-                if( it != ISM.end() ) {
-
-                    int i = it.value();
-
-                    // Exclude inners
-
-                    if( !inner.contains( i ) )
-                        V.push_back( i );
-                }
-            }
-        }
-
-        qSort( V );
+        int rin, rout;
+        df->locFltRadii( rin, rout, sel );
+        car.lcl_init( shankMap, rin, rout, false );
     }
 }
-
-
-// Space averaging for value: d_ig = &data[ig].
-//
-int FileViewerWindow::sAveApplyLocal( const qint16 *d_ig, int ig )
-{
-    const std::vector<int>  &V = TSM[ig];
-
-    int nv = V.size();
-
-    if( nv ) {
-
-        const qint16    *d  = d_ig - ig;
-        const int       *v  = &V[0];
-        int             sum = 0;
-
-        for( int iv = 0; iv < nv; ++iv )
-            sum += d[v[iv]];
-
-        return *d_ig - sum/nv;
-    }
-
-    return *d_ig;
-}
-
-
-// Space averaging for all values.
-//
-#if 0
-// ----------------
-// Per-shank method
-// ----------------
-void FileViewerWindow::sAveApplyGlobal(
-    qint16  *d,
-    int     ntpts,
-    int     nC,
-    int     nAP,
-    int     dwnSmp )
-{
-    if( nAP <= 0 )
-        return;
-
-    const ShankMapDesc  *E = &shankMap->e[0];
-
-    int                 ns      = shankMap->ns,
-                        dStep   = nC * dwnSmp;
-    std::vector<int>    _A( ns ),
-                        _N( ns );
-    std::vector<float>  _S( ns );
-    int                 *A  = &_A[0],
-                        *N  = &_N[0];
-    float               *S  = &_S[0];
-
-    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
-
-        for( int is = 0; is < ns; ++is ) {
-            S[is] = 0;
-            N[is] = 0;
-            A[is] = 0;
-        }
-
-        for( int ig = 0; ig < nAP; ++ig ) {
-
-            const ShankMapDesc  *e = &E[ig];
-
-            if( e->u ) {
-                S[e->s] += d[ig];
-                ++N[e->s];
-            }
-        }
-
-        for( int is = 0; is < ns; ++is ) {
-
-            if( N[is] > 1 )
-                A[is] = S[is] / N[is];
-        }
-
-        for( int ig = 0; ig < nAP; ++ig ) {
-            const ShankMapDesc  *e = &E[ig];
-            if( e->u )
-                d[ig] -= A[e->s];
-        }
-    }
-}
-#else
-// ------------------
-// Whole-probe method
-// ------------------
-void FileViewerWindow::sAveApplyGlobal(
-    qint16  *d,
-    int     ntpts,
-    int     nC,
-    int     nAP,
-    int     dwnSmp )
-{
-    if( nAP <= 0 )
-        return;
-
-    const ShankMapDesc  *E = &shankMap->e[0];
-
-    int dStep = nC * dwnSmp;
-
-    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
-
-        double  S = 0;
-        int     A = 0,
-                N = 0;
-
-        for( int ig = 0; ig < nAP; ++ig ) {
-
-            if( E[ig].u ) {
-                S += d[ig];
-                ++N;
-            }
-        }
-
-        if( N > 1 )
-            A = S / N;
-
-        for( int ig = 0; ig < nAP; ++ig ) {
-            if( E[ig].u )
-                d[ig] -= A;
-        }
-    }
-}
-#endif
-
-
-// Space averaging for all values.
-//
-#if 0
-// ----------------
-// Per-shank method
-// ----------------
-void FileViewerWindow::sAveApplyGlobalStride(
-    qint16  *d,
-    int     ntpts,
-    int     nC,
-    int     nAP,
-    int     stride,
-    int     dwnSmp )
-{
-    if( nAP <= 0 )
-        return;
-
-    nAP = ig2ic[nAP-1];    // highest acquired channel saved
-
-    const ShankMapDesc  *E = &shankMap->e[0];
-
-    int                 ns      = shankMap->ns,
-                        dStep   = nC * dwnSmp;
-    std::vector<int>    _A( ns ),
-                        _N( ns );
-    std::vector<float>  _S( ns );
-    int                 *A  = &_A[0],
-                        *N  = &_N[0];
-    float               *S  = &_S[0];
-
-    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
-
-        for( int ic0 = 0; ic0 < stride; ++ic0 ) {
-
-            for( int is = 0; is < ns; ++is ) {
-                S[is] = 0;
-                N[is] = 0;
-                A[is] = 0;
-            }
-
-            for( int ic = ic0; ic <= nAP; ic += stride ) {
-
-                int ig = ic2ig[ic];
-
-                if( ig >= 0 ) {
-
-                    const ShankMapDesc  *e = &E[ig];
-
-                    if( e->u ) {
-                        S[e->s] += d[ig];
-                        ++N[e->s];
-                    }
-                }
-            }
-
-            for( int is = 0; is < ns; ++is ) {
-
-                if( N[is] > 1 )
-                    A[is] = S[is] / N[is];
-            }
-
-            for( int ic = ic0; ic <= nAP; ic += stride ) {
-
-                int ig = ic2ig[ic];
-
-                if( ig >= 0 ) {
-                    const ShankMapDesc  *e = &E[ig];
-                    if( e->u )
-                        d[ig] -= A[e->s];
-                }
-            }
-        }
-    }
-}
-#else
-// ------------------
-// Whole-probe method
-// ------------------
-void FileViewerWindow::sAveApplyGlobalStride(
-    qint16  *d,
-    int     ntpts,
-    int     nC,
-    int     nAP,
-    int     stride,
-    int     dwnSmp )
-{
-    if( nAP <= 0 )
-        return;
-
-    nAP = ig2ic[nAP-1];    // highest acquired channel saved
-
-    const ShankMapDesc  *E = &shankMap->e[0];
-
-    int dStep = nC * dwnSmp;
-
-    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
-
-        for( int ic0 = 0; ic0 < stride; ++ic0 ) {
-
-            double  S = 0;
-            int     A = 0,
-                    N = 0;
-
-            for( int ic = ic0; ic <= nAP; ic += stride ) {
-
-                int ig = ic2ig[ic];
-
-                if( ig >= 0 && E[ig].u ) {
-                    S += d[ig];
-                    ++N;
-                }
-            }
-
-            if( N > 1 )
-                A = S / N;
-
-            for( int ic = ic0; ic <= nAP; ic += stride ) {
-
-                int ig = ic2ig[ic];
-
-                if( ig >= 0 && E[ig].u )
-                    d[ig] -= A;
-            }
-        }
-    }
-}
-#endif
-
-
-// Space averaging for all values.
-//
-#if 0
-// ----------------
-// Per-shank method
-// ----------------
-void FileViewerWindow::sAveApplyDmxTbl(
-    qint16  *d,
-    int     ntpts,
-    int     nC,
-    int     nAP,
-    int     dwnSmp )
-{
-    if( nAP <= 0 )
-        return;
-
-    const ShankMapDesc  *E = &shankMap->e[0];
-
-    int                 ns      = shankMap->ns,
-                        dStep   = nC * dwnSmp;
-    std::vector<int>    _A( ns ),
-                        _N( ns );
-    std::vector<float>  _S( ns );
-    int                 *T  = &muxTbl[0],
-                        *A  = &_A[0],
-                        *N  = &_N[0];
-    float               *S  = &_S[0];
-
-    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
-
-        for( int irow = 0; irow < nGrp; ++irow ) {
-
-            for( int is = 0; is < ns; ++is ) {
-                S[is] = 0;
-                N[is] = 0;
-                A[is] = 0;
-            }
-
-            for( int icol = 0; icol < nADC; ++icol ) {
-
-                int ic = T[nADC*irow + icol];
-
-                if( ic < nAP ) {
-
-                    int ig = ic2ig[ic];
-
-                    if( ig >= 0 ) {
-
-                        const ShankMapDesc  *e = &E[ig];
-
-                        if( e->u ) {
-                            S[e->s] += d[ig];
-                            ++N[e->s];
-                        }
-                    }
-                }
-            }
-
-            for( int is = 0; is < ns; ++is ) {
-
-                if( N[is] > 1 )
-                    A[is] = S[is] / N[is];
-            }
-
-            for( int icol = 0; icol < nADC; ++icol ) {
-
-                int ic = T[nADC*irow + icol];
-
-                if( ic < nAP ) {
-                    int ig = ic2ig[ic];
-                    if( ig >= 0 ) {
-                        const ShankMapDesc  *e = &E[ig];
-                        if( e->u )
-                            d[ig] -= A[e->s];
-                    }
-                }
-            }
-        }
-    }
-}
-#else
-// ------------------
-// Whole-probe method
-// ------------------
-void FileViewerWindow::sAveApplyDmxTbl(
-    qint16  *d,
-    int     ntpts,
-    int     nC,
-    int     nAP,
-    int     dwnSmp )
-{
-    if( nAP <= 0 )
-        return;
-
-    const ShankMapDesc  *E = &shankMap->e[0];
-
-    int *T      = &muxTbl[0];
-    int dStep   = nC * dwnSmp;
-
-    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
-
-        for( int irow = 0; irow < nGrp; ++irow ) {
-
-            double  S = 0;
-            int     A = 0,
-                    N = 0;
-
-            for( int icol = 0; icol < nADC; ++icol ) {
-
-                int ic = T[nADC*irow + icol];
-
-                if( ic < nAP ) {
-                    int ig = ic2ig[ic];
-                    if( ig >= 0 && E[ig].u ) {
-                        S += d[ig];
-                        ++N;
-                    }
-                }
-            }
-
-            if( N > 1 )
-                A = S / N;
-
-            for( int icol = 0; icol < nADC; ++icol ) {
-
-                int ic = T[nADC*irow + icol];
-
-                if( ic < nAP ) {
-                    int ig = ic2ig[ic];
-                    if( ig >= 0 && E[ig].u )
-                        d[ig] -= A;
-                }
-            }
-        }
-    }
-}
-#endif
 
 
 void FileViewerWindow::updateXSel()
@@ -3628,8 +3174,8 @@ void FileViewerWindow::zoomTime()
 /* updateGraphs --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-#define V_S_AVE( d_ig )                                         \
-    (sAveLocal ? sAveApplyLocal( d_ig, ig ) : *d_ig)
+#define V_S_AVE( d_ig )                         \
+    (sAveLocal ? car.lcl_1( d_ig, ig ) : *d_ig)
 
 
 // Notes:
@@ -3808,7 +3354,7 @@ sumL+=getTime()-qq;
             break;
 
         if( shankCtl && shankCtl->isVisible() )
-            shankCtl->putSamps( data, shankMap );
+            shankCtl->putSamps( data );
 
         dtpts = (ntpts + dwnSmp - 1) / dwnSmp;
 
@@ -3856,27 +3402,22 @@ sumF+=getTime()-qq;
 qq=getTime();
 #endif
 
+        if( nSpikeChans )
+            car.setChans( nG, nSpikeChans, (binMax ? binMax : dwnSmp) );
+
         switch( tbGetSAveSel() ) {
             case 1: // local ring
             case 2: // local ring
                 sAveLocal = true;
                 break;
             case 3: // global all
-                sAveApplyGlobal(
-                    &data[0], ntpts, nG, nSpikeChans,
-                    (binMax ? binMax : dwnSmp) );
+                car.gbl_ave_auto( &data[0], ntpts );
                 break;
             case 4: // global demux
-                if( fType == fvNI ) {
-                    sAveApplyGlobalStride(
-                        &data[0], ntpts, nG, nSpikeChans,
-                        stride, (binMax ? binMax : dwnSmp) );
-                }
-                else {
-                    sAveApplyDmxTbl(
-                        &data[0], ntpts, nG, nSpikeChans,
-                        (binMax ? binMax : dwnSmp) );
-                }
+                if( fType == fvNI )
+                    car.gbl_dmx_stride_auto( &data[0], ntpts, stride, ig2ic, ic2ig );
+                else
+                    car.gbl_dmx_tbl_auto( &data[0], ntpts, ic2ig );
                 break;
             default:
                 ;
@@ -3996,7 +3537,7 @@ qq=getTime();
 
                     for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
-                        int val = sAveApplyLocal( d, ig );
+                        int val = car.lcl_1( d, ig );
 
                         stat.add( val );
                         ybuf[ny++] = val * ysc;

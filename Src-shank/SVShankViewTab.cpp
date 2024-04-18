@@ -140,6 +140,12 @@ void SVShankViewTab::colorTraces( MGraphX *theX, std::vector<MGraphY> &vY )
 }
 
 
+void SVShankViewTab::mapChanged( const ShankMap *S )
+{
+    heat.updateMap( S );
+}
+
+
 void SVShankViewTab::selChan( int ic, const QString &name )
 {
     if( ic < 0 )
@@ -163,12 +169,12 @@ void SVShankViewTab::putSamps( const vec_i16 &_data, quint64 headCt )
     SC->drawMtx.lock();
         switch( set.what ) {
             case 0:
-                heat.apFilter( data, _data, headCt, 0 );
+                heat.apFilter( data, _data, headCt );
                 heat.accumSpikes( data, set.thresh, set.inarow );
                 if( done ) heat.normSpikes();
                 break;
             case 1:
-                heat.apFilter( data, _data, headCt, 0 );
+                heat.apFilter( data, _data, headCt );
                 heat.accumPkPk( data );
                 if( done ) heat.normPkPk( 1 );
                 break;

@@ -87,7 +87,7 @@ public:
     void selChan( int sh, int bk, int ig );
 
     void putInit();
-    void putSamps( const vec_i16 &_data, const ShankMap *S );
+    void putSamps( const vec_i16 &_data );
     void putDone();
 
     void cursorOver( int ig );

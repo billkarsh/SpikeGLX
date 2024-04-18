@@ -31,7 +31,9 @@ void SVShankCtl_Ni::init()
 
 void SVShankCtl_Ni::mapChanged()
 {
-    view()->setShankMap( &p.ni.sns.shankMap );
+    const ShankMap *S = &p.ni.sns.shankMap;
+    svTab->mapChanged( S );
+    view()->setShankMap( S );
 }
 
 /* ---------------------------------------------------------------- */

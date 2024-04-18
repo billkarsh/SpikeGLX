@@ -60,6 +60,9 @@ SVGrafsM_Ni::SVGrafsM_Ni(
 
     cTTLAction = new QAction( "Color TTL Events...", this );
     ConnectUI( cTTLAction, SIGNAL(triggered()), this, SLOT(colorTTL()) );
+
+    car.setChans( chanCount(), neurChanCount() );
+    car.setSU( &p.ni.sns.shankMap );
 }
 
 /* ---------------------------------------------------------------- */
@@ -78,8 +81,8 @@ SVGrafsM_Ni::SVGrafsM_Ni(
     Rather, min_x and max_x suggest only the span of depicted data.
 */
 
-#define V_S_AVE( d_ic )                                         \
-    (sAveLocal ? sAveApplyLocal( d_ic, ic ) : *d_ic)
+#define V_S_AVE( d_ic )                         \
+    (sAveLocal ? car.lcl_1( d_ic, ic ) : *d_ic)
 
 
 void SVGrafsM_Ni::putSamps( vec_i16 &data, quint64 headCt )
@@ -161,22 +164,18 @@ void SVGrafsM_Ni::putSamps( vec_i16 &data, quint64 headCt )
     // -<S>
     // ----
 
+    car.setChans( nC, nNu, (drawBinMax ? 1 : dwnSmp) );
+
     switch( set.sAveSel ) {
         case 1:
         case 2:
             sAveLocal = true;
             break;
         case 3:
-            sAveApplyGlobal(
-                p.ni.sns.shankMap,
-                &data[0], ntpts, nC, nNu,
-                (drawBinMax ? 1 : dwnSmp) );
+            car.gbl_ave_auto( &data[0], ntpts );
             break;
         case 4:
-            sAveApplyGlobalStride(
-                p.ni.sns.shankMap,
-                &data[0], ntpts, nC, nNu, p.ni.muxFactor,
-                (drawBinMax ? 1 : dwnSmp) );
+            car.gbl_dmx_stride_auto( &data[0], ntpts, p.ni.muxFactor );
             break;
         default:
             ;
@@ -292,7 +291,7 @@ void SVGrafsM_Ni::putSamps( vec_i16 &data, quint64 headCt )
 
                 for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
-                    int val = sAveApplyLocal( d, ic );
+                    int val = car.lcl_1( d, ic );
 
                     stat.add( val );
                     ybuf[ny++] = val * ysc;

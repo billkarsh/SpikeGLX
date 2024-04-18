@@ -1,10 +1,10 @@
 #ifndef SVGRAFSM_H
 #define SVGRAFSM_H
 
-#include "SGLTypes.h"
 #include "MGraph.h"
 #include "GraphStats.h"
 #include "TimedTextUpdate.h"
+#include "CAR.h"
 
 #include <QWidget>
 
@@ -92,11 +92,11 @@ protected:
                             *cTTLAction;
     Biquad                  *hipass,
                             *lopass;
+    CAR                     car;
     std::vector<MGraphY>    ic2Y;
     std::vector<GraphStats> ic2stat;
     QVector<int>            ic2iy,
                             ig2ic;
-    std::vector<std::vector<int> >  TSM;
     mutable QMutex          drawMtx,
                             fltMtx;
     UsrSettings             set;
@@ -203,22 +203,6 @@ protected:
     void ensureVisible();
 
     void sAveTable( const ShankMap &SM, int nSpikeChans, int sel );
-    int sAveApplyLocal( const qint16 *d_ic, int ic );
-    void sAveApplyGlobal(
-        const ShankMap  &SM,
-        qint16          *d,
-        int             ntpts,
-        int             nC,
-        int             nAP,
-        int             dwnSmp );
-    void sAveApplyGlobalStride(
-        const ShankMap  &SM,
-        qint16          *d,
-        int             ntpts,
-        int             nC,
-        int             nAP,
-        int             stride,
-        int             dwnSmp );
 
 private:
     void initGraphs();

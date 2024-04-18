@@ -135,7 +135,7 @@ void ShankView::setImro( const IMROTbl *R )
     }
 
     _ncolhwr    = R->nCol_hwr();
-    bnkRws      = R->nAP() / _ncolhwr;
+    bnkRws      = R->nChanPerBank() / _ncolhwr;
 }
 
 

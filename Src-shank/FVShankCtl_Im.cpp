@@ -18,7 +18,7 @@ FVShankCtl_Im::FVShankCtl_Im( const DataFile *df, QWidget *parent )
 
 void FVShankCtl_Im::init( const ShankMap *map )
 {
-    parInit( map, df->imro()->nAP() / map->nc );
+    parInit( map, df->imro()->nChanPerBank() / map->nc );
 }
 
 
