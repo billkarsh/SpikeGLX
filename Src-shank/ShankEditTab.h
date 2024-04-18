@@ -11,6 +11,8 @@ class ShankEditTab;
 
 class ShankCtlBase;
 
+class QMenu;
+
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -22,6 +24,7 @@ class ShankEditTab : public QObject
 private:
     ShankCtlBase            *SC;
     Ui::ShankEditTab        *seTabUI;
+    QMenu                   *mClear;
     IMROTbl                 *R0,
                             *Rfile,
                             *R;
@@ -29,9 +32,9 @@ private:
     std::vector<IMRO_ROI>   vR;
     QString                 filename,
                             lastDir;
-    int                     grid,
-                            nBoxes,
-                            boxRows;
+    int                     nBase,
+                            grid,
+                            nBoxes[4];
     bool                    canEdit;
 
 public:
@@ -58,8 +61,15 @@ private slots:
     void ypixChanged( int y );
     void loadBut();
     void defBut();
-    void clearBut();
-    void bxCBChanged();
+    void clearAll();
+    void clearShank0();
+    void clearShank1();
+    void clearShank2();
+    void clearShank3();
+    void bx0CBChanged();
+    void bx1CBChanged();
+    void bx2CBChanged();
+    void bx3CBChanged();
     bool saveBut();
     void helpBut();
     void okBut();
@@ -67,8 +77,13 @@ private slots:
 
 private:
     void initItems();
-    void enableItems( bool enabled );
-    void setBoxRows();
+    void initClearMenu();
+    void initBoxes();
+    void enableItems( bool enabled, bool onebox = false );
+    void clearShank( int s );
+    int boxRows( int s );
+    int boxesOnShank( int s );
+    void bxCBChanged( int s );
     void R2GUI();
     bool GUI2R();
     bool isDefault();
@@ -76,8 +91,8 @@ private:
     void clickHere( IMRO_ROI &C, int s, int r );
     void buildTestBoxes( tImroROIs vT, int s );
     bool fitIntoGap( IMRO_ROI &C );
-    bool boxOverlapsMe( const IMRO_ROI &C, const IMRO_ROI &B );
-    bool boxIsBelowMe( const IMRO_ROI &C, const IMRO_ROI &B );
+    bool boxOverlapsMe( const IMRO_ROI &Me, const IMRO_ROI &B );
+    bool boxIsBelowMe( const IMRO_ROI &Me, const IMRO_ROI &B );
     void color();
     void loadSettings();
     void saveSettings() const;

@@ -41,10 +41,13 @@ struct IMRO_GUI {
     std::vector<QString>    refs;
     std::vector<int>        gains;
     int                     grid;
+    qint8                   nBase;
     bool                    apEnab,
                             lfEnab,
                             hpEnab;
-    IMRO_GUI() : grid(1), apEnab(false), lfEnab(false), hpEnab(false)   {}
+    IMRO_GUI()
+        :   grid(1), nBase(1),
+            apEnab(false), lfEnab(false), hpEnab(false) {}
 };
 
 // Editing helper
@@ -109,6 +112,7 @@ public:
     virtual int nLF() const = 0;
     virtual int nSY() const             {return 1;}
     virtual int nBanks() const = 0;
+    virtual int nChanPerBank() const    {return nAP();}
     virtual int nRefs() const = 0;
     virtual int maxInt() const = 0;
     virtual double maxVolts() const = 0;
@@ -185,9 +189,9 @@ public:
         {vX.clear(); Q_UNUSED( s )}
     virtual void edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
         {Q_UNUSED( vR ) Q_UNUSED( A )}
-    int edit_defaultROI( tImroROIs vR ) const;
-    bool edit_isCanonical( int &nb, tImroROIs vR ) const;
-    int edit_tbl2ROI( tImroROIs vR ) const;
+    virtual void edit_defaultROI( int *nBoxes, tImroROIs vR ) const;
+    virtual bool edit_isCanonical( int *nBoxes, tImroROIs vR ) const;
+    void edit_tbl2ROI( int *nBoxes, tImroROIs vR ) const;
     void edit_exclude( tImroSites vX, tconstImroROIs vR ) const;
     bool edit_isAllowed( tconstImroSites vX, const IMRO_ROI &B ) const;
 
