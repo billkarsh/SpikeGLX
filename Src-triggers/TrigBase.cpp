@@ -232,8 +232,7 @@ void TrigBase::endTrig()
         msec = offmsec;
 
         for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
-            kvmRmt[QString("imErrFlags%1_IS_CT_SR_LK_PP_SY").arg( ip )] =
-                mainApp()->metrics()->getErrFlags( ip );
+            getErrFlags( ip );
             if( dfImAp[ip] ) {
                 if( !svySBTT[ip].isEmpty() )
                     kvmRmt["~svySBTT"] = svySBTT[ip];
@@ -324,8 +323,7 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
         if( nImQ ) {
             for( int ip = 0; ip < nImQ; ++ip ) {
                 firstCtIm.push_back( 0 );
-                kvmRmt[QString("imErrFlags%1_IS_CT_SR_LK_PP_SY").arg( ip )] =
-                    mainApp()->metrics()->getErrFlags( ip );
+                getErrFlags( ip );
                 dfImAp.push_back(
                     p.im.prbj[ip].apSaveChanCount() ?
                     new DataFileIMAP( ip ) : 0 );
@@ -580,8 +578,7 @@ void TrigBase::endRun( const QString &err )
         msec = offmsec;
 
         for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
-            kvmRmt[QString("imErrFlags%1_IS_CT_SR_LK_PP_SY").arg( ip )] =
-                mainApp()->metrics()->getErrFlags( ip );
+            getErrFlags( ip );
             if( dfImAp[ip] ) {
                 if( !svySBTT[ip].isEmpty() )
                     kvmRmt["~svySBTT"] = svySBTT[ip];
@@ -1112,6 +1109,21 @@ bool TrigBase::writeDataNI( vec_i16 &data, quint64 headCt )
     }
 
     return dfNi->writeAndInvalSubset( p, data );
+}
+
+
+void TrigBase::getErrFlags( int ip )
+{
+    if( p.im.prbj[ip].roTbl->apiFetchType() == 4 ) {
+        for( int is = 0; is < 4; ++is ) {
+            kvmRmt[QString("imErrFlags%1-%2_IS_CT_SR_LK_PP_SY").arg( ip ).arg( is )] =
+                mainApp()->metrics()->getErrFlags( ip, is );
+        }
+    }
+    else {
+        kvmRmt[QString("imErrFlags%1_IS_CT_SR_LK_PP_SY").arg( ip )] =
+            mainApp()->metrics()->getErrFlags( ip );
+    }
 }
 
 /* ---------------------------------------------------------------- */

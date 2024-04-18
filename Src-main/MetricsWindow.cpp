@@ -115,9 +115,14 @@ void MetricsWindow::showDialog()
 }
 
 
-QString MetricsWindow::getErrFlags( int ip )
+QString MetricsWindow::getErrFlags( int ip, int shank )
 {
-    QString stream = QString("imec%1").arg( ip, 2, 10, QChar('0') );
+    QString stream;
+
+    if( shank < 0 )
+        stream = QString("imec%1").arg( ip, 2, 10, QChar('0') );
+    else
+        stream = QString("quad%1-%2").arg( ip, 2, 10, QChar('0') ).arg( shank );
 
     QMutexLocker    ml( &err.erfMtx );
 
@@ -222,6 +227,10 @@ void MetricsWindow::updateMx()
 
     if( err.flags.size() ) {
 
+        te->setTextColor( Qt::darkRed );
+        te->append( "Stream-i {imec error flags}:" );
+        ledstate = qMax( ledstate, 2 );
+
         QMap<QString,MXErrFlags>::iterator  it, end = err.flags.end();
 
         for( it = err.flags.begin(); it != end; ++it ) {
@@ -230,17 +239,13 @@ void MetricsWindow::updateMx()
             quint32     sum = F.errCOUNT + F.errSERDES
                                 + F.errLOCK + F.errPOP + F.errSYNC;
 
-            if( sum ) {
+            if( sum )
                 te->setTextColor( Qt::darkRed );
-                ledstate = qMax( ledstate, 2 );
-            }
             else
                 te->setTextColor( Qt::darkGreen );
 
             te->append(
-                QString(
-                "Stream-i {imec error flags}:  %1"
-                "  COUNT %2 SERDES %3 LOCK %4 POP %5 SYNC %6")
+                QString("  %1 COUNT %2 SERDES %3 LOCK %4 POP %5 SYNC %6")
                 .arg( it.key() )
                 .arg( F.errCOUNT ).arg( F.errSERDES )
                 .arg( F.errLOCK ).arg( F.errPOP ).arg( F.errSYNC ) );

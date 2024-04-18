@@ -113,7 +113,7 @@ public:
     void runStart();
     void runEnd();
 
-    QString getErrFlags( int ip );
+    QString getErrFlags( int ip, int shank = -1 );
 
 signals:
     void closed( QWidget *w );
