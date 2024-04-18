@@ -692,7 +692,7 @@ bool ConfigCtl::validImROTbl( QString &err, CimCfg::PrbEach &E, int ip ) const
 
 bool ConfigCtl::validImMaps( QString &err, CimCfg::PrbEach &E, int ip ) const
 {
-    validImShankMap( err, E, ip );
+    validImShankMap( E );
 
     return  validImChanMap( err, E, ip );
 }
@@ -1049,7 +1049,7 @@ void ConfigCtl::tabChanged( int tab )
 {
     QString s;
 
-    switch( cfgUI->tabsW->currentIndex() ) {
+    switch( tab ) {
         case 0: s = "Devices Help"; break;
         case 1: s = "IM Help"; break;
         case 2: s = "Obx Help"; break;
@@ -1702,7 +1702,7 @@ bool ConfigCtl::validNiChannels(
 }
 
 
-void ConfigCtl::validImShankMap( QString &err, CimCfg::PrbEach &E, int ip ) const
+void ConfigCtl::validImShankMap( CimCfg::PrbEach &E ) const
 {
     if( usingIM ) {
 
@@ -2772,7 +2772,7 @@ bool ConfigCtl::shankParamsToQ( QString &err, DAQ::Params &q, int ip ) const
     if( !validImStdbyBits( err, E, ip ) )
         return false;
 
-    validImShankMap( err, E, ip );
+    validImShankMap( E );
 
     if( !validNiDevices( err, q )
         || !validNiChannels( err, q,
@@ -2967,19 +2967,20 @@ void ConfigCtl::running_setProbe( DAQ::Params &q, int ip )
 
     run->grfHardPause( true );
     run->grfWaitPaused();
-        E0 = E;
-    run->grfHardPause( false );
 
+    E0 = E;
     imTab->updateProbe( E, ip );
     imTab->saveSettings();
 
     if( I || S || C ) {
 
+        run->grfUpdateProbe( ip, I || S, I || C );
+
         if( I || S )
             run->imecUpdate( ip );
-
-        run->grfUpdateProbe( ip, I || S, I || C );
     }
+
+    run->grfHardPause( false );
 }
 
 

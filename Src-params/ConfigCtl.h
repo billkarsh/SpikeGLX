@@ -154,7 +154,7 @@ private:
         QVector<uint>   &vcXD2,
         QString         &uiStr1Err,
         QString         &uiStr2Err ) const;
-    void validImShankMap( QString &err, CimCfg::PrbEach &E, int ip ) const;
+    void validImShankMap( CimCfg::PrbEach &E ) const;
     bool validNiShankMap( QString &err, DAQ::Params &q ) const;
     bool validImChanMap( QString &err, CimCfg::PrbEach &E, int ip ) const;
     bool validObChanMap( QString &err, DAQ::Params &q, int ip ) const;
