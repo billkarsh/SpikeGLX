@@ -12,8 +12,12 @@ GOOD: No entries in this section.
 BAD:  Any entries in this section.
 ```
 
-For each imec stream we monitor the cumulative count of several error flags.
-These are labeled {COUNT, SERDES, LOCK, POP, SYNC}.
+For each imec stream we monitor the cumulative count of several error flags,
+hence, imec05 denotes the flags for probe steam 5. Note that quad-base
+probes (part number NP2020) record flags for each shank, hence, quad03-2
+denotes that stream 3 is a quad-probe and the flags are from shank 2.
+
+The flags are labeled {COUNT, SERDES, LOCK, POP, SYNC}.
 
 Any instances of these errors implies that samples have been dropped. It is
 not possible to tell how many samples are dropped from these counts. All
@@ -21,7 +25,8 @@ you can tell is that some of the data being transmitted from the device are
 corrupt or missing.
 
 These flags correspond to bits of the status/SYNC word that is visible as
-the last channel in the graphs and in your recorded data:
+the last channel in the graphs and in your recorded data (quad-probes have
+4 separate status words):
 
 ```
 bit 0: Acquisition start trigger received

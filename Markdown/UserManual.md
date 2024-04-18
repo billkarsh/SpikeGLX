@@ -341,10 +341,13 @@ independently each time you run:
 * `nidq`: Whisper/NI-DAQ acquisition from PXIe, PCI or USB devices.
 
 Imec probes currently read out 384 channels of neural data and have 8 bits
-of status data (stored as a 16-bit SY word).  Bit #0 signals that custom user
-FPGA code running on the Enclustra has detected an interesting neural
-event (NOT YET IMPLEMENTED). Bit #6 is the sync waveform, the other bits
-are error flags. Each probe is its own stream.
+of status data (stored as a 16-bit SY word). Bit #0 of the status word
+signals that custom user FPGA code running on the Enclustra has detected
+an interesting neural event (NOT YET IMPLEMENTED). Status bit #6 is the
+sync waveform, the other bits are error flags. Each probe is its own stream.
+
+>*Quad-probes (part number NP2020) have four separate shanks. 384 channels
+are read out from each shank, and the stream records 4 SY status words.*
 
 Imec OneBoxes are compact and inexpensive alternatives to PXI chassis. Each
 OneBox connects via USB. A box has two ports for neural headstages. The probes
@@ -381,16 +384,18 @@ Each imec stream acquires up to **three distinct types** of channels:
 ```
 1. AP = 16-bit action potential channels
 2. LF = 16-bit local field potential channels (some probes)
-3. SY = The single 16-bit sync input channel (sync is bit #6)
+3. SY = 16-bit status/sync words (sync is bit #6)
 ```
 
-All probes read out 384 AP and a single SY channel. Some probes read out a
-separate LF band with the same channel count as the AP band.
+Most probes read out 384 AP and a single SY channel. Some probes read out a
+separate LF band with the same channel count as the AP band. Quad-probes
+read out 1536 AP channels (384 from each of four shanks) and have four SY
+words (one per shank).
 
 Throughout the software the channels are maintained in `acquisition order`.
 That is, each acquired **sample** (or **timepoint**) contains all 384 AP
 channels, followed by the 384 LF channels (if present), followed by the
-SY channel.
+SY channel(s).
 
 The channels all have names with two (zero-based) indices, like this:
 
@@ -440,7 +445,7 @@ Each OneBox stream acquires up to **three distinct types** of channels:
 ```
 1. XA = 16-bit analog channels
 2. XD = 16-bit packed digital lines
-3. SY = The single 16-bit sync input channel (sync is bit #6)
+3. SY = 16-bit status/sync word (sync is bit #6)
 ```
 
 You can specify up to 12 analog channels to read out.

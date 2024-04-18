@@ -257,7 +257,10 @@
 <li>... : And so on.</li>
 <li><code>nidq</code>: Whisper/NI-DAQ acquisition from PXIe, PCI or USB devices.</li>
 </ul>
-<p>Imec probes currently read out 384 channels of neural data and have 8 bits of status data (stored as a 16-bit SY word). Bit #0 signals that custom user FPGA code running on the Enclustra has detected an interesting neural event (NOT YET IMPLEMENTED). Bit #6 is the sync waveform, the other bits are error flags. Each probe is its own stream.</p>
+<p>Imec probes currently read out 384 channels of neural data and have 8 bits of status data (stored as a 16-bit SY word). Bit #0 of the status word signals that custom user FPGA code running on the Enclustra has detected an interesting neural event (NOT YET IMPLEMENTED). Status bit #6 is the sync waveform, the other bits are error flags. Each probe is its own stream.</p>
+<blockquote>
+<p><em>Quad-probes (part number NP2020) have four separate shanks. 384 channels are read out from each shank, and the stream records 4 SY status words.</em></p>
+</blockquote>
 <p>Imec OneBoxes are compact and inexpensive alternatives to PXI chassis. Each OneBox connects via USB. A box has two ports for neural headstages. The probes you plug into a OneBox are treated as additional imecj data streams, as if those probes were plugged into PXI modules. OneBoxes can also read up to 12 analog channels and those channels can be thresholded, making 12 pseudo digital channels. These nonneural inputs are referred to as OneBox streams, with labels <code>obx0</code>, <code>obx1</code>, and so on.</p>
 <p>An Nidq device (M, X or S-series, digital, a.k.a. 62xx, 63xx, 61xx, 65xx) can be used to record auxiliary, usually non-neural, experiment signals. These devices offer several analog and digital channels. You can actually use two such devices if needed.</p>
 <p>The Whisper system is a 32X multiplexer add-on that plugs into an NI device, giving you 256 input channels. Whisper requires S-series devices (61xx).</p>
@@ -269,9 +272,9 @@
 <p>Each imec stream acquires up to <strong>three distinct types</strong> of channels:</p>
 <pre><code>1. AP = 16-bit action potential channels
 2. LF = 16-bit local field potential channels (some probes)
-3. SY = The single 16-bit sync input channel (sync is bit #6)</code></pre>
-<p>All probes read out 384 AP and a single SY channel. Some probes read out a separate LF band with the same channel count as the AP band.</p>
-<p>Throughout the software the channels are maintained in <code>acquisition order</code>. That is, each acquired <strong>sample</strong> (or <strong>timepoint</strong>) contains all 384 AP channels, followed by the 384 LF channels (if present), followed by the SY channel.</p>
+3. SY = 16-bit status/sync words (sync is bit #6)</code></pre>
+<p>Most probes read out 384 AP and a single SY channel. Some probes read out a separate LF band with the same channel count as the AP band. Quad-probes read out 1536 AP channels (384 from each of four shanks) and have four SY words (one per shank).</p>
+<p>Throughout the software the channels are maintained in <code>acquisition order</code>. That is, each acquired <strong>sample</strong> (or <strong>timepoint</strong>) contains all 384 AP channels, followed by the 384 LF channels (if present), followed by the SY channel(s).</p>
 <p>The channels all have names with two (zero-based) indices, like this:</p>
 <pre><code>AP0;0 .. AP383;383 | LF0;384 .. LF383;767 | SY0;768</code></pre>
 <p>For example, LF1;385 tells you: - This is an LF channel - It's the second channel in the LF group - It's the 386th channel overall</p>
@@ -292,7 +295,7 @@
 <p>Each OneBox stream acquires up to <strong>three distinct types</strong> of channels:</p>
 <pre><code>1. XA = 16-bit analog channels
 2. XD = 16-bit packed digital lines
-3. SY = The single 16-bit sync input channel (sync is bit #6)</code></pre>
+3. SY = 16-bit status/sync word (sync is bit #6)</code></pre>
 <p>You can specify up to 12 analog channels to read out.</p>
 <p>If you click the XD checkbox, all 12 channels are thresholded at 10% of the current voltage range maximum, and read out as the low-12 bits of a single 16-bit word.</p>
 <p>Throughout the software the channels are maintained in <code>acquisition order</code>. That is, each acquired <strong>sample</strong> (or <strong>timepoint</strong>) contains the XA channels (if present), followed by the XD channel (if present), followed by the SY channel.</p>
