@@ -160,8 +160,21 @@ void SimProbesCtl::cancelBut()
 
 void SimProbesCtl::cellDoubleClicked( int row, int col )
 {
-    if( col == TBL_PATH )
-        QTimer::singleShot( 150, this, SLOT(editPath( row )) );
+    if( col == TBL_PATH ) {
+        clkRow = row;
+        QTimer::singleShot( 150, this, SLOT(editPath()) );
+    }
+}
+
+
+void SimProbesCtl::editPath()
+{
+    QString file = (maddr.begin() + clkRow).value() + ".ap.bin";
+
+    if( selectFile( file ) ) {
+        maddr[(maddr.begin() + clkRow).key()] = file;
+        toTable();
+    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -257,17 +270,6 @@ bool SimProbesCtl::selectFile( QString &file )
     }
 
     return false;
-}
-
-
-void SimProbesCtl::editPath( int row )
-{
-    QString file = (maddr.begin() + row).value();
-
-    if( selectFile( file ) ) {
-        maddr[(maddr.begin() + row).key()] = file;
-        toTable();
-    }
 }
 
 

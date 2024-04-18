@@ -286,7 +286,7 @@ bool Subset::rngStr2Bits( QBitArray &b, const QString &s )
 
         if( n == 2 ) {
 
-            r1  = rng[0].toInt( &ok1 ),
+            r1  = rng[0].toInt( &ok1 );
             r2  = rng[1].toInt( &ok2 );
 
             if( !ok1 || !ok2 || r1 < 0 || r2 < 0 )

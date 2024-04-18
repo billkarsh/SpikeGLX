@@ -24,6 +24,7 @@ private:
     Ui::SimProbesDialog     *spUI;
     SimProbes               &SP;
     QMap<SPAddr,QString>    maddr;
+    int                     clkRow;
 
 public:
     SimProbesCtl( QObject *parent, SimProbes &SP );
@@ -39,6 +40,7 @@ private slots:
     void okBut();
     void cancelBut();
     void cellDoubleClicked( int row, int col );
+    void editPath();
 
 private:
     SPAddr lowestAvailAddr();
@@ -46,7 +48,6 @@ private:
     int addr2row( SPAddr &A );
     void selectAddr( SPAddr &A );
     bool selectFile( QString &file );
-    void editPath( int row );
     void toTable();
     bool fromTable();
 };

@@ -678,7 +678,7 @@ void Params::remoteSetDAQParams( const QString &str )
 
 const QString& gateModeToString( GateMode gateMode )
 {
-    if( gateMode >= 0 && gateMode < N_gateModes )
+    if( gateMode < N_gateModes )
         return gateModeStrs[gateMode];
 
     return unk;
@@ -708,7 +708,7 @@ GateMode stringToGateMode( const QString &str )
 
 const QString& trigModeToString( TrigMode trigMode )
 {
-    if( trigMode >= 0 && trigMode < N_trigModes )
+    if( trigMode < N_trigModes )
         return trigModeStrs[trigMode];
 
     return unk;
