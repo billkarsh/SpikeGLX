@@ -148,15 +148,15 @@ void SVGrafsM_Ni::putSamps( vec_i16 &data, quint64 headCt )
     bool    drawBinMax  = set.binMaxOn && dwnSmp > 1 && set.bandSel != 2,
             sAveLocal   = false;
 
-    // -------------------------------------------
-    // -<Tn>; not applied to AP if hipass filtered
-    // -------------------------------------------
+    // ---------------------------------
+    // -<Tn>; not applied if AP filtered
+    // ---------------------------------
 
     if( set.tnChkOn ) {
 
         Tn.updateLvl( &data[0], ntpts, dwnSmp );
 
-        if( set.bandSel == 0 )
+        if( set.bandSel != 1 )
             Tn.apply( &data[0], ntpts, (drawBinMax ? 1 : dwnSmp) );
     }
 

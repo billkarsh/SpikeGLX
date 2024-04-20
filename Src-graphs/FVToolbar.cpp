@@ -139,22 +139,35 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
 
     if( fv->tbGetNeurChans() ) {
 
-        // Hipass
+        // Bandpass
 
         addSeparator();
 
         if( fType != fvLF ) {
 
-            C = new QCheckBox( "300 - INF", this );
-            C->setToolTip( "Applied only to neural channels" );
-            C->setChecked( fv->tbGet300HzOn() );
-            ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbHipassClicked(bool)) );
-            addWidget( C );
+            CB = new QComboBox( this );
+            CB->setToolTip( "Applied only to neural channels" );
+
+            if( fType == fvAP ) {
+                CB->addItem( "AP Native" );
+                CB->addItem( "300 - INF" );
+                CB->addItem( "0.5 - 500" );
+            }
+            else {
+                CB->addItem( "Pass All" );
+                CB->addItem( "300 - INF" );
+                CB->addItem( "0.1 - 300" );
+            }
+
+            CB->setCurrentIndex( fv->tbGetBandSel() );
+            ConnectUI( CB, SIGNAL(currentIndexChanged(int)), fv, SLOT(tbBandSelChanged(int)) );
+            addWidget( CB );
         }
 
         // -<Tn> (DC filter)
 
         C = new QCheckBox( "-<Tn>", this );
+        C->setStyleSheet( "padding-left: 4px; padding-right: 4px" );
         C->setToolTip( "Temporally average neural channels" );
         C->setChecked( fv->tbGetTnChkOn() );
         ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbTnClicked(bool)) );
@@ -207,7 +220,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
 
     if( fv->tbGetAnaChans() > fv->tbGetNeurChans() ) {
 
-        // -<Tn> (DC filter)
+        // -<Tx> (DC filter)
 
         addSeparator();
 

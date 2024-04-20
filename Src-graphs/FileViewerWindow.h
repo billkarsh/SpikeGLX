@@ -200,10 +200,10 @@ private:
                 ySclLf;
         int     yPixAp,
                 yPixLf,
-                sAveSel,    // {0=Off, 1,2=Local, 3,4=Global}
+                bandSel,    // {0=off, 1=AP, 2=LF}
+                sAveSel,    // {0=off, 1=lcl, 2=lcl', 3=gbl, 4=dmx}
                 binMax;     // {0=Off, 1=slow, 2=fast, 3=faster}
-        bool    bp300Hz,
-                tnChkOnAp,
+        bool    tnChkOnAp,
                 tnChkOnLf;
 
         void loadSettings( QSettings &S );
@@ -221,10 +221,10 @@ private:
     struct SaveNi {
         double  ySclNeu;
         int     yPix,
-                sAveSel,    // {0=Off, 1,2=Local, 3,4=Global}
+                bandSel,    // {0=off, 1=AP, 2=LF}
+                sAveSel,    // {0=off, 1=lcl, 2=lcl', 3=gbl, 4=dmx}
                 binMax;     // {0=Off, 1=slow, 2=fast, 3=faster}
-        bool    bp300Hz,
-                tnChkOn,
+        bool    tnChkOn,
                 txChkOn;
 
         void loadSettings( QSettings &S );
@@ -249,13 +249,15 @@ private:
     private:
         int                 nC,
                             i0,
-                            nI;
+                            nI,
+                            maxInt;
     public:
         std::vector<int>    lvl;
     public:
-        void init( int nChannels, int c0, int cLim );
+        void init( int nChannels, int c0, int cLim, int maxInt );
         void updateLvl(
             const DataFile  *df,
+            Biquad          *hipass,
             qint64          xpos,
             int             nRem,
             int             chunk,
@@ -287,7 +289,8 @@ private:
     FVShankCtl              *shankCtl;
     ShankMap                *shankMap;
     ChanMap                 *chanMap;
-    Biquad                  *hipass;
+    Biquad                  *hipass,
+                            *lopass;
     ExportCtl               *exportCtl;
     QMenu                   *channelsMenu;
     MGScroll                *mscroll;
@@ -354,20 +357,20 @@ public:
             }
         }
     int     tbGetNDivs() const      {return sav.all.nDivs;}
+    int     tbGetBandSel() const
+        {
+            switch( fType ) {
+                case fvAP: return sav.im.bandSel;
+                case fvNI: return sav.ni.bandSel;
+                default:   return 0;
+            }
+        }
     int     tbGetSAveSel() const
         {
             switch( fType ) {
                 case fvAP: return sav.im.sAveSel;
                 case fvNI: return sav.ni.sAveSel;
                 default:   return 0;
-            }
-        }
-    bool    tbGet300HzOn() const
-        {
-            switch( fType ) {
-                case fvAP: return sav.im.bp300Hz;
-                case fvNI: return sav.ni.bp300Hz;
-                default:   return false;
             }
         }
     bool    tbGetTnChkOn() const
@@ -420,9 +423,9 @@ public slots:
     void tbSetYScale( double d );
     void tbSetMuxGain( double d );
     void tbSetNDivs( int n );
-    void tbHipassClicked( bool b );
     void tbTnClicked( bool b );
     void tbTxClicked( bool b );
+    void tbBandSelChanged( int sel, bool update = true );
     void tbSAveSelChanged( int sel );
     void tbBinMaxChanged( int sel );
     void tbApplyAll();
@@ -497,7 +500,6 @@ private:
 
 // Data-dependent inits
     bool openFile( QString &error, const QString &fname );
-    void initHipass();
     void killActions();
     void initGraphs();
 

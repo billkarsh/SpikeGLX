@@ -129,7 +129,7 @@ void SVToolsM::init()
         CB = new QComboBox( this );
 
         if( gr->isImec() ) {
-            CB->setToolTip( "Applied only to spike channels" );
+            CB->setToolTip( "Applied only to ap-band channels" );
             CB->addItem( "AP Native" );
             CB->addItem( "300 - INF" );
             CB->addItem( "0.5 - 500" );

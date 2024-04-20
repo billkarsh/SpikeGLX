@@ -47,8 +47,8 @@ protected:
         QColor  clr0,       // AP
                 clr1;       // LF or Aux
         int     navNChan,
-                bandSel,
-                sAveSel;    // {0=Off, 1=Local, 2=Global}
+                bandSel,    // {0=off, 1=AP, 2=LF, 3=AP+LF}
+                sAveSel;    // {0=off, 1=lcl, 2=lcl', 3=gbl, 4=dmx}
         bool    tnChkOn,
                 txChkOn,
                 binMaxOn,

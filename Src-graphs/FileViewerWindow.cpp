@@ -408,9 +408,9 @@ void FileViewerWindow::SaveIm::loadSettings( QSettings &S )
     ySclLf      = S.value( "ySclLf", 1.0 ).toDouble();
     yPixAp      = S.value( "yPixAp", 100 ).toInt();
     yPixLf      = S.value( "yPixLf", 100 ).toInt();
+    bandSel     = S.value( "bandSel", 0 ).toInt();
     sAveSel     = S.value( "sAveSel", 0 ).toInt();
     binMax      = S.value( "binMax", 0 ).toInt();
-    bp300Hz     = S.value( "bp300Hz", false ).toBool();
     tnChkOnAp   = S.value( "tnChkOnAp", true ).toBool();
     tnChkOnLf   = S.value( "tnChkOnLf", true ).toBool();
     S.endGroup();
@@ -428,9 +428,9 @@ void FileViewerWindow::SaveIm::saveSettings( QSettings &S, int fType ) const
     if( fType == fvAP ) {
         S.setValue( "ySclAp", ySclAp );
         S.setValue( "yPixAp", qMax( yPixAp, 4 ) );
+        S.setValue( "bandSel", bandSel );
         S.setValue( "sAveSel", sAveSel );
         S.setValue( "binMax", binMax );
-        S.setValue( "bp300Hz", bp300Hz );
         S.setValue( "tnChkOnAp", tnChkOnAp );
     }
     else {
@@ -468,9 +468,9 @@ void FileViewerWindow::SaveNi::loadSettings( QSettings &S )
     S.beginGroup( "FileViewer_Nidq" );
     ySclNeu = S.value( "ySclNeu", 1.0 ).toDouble();
     yPix    = S.value( "yPix", 100 ).toInt();
+    bandSel = S.value( "bandSel", 0 ).toInt();
     sAveSel = S.value( "sAveSel", 0 ).toInt();
     binMax  = S.value( "binMax", 0 ).toInt();
-    bp300Hz = S.value( "bp300Hz", true ).toBool();
     tnChkOn = S.value( "tnChkOn", true ).toBool();
     txChkOn = S.value( "txChkOn", false ).toBool();
     S.endGroup();
@@ -485,9 +485,9 @@ void FileViewerWindow::SaveNi::saveSettings( QSettings &S ) const
     S.beginGroup( "FileViewer_Nidq" );
     S.setValue( "ySclNeu", ySclNeu );
     S.setValue( "yPix", qMax( yPix, 4 ) );
+    S.setValue( "bandSel", bandSel );
     S.setValue( "sAveSel", sAveSel );
     S.setValue( "binMax", binMax );
-    S.setValue( "bp300Hz", bp300Hz );
     S.setValue( "tnChkOn", tnChkOn );
     S.setValue( "txChkOn", txChkOn );
     S.endGroup();
@@ -497,17 +497,19 @@ void FileViewerWindow::SaveNi::saveSettings( QSettings &S ) const
 /* class DCAve ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void FileViewerWindow::DCAve::init( int nChannels, int c0, int cLim )
+void FileViewerWindow::DCAve::init( int nChannels, int c0, int cLim, int maxInt )
 {
-    nC  = nChannels;
-    i0  = c0;
-    nI  = cLim - c0;
+    nC              = nChannels;
+    i0              = c0;
+    nI              = cLim - c0;
+    this->maxInt    = maxInt;
     lvl.assign( nI, 0 );
 }
 
 
 void FileViewerWindow::DCAve::updateLvl(
     const DataFile  *df,
+    Biquad          *hipass,
     qint64          xpos,
     int             nRem,
     int             chunk,
@@ -545,6 +547,11 @@ void FileViewerWindow::DCAve::updateLvl(
         nRem    -= ntpts;
         nSamp   += (ntpts + dwnSmp - 1) / dwnSmp;
 
+        // filter
+
+        if( hipass )
+            hipass->applyBlockwiseMem( &data[0], maxInt, ntpts, nC, 0, nI );
+
         // accumulate sums
 
         const qint16    *d = &data[0];
@@ -561,6 +568,9 @@ void FileViewerWindow::DCAve::updateLvl(
         for( int ig = 0; ig < nI; ++ig )
             L[ig] = S[ig]/nSamp;
     }
+
+    if( hipass )
+        hipass->clearMem();
 }
 
 
@@ -599,9 +609,11 @@ static bool     _linkManUpdt, _linkCanDraw = true;
 /* ---------------------------------------------------------------- */
 
 FileViewerWindow::FileViewerWindow()
-    :   QMainWindow(0), tMouseOver(-1.0), yMouseOver(-1.0),
-        df(0), shankCtl(0), shankMap(0), chanMap(0), hipass(0),
-        igSelected(-1), igMaximized(-1), igMouseOver(-1), curSMap(0),
+    :   QMainWindow(0),
+        tMouseOver(-1.0), yMouseOver(-1.0),
+        df(0), shankCtl(0), shankMap(0), chanMap(0),
+        hipass(0), lopass(0), igSelected(-1),
+        igMaximized(-1), igMouseOver(-1), curSMap(0),
         didLayout(false), sortingDisabled(false),
         selDrag(false), zoomDrag(false)
 {
@@ -625,6 +637,9 @@ FileViewerWindow::~FileViewerWindow()
 
     if( hipass )
         delete hipass;
+
+    if( lopass )
+        delete lopass;
 }
 
 
@@ -649,13 +664,8 @@ bool FileViewerWindow::viewFile( QString &error, const QString &fname )
 
     loadSettings();
 
-// --------------------
-// Data-dependent inits
-// --------------------
-
     scanGrp->setRanges( true );
     scanGrp->enableManualUpdate( sav.all.manualUpdate );
-    initHipass();
 
 // --------------------------
 // Manage previous array data
@@ -698,6 +708,7 @@ bool FileViewerWindow::viewFile( QString &error, const QString &fname )
 
     initGraphs();
 
+    tbBandSelChanged( tbGetBandSel(), false );
     sAveTable( tbGetSAveSel() );
 
 // ------------
@@ -1122,19 +1133,6 @@ void FileViewerWindow::tbSetNDivs( int n )
 }
 
 
-void FileViewerWindow::tbHipassClicked( bool b )
-{
-    switch( fType ) {
-        case fvAP: sav.im.bp300Hz = b; break;
-        case fvNI: sav.ni.bp300Hz = b; break;
-        default:   return;
-    }
-
-    saveSettings();
-    updateGraphs();
-}
-
-
 void FileViewerWindow::tbTnClicked( bool b )
 {
     switch( fType ) {
@@ -1156,6 +1154,52 @@ void FileViewerWindow::tbTxClicked( bool b )
         case fvLF: return;
         case fvOB: sav.ob.txChkOn = b; break;
         case fvNI: sav.ni.txChkOn = b; break;
+    }
+
+    saveSettings();
+    updateGraphs();
+}
+
+
+void FileViewerWindow::tbBandSelChanged( int sel, bool update )
+{
+    if( !(fType == fvAP || fType == fvNI) )
+        return;
+
+    if( hipass ) {
+        delete hipass;
+        hipass = 0;
+    }
+
+    if( lopass ) {
+        delete lopass;
+        lopass = 0;
+    }
+
+    double  srate = df->samplingRateHz();
+
+    switch( sel ) {
+        case 1:
+            hipass = new Biquad( bq_type_highpass, 300/srate );
+            break;
+        case 2:
+            if( fType == fvAP ) {
+                hipass = new Biquad( bq_type_highpass, 0.5/srate );
+                lopass = new Biquad( bq_type_lowpass,  500/srate );
+            }
+            else {
+                hipass = new Biquad( bq_type_highpass, 0.1/srate );
+                lopass = new Biquad( bq_type_lowpass,  300/srate );
+            }
+            break;
+    }
+
+    if( !update )
+        return;
+
+    switch( fType ) {
+        case fvAP: sav.im.bandSel = sel; break;
+        case fvNI: sav.ni.bandSel = sel; break;
     }
 
     saveSettings();
@@ -2656,16 +2700,6 @@ bool FileViewerWindow::openFile( QString &error, const QString &fname )
 }
 
 
-void FileViewerWindow::initHipass()
-{
-    if( hipass )
-        delete hipass;
-
-    hipass =
-    new Biquad( bq_type_highpass, 300.0 / df->samplingRateHz() );
-}
-
-
 void FileViewerWindow::killActions()
 {
 // Remove submenus referencing actions
@@ -3235,7 +3269,7 @@ void FileViewerWindow::updateGraphs()
             binMax;
     bool    sAveLocal   = false;
 
-    if( tbGet300HzOn() )
+    if( tbGetBandSel() )
         xflt = qMin( qint64(BIQUAD_TRANS_WIDE), pos );
     else
         xflt = 0;
@@ -3283,28 +3317,29 @@ void FileViewerWindow::updateGraphs()
 // of more indexing.
 
     int chunk =
-            qMax( 1, int((tbGet300HzOn() ? 0.05 : 0.02)*srate/dwnSmp) )
+            qMax( 1, int((tbGetBandSel() ? 0.05 : 0.02)*srate/dwnSmp) )
             * dwnSmp;
 
 // ------------
 // Filter setup
 // ------------
 
-    hipass->clearMem();
+    if( hipass ) hipass->clearMem();
+    if( lopass ) lopass->clearMem();
 
-    // -<Tn>; not applied if hipass filtered
+    // -<Tn>; not applied if AP filtered
 
-    if( tbGetTnChkOn() && !tbGet300HzOn() ) {
+    if( tbGetTnChkOn() && tbGetBandSel() != 1 ) {
 
-        Tn.init( nG, 0, nNeurChans );
-        Tn.updateLvl( df, xpos, ntpts, chunk, dwnSmp );
+        Tn.init( nG, 0, nNeurChans, maxInt );
+        Tn.updateLvl( df, hipass, xpos, ntpts, chunk, dwnSmp );
     }
 
     // -<Tx>
 
     if( tbGetTxChkOn() ) {
-        Tx.init( nG, nNeurChans, nAnaChans );
-        Tx.updateLvl( df, xpos, ntpts, chunk, dwnSmp );
+        Tx.init( nG, nNeurChans, nAnaChans, 0 );
+        Tx.updateLvl( df, 0, xpos, ntpts, chunk, dwnSmp );
     }
 
 // ----------
@@ -3378,20 +3413,20 @@ sumL+=getTime()-qq;
 qq=getTime();
 #endif
 
-        if( tbGet300HzOn() ) {
-            hipass->applyBlockwiseMem(
-                    &data[0], maxInt, ntpts, nG, 0, nSpikeChans );
-        }
+        if( hipass )
+            hipass->applyBlockwiseMem( &data[0], maxInt, ntpts, nG, 0, nSpikeChans );
+        if( lopass )
+            lopass->applyBlockwiseMem( &data[0], maxInt, ntpts, nG, 0, nSpikeChans );
 
 #ifdef PROFILE
 sumF+=getTime()-qq;
 #endif
 
-        // -------------------------------------
-        // -<Tn>; not applied if hipass filtered
-        // -------------------------------------
+        // ---------------------------------
+        // -<Tn>; not applied if AP filtered
+        // ---------------------------------
 
-        if( tbGetTnChkOn() && !tbGet300HzOn() )
+        if( tbGetTnChkOn() && tbGetBandSel() != 1 )
             Tn.apply( &data[0], ntpts, (binMax ? binMax : dwnSmp) );
 
         // ----

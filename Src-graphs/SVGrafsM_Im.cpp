@@ -202,9 +202,9 @@ void SVGrafsM_Im::putSamps( vec_i16 &data, quint64 headCt )
     if( nLF && set.bandSel == 3 )
         addLF2AP( E, &data[0], ntpts, nC, nAP, (drawBinMax ? 1 : dwnSmp) );
 
-    // -------------------------------------------
-    // -<Tn>; not applied to AP if hipass filtered
-    // -------------------------------------------
+    // ---------------------------------
+    // -<Tn>; not applied if AP filtered
+    // ---------------------------------
 
     if( set.tnChkOn ) {
 
