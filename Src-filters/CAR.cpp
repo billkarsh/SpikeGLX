@@ -146,6 +146,14 @@ void CAR::setMuxTbl( const IMROTbl *R )
 }
 
 
+const int* CAR::getMuxTbl( int &nADC, int &nGrp ) const
+{
+    nADC = this->nADC;
+    nGrp = this->nGrp;
+    return &muxTbl[0];
+}
+
+
 // For each channel [0,nAP), calculate an 8-way
 // neighborhood of indices into a timepoint's channels.
 // - Inherently per shank.

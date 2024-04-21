@@ -69,9 +69,10 @@ public:
     void setChans( int _nC, int _nAP, int _dwnSmp = 1 );
     void setSU( const GeomMap *map );
     void setSU( const ShankMap *map );
-    const SUList &getSU()           {return SU;}
+    const SUList &getSU() const     {return SU;}
     void setMuxTbl( const IMROTbl *R );
-    int getMuxTblSize()             {return nADC * nGrp;}
+    const int* getMuxTbl( int &nADC, int &nGrp ) const;
+    int getMuxTblSize() const       {return nADC * nGrp;}
 
 /* ---------------------------------------------------------------- */
 /* Local CAR is inherently per shank ------------------------------ */
