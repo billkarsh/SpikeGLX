@@ -167,9 +167,10 @@ use_raw:
         }
         else
             car.gbl_ave_all( &odata[0], ntpts );
-    }
 
-    zeroFilterTransient( &odata[0], ntpts, nAP );
+        if( offline )
+            zeroFilterTransient( &odata[0], ntpts, nAP );
+    }
 }
 
 
@@ -202,7 +203,7 @@ void Heatmap::accumReset( bool resetFlt )
 
 void Heatmap::accumSpikes( const vec_i16 &data, int thresh, int inarow )
 {
-    int ntpts = int(data.size()) / nC;
+    int ntpts = int(data.size()) / nAP;
 
     if( !ntpts )
         return;
@@ -240,7 +241,7 @@ void Heatmap::accumSpikes( const vec_i16 &data, int thresh, int inarow )
 
 void Heatmap::accumPkPk( const vec_i16 &data )
 {
-    int ntpts = int(data.size()) / nC;
+    int ntpts = int(data.size()) / nAP;
 
     if( !ntpts )
         return;

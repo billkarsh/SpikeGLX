@@ -157,7 +157,7 @@ const int* CAR::getMuxTbl( int &nADC, int &nGrp ) const
 // For each channel [0,nAP), calculate an 8-way
 // neighborhood of indices into a timepoint's channels.
 // - Inherently per shank.
-// - Annulus with {inner^2, outer^2} radii {id2, od2}.
+// - Annulus with {inner^2, outer^2} radii^2 {id2, od2}.
 // - The list is sorted for cache friendliness.
 // Dependencies:
 // {setChans}

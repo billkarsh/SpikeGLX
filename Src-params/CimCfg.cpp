@@ -1156,8 +1156,8 @@ QString CimCfg::ImProbeTable::whosChecked( QTableWidget *T ) const
 void CimCfg::PrbAll::loadSettings( QSettings &S )
 {
     qf_secsStr      = S.value( "imQfSecs", ".5" ).toString();
-    qf_loCutStr     = S.value( "imQfLoCut", "0" ).toString();
-    qf_hiCutStr     = S.value( "imQfHiCut", "INF" ).toString();
+    qf_loCutStr     = S.value( "imQfLoCut", "300" ).toString();
+    qf_hiCutStr     = S.value( "imQfHiCut", "9000" ).toString();
     calPolicy       = S.value( "imCalPolicy", 0 ).toInt();
     trgSource       = S.value( "imTrgSource", 0 ).toInt();
     svySecPerBnk    = S.value( "imSvySecPerBnk", 35 ).toInt();

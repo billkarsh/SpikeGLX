@@ -301,7 +301,7 @@ public:
                 qf_on;
 
         PrbAll()
-        :   qf_secsStr( ".5" ), qf_loCutStr( "0" ), qf_hiCutStr( "INF" ),
+        :   qf_secsStr( ".5" ), qf_loCutStr( "300" ), qf_hiCutStr( "9000" ),
             calPolicy(0), trgSource(0), svySecPerBnk(35), lowLatency(false),
             trgRising(true), bistAtDetect(true), isSvyRun(false),
             qf_on(true) {}

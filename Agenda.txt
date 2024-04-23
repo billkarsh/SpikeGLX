@@ -5,6 +5,9 @@
 --------
 + Fix geomMap indexing error.
 + Improve selection in Configure Slots dialog.
++ Improve handling of unknown probe types.
++ Simplify run initialization progress dialog.
++ FileViewer gets LF-band filter.
 
 20231207
 --------
