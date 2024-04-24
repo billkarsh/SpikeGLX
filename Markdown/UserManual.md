@@ -9,6 +9,7 @@
         + [Remote Command Servers](#remote-command-servers)
         + [Data Directory](#data-directory)
         + [Multidrive Run Splitting](#multidrive-run-splitting)
+        + [Display Settings](#display-settings)
         + [Screen Saver and Power Settings](#screen-saver-and-power-settings)
         + [Graphics Problems](#graphics-problems)
     + [Data Stream](#data-stream)
@@ -247,6 +248,18 @@ The result is as follows:
 
 >The mod operation is just the remainder when dividing j by N. For example,
 7 mod 3 = 1.
+
+#### Display Settings
+
+Depending upon your monitor size and resolution, you might find that the
+text in menus, buttons and lists is either fuzzy or too small to read. If
+that's the case, try altering the following Windows setting:
+
+1. Right-click on your Windows desktop and select 'Display settings.'
+2. Click 'Advanced scaling settings.'
+3. Find the button called 'Let Windows try to fix apps so they're not blurry.'
+4. Turn this feature **OFF**. -- Yes, disable it.
+5. Quit and restart SpikeGLX.
 
 #### Screen Saver and Power Settings
 

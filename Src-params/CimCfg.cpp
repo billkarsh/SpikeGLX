@@ -265,7 +265,7 @@ void CimCfg::ImProbeTable::setCfgSlots( const QVector<CfgSlot> &vCS )
         }
     }
 
-    qSort( probes.begin(), probes.end() );
+    qSort( probes );
 
     saveProbeTable();
     saveSlotTable();
@@ -323,7 +323,7 @@ void CimCfg::ImProbeTable::getCfgSlots( QVector<CfgSlot> &vCS )
 // Final sort
 // ----------
 
-    qSort( vCS.begin(), vCS.end() );
+    qSort( vCS );
 }
 
 
@@ -402,7 +402,7 @@ bool CimCfg::ImProbeTable::scanCfgSlots( QVector<CfgSlot> &vCS, QString &msg ) c
 // Final sort
 // ----------
 
-    qSort( vCS.begin(), vCS.end() );
+    qSort( vCS );
 
     msg = "Bus scan OK";
     return true;
@@ -719,7 +719,7 @@ void CimCfg::ImProbeTable::loadProbeTable()
     for( int i = 0; i < np; ++i )
         probes[i].loadSettings( settings, i );
 
-    qSort( probes.begin(), probes.end() );
+    qSort( probes );
 }
 
 

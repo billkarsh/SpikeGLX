@@ -10,6 +10,7 @@
 * [Gauging System Health](#gauging-system-health)
 * [How to Report Bugs](#how-to-report-bugs)
 * [Graphics Problems](#graphics-problems)
+    + [Fuzzy Text](#fuzzy-text)
     + [Black Graphics](#black-graphics)
     + [Graphs Flicker](#graphs-flicker)
 * [Remote Desktop](#remote-desktop)
@@ -228,6 +229,19 @@ window.
 --------
 
 ## Graphics Problems
+
+### Fuzzy Text
+
+"Why is the text in my SpikeGLX controls, menus and log window so tiny
+and hard to read?"
+
+Try altering the following Windows setting:
+
+1. Right-click on your Windows desktop and select 'Display settings.'
+2. Click 'Advanced scaling settings.'
+3. Find the button called 'Let Windows try to fix apps so they're not blurry.'
+4. Turn this feature **OFF**. -- Yes, disable it.
+5. Quit and restart SpikeGLX.
 
 ### Black Graphics
 

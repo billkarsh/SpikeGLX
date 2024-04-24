@@ -1002,7 +1002,7 @@ void IMROTbl::edit_exclude( tImroSites vX, tconstImroROIs vR ) const
         }
     }
 
-    qSort( vX.begin(), vX.end() );
+    qSort( vX );
 }
 
 

@@ -90,7 +90,7 @@ void ConfigSlotsCtl::addBut()
     }
 
     vCS.push_back( CimCfg::CfgSlot( slot, 0, 1, true ) );
-    qSort( vCS.begin(), vCS.end() );
+    qSort( vCS );
     csUI->statusLbl->setText( QString("Sim slot %1 added").arg( slot ) );
     toGUI();
 }
@@ -180,7 +180,7 @@ void ConfigSlotsCtl::slotCBChanged( int sel )
         CS.slot = sel + CimCfg::imSlotNone;
     }
 
-    qSort( vCS.begin(), vCS.end() );
+    qSort( vCS );
     toGUI();
 
 // Reselect item

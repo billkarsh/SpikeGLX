@@ -927,7 +927,7 @@ void ShankEditTab::buildTestBoxes( tImroROIs vT, int s )
     if( r0 >= 0 )
         vT.push_back( IMRO_ROI( s, r0, r0 + nr ) );
 
-    qSort( vT.begin(), vT.end() );
+    qSort( vT );
 }
 
 
