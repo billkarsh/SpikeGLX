@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+April 24, 2024
+
+* C_Waves 2.6 (Handle int64 or uint64 spike times).
+
 January 29, 2024
 
 * SpikeGLX 20231207-phase30 (NP1016, imec 3.62.1).
