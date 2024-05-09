@@ -83,7 +83,7 @@ void IMBISTCtl::go()
 
     if( !itest ) {
 
-        if( !okVersions() )
+        if( !okVersions() || !probeType() )
             return;
 
         if( !test_bistBS() )
@@ -175,6 +175,8 @@ bool IMBISTCtl::okVersions()
     QString         bsfw, bscfw;
     NP_ErrorCode    err;
     int             slot = bistUI->slotSB->value();
+
+    np_scanBS();
 
     np_getDeviceInfo( slot, &bs );
 
@@ -311,9 +313,9 @@ bool IMBISTCtl::probeType()
 // Test for NHP 128-channel analog
 // -------------------------------
 
-    if( QString(hID.ProductNumber) == "NPNH_HS_30" ||
-        QString(hID.ProductNumber) == "NPNH_HS_31" ) {
+    QString prod(hID.ProductNumber);
 
+    if( prod == "NPNH_HS_30" || prod == "NPNH_HS_31" ) {
         type = 1200;
         return true;
     }

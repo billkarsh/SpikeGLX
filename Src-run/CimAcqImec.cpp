@@ -2719,6 +2719,8 @@ bool CimAcqImec::configure()
 /* createAcqWorkerThreads ----------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// High channel count probes get own worker
+//
 void CimAcqImec::createAcqWorkerThreads()
 {
 // @@@ FIX Tune streams per thread here and in triggers
@@ -2727,6 +2729,14 @@ void CimAcqImec::createAcqWorkerThreads()
     std::vector<ImAcqStream>    streams;
 
     for( int ip = 0, np = p.stream_nIM(); ip < np; ++ip ) {
+
+        if( p.stream_nChans( jsIM, ip ) > 384 ) {
+
+            std::vector<ImAcqStream>    solo;
+            solo.push_back( ImAcqStream( T, p, owner->imQ[ip], jsIM, ip ) );
+            acqThd.push_back( new ImAcqThread( this, acqShr, solo ) );
+            continue;
+        }
 
         streams.push_back( ImAcqStream( T, p, owner->imQ[ip], jsIM, ip ) );
 

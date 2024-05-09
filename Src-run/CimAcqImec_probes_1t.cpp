@@ -5,6 +5,7 @@
 #include "Util.h"
 
 #include <QDir>
+#include <QThread>
 
 
 #define STOPCHECK   if( isStopped() ) return false;
@@ -43,7 +44,21 @@ bool CimAcqImec::_1t_openProbe( const CimCfg::ImProbeDat &P )
         return false;
     }
 
-    err = np_init( P.slot, P.port, P.dock );
+    for( int itry = 1; itry <= 10; ++itry ) {
+
+        err = np_init( P.slot, P.port, P.dock );
+
+        if( err == SUCCESS ) {
+            if( itry > 1 ) {
+                Warning() <<
+                QString("Probe %1: init() took %2 tries.")
+                .arg( P.ip ).arg( itry );
+            }
+            break;
+        }
+
+        QThread::msleep( 100 );
+    }
 
     if( err != SUCCESS ) {
         runError(
@@ -367,7 +382,21 @@ bool CimAcqImec::_1t_writeProbe( const CimCfg::ImProbeDat &P )
 {
     NP_ErrorCode    err;
 
-    err = np_writeProbeConfiguration( P.slot, P.port, P.dock, true );
+    for( int itry = 1; itry <= 10; ++itry ) {
+
+        err = np_writeProbeConfiguration( P.slot, P.port, P.dock, true );
+
+        if( err == SUCCESS ) {
+            if( itry > 1 ) {
+                Warning() <<
+                QString("Probe %1: writeConfig() took %2 tries.")
+                .arg( P.ip ).arg( itry );
+            }
+            break;
+        }
+
+        QThread::msleep( 100 );
+    }
 
     if( err != SUCCESS ) {
         runError(

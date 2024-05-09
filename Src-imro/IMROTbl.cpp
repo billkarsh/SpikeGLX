@@ -26,6 +26,7 @@ using namespace Neuropixels;
 
 #include <QFileInfo>
 #include <QSet>
+#include <QThread>
 
 /* ---------------------------------------------------------------- */
 /* IMRO_Site ------------------------------------------------------ */
@@ -663,13 +664,14 @@ int IMROTbl::selectSites( int slot, int port, int dock, bool write ) const
 // Connect all according to table banks
 // ------------------------------------
 
+    NP_ErrorCode    err;
+
     for( int ic = 0, nC = nChan(); ic < nC; ++ic ) {
 
         if( chIsRef( ic ) )
             continue;
 
-        int             shank, bank;
-        NP_ErrorCode    err;
+        int shank, bank;
 
         shank = elShankAndBank( bank, ic );
 
@@ -679,8 +681,24 @@ int IMROTbl::selectSites( int slot, int port, int dock, bool write ) const
             return err;
     }
 
-    if( write )
-        np_writeProbeConfiguration( slot, port, dock, true );
+    if( write ) {
+
+        for( int itry = 1; itry <= 10; ++itry ) {
+
+            err = np_writeProbeConfiguration( slot, port, dock, true );
+
+            if( err == SUCCESS ) {
+                if( itry > 1 ) {
+                    Warning() <<
+                    QString("Probe (slot %1, port %2, dock %3): writeConfig() took %4 tries.")
+                    .arg( slot ).arg( port ).arg( dock).arg( itry );
+                }
+                break;
+            }
+
+            QThread::msleep( 100 );
+        }
+    }
 #endif
 
     return 0;
