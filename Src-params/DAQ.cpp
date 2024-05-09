@@ -197,6 +197,14 @@ int Params::iq2jsip( int &ip, int iq ) const
 }
 
 
+double Params::stream_rate( int iq ) const
+{
+    int ip, js = iq2jsip( ip, iq );
+
+    return stream_rate( js, ip );
+}
+
+
 double Params::stream_rate( int js, int ip ) const
 {
     switch( js ) {

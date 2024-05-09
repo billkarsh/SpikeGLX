@@ -465,6 +465,8 @@ void SVGrafsM_Ni::setLocalFilters( int &rin, int &rout, int iflt )
 //
 void SVGrafsM_Ni::bandSelChanged( int sel )
 {
+    double  srate = p.ni.srate;
+
     fltMtx.lock();
 
     if( hipass ) {
@@ -480,10 +482,10 @@ void SVGrafsM_Ni::bandSelChanged( int sel )
     if( !sel )
         ;
     else if( sel == 1 )
-        hipass = new Biquad( bq_type_highpass, 300/p.ni.srate );
+        hipass = new Biquad( bq_type_highpass, 300/srate );
     else {
-        hipass = new Biquad( bq_type_highpass, 0.1/p.ni.srate );
-        lopass = new Biquad( bq_type_lowpass,  300/p.ni.srate );
+        hipass = new Biquad( bq_type_highpass, 0.1/srate );
+        lopass = new Biquad( bq_type_lowpass,  300/srate );
     }
 
     fltMtx.unlock();
@@ -695,7 +697,7 @@ void SVGrafsM_Ni::myInit()
 
 double SVGrafsM_Ni::mySampRate() const
 {
-    return p.ni.srate;
+    return p.stream_rate( jsNI, 0 );
 }
 
 

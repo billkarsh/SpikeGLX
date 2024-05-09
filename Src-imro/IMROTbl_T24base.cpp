@@ -7,7 +7,7 @@
 /* struct IMRODesc ------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-static char blockMap[4][8] = // 4 shanks X 8 orders
+static char blockMap[4][8] = // 4 shanks X 8 blocks
     {
        {0,6,1,7,2,4,3,5},
        {6,0,7,1,4,2,5,3},
@@ -278,7 +278,7 @@ void IMROTbl_T24base::muxTable( int &nADC, int &nGrp, std::vector<int> &T ) cons
     nADC = 24;
     nGrp = 16;
 
-    T.resize( 384 );
+    T.resize( imType24baseChan );
 
 // Generate by pairs of columns
 
@@ -331,14 +331,11 @@ void IMROTbl_T24base::edit_init() const
 IMRO_GUI IMROTbl_T24base::edit_GUI() const
 {
     IMRO_GUI    G;
-
     if( tip0refID() == 2 )
         G.refs.push_back( "Ground" );
-
     for( int i = 0; i < imType24baseShanks; ++i )
         G.refs.push_back( QString("Tip %1").arg( i ) );
     G.refs.push_back( "Join Tips" );
-
     G.gains.push_back( apGain( 0 ) );
     return G;
 }
@@ -373,10 +370,10 @@ bool IMROTbl_T24base::edit_Attr_canonical() const
     if( ne != imType24baseChan )
         return false;
 
-    const IMRODesc_T24base  &E = e[0];
+    int refid = e[0].refid;
 
     for( int ie = 4; ie < ne; ++ie ) {
-        if( e[ie].refid != E.refid )
+        if( e[ie].refid != refid )
             return false;
     }
 

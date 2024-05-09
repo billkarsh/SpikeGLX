@@ -265,7 +265,7 @@ void CimCfg::ImProbeTable::setCfgSlots( const QVector<CfgSlot> &vCS )
         }
     }
 
-    qSort( probes );
+    std::sort( probes.begin(), probes.end() );
 
     saveProbeTable();
     saveSlotTable();
@@ -323,7 +323,7 @@ void CimCfg::ImProbeTable::getCfgSlots( QVector<CfgSlot> &vCS )
 // Final sort
 // ----------
 
-    qSort( vCS );
+    std::sort( vCS.begin(), vCS.end() );
 }
 
 
@@ -402,7 +402,7 @@ bool CimCfg::ImProbeTable::scanCfgSlots( QVector<CfgSlot> &vCS, QString &msg ) c
 // Final sort
 // ----------
 
-    qSort( vCS );
+    std::sort( vCS.begin(), vCS.end() );
 
     msg = "Bus scan OK";
     return true;
@@ -719,7 +719,7 @@ void CimCfg::ImProbeTable::loadProbeTable()
     for( int i = 0; i < np; ++i )
         probes[i].loadSettings( settings, i );
 
-    qSort( probes );
+    std::sort( probes.begin(), probes.end() );
 }
 
 
@@ -2185,8 +2185,9 @@ guiBreathe();
         // Test for NHP 128-channel analog
         // -------------------------------
 
-        if( QString(hID.ProductNumber) == "NPNH_HS_30" ||
-            QString(hID.ProductNumber) == "NPNH_HS_31" ) {
+        QString prod(hID.ProductNumber);
+
+        if( prod == "NPNH_HS_30" || prod == "NPNH_HS_31" ) {
 
             isHSpsv = true;
 
@@ -2201,7 +2202,7 @@ guiBreathe();
             }
         }
 
-        P.hspn = hID.ProductNumber;
+        P.hspn = prod;
 #else
         P.hspn = "sim";
 #endif

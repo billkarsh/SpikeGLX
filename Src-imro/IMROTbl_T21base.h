@@ -18,9 +18,9 @@ struct IMRODesc_T21base
             rsrv;   // padding
 
     IMRODesc_T21base()
-    :   mbank(1), refid(0)              {}
+    :   mbank(1), refid(0)          {}
     IMRODesc_T21base( int mbank, int refid )
-    :   mbank(mbank), refid(refid)      {}
+    :   mbank(mbank), refid(refid)  {}
     void setElec( int ch )
         {elec = chToEl( ch, mbank );}
     static int lowBank( int mbank );

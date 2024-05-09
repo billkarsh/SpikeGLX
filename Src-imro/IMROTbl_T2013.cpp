@@ -11,8 +11,7 @@
 //
 int IMROTbl_T2013::refTypeAndFields( int &shank, int &bank, int ch ) const
 {
-    const IMRODesc_T24base  &E  = e[ch];
-    int                     rid = E.refid;
+    int rid = e[ch].refid;
 
     bank = 0;
 

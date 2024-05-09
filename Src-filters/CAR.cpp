@@ -227,7 +227,7 @@ void CAR::lcl_init( const GeomMap *map, double id2, double od2, bool bloc_tmp )
             }
         }
 
-        qSort( V );
+        std::sort( V.begin(), V.end() );
     }
 }
 
@@ -317,7 +317,7 @@ void CAR::lcl_init( const ShankMap *map, int id, int od, bool bloc_tmp )
             }
         }
 
-        qSort( V );
+        std::sort( V.begin(), V.end() );
     }
 }
 

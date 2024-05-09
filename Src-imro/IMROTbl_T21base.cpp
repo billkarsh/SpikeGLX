@@ -275,7 +275,7 @@ void IMROTbl_T21base::muxTable( int &nADC, int &nGrp, std::vector<int> &T ) cons
     nADC = 24;
     nGrp = 16;
 
-    T.resize( 384 );
+    T.resize( imType21baseChan );
 
 // Generate by pairs of columns
 
@@ -362,10 +362,8 @@ void IMROTbl_T21base::edit_init() const
 IMRO_GUI IMROTbl_T21base::edit_GUI() const
 {
     IMRO_GUI    G;
-
     if( tip0refID() == 2 )
         G.refs.push_back( "Ground" );
-
     G.refs.push_back( "Tip" );
     G.gains.push_back( apGain( 0 ) );
     G.grid = 16;    // prevents editing fragmentation
@@ -392,10 +390,10 @@ bool IMROTbl_T21base::edit_Attr_canonical() const
     if( ne != imType21baseChan )
         return false;
 
-    const IMRODesc_T21base  &E = e[0];
+    int refid = e[0].refid;
 
     for( int ie = 1; ie < ne; ++ie ) {
-        if( e[ie].refid != E.refid )
+        if( e[ie].refid != refid )
             return false;
     }
 

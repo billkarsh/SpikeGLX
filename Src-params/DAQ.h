@@ -155,6 +155,7 @@ struct Params {
     QString iq2stream( int iq ) const;
     int iq2jsip( int &ip, int iq ) const;
 
+    double stream_rate( int iq ) const;
     double stream_rate( int js, int ip ) const;
     int stream_nChans( int js, int ip ) const;
 

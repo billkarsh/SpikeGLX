@@ -122,14 +122,7 @@ TrigTimed::Counts::Counts( const DAQ::Params &p ) : nq(p.stream_nq())
 
     for( int iq = 0; iq < nq; ++iq ) {
 
-        double  srate;
-        int     ip, js = p.iq2jsip( ip, iq );
-
-        switch( js ) {
-            case jsNI: srate = p.ni.srate; break;
-            case jsOB: srate = p.im.obxj[ip].srate; break;
-            case jsIM: srate = p.im.prbj[ip].srate; break;
-        }
+        double  srate = p.stream_rate( iq );
 
         hiCtMax[iq]     = (p.trgTim.isHInf ? UNSET64 : qint64(hitim * srate));
         loCt[iq]        = p.trgTim.tL * srate;

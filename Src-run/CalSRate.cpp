@@ -838,7 +838,7 @@ void CalSRRun::finish_cleanup()
         for( int is = 0; is < ns; ++is ) {
 
             const CalSRStream   &S    = vIM[is];
-            double              srate = p.im.prbj[S.ip].srate;
+            double              srate = p.stream_rate( jsIM, S.ip );
 
             if( !S.err.isEmpty() ) {
                 msg += QString(
@@ -875,7 +875,7 @@ void CalSRRun::finish_cleanup()
         for( int is = 0; is < ns; ++is ) {
 
             const CalSRStream   &S    = vOB[is];
-            double              srate = p.im.obxj[S.ip].srate;
+            double              srate = p.stream_rate( jsOB, S.ip );
 
             if( !S.err.isEmpty() ) {
                 msg += QString(
@@ -907,6 +907,8 @@ void CalSRRun::finish_cleanup()
 // Nidq
 // ----
 
+    double  srate = p.stream_rate( jsNI, 0 );
+
     if( vNI.size() ) {
 
         CalSRStream &S = vNI[0];
@@ -914,18 +916,18 @@ void CalSRRun::finish_cleanup()
         if( !S.err.isEmpty() ) {
             msg += QString(
             "    NI  %1  :  %2\n" )
-            .arg( p.ni.srate, 0, 'f', 6 )
+            .arg( srate, 0, 'f', 6 )
             .arg( S.err );
         }
         else if( S.av == 0 ) {
             msg += QString(
             "    NI  %1  :  canceled\n" )
-            .arg( p.ni.srate, 0, 'f', 6 );
+            .arg( srate, 0, 'f', 6 );
         }
         else {
             msg += QString(
             "    NI  %1  :  %2 +/- %3\n" )
-            .arg( p.ni.srate, 0, 'f', 6 )
+            .arg( srate, 0, 'f', 6 )
             .arg( S.av, 0, 'f', 6 )
             .arg( S.se, 0, 'f', 6 );
         }
@@ -933,7 +935,7 @@ void CalSRRun::finish_cleanup()
     else {
         msg += QString(
         "    NI  %1  :  <disabled>\n" )
-        .arg( p.ni.srate, 0, 'f', 6 );
+        .arg( srate, 0, 'f', 6 );
     }
 
     msg +=

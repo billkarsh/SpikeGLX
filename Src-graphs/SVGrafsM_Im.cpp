@@ -536,6 +536,8 @@ void SVGrafsM_Im::setLocalFilters( int &rin, int &rout, int iflt )
 //
 void SVGrafsM_Im::bandSelChanged( int sel )
 {
+    double  srate = p.stream_rate( jsIM, ip );
+
     fltMtx.lock();
 
     if( hipass ) {
@@ -549,10 +551,10 @@ void SVGrafsM_Im::bandSelChanged( int sel )
     }
 
     if( sel == 1 )
-        hipass = new Biquad( bq_type_highpass, 300/p.im.prbj[ip].srate );
+        hipass = new Biquad( bq_type_highpass, 300/srate );
     else if( sel == 2 ) {
-        hipass = new Biquad( bq_type_highpass, 0.5/p.im.prbj[ip].srate );
-        lopass = new Biquad( bq_type_lowpass,  500/p.im.prbj[ip].srate );
+        hipass = new Biquad( bq_type_highpass, 0.5/srate );
+        lopass = new Biquad( bq_type_lowpass,  500/srate );
     }
 
     fltMtx.unlock();
@@ -846,7 +848,7 @@ void SVGrafsM_Im::myInit()
 
 double SVGrafsM_Im::mySampRate() const
 {
-    return p.im.prbj[ip].srate;
+    return p.stream_rate( jsIM, ip );
 }
 
 

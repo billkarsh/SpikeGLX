@@ -18,12 +18,12 @@ HEADERS += \
     $$PWD/IMROTbl_T1123.h \
     $$PWD/IMROTbl_T1200.h \
     $$PWD/IMROTbl_T1300.h \
+    $$PWD/IMROTbl_T2003.h \
+    $$PWD/IMROTbl_T2013.h \
     $$PWD/IMROTbl_T21.h \
     $$PWD/IMROTbl_T21base.h \
     $$PWD/IMROTbl_T24.h \
     $$PWD/IMROTbl_T24base.h \
-    $$PWD/IMROTbl_T2003.h \
-    $$PWD/IMROTbl_T2013.h \
     $$PWD/IMROTbl_T3A.h
 
 SOURCES += \
@@ -41,12 +41,12 @@ SOURCES += \
     $$PWD/IMROTbl_T1122.cpp \
     $$PWD/IMROTbl_T1123.cpp \
     $$PWD/IMROTbl_T1200.cpp \
+    $$PWD/IMROTbl_T2003.cpp \
+    $$PWD/IMROTbl_T2013.cpp \
     $$PWD/IMROTbl_T21.cpp \
     $$PWD/IMROTbl_T21base.cpp \
     $$PWD/IMROTbl_T24.cpp \
     $$PWD/IMROTbl_T24base.cpp \
-    $$PWD/IMROTbl_T2003.cpp \
-    $$PWD/IMROTbl_T2013.cpp \
     $$PWD/IMROTbl_T3A.cpp
 
 

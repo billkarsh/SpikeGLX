@@ -18,8 +18,7 @@ static int refs[4] = {127,511,895,1279};
 //
 int IMROTbl_T24::refTypeAndFields( int &shank, int &bank, int ch ) const
 {
-    const IMRODesc_T24base  &E  = e[ch];
-    int                     rid = E.refid;
+    int rid = e[ch].refid;
 
     if( rid == 0 ) {
         shank   = 0;

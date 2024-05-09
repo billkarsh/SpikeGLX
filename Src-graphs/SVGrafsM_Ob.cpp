@@ -68,7 +68,7 @@ SVGrafsM_Ob::SVGrafsM_Ob(
 
 void SVGrafsM_Ob::putSamps( vec_i16 &data, quint64 headCt )
 {
-    const CimCfg::ObxEach   &E = p.im.obxj[ip];
+    double  srate = p.stream_rate( jsOB, ip );
 
 #if 0
     double  tProf = getTime();
@@ -187,7 +187,7 @@ void SVGrafsM_Ob::putSamps( vec_i16 &data, quint64 headCt )
     theX->spanMtx.lock();
 
     double  span        = theX->spanSecs(),
-            TabsCursor  = (headCt + ntpts) / E.srate,
+            TabsCursor  = (headCt + ntpts) / srate,
             TwinCursor  = span * theX->Y[0]->yval.cursor()
                             / theX->Y[0]->yval.capacity();
 
@@ -452,7 +452,7 @@ void SVGrafsM_Ob::myInit()
 
 double SVGrafsM_Ob::mySampRate() const
 {
-    return p.im.obxj[ip].srate;
+    return p.stream_rate( jsOB, ip );
 }
 
 
