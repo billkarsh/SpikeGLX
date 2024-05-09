@@ -239,10 +239,19 @@ void GeomMap::fromString( const QString &s_in )
                         QRegExp("^\\s+|\\s*,\\s*"),
                         QString::SkipEmptyParts );
 
-    pn = hl[0];
-    ns = hl[1].toInt();
-    ds = hl[2].toFloat();
-    wd = hl[3].toFloat();
+    if( hl.size() == 4 ) {
+        pn = hl[0];
+        ns = hl[1].toInt();
+        ds = hl[2].toFloat();
+        wd = hl[3].toFloat();
+    }
+    else {
+        // originally, without ds field
+        pn = hl[0];
+        ns = hl[1].toInt();
+        ds = 250.0f;
+        wd = hl[2].toFloat();
+    }
 
 // Entries
 
