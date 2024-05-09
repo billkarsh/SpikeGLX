@@ -786,12 +786,12 @@ int IMROTbl::selectAPFlts( int slot, int port, int dock ) const
 void IMROTbl::edit_defaultROI( int *nBoxes, tImroROIs vR ) const
 {
     vR.clear();
-    vR.push_back( IMRO_ROI( 0, 0, nChanPerBank() / _ncolhwr ) );
+    vR.push_back( IMRO_ROI( 0, 0, nAP() / _ncolhwr ) );
     nBoxes[0] = 1;
 }
 
 
-// - Box count: {1,2,4,...,IMRO_ROI_MAX}.
+// - Box count: {bxMin,x2,x4,...,IMRO_ROI_MAX}.
 // - Boxes span shanks.
 // - Boxes enclose all AP channels.
 // - Canonical attributes all channels.
@@ -800,11 +800,11 @@ bool IMROTbl::edit_isCanonical( int *nBoxes, tImroROIs vR ) const
 {
 // Calculate Boxes menu entries
 
-    QSet<int>   boxesMenu = {1};
+    QSet<int>   boxesMenu;
     IMRO_GUI    G = edit_GUI();
-    int         rows_per_box = nChanPerBank() / _ncolvis;
+    int         rows_per_box = nAP() / _ncolvis;
 
-    for( int nb = 2; nb <= IMRO_ROI_MAX; nb *= 2 ) {
+    for( int nb = G.bxMin; nb <= IMRO_ROI_MAX; nb *= 2 ) {
 
         if( (rows_per_box / nb) % G.grid == 0 )
             boxesMenu.insert( nb );
@@ -895,7 +895,7 @@ void IMROTbl::edit_tbl2ROI( int *nBoxes, tImroROIs vR ) const
 
     ShankMap    M;
     toShankMap_hwr( M );
-    qSort( M.e );   // s->r->c
+    std::sort( M.e.begin(), M.e.end() );    // s->r->c
 
     for( int ie = 0, ne = M.e.size(); ie < ne; ) {
 
@@ -1002,7 +1002,7 @@ void IMROTbl::edit_exclude( tImroSites vX, tconstImroROIs vR ) const
         }
     }
 
-    qSort( vX );
+    std::sort( vX.begin(), vX.end() );
 }
 
 

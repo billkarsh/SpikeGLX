@@ -28,13 +28,12 @@ private:
     IMROTbl                 *R0,
                             *Rfile,
                             *R;
+    IMRO_GUI                G;
     std::vector<IMRO_Site>  vX;
     std::vector<IMRO_ROI>   vR;
     QString                 filename,
                             lastDir;
-    int                     nBase,
-                            grid,
-                            nBoxes[4];
+    int                     nBoxes[4];
     bool                    canEdit;
 
 public:
@@ -79,7 +78,7 @@ private:
     void initItems();
     void initClearMenu();
     void initBoxes();
-    void enableItems( bool enabled, bool onebox = false );
+    void enableItems( bool enabled, bool bxMin = false );
     void clearShank( int s );
     int boxRows( int s );
     int boxesOnShank( int s );

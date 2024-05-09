@@ -41,12 +41,13 @@ struct IMRO_GUI {
     std::vector<QString>    refs;
     std::vector<int>        gains;
     int                     grid;
-    qint8                   nBase;
+    qint8                   nBase,
+                            bxMin;
     bool                    apEnab,
                             lfEnab,
                             hpEnab;
     IMRO_GUI()
-        :   grid(1), nBase(1),
+        :   grid(1), nBase(1), bxMin(1),
             apEnab(false), lfEnab(false), hpEnab(false) {}
 };
 
