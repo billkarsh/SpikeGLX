@@ -142,7 +142,8 @@ void Heatmap::apFilter( vec_i16 &odata, const vec_i16 &idata, quint64 headCt )
         }
 
         if( 1 != Qf->getNSampsFromCt( odata, headCt, ntpts ) ) {
-            Warning() << "ShankView filtered stream lagging.";
+            Warning() <<
+            "ShankView filtered IM stream lagging; try longer stream length.";
             goto use_raw;
         }
 
