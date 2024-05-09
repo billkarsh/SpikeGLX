@@ -20,7 +20,7 @@ bool KVParams::parseOneLine( QString &line )
 // ChanMap strings might include them, so exception is
 // made for anything called 'map'.
 
-    QRegExp comment("(\\[|;|#|//).*");
+    QRegExp comment("(\\[|\\s+;|^;|\\s+#|^#|\\s+//|^//).*");
 
     if( !line.contains( "file", Qt::CaseInsensitive )
         && !line.contains( "notes", Qt::CaseInsensitive )
