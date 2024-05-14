@@ -200,6 +200,7 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imStdby"]          = E.stdbyStr;
     kvp["imSvyMaxBnk"]      = E.svyMaxBnk;
     kvp["imLEDEnable"]      = E.LEDEnable;
+    kvp["imSvyNShanks"]     = E.roTbl->nSvyShank();
     kvp["imAiRangeMin"]     = -E.roTbl->maxVolts();
     kvp["imAiRangeMax"]     = E.roTbl->maxVolts();
     kvp["imMaxInt"]         = E.roTbl->maxInt();
@@ -218,6 +219,7 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imDatHs_pn"]       = P.hspn;
     kvp["imDatHs_sn"]       = P.hssn;
     kvp["imDatHs_hw"]       = P.hshw;
+    kvp["imDatHs_fw"]       = P.hsfw;
     kvp["imDatFx_pn"]       = P.fxpn;
     kvp["imDatFx_sn"]       = P.fxsn;
     kvp["imDatFx_hw"]       = P.fxhw;

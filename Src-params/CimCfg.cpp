@@ -52,8 +52,11 @@ bool CimCfg::ImProbeDat::setProbeType()
 
 int CimCfg::ImProbeDat::nHSDocks() const
 {
-    if( type == 21 || type == 24 || type == 2003 || type == 2013 )
+    if( type == 21 || type == 2003 ||
+        type == 24 || type == 2013 || type == 2020 ) {
+
         return 2;
+    }
 
     return 1;
 }
@@ -1959,8 +1962,8 @@ guiBreathe();
         }
 
 #if 0
-//@OBX May be fixed in 3.62
-        //@OBX part number fudge
+//@OBX367 May be fixed in 3.62
+        //@OBX367 part number fudge
         hID.ProductNumber[HARDWAREID_PN_LEN-1] = 0;
         if( strlen( hID.ProductNumber ) >= 40 )
             strcpy( hID.ProductNumber, "NP2_QBSC_01" );
@@ -2058,6 +2061,7 @@ guiBreathe();
     // Required firmware?
     // ------------------
 
+#ifdef HAVE_IMEC
     if( bs_bsc.size() ) {
 
         slVers.append("");
@@ -2069,6 +2073,7 @@ guiBreathe();
         slVers.append("(3) Required files are in the download package 'Firmware' folder.");
         return false;
     }
+#endif
 
     return true;
 }
@@ -2260,6 +2265,16 @@ guiBreathe();
         slVers.append(
             QString("HS(slot %1, port %2) hardware version %3")
             .arg( P.slot ).arg( P.port ).arg( P.hshw ) );
+
+        // ----
+        // HSFW
+        // ----
+        
+        P.hsfw = "0.0.0";
+
+        slVers.append(
+            QString("HS(slot %1, port %2) firmware version %3")
+            .arg( P.slot ).arg( P.port ).arg( P.hsfw ) );
 
         // ----
         // FXPN
@@ -2510,6 +2525,12 @@ bool CimCfg::detect_simProbe(
     P.hspn = kvp["imDatHs_pn"].toString();
     P.hssn = kvp["imDatHs_sn"].toULongLong();
     P.hshw = kvp["imDatHs_hw"].toString();
+
+    if( kvp.find( "imDatHs_fw" ) != kvp.end() )
+        P.hsfw = kvp["imDatHs_fw"].toString();
+    else
+        P.hsfw = "0.0.0";
+
     P.fxpn = kvp["imDatFx_pn"].toString();
     P.fxsn = kvp["imDatFx_sn"].toString();
     P.fxhw = kvp["imDatFx_hw"].toString();
@@ -2532,6 +2553,9 @@ bool CimCfg::detect_simProbe(
     slVers.append(
         QString("HS(slot %1, port %2) hardware version %3")
         .arg( P.slot ).arg( P.port ).arg( P.hshw ) );
+    slVers.append(
+        QString("HS(slot %1, port %2) firmware version %3")
+        .arg( P.slot ).arg( P.port ).arg( P.hsfw ) );
     slVers.append(
         QString("FX(slot %1, port %2, dock %3) part number %4")
         .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( P.fxpn ) );

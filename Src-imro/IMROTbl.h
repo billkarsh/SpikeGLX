@@ -98,6 +98,7 @@ public:
     virtual void copyFrom( const IMROTbl *rhs ) = 0;
     virtual void fillDefault() = 0;
     virtual void fillShankAndBank( int shank, int bank ) = 0;
+    virtual int svy_minRow( int shank, int bank ) const;
 
     virtual int nElec() const = 0;
     virtual int nShank() const = 0;
@@ -113,6 +114,7 @@ public:
     virtual int nLF() const = 0;
     virtual int nSY() const             {return 1;}
     virtual int nBanks() const = 0;
+    virtual int nSvyBanks() const       {return nBanks();}
     virtual int nChanPerBank() const    {return nAP();}
     virtual int nRefs() const = 0;
     virtual int maxInt() const = 0;

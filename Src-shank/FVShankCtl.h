@@ -37,7 +37,7 @@ public slots:
     void lbutClicked( int ig );
 
 protected:
-    void parInit( const ShankMap *map, int bnkRws = 0 );
+    void parInit( const ShankMap *map );
     virtual void closeEvent( QCloseEvent *e );
 
     virtual QString screenStateName() const = 0;

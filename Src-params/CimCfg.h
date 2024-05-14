@@ -99,6 +99,7 @@ public:
                     port;       // ini
         QString     hspn,       // detect
                     hshw,       // detect
+                    hsfw,       // detect
                     fxpn,       // detect
                     fxsn,       // detect
                     fxhw,       // detect
@@ -122,6 +123,7 @@ public:
             {
                 hspn.clear();
                 hshw.clear();
+                hsfw.clear();
                 fxpn.clear();
                 fxsn.clear();
                 fxhw.clear();

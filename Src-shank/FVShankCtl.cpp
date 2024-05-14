@@ -40,10 +40,8 @@ void FVShankCtl::lbutClicked( int ig )
 /* Protected ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-void FVShankCtl::parInit( const ShankMap *map, int bnkRws )
+void FVShankCtl::parInit( const ShankMap *map )
 {
-    Q_UNUSED( bnkRws )
-
     baseInit( df->imro(), true );
 
     ConnectUI( view(), SIGNAL(cursorOver(int,bool)), this, SLOT(cursorOver(int)) );

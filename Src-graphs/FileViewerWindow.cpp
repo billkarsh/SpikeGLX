@@ -875,10 +875,7 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
                     is = 0,
                     ib = 0,
                     nC = R->nAP(),
-                    // nBK = number of full banks
-                    // nRW = number of rows in full banks
-                    nBK = R->nElecPerShank() / R->nChanPerBank(),
-                    nRW = nBK * R->nChanPerBank() / R->nCol_hwr();
+                    R0;
 
     heat.setStream( df );
     heat.updateMap( m );
@@ -905,11 +902,13 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
             for( int i = 0; i < nC; ++i )
                 d[i] /= fn;
 
-            if( ib < nBK )
+            R0 = R->svy_minRow( is, ib );
+
+            if( R0 < 0 )
                 S->insert( S->end(), D.begin(), D.end() );
             else {
                 for( int ic = 0; ic < nC; ++ic ) {
-                    if( m->e[ic].r >= nRW )
+                    if( m->e[ic].r >= R0 )
                         S->push_back( d[ic] );
                 }
             }
@@ -971,11 +970,13 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
     for( int i = 0; i < nC; ++i )
         d[i] /= fn;
 
-    if( ib < nBK )
+    R0 = R->svy_minRow( is, ib );
+
+    if( R0 < 0 )
         S->insert( S->end(), D.begin(), D.end() );
     else {
         for( int ic = 0; ic < nC; ++ic ) {
-            if( m->e[ic].r >= nRW )
+            if( m->e[ic].r >= R0 )
                 S->push_back( d[ic] );
         }
     }

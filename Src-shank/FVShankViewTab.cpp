@@ -439,10 +439,7 @@ void FVShankViewTab::makeWorldMap()
                         ns = R->nSvyShank(),
                         nb = 1 + f->svyMaxbank(),
                         ng = 0,
-                        // nBK = number of full banks
-                        // nRW = number of rows in full banks
-                        nBK = R->nElecPerShank() / R->nChanPerBank(),
-                        nRW = nBK * R->nChanPerBank() / R->nCol_hwr();
+                        R0;
 
     Q->fillDefault();
 
@@ -454,15 +451,16 @@ void FVShankViewTab::makeWorldMap()
 
             Q->fillShankAndBank( is, ib );
             Q->toShankMap_vis( *m );
+            R0 = Q->svy_minRow( is, ib );
 
-            if( ib < nBK ) {
+            if( R0 < 0 ) {
                 MW->e.insert( MW->e.end(), m->e.begin(), m->e.end() );
                 for( int ic = 0; ic < nC; ++ic )
                     w_ig2sbg[ng++] = SBG( is, ib, ic );
             }
             else {
                 for( int ic = 0; ic < nC; ++ic ) {
-                    if( m->e[ic].r >= nRW ) {
+                    if( m->e[ic].r >= R0 ) {
                         MW->e.push_back( m->e[ic] );
                         w_ig2sbg[ng++] = SBG( is, ib, ic );
                     }

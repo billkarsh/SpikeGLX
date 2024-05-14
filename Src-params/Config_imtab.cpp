@@ -874,7 +874,7 @@ void Config_imtab::toTbl( int ip )
 
     if( imTabUI->svyChk->isChecked() ) {
 
-        int maxb    = E.roTbl->nBanks() - 1,
+        int maxb    = E.roTbl->nSvyBanks() - 1,
             v       = E.svyMaxBnk;
 
         if( v < 0 || v > maxb )
@@ -941,7 +941,7 @@ void Config_imtab::fromTbl( int ip )
 
     if( imTabUI->svyChk->isChecked() ) {
 
-        int     maxb = E.roTbl->nBanks() - 1,
+        int     maxb = E.roTbl->nSvyBanks() - 1,
                 v;
         bool    ok;
 

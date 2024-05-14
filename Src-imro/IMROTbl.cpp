@@ -441,6 +441,22 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
 }
 
 
+// Return min row to graft into world-map, or,
+// return -1 to keep all.
+//
+int IMROTbl::svy_minRow( int shank, int bank ) const
+{
+    Q_UNUSED( shank )
+
+    int nFullBanks = nElecPerShank() / nChanPerBank();
+
+    if( bank > nFullBanks - 1 )
+        return nFullBanks * nChanPerBank() / nCol_hwr();
+
+    return -1;
+}
+
+
 bool IMROTbl::loadFile( QString &msg, const QString &path )
 {
     QFile       f( path );

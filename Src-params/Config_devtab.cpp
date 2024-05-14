@@ -340,6 +340,10 @@ void Config_devtab::imWriteCurrent()
                 .arg( P.slot ).arg( P.port ).arg( P.hshw ) );
 
             imWrite(
+                QString("HS(slot %1, port %2) firmware version %3")
+                .arg( P.slot ).arg( P.port ).arg( P.hsfw ) );
+
+            imWrite(
                 QString("FX(slot %1, port %2, dock %3) part number %4")
                 .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( P.fxpn ) );
 

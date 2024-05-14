@@ -843,6 +843,12 @@ imSvyMaxBnk=2
 The highest bank index to survey.
 
 ```
+imSvyNShanks=4
+```
+
+The count of shanks to survey.
+
+```
 imTipLength=206
 ```
 
