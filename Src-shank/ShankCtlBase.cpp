@@ -45,8 +45,8 @@ void ShankCtlBase::baseInit( const IMROTbl *R, bool hasViewTab )
 {
     scUI = new Ui::ShankWindow;
     scUI->setupUi( this );
-    ConnectUI( view(), SIGNAL(gridHover(int,int,int)), this, SLOT(gridHover(int,int,int)) );
-    ConnectUI( view(), SIGNAL(gridClicked(int,int,int)), this, SLOT(gridClicked(int,int,int)) );
+    ConnectUI( view(), SIGNAL(gridHover(int,int)), this, SLOT(gridHover(int,int)) );
+    ConnectUI( view(), SIGNAL(gridClicked(int,int,bool)), this, SLOT(gridClicked(int,int,bool)) );
 
     if( R )
         view()->setImro( R );
@@ -162,21 +162,17 @@ void ShankCtlBase::update()
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void ShankCtlBase::gridHover( int s, int c, int r )
+void ShankCtlBase::gridHover( int s, int r )
 {
-    Q_UNUSED( c )
-
     if( !scUI->tabsW->currentIndex() )
         seTab->gridHover( s, r );
 }
 
 
-void ShankCtlBase::gridClicked( int s, int c, int r )
+void ShankCtlBase::gridClicked( int s, int r, bool shift )
 {
-    Q_UNUSED( c )
-
     if( !scUI->tabsW->currentIndex() )
-        seTab->gridClicked( s, r );
+        seTab->gridClicked( s, r, shift );
 }
 
 /* ---------------------------------------------------------------- */

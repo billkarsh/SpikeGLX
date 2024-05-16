@@ -276,12 +276,12 @@ void ShankView::mouseMoveEvent( QMouseEvent *evt )
             return;
         }
 
-        emit( gridHover( s, c, r ) );
+        emit( gridHover( s, r ) );
         return;
     }
 
     emit( cursorOver( -1, false ) );
-    emit( gridHover( -1, -1, -1 ) );
+    emit( gridHover( -1, -1 ) );
 }
 
 
@@ -295,10 +295,12 @@ void ShankView::mousePressEvent( QMouseEvent *evt )
 
         it = ISM.find( ShankMapDesc( s, c, r, 1 ) );
 
-        if( it != ISM.end() )
-            emit( lbutClicked( it.value(), evt->modifiers() & Qt::SHIFT ) );
+        bool shift = evt->modifiers() & Qt::SHIFT;
 
-        emit( gridClicked( s, c, r ) );
+        if( it != ISM.end() )
+            emit( lbutClicked( it.value(), shift ) );
+
+        emit( gridClicked( s, r, shift ) );
     }
 }
 

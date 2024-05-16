@@ -8,12 +8,9 @@
 
 #include <QFileDialog>
 #include <QFileInfo>
-#include <QMessageBox>
 #include <QMenu>
 #include <QSettings>
 #include <QThread>
-
-#define NBOXES  (nBoxes[0] + nBoxes[1] + nBoxes[2] + nBoxes[3])
 
 
 /* ---------------------------------------------------------------- */
@@ -44,10 +41,6 @@ ShankEditTab::ShankEditTab(
     ConnectUI( seTabUI->loadBut, SIGNAL(clicked()), this, SLOT(loadBut()) );
     ConnectUI( seTabUI->defBut, SIGNAL(clicked()), this, SLOT(defBut()) );
     ConnectUI( seTabUI->clearBut, SIGNAL(clicked()), this, SLOT(clearAll()) );
-    ConnectUI( seTabUI->bx0CB, SIGNAL(currentIndexChanged(int)), this, SLOT(bx0CBChanged()) );
-    ConnectUI( seTabUI->bx1CB, SIGNAL(currentIndexChanged(int)), this, SLOT(bx1CBChanged()) );
-    ConnectUI( seTabUI->bx2CB, SIGNAL(currentIndexChanged(int)), this, SLOT(bx2CBChanged()) );
-    ConnectUI( seTabUI->bx3CB, SIGNAL(currentIndexChanged(int)), this, SLOT(bx3CBChanged()) );
     ConnectUI( seTabUI->saveBut, SIGNAL(clicked()), this, SLOT(saveBut()) );
     ConnectUI( seTabUI->helpBut, SIGNAL(clicked()), this, SLOT(helpBut()) );
     ConnectUI( seTabUI->okBut, SIGNAL(clicked()), this, SLOT(okBut()) );
@@ -130,7 +123,7 @@ void ShankEditTab::gridHover( int s, int r )
 }
 
 
-void ShankEditTab::gridClicked( int s, int r )
+void ShankEditTab::gridClicked( int s, int r, bool shift )
 {
     if( !canEdit ) {
         beep( "Non-standard IMRO; can not be edited" );
@@ -139,78 +132,99 @@ void ShankEditTab::gridClicked( int s, int r )
 
     int nb = vR.size();
 
-// Toggle off
+// Clear if shift
 
-    for( int ib = 0; ib < nb; ++ib ) {
+    if( shift ) {
 
-        IMRO_ROI    &B = vR[ib];
+        for( int ib = 0; ib < nb; ++ib ) {
 
-        if( s == B.s && r >= B.r0 && r < B.rLim ) {
+            IMRO_ROI    &B = vR[ib];
 
-            vR.erase( vR.begin() + ib );
-            R->edit_exclude( vX, vR );
-            color();
-            return;
+            if( s == B.s && r >= B.r0 && r < B.rLim ) {
+
+                vR.erase( vR.begin() + ib );
+                R->edit_exclude( vX, vR );
+                updateSums( s );
+                getSelObj( s )->setText( "" );
+                color();
+                SC->setStatus( "" );
+                return;
+            }
         }
+        return;
     }
 
 // Full?
 
     if( G.nBase == 1 ) {
-        if( nb >= nBoxes[0] ) {
-            beep( "Already enough boxes" );
+        if( getSum( 0 ) >= getRqd( 0 ) ) {
+            beep( "All channels set" );
             return;
         }
     }
     else {
-        if( boxesOnShank( s ) >= nBoxes[s] ) {
-            beep( "Already enough boxes on shank" );
+        if( getSum( s ) >= getRqd( s ) ) {
+            beep( "All channels on shank set" );
             return;
         }
     }
 
 // Only one possible?
 
-    if( R->nRow() == G.grid ) {
+    if( R->nBanks() == 1 ) {
         vX.clear();
-        R->edit_defaultROI( nBoxes, vR );
+        R->edit_defaultROI( vR );
+        enableItems( true );
         color();
+        SC->setStatus( "Probe requires default pattern" );
         return;
     }
 
+// Where is the click?
+
+    int gap0, gapLim, code = where( gap0, gapLim, s, r );
+
 // Forbidden?
 
-    if( forbidden( s, r ) ) {
+    if( code < 0 ) {
         beep( "Forbidden" );
         return;
     }
 
-// Place
+// Place into gap?
 
-    IMRO_ROI    C;
-    clickHere( C, s, r );
-
-// Shift?
-
-    if( G.nBase == 1 ) {
-        if( nBoxes[0] > 1 && !fitIntoGap( C ) )
-            return;
-    }
-    else {
-        if( nBoxes[s] > 1 && !fitIntoGap( C ) )
-            return;
+    if( code == 0 ) {
+        IMRO_ROI    C;
+        clickHere( C, gap0, gapLim, s, r );
+        vR.push_back( C );
+        getSelObj( s )->
+        setText( QString("%1").arg( (C.rLim - C.r0)*R->nCol_hwr() ) );
     }
 
-// Add
+// Selected?
 
-    vR.push_back( C );
+    if( code == 1 || code == 2 ) {
 
-    if( vR.size() >= NBOXES )
+        int ib = selected( gap0, gapLim, code, s );
+
+        if( ib >= 0 ) {
+            const IMRO_ROI  &B = vR[ib];
+            getSelObj( s )->
+            setText( QString("%1").arg( (B.rLim - B.r0)*R->nCol_hwr() ) );
+        }
+    }
+
+// Update
+
+    updateSums( s );
+
+    if( isDone() )
         vX.clear();
     else
         R->edit_exclude( vX, vR );
 
     color();
+    SC->setStatus( "" );
 }
 
 
@@ -267,9 +281,9 @@ void ShankEditTab::loadBut()
 void ShankEditTab::defBut()
 {
     vX.clear();
-    R->edit_defaultROI( nBoxes, vR );
+    R->edit_defaultROI( vR );
 
-    enableItems( true, true );
+    enableItems( true );
 
     IMRO_Attr   A = R->edit_Attr_def();
     seTabUI->rfCB->setCurrentIndex( A.refIdx );
@@ -284,7 +298,7 @@ void ShankEditTab::clearAll()
 {
     vX.clear();
     vR.clear();
-    enableItems( true );
+    enableItems( true, true );
     color();
 }
 
@@ -310,30 +324,6 @@ void ShankEditTab::clearShank2()
 void ShankEditTab::clearShank3()
 {
     clearShank( 3 );
-}
-
-
-void ShankEditTab::bx0CBChanged()
-{
-    bxCBChanged( 0 );
-}
-
-
-void ShankEditTab::bx1CBChanged()
-{
-    bxCBChanged( 1 );
-}
-
-
-void ShankEditTab::bx2CBChanged()
-{
-    bxCBChanged( 2 );
-}
-
-
-void ShankEditTab::bx3CBChanged()
-{
-    bxCBChanged( 3 );
 }
 
 
@@ -494,7 +484,7 @@ void ShankEditTab::initItems()
     seTabUI->lfCB->setEnabled( G.lfEnab );
     seTabUI->hpCB->setEnabled( G.hpEnab );
 
-    enableItems( true, true );
+    enableItems( true );
 }
 
 
@@ -535,86 +525,64 @@ void ShankEditTab::initClearMenu()
 
 void ShankEditTab::initBoxes()
 {
+    QString s;
+    int     cpb = R->nChanPerBank();
+
+    seTabUI->rowsSB->setMinimum( 1 );
+    seTabUI->rowsSB->setMaximum( cpb / R->nCol_hwr() );
+    seTabUI->rowsSB->setValue( cpb / R->nCol_hwr() );
+
     if( G.nBase == 1 ) {
-        nBoxes[0] = G.bxMin;
-        nBoxes[1] = 0;
-        nBoxes[2] = 0;
-        nBoxes[3] = 0;
-        seTabUI->bxGB->setTitle( "Boxes (whole probe)" );
-        seTabUI->bx1CB->hide();
-        seTabUI->bx2CB->hide();
-        seTabUI->bx3CB->hide();
+        seTabUI->rqd0->setText( QString("%1").arg( R->nAP() ) );
+        seTabUI->sel1->hide();
+        seTabUI->sel2->hide();
+        seTabUI->sel3->hide();
+        seTabUI->sum1->hide();
+        seTabUI->sum2->hide();
+        seTabUI->sum3->hide();
+        seTabUI->rqd1->hide();
+        seTabUI->rqd2->hide();
+        seTabUI->rqd3->hide();
     }
     else {
-        for( int is = 0; is < 4; ++is )
-            nBoxes[is] = G.bxMin;
-    }
-
-    for( int nb = G.bxMin, bxrows = boxRows( 0 ); nb <= IMRO_ROI_MAX; nb *= 2 ) {
-
-        if( (bxrows / nb) % G.grid == 0 ) {
-
-            QString s = QString("%1").arg( nb );
-
-            seTabUI->bx0CB->addItem( s );
-            if( G.nBase == 4 ) {
-                seTabUI->bx1CB->addItem( s );
-                seTabUI->bx2CB->addItem( s );
-                seTabUI->bx3CB->addItem( s );
-            }
-        }
-        else
-            break;
+        s = QString("%1").arg( cpb );
+        seTabUI->rqd0->setText( s );
+        seTabUI->rqd1->setText( s );
+        seTabUI->rqd2->setText( s );
+        seTabUI->rqd3->setText( s );
     }
 }
 
 
-void ShankEditTab::enableItems( bool enabled, bool bxMin )
+void ShankEditTab::enableItems( bool enabled, bool clear )
 {
-    SignalBlocker   b0(seTabUI->bx0CB),
-                    b1(seTabUI->bx1CB),
-                    b2(seTabUI->bx2CB),
-                    b3(seTabUI->bx3CB);
-
     canEdit = enabled;
+
+    SC->setStatus( "" );
+
+    seTabUI->sel0->setText( "" );
+    seTabUI->sel1->setText( "" );
+    seTabUI->sel2->setText( "" );
+    seTabUI->sel3->setText( "" );
+
+    if( !enabled || !clear ) {
+        seTabUI->sum0->setText( seTabUI->rqd0->text() );
+        seTabUI->sum1->setText( seTabUI->rqd1->text() );
+        seTabUI->sum2->setText( seTabUI->rqd2->text() );
+        seTabUI->sum3->setText( seTabUI->rqd3->text() );
+    }
+    else {
+        seTabUI->sum0->setText( "0" );
+        seTabUI->sum1->setText( "0" );
+        seTabUI->sum2->setText( "0" );
+        seTabUI->sum3->setText( "0" );
+    }
 
     if( enabled ) {
 
         if( G.nBase == 4 ) {
-            seTabUI->clearBut->setText( "Clear Boxes" );
+            seTabUI->clearBut->setText( "Clear" );
             seTabUI->clearBut->setMenu( mClear );
-        }
-
-        if( bxMin )
-            nBoxes[0] = G.bxMin;
-
-        seTabUI->bx0CB->setEditable( false );
-        seTabUI->bx0CB->setEnabled( true );
-        seTabUI->bx0CB->setCurrentIndex(
-            seTabUI->bx0CB->findText( QString("%1").arg( nBoxes[0] ) ) );
-
-        if( G.nBase == 4 ) {
-
-            if( bxMin ) {
-                nBoxes[1] = G.bxMin;
-                nBoxes[2] = G.bxMin;
-                nBoxes[3] = G.bxMin;
-            }
-
-            seTabUI->bx1CB->setEditable( false );
-            seTabUI->bx1CB->setEnabled( true );
-            seTabUI->bx1CB->setCurrentIndex(
-                seTabUI->bx1CB->findText( QString("%1").arg( nBoxes[1] ) ) );
-
-            seTabUI->bx2CB->setEditable( false );
-            seTabUI->bx2CB->setEnabled( true );
-            seTabUI->bx2CB->setCurrentIndex(
-                seTabUI->bx2CB->findText( QString("%1").arg( nBoxes[2] ) ) );
-
-            seTabUI->bx3CB->setEditable( false );
-            seTabUI->bx3CB->setEnabled( true );
-            seTabUI->bx3CB->setCurrentIndex(
-                seTabUI->bx3CB->findText( QString("%1").arg( nBoxes[3] ) ) );
         }
 
         seTabUI->rfCB->setEnabled( true );
@@ -624,26 +592,8 @@ void ShankEditTab::enableItems( bool enabled, bool bxMin )
     }
     else {
         if( G.nBase == 4 ) {
-            seTabUI->clearBut->setText( "Clear All Boxes" );
+            seTabUI->clearBut->setText( "Clear All" );
             seTabUI->clearBut->setMenu( 0 );
-        }
-
-        seTabUI->bx0CB->setEditable( true );
-        seTabUI->bx0CB->setCurrentText( "NA" );
-        seTabUI->bx0CB->setEnabled( false );
-
-        if( G.nBase == 4 ) {
-            seTabUI->bx1CB->setEditable( true );
-            seTabUI->bx1CB->setCurrentText( "NA" );
-            seTabUI->bx1CB->setEnabled( false );
-
-            seTabUI->bx2CB->setEditable( true );
-            seTabUI->bx2CB->setCurrentText( "NA" );
-            seTabUI->bx2CB->setEnabled( false );
-
-            seTabUI->bx3CB->setEditable( true );
-            seTabUI->bx3CB->setCurrentText( "NA" );
-            seTabUI->bx3CB->setEnabled( false );
         }
 
         seTabUI->rfCB->setEnabled( false );
@@ -663,127 +613,17 @@ void ShankEditTab::clearShank( int s )
     }
 
     R->edit_exclude( vX, vR );
-    color();
-}
-
-
-int ShankEditTab::boxRows( int s )
-{
-    int bxrows = R->nAP() / (G.nBase * R->nCol_hwr());
-
-    switch( nBoxes[G.nBase == 4 ? s : 0] ) {
-        case 64: bxrows /= 2;
-        case 32: bxrows /= 2;
-        case 16: bxrows /= 2;
-        case 8:  bxrows /= 2;
-        case 4:  bxrows /= 2;
-        case 2:  bxrows /= 2;
-        default: break;
-    }
-
-    return bxrows;
-}
-
-
-int ShankEditTab::boxesOnShank( int s )
-{
-    int N = 0;
-
-    for( int ib = 0, nb = vR.size(); ib < nb; ++ib ) {
-        if( vR[ib].s == s )
-            ++N;
-    }
-
-    return N;
-}
-
-
-void ShankEditTab::bxCBChanged( int s )
-{
-    int ui;
-
-    switch( s ) {
-        case 0: ui = seTabUI->bx0CB->currentText().toInt(); break;
-        case 1: ui = seTabUI->bx1CB->currentText().toInt(); break;
-        case 2: ui = seTabUI->bx2CB->currentText().toInt(); break;
-        case 3: ui = seTabUI->bx3CB->currentText().toInt(); break;
-    }
-
-    if( ui < nBoxes[s] && vR.size() ) {
-
-        int yesNo = QMessageBox::warning(
-            SC,
-            "Smaller Box Count",
-            "Reducing the box count will clear current boxes...\n\n"
-            "Reduce count anyway?",
-            QMessageBox::Yes | QMessageBox::No,
-            QMessageBox::No );
-
-        if( yesNo != QMessageBox::Yes ) {
-            QString str = QString("%1").arg( nBoxes[s] );
-            switch( s ) {
-                case 0:
-                {
-                    SignalBlocker   b0(seTabUI->bx0CB);
-                    seTabUI->bx0CB->setCurrentIndex( seTabUI->bx0CB->findText( str ) );
-                    break;
-                }
-                case 1:
-                {
-                    SignalBlocker   b1(seTabUI->bx1CB);
-                    seTabUI->bx1CB->setCurrentIndex( seTabUI->bx1CB->findText( str ) );
-                    break;
-                }
-                case 2:
-                {
-                    SignalBlocker   b2(seTabUI->bx2CB);
-                    seTabUI->bx2CB->setCurrentIndex( seTabUI->bx2CB->findText( str ) );
-                    break;
-                }
-                case 3:
-                {
-                    SignalBlocker   b3(seTabUI->bx3CB);
-                    seTabUI->bx3CB->setCurrentIndex( seTabUI->bx3CB->findText( str ) );
-                    break;
-                }
-            }
-            return;
-        }
-
-        if( G.nBase == 1 )
-            clearAll();
-        else
-            clearShank( s );
-
-        return;
-    }
-
-    do {
-
-        for( int ib = 0, nb = vR.size(); ib < nb; ++ib ) {
-
-            const IMRO_ROI  &B  = vR[ib];
-
-            if( G.nBase == 4 && B.s != s )
-                continue;
-
-            int mid = (B.r0 + B.rLim) / 2;
-
-            vR.push_back( IMRO_ROI( B.s, mid, B.rLim ) );
-            vR[ib].rLim = mid;
-        }
-
-    } while( (nBoxes[s] *= 2) < ui );
-
-    nBoxes[s] = ui;
+    getSelObj( s )->setText( "" );
+    getSumObj( s )->setText( "0" );
+    SC->setStatus( "" );
     color();
 }
 
 
 void ShankEditTab::R2GUI()
 {
-    R->edit_tbl2ROI( nBoxes, vR );
-    enableItems( R->edit_isCanonical( nBoxes, vR ) );
+    R->edit_tbl2ROI( vR );
+    enableItems( R->edit_isCanonical( vR ) );
 
     vX.clear();
 
@@ -804,11 +644,8 @@ void ShankEditTab::R2GUI()
 
 bool ShankEditTab::GUI2R()
 {
-    int rem = NBOXES - vR.size();
-
-    if( rem > 0 ) {
-        beep( QString("Click %1 more box%2")
-                .arg( rem ).arg( rem > 1 ? "es" : "" ) );
+    if( !isDone() ) {
+        beep( "Some channels not set (see counts above)" );
         return false;
     }
 
@@ -821,6 +658,19 @@ bool ShankEditTab::GUI2R()
     R->edit_ROI2tbl( vR, A );
 
     return true;
+}
+
+
+bool ShankEditTab::isDone()
+{
+    if( G.nBase == 1 )
+        return getSum( 0 ) >= getRqd( 0 );
+    else {
+        return getSum( 0 ) >= getRqd( 0 ) &&
+               getSum( 1 ) >= getRqd( 1 ) &&
+               getSum( 2 ) >= getRqd( 2 ) &&
+               getSum( 3 ) >= getRqd( 3 );
+    }
 }
 
 
@@ -837,46 +687,112 @@ bool ShankEditTab::isDefault()
 }
 
 
-bool ShankEditTab::forbidden( int s, int r )
+// Return:
+// -1: click in forbidden range.
+//  0: click in gap, range given.
+//  1: extend low  part within given range.
+//  2: extend high part within given range.
+//
+int ShankEditTab::where( int &gap0, int &gapLim, int s, int r )
 {
-    for( int ix = 0, nx = vX.size(); ix < nx; ++ix ) {
+    std::vector<IMRO_ROI>   vT;
+    buildTestBoxes( vT, s );
 
-        const IMRO_Site &S = vX[ix];
+// Default range
+    gap0    = 0;
+    gapLim  = R->nRow();
 
-        if( S.s < s )
+    for( int ib = 0, nb = vT.size(); ib < nb; ++ib ) {
+
+        const IMRO_ROI  &B = vT[ib];
+
+        if( B.s < s )
             continue;
-        else if( S.s > s )
-            return false;
+        else if( B.s > s )
+            break;
 
-        if( S.r < r )
-            continue;
-        else if( S.r > r )
-            return false;
+        if( B.rLim <= r ) {
+            // box fully below click
+            gap0 = B.rLim;
+        }
+        else if( B.r0 > r ) {
+            // box fully above
+            gapLim = B.r0;
+            return 0;
+        }
+        else if( B.cLim == -2 ) {
+            // in forbidden box
+            return -1;
+        }
+        else {
+            // in extensible box
+            int mid = (B.r0 + B.rLim) / 2;
 
-        return true;    // same (shank,row)
+            if( r <= mid ) {
+                gapLim = B.rLim - 1;
+                return 1;
+            }
+            else {
+                gap0 = B.r0 + 1;
+                return 2;
+            }
+        }
     }
 
-    return false;
+// Shank clear
+    return 0;
 }
 
 
-void ShankEditTab::clickHere( IMRO_ROI &C, int s, int r )
+// Return index of clicked box, or -1.
+//
+int ShankEditTab::selected( int gap0, int gapLim, int code, int s )
 {
-    int rem, bxrows = boxRows( s );
+    --gap0;
+    ++gapLim;
 
-    C.s     = s;
-    C.r0    = r - bxrows/2;
+    for( int ib = 0, nb = vR.size(); ib < nb; ++ib ) {
+        const IMRO_ROI  &B = vR[ib];
+        if( B.s < s )
+            continue;
+        if( code == 1 && B.rLim == gapLim )
+            return ib;
+        if( code == 2 && B.r0 == gap0 )
+            return ib;
+    }
 
-    if( C.r0 <= 0 )
-        C.r0 = 0;
-    else if( (rem = C.r0 % G.grid) )
-        C.r0 -= rem;
+    return -1;
+}
 
-    C.rLim = C.r0 + bxrows;
 
-    if( C.rLim >= R->nRow() ) {
-        C.rLim = R->nRow();
-        C.r0 = C.rLim - bxrows;
+void ShankEditTab::clickHere( IMRO_ROI &C, int gap0, int gapLim, int s, int r )
+{
+    int maxRows = qMin( seTabUI->rowsSB->value(), shortfall( s ) );
+
+    C.s = s;
+
+// If box doesn't fit, then make = gap
+
+    if( maxRows >= gapLim - gap0 ) {
+        C.r0   = gap0;
+        C.rLim = gapLim;
+        return;
+    }
+
+// Box fits, center at click
+
+    C.r0   = r - maxRows/2;
+    C.rLim = C.r0 + maxRows;
+
+// But slide to stay within gapC.rLim = C.r0 + maxRows;
+
+    if( C.r0 < gap0 ) {
+        C.r0   = gap0;
+        C.rLim = C.r0 + maxRows;
+    }
+    else if( C.rLim > gapLim ) {
+        C.rLim = gapLim;
+        C.r0   = C.rLim - maxRows;
     }
 }
 
@@ -915,78 +831,97 @@ void ShankEditTab::buildTestBoxes( tImroROIs vT, int s )
         else if( S.r == r0 + nr )
             ++nr;
         else {
-            vT.push_back( IMRO_ROI( s, r0, r0 + nr ) );
+            vT.push_back( IMRO_ROI( s, r0, r0 + nr, -1, -2 ) );
             r0 = S.r;
             nr = 1;
         }
     }
 
     if( r0 >= 0 )
-        vT.push_back( IMRO_ROI( s, r0, r0 + nr ) );
+        vT.push_back( IMRO_ROI( s, r0, r0 + nr, -1, -2 ) );
 
     std::sort( vT.begin(), vT.end() );
 }
 
 
-// Return true if room.
-//
-bool ShankEditTab::fitIntoGap( IMRO_ROI &C )
+int ShankEditTab::shortfall( int s )
 {
-    std::vector<IMRO_ROI>   vT;
-    int                     bxrows = boxRows( C.s );
-    buildTestBoxes( vT, C.s );
+    if( G.nBase == 1 )
+        return qMax( (getRqd( 0 ) - getSum( 0 )) / R->nCol_hwr(), 0 );
+    else
+        return qMax( (getRqd( s ) - getSum( s )) / R->nCol_hwr(), 0 );
+}
 
-    for( int ib = 0, nb = vT.size(); ib < nb; ++ib ) {
 
-        const IMRO_ROI  &B = vT[ib];
+void ShankEditTab::updateSums( int s )
+{
+    int nb  = vR.size(),
+        sum = 0;
 
-        if( boxOverlapsMe( C, B ) ) {
-
-            if( boxIsBelowMe( C, B ) ) {
-
-                C.r0    = B.rLim;
-                C.rLim  = C.r0 + bxrows;
-                ++ib;
-
-                if( C.rLim > R->nRow() ||
-                    (ib < nb && boxOverlapsMe( C, vT[ib] )) ) {
-
-                    beep( "No room" );
-                    return false;
-                }
-            }
-            else {
-                C.rLim  = B.r0;
-                C.r0    = C.rLim - bxrows;
-                --ib;
-
-                if( C.r0 < 0 ||
-                    (ib >= 0 && boxOverlapsMe( C, vT[ib] )) ) {
-
-                    beep( "No room" );
-                    return false;
-                }
-            }
-
-            break;
-        }
-        else if( C.rLim < B.r0 )
-            break;
+    for( int ib = 0; ib < nb; ++ib ) {
+        const IMRO_ROI  &B = vR[ib];
+        if( G.nBase == 1 || B.s == s )
+            sum += B.rLim - B.r0;
     }
 
-    return true;
+    getSumObj( s )->setText( QString("%1").arg( sum * R->nCol_hwr() ) );
 }
 
 
-bool ShankEditTab::boxOverlapsMe( const IMRO_ROI &Me, const IMRO_ROI &B )
+int ShankEditTab::getSum( int s )
 {
-    return Me.r0 < B.rLim && Me.rLim > B.r0;
+    return getSumObj( s )->text().toInt();
 }
 
 
-bool ShankEditTab::boxIsBelowMe( const IMRO_ROI &Me, const IMRO_ROI &B )
+int ShankEditTab::getRqd( int s )
 {
-    return B.r0 <= Me.r0;
+    return getRqdObj( s )->text().toInt();
+}
+
+
+QLabel *ShankEditTab::getSelObj( int s )
+{
+    if( G.nBase == 1 )
+        return seTabUI->sel0;
+    else {
+        switch( s ) {
+            case 0:  return seTabUI->sel0;
+            case 1:  return seTabUI->sel1;
+            case 2:  return seTabUI->sel2;
+            default: return seTabUI->sel3;
+        }
+    }
+}
+
+
+QLabel *ShankEditTab::getSumObj( int s )
+{
+    if( G.nBase == 1 )
+        return seTabUI->sum0;
+    else {
+        switch( s ) {
+            case 0:  return seTabUI->sum0;
+            case 1:  return seTabUI->sum1;
+            case 2:  return seTabUI->sum2;
+            default: return seTabUI->sum3;
+        }
+    }
+}
+
+
+QLabel *ShankEditTab::getRqdObj( int s )
+{
+    if( G.nBase == 1 )
+        return seTabUI->rqd0;
+    else {
+        switch( s ) {
+            case 0:  return seTabUI->rqd0;
+            case 1:  return seTabUI->rqd1;
+            case 2:  return seTabUI->rqd2;
+            default: return seTabUI->rqd3;
+        }
+    }
 }
 
 

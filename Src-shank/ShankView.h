@@ -91,8 +91,8 @@ public:
 signals:
     void cursorOver( int ic, bool shift );
     void lbutClicked( int ic, bool shift );
-    void gridHover( int s, int c, int r );
-    void gridClicked( int s, int c, int r );
+    void gridHover( int s, int r );
+    void gridClicked( int s, int r, bool shift );
 
 public slots:
 #ifdef OPENGL54

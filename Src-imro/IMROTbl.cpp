@@ -25,7 +25,6 @@ using namespace Neuropixels;
 #endif
 
 #include <QFileInfo>
-#include <QSet>
 #include <QThread>
 
 /* ---------------------------------------------------------------- */
@@ -368,7 +367,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _xpitch     = 32;
                 _zpitch     = 15;
                 break;
-            case 2020:  // 2.0 multi shank (Ph 2C)
+            case 2020:  // 2.0 quad base (Ph 2C)
                 _ncolhwr    = 2;
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};
@@ -817,86 +816,24 @@ int IMROTbl::selectAPFlts( int slot, int port, int dock ) const
 /* Edit ----------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void IMROTbl::edit_defaultROI( int *nBoxes, tImroROIs vR ) const
+void IMROTbl::edit_defaultROI( tImroROIs vR ) const
 {
     vR.clear();
     vR.push_back( IMRO_ROI( 0, 0, nAP() / _ncolhwr ) );
-    nBoxes[0] = 1;
 }
 
 
-// - Box count: {bxMin,x2,x4,...,IMRO_ROI_MAX}.
 // - Boxes span shanks.
 // - Boxes enclose all AP channels.
 // - Canonical attributes all channels.
 //
-bool IMROTbl::edit_isCanonical( int *nBoxes, tImroROIs vR ) const
+bool IMROTbl::edit_isCanonical( tImroROIs vR ) const
 {
-// Calculate Boxes menu entries
-
-    QSet<int>   boxesMenu;
-    IMRO_GUI    G = edit_GUI();
-    int         rows_per_box = nAP() / _ncolvis;
-
-    for( int nb = G.bxMin; nb <= IMRO_ROI_MAX; nb *= 2 ) {
-
-        if( (rows_per_box / nb) % G.grid == 0 )
-            boxesMenu.insert( nb );
-        else
-            break;
-    }
-
-// If canonical, all boxes are same size.
-// That size must be the min size in the set.
-// Split large boxes if they are multiples of the min size.
-
-    if( nBoxes[0] ) {
-
-        int minrows = 1000000,
-            nbsplit = 0;
-
-        for( int ib = 0; ib < nBoxes[0]; ++ib )
-            minrows = qMin( minrows, vR[ib].rLim - vR[ib].r0 );
-
-        for( int ib = 0; ib < nBoxes[0]; ++ib ) {
-
-            if( nbsplit >= 0 ) {
-
-                int nrows = vR[ib].rLim - vR[ib].r0;
-
-                if( nrows % minrows == 0 ) {
-
-                    nbsplit += nrows / minrows;
-
-                    while( nrows > minrows ) {
-                        IMRO_ROI    Rnew = vR[ib];
-                        Rnew.r0      = Rnew.rLim - minrows;
-                        vR[ib].rLim -= minrows;
-                        nrows       -= minrows;
-                        vR.push_back( Rnew );
-                    }
-                }
-                else {
-                    nbsplit = -1;
-                    break;
-                }
-            }
-        }
-
-        if( nbsplit >= 0 )
-            nBoxes[0] = nbsplit;
-    }
-
-// Check box count
-
-    if( !boxesMenu.contains( nBoxes[0] ) )
-        return false;
-
 // Assess boxes
 
     int nr = 0;
 
-    for( int ib = 0; ib < nBoxes[0]; ++ib ) {
+    for( int ib = 0; ib < vR.size(); ++ib ) {
 
         const IMRO_ROI  &B = vR[ib];
 
@@ -917,14 +854,8 @@ bool IMROTbl::edit_isCanonical( int *nBoxes, tImroROIs vR ) const
 // Within range, scan across for contiguous 1s.
 // That defines ROI boxes.
 //
-// Fill in ROI count(s):
-// - nBoxes[shank] if NP2020.
-// - nBoxes[0] = sum if !NP2020.
-//
-void IMROTbl::edit_tbl2ROI( int *nBoxes, tImroROIs vR ) const
+void IMROTbl::edit_tbl2ROI( tImroROIs vR ) const
 {
-    int nB[4] = {0,0,0,0};
-
     vR.clear();
 
     ShankMap    M;
@@ -1003,17 +934,9 @@ void IMROTbl::edit_tbl2ROI( int *nBoxes, tImroROIs vR ) const
             else if( roi.c0 >= 0 ) {
                 ++roi.cLim;
                 vR.push_back( roi );
-                ++nB[B0.s];
                 roi.c0 = -1;
             }
         }
-    }
-
-    if( apiFetchType() == 4 )
-        memcpy( nBoxes, nB, 4*sizeof(int) );
-    else {
-        nBoxes[0] = vR.size();
-        memset( &nBoxes[1], 0, 3*sizeof(int) );
     }
 }
 

@@ -8,6 +8,7 @@
 + Improve handling of unknown probe types.
 + Simplify run initialization progress dialog.
 + FileViewer gets LF-band filter.
++ New imro editor site selection scheme.
 
 20231207
 --------

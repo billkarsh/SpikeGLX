@@ -11,6 +11,7 @@ class ShankEditTab;
 
 class ShankCtlBase;
 
+class QLabel;
 class QMenu;
 
 /* ---------------------------------------------------------------- */
@@ -33,7 +34,6 @@ private:
     std::vector<IMRO_ROI>   vR;
     QString                 filename,
                             lastDir;
-    int                     nBoxes[4];
     bool                    canEdit;
 
 public:
@@ -50,7 +50,7 @@ public:
     void renameApplyRevert();
     void syncYPix( int y );
     void gridHover( int s, int r );
-    void gridClicked( int s, int r );
+    void gridClicked( int s, int r, bool shift );
     void beep( const QString &msg );
 
 signals:
@@ -65,10 +65,6 @@ private slots:
     void clearShank1();
     void clearShank2();
     void clearShank3();
-    void bx0CBChanged();
-    void bx1CBChanged();
-    void bx2CBChanged();
-    void bx3CBChanged();
     bool saveBut();
     void helpBut();
     void okBut();
@@ -78,20 +74,23 @@ private:
     void initItems();
     void initClearMenu();
     void initBoxes();
-    void enableItems( bool enabled, bool bxMin = false );
+    void enableItems( bool enabled, bool clear = false );
     void clearShank( int s );
-    int boxRows( int s );
-    int boxesOnShank( int s );
-    void bxCBChanged( int s );
     void R2GUI();
     bool GUI2R();
+    bool isDone();
     bool isDefault();
-    bool forbidden( int s, int r );
-    void clickHere( IMRO_ROI &C, int s, int r );
+    int where( int &gap0, int &gapLim, int s, int r );
+    int selected( int gap0, int gapLim, int code, int s );
+    void clickHere( IMRO_ROI &C, int gap0, int gapLim, int s, int r );
     void buildTestBoxes( tImroROIs vT, int s );
-    bool fitIntoGap( IMRO_ROI &C );
-    bool boxOverlapsMe( const IMRO_ROI &Me, const IMRO_ROI &B );
-    bool boxIsBelowMe( const IMRO_ROI &Me, const IMRO_ROI &B );
+    int shortfall( int s );
+    void updateSums( int s );
+    int getSum( int s );
+    int getRqd( int s );
+    QLabel *getSelObj( int s );
+    QLabel *getSumObj( int s );
+    QLabel *getRqdObj( int s );
     void color();
     void loadSettings();
     void saveSettings() const;

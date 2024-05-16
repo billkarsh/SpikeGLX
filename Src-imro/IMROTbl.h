@@ -40,15 +40,12 @@ struct IMRO_ROI {
 struct IMRO_GUI {
     std::vector<QString>    refs;
     std::vector<int>        gains;
-    int                     grid;
-    qint8                   nBase,
-                            bxMin;
+    qint8                   nBase;
     bool                    apEnab,
                             lfEnab,
                             hpEnab;
     IMRO_GUI()
-        :   grid(1), nBase(1), bxMin(1),
-            apEnab(false), lfEnab(false), hpEnab(false) {}
+        :   nBase(1), apEnab(false), lfEnab(false), hpEnab(false)   {}
 };
 
 // Editing helper
@@ -192,9 +189,9 @@ public:
         {vX.clear(); Q_UNUSED( s )}
     virtual void edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
         {Q_UNUSED( vR ) Q_UNUSED( A )}
-    virtual void edit_defaultROI( int *nBoxes, tImroROIs vR ) const;
-    virtual bool edit_isCanonical( int *nBoxes, tImroROIs vR ) const;
-    void edit_tbl2ROI( int *nBoxes, tImroROIs vR ) const;
+    virtual void edit_defaultROI( tImroROIs vR ) const;
+    virtual bool edit_isCanonical( tImroROIs vR ) const;
+    void edit_tbl2ROI( tImroROIs vR ) const;
     void edit_exclude( tImroSites vX, tconstImroROIs vR ) const;
     bool edit_isAllowed( tconstImroSites vX, const IMRO_ROI &B ) const;
 

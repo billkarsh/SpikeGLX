@@ -366,7 +366,6 @@ IMRO_GUI IMROTbl_T21base::edit_GUI() const
         G.refs.push_back( "Ground" );
     G.refs.push_back( "Tip" );
     G.gains.push_back( apGain( 0 ) );
-    G.grid = 16;    // prevents editing fragmentation
     return G;
 }
 

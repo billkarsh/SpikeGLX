@@ -342,10 +342,6 @@ IMRO_GUI IMROTbl_T0base::edit_GUI() const
     G.gains.push_back( 1500 );
     G.gains.push_back( 2000 );
     G.gains.push_back( 3000 );
-
-    if( nBanks() == 1 )
-        G.grid = nRow();    // force one box at lowest bank
-
     G.apEnab = true;
     G.lfEnab = true;
     G.hpEnab = true;
