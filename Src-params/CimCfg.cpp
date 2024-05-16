@@ -14,7 +14,7 @@ using namespace Neuropixels;
 #pragma message("*** Message to self: Building simulated IMEC version ***")
 #endif
 
-#include <QDir>
+#include <QDirIterator>
 #include <QFileInfo>
 #include <QSettings>
 #include <QTableWidget>
@@ -2420,9 +2420,7 @@ guiBreathe();
         // ---
 
 #ifdef HAVE_IMEC
-        QString path = QString("%1/%2").arg( calibPath() ).arg( P.sn );
-
-        P.cal = QDir( path ).exists();
+        P.cal = testFixCalPath( P.sn );
 #else
         P.cal = 1;
 #endif
@@ -2579,6 +2577,54 @@ void CimCfg::detect_OneBoxes( ImProbeTable &T )
         P.pn    = "obx";
         P.obsn  = T.slot2Vers[P.slot].bscsn.toInt();
     }
+}
+
+
+bool CimCfg::testFixCalPath( quint64 sn )
+{
+    QString path = QString("%1/%2").arg( calibPath() ).arg( sn );
+
+// Folder already exists?
+
+    if( QDir( path ).exists() )
+        return true;
+
+// Folder does not exist; do any files exist?
+
+    QVector<QString>    flist;
+    QDirIterator        it( calibPath() );
+    QString             ssn = QString("%1").arg( sn );
+
+    while( it.hasNext() ) {
+
+        it.next();
+
+        QFileInfo   fi = it.fileInfo();
+
+        if( fi.isFile() && fi.fileName().startsWith( ssn ) )
+            flist.push_back( fi.filePath() );
+    }
+
+    if( !flist.size() )
+        return false;
+
+// Create folder
+
+    if( !QDir().mkpath( path ) )
+        return false;
+
+// Move files
+
+    bool    ok = true;
+
+    for( int i = 0, n = flist.size(); i < n; ++i ) {
+        QFile   fi( flist[i] );
+        ok &= fi.rename( QString("%1/%2")
+                            .arg( path )
+                            .arg( QFileInfo( fi ).fileName() ) );
+    }
+
+    return ok;
 }
 
 

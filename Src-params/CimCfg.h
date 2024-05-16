@@ -515,6 +515,7 @@ public:
         ImProbeTable    &T,
         ImProbeDat      &P );
     static void detect_OneBoxes( ImProbeTable &T );
+    static bool testFixCalPath( quint64 sn );
     static void forceProbeData(
         int             slot,
         int             port,
