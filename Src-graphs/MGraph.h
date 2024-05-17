@@ -223,6 +223,7 @@ protected:
 
 private:
     const MGraph *getShr( const QString &usr );
+    int evtCoords( double &x, double &y, QMouseEvent *evt, int ny );
     void win2LogicalCoords( double &x, double &y, int iy );
     void drawBaselines();
     void drawGrid();

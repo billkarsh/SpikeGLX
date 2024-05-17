@@ -91,7 +91,8 @@ public:
 signals:
     void cursorOver( int ic, bool shift );
     void lbutClicked( int ic, bool shift );
-    void gridHover( int s, int r );
+    void lbutReleased();
+    void gridHover( int s, int r, bool quiet = false );
     void gridClicked( int s, int r, bool shift );
 
 public slots:
@@ -108,6 +109,7 @@ protected:
 
     void mouseMoveEvent( QMouseEvent *evt );
     void mousePressEvent( QMouseEvent *evt );
+    void mouseReleaseEvent( QMouseEvent *evt );
 
 private:
     float viewportPix();
@@ -128,6 +130,7 @@ private:
     void drawRect( float l, float t, float w, float h, SColor c );
     bool evt2Pad( int &s, int &c, int &r, const QMouseEvent *evt );
     int getSelY();
+    int getRowYDelta( int row );
 };
 
 /* ---------------------------------------------------------------- */
@@ -150,6 +153,7 @@ public:
 
 public slots:
     void scrollToSelected();
+    void scrollToRow( int row );
 
 protected:
     virtual void resizeEvent( QResizeEvent *e );

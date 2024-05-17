@@ -62,8 +62,9 @@ signals:
     void gimmeTraces();
 
 public slots:
-    void gridHover( int s, int r );
+    void gridHover( int s, int r, bool quiet );
     void gridClicked( int s, int r, bool shift );
+    void lbutReleased();
 
 protected:
     virtual bool eventFilter( QObject *watched, QEvent *event );

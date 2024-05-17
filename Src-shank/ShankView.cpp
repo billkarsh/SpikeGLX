@@ -273,6 +273,7 @@ void ShankView::mouseMoveEvent( QMouseEvent *evt )
         if( it != ISM.end() ) {
 
             emit( cursorOver( it.value(), evt->modifiers() & Qt::SHIFT ) );
+            emit( gridHover( s, r, true ) );
             return;
         }
 
@@ -302,6 +303,13 @@ void ShankView::mousePressEvent( QMouseEvent *evt )
 
         emit( gridClicked( s, r, shift ) );
     }
+}
+
+
+void ShankView::mouseReleaseEvent( QMouseEvent *evt )
+{
+    if( !(evt->buttons() & Qt::LeftButton) )
+        emit( lbutReleased() );
 }
 
 
@@ -878,6 +886,19 @@ int ShankView::getSelY()
     return TIPPX + rowPix*smap->e[sel].r + rowPix/(2*(1.0f+ROWSEP));
 }
 
+
+int ShankView::getRowYDelta( int row )
+{
+    int rowY = TIPPX + rowPix*row + rowPix/(2*(1.0f+ROWSEP));
+
+    if( rowY < vBot )
+        return 4 * rowPix/(1.0f+ROWSEP);
+    else if( rowY > vTop )
+        return -4 * rowPix/(1.0f+ROWSEP);
+
+    return 0;
+}
+
 /* ---------------------------------------------------------------- */
 /* ShankScroll ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -928,6 +949,32 @@ void ShankScroll::scrollToSelected()
     if( pos < sc_min )
         pos = sc_min;
     else if( pos > sc_max )
+        pos = sc_max;
+
+    if( pos != theV->slidePos )
+        scrollTo( pos );
+    else
+        theV->update();
+}
+
+
+void ShankScroll::scrollToRow( int row )
+{
+    if( row < 0 )
+        return;
+
+    int del = theV->getRowYDelta( row );
+
+    if( del == 0 )
+        return;
+
+    int sc_min  = verticalScrollBar()->minimum(),
+        sc_max  = verticalScrollBar()->maximum(),
+        pos     = verticalScrollBar()->value() + del;
+
+    if( pos < sc_min || row >= theV->smap->nr - 4 )
+        pos = sc_min;
+    else if( pos > sc_max || row <= 4 )
         pos = sc_max;
 
     if( pos != theV->slidePos )

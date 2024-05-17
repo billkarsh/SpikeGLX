@@ -36,25 +36,36 @@
 <li>When the scrollbar has focus you can navigate along the probe with the arrow or page keys.</li>
 </ul>
 <h3 id="boxes">Boxes</h3>
-<p>Define your region(s) of interest:</p>
+<p>Define your region(s) of interest (ROI):</p>
+<h4 id="readouts">Readouts</h4>
+<p>The <code>Rqd</code> readout reminds you how many total channels/sites you must select to make a valid table. Most probes have 384 channels that are shared over the whole probe surface. Some probes have fewer than 384 readout channels, NXT probes have 912 or 1536 channels, and quad-probes have 384 channels on each of the four shanks. In all cases, Rqd tells you the required total channel count.</p>
+<p><code>Sum</code> is the channel count summed over your current set of boxes. You are done making a valid ROI when <strong>Sum = Rqd</strong>.</p>
+<p>When you click in an existing box <code>Sel</code> reads out its size, in channels.</p>
+<h4 id="making-new-boxes">Making New Boxes</h4>
 <ol style="list-style-type: decimal">
-<li>Set the <code>Boxes</code> menu to the number of desired regions.</li>
-<li>Click on the probe to place the centers of boxes.</li>
+<li>Use <code>Nrows</code> to set the number of rows you want a new box to have.</li>
+<li>Click where you want to place the center of the new box.</li>
 </ol>
 <ul>
-<li>Dark outlines indicate excluded sites.</li>
-<li>Boxes snap into place next to existing boxes or forbidden zones.</li>
-<li>Click in an existing box to delete it.</li>
-<li><code>Clear</code> removes all boxes.</li>
-<li>Reducing the <code>Boxes</code> count will remove all existing boxes.</li>
-<li>Increasing the <code>Boxes</code> count will evenly split all existing boxes.</li>
+<li>Dark outlines indicate excluded/forbidden sites.</li>
+<li>If a box won't fit where you clicked, the box is downsized.</li>
+<li>If a box overlaps a forbidden zone or another box, the box is moved.</li>
+<li>If a box goes off the top or bottom of the shank, the box is moved.</li>
 </ul>
-<blockquote>
-<p>Note: Each probe type may limit the maximum number of boxes available, and may impose an internal grid that prevents placing boxes at illegal locations.</p>
-</blockquote>
-<blockquote>
-<p>Tip: It might become tedious placing 16 boxes on some probe types due to their complicated selection rules. Make your life easier by using the smallest <code>Boxes</code> count that adequately samples the activity. Also, this strategy can help: Use the splitting feature. Set <code>Boxes</code> small to start and place a full set (perhaps, 4) over the activity. Next, increase <code>Boxes</code>, which splits those into 8. Finally move some of the smaller boxes to better locations. Split again to get to 16 if you need to.</p>
-</blockquote>
+<h4 id="resizing-boxes">Resizing Boxes</h4>
+<ul>
+<li><code>Click-and-drag</code> in the upper-half of a box to adjust its top edge.</li>
+<li><code>Click-and-drag</code> in the lower-half of a box to adjust its bottom edge.</li>
+<li>The size is limited by other objects, and by Rqd.</li>
+<li>The view will scroll as you drag beyond the top/bottom edge.</li>
+<li>Drag off the side of the shank to revert to the original size.</li>
+<li>Let the mouse button up to finish the operation.</li>
+</ul>
+<h4 id="clearingerasing-boxes">Clearing/Erasing Boxes</h4>
+<ul>
+<li>The <code>Clear All</code> button erases all boxes.</li>
+<li><code>Shift-click</code> in a box to clear it.</li>
+</ul>
 <hr />
 <h3 id="view-tab-quick-reference">View Tab Quick Reference</h3>
 <ul>
@@ -75,10 +86,10 @@
 <p>Every tenth of a second a process thread called the 'graph fetcher' grabs the next chunk of raw data from the main data stream and pushes it to the Graphs window. The stepping of the visible time cursor across the screen heralds these events.</p>
 <p>If the corresponding Shank Viewer is visible, the Graphs window pushes a copy of the unmodified raw data chunk to the Shank Viewer. Importantly, the filter choices in the Graphs window do not affect the Shank Viewer; each does its own filtering/processing.</p>
 <p>Note that clicking <code>Pause</code> in the Graphs window pauses/resumes both the graphs and the shank activity mapping.</p>
-<p>By default, both the online and offline Shank Viewers apply a <code>300Hz highpass</code> and <code>global CAR</code> filter to AP-band channels and a <code>0.2Hz - 300Hz bandpass</code> filter to the LFP channels. These filters reduce out-of-band electrical noise, including DC offsets, which allows better comparison to your requested spike threshold voltage.</p>
+<p>By default, both the online and offline Shank Viewers apply a <code>300Hz high-pass</code> and <code>global CAR</code> filter to AP-band channels and a <code>0.2Hz - 300Hz bandpass</code> filter to the LFP channels. These filters reduce out-of-band electrical noise, including DC offsets, which allows better comparison to your requested spike threshold voltage.</p>
 <p>As of SpikeGLX version 20230425, the Configuration dialog/IM Setup tab has a box to set up a filtered probe AP-band stream that runs in parallel with the raw stream. You can set the bandpass edges for this stream, and the stream automatically gets global <code>demux</code> CAR. These data, when present, are used to improve signal-to-background in both audio output and Shank Viewers (for {spike, AP pk-pk} calculations). There is a checkbox to disable this feature just in case you are running out of RAM or CPU, but we don't think this will be necessary unless you are running 12 probes or more at the same time.</p>
 <h3 id="file-viewer-data-flow">File Viewer Data Flow</h3>
-<p><code>Average current window</code> applies a 300Hz highpass and global CAR filer, then counts spikes and tallies peak-to-peak voltages over the data currently displayed in the File Viewer window. The Shank Viewer updates as you scroll.</p>
+<p><code>Average current window</code> applies a 300Hz high-pass and global CAR filer, then counts spikes and tallies peak-to-peak voltages over the data currently displayed in the File Viewer window. The Shank Viewer updates as you scroll.</p>
 <p><code>Sample whole survey</code> is specifically for viewing survey result files. It averages up to four half-second time chunks drawn from each of the banks on the probe to build a whole-probe activity map. You have to click <code>Update whole survey</code> to trigger the calculation. If you change the spike threshold or 'stay low' values you need to click <code>Update</code> again. Peak-to-peak calculation has no parameters so only one <code>Update</code> click each is needed.</p>
 <h3 id="setting-a-spike-threshold">Setting a Spike Threshold</h3>
 <p>You can read an appropriate threshold level from a graph:</p>

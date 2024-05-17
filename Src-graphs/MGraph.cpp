@@ -557,17 +557,8 @@ void MGraph::mouseMoveEvent( QMouseEvent *evt )
 
     if( X && (ny = X->Y.size()) ) {
 
-        double  x   = evt->x(),
-                y   = evt->y() + X->clipTop;
-        int     iy0 = X->clipTop / X->ypxPerGrf,
-                iy  = y / X->ypxPerGrf;
-
-        if( iy >= ny )
-            iy = ny - 1;
-        else if( iy < iy0 )
-            iy = iy0;
-
-        y -= iy * X->ypxPerGrf;
+        double  x, y;
+        int     iy = evtCoords( x, y, evt, ny );
 
         emit( cursorOverWindowCoords( x, y, iy ) );
 
@@ -583,17 +574,8 @@ void MGraph::mousePressEvent( QMouseEvent *evt )
 
     if( X && (ny = X->Y.size()) ) {
 
-        double  x   = evt->x(),
-                y   = evt->y() + X->clipTop;
-        int     iy0 = X->clipTop / X->ypxPerGrf,
-                iy  = y / X->ypxPerGrf;
-
-        if( iy >= ny )
-            iy = ny - 1;
-        else if( iy < iy0 )
-            iy = iy0;
-
-        y -= iy * X->ypxPerGrf;
+        double  x, y;
+        int     iy = evtCoords( x, y, evt, ny );
 
         if( evt->buttons() & Qt::LeftButton ) {
 
@@ -629,17 +611,8 @@ void MGraph::mouseDoubleClickEvent( QMouseEvent *evt )
 
     if( X && (ny = X->Y.size()) && (evt->buttons() & Qt::LeftButton) ) {
 
-        double  x   = evt->x(),
-                y   = evt->y() + X->clipTop;
-        int     iy0 = X->clipTop / X->ypxPerGrf,
-                iy  = y / X->ypxPerGrf;
-
-        if( iy >= ny )
-            iy = ny - 1;
-        else if( iy < iy0 )
-            iy = iy0;
-
-        y -= iy * X->ypxPerGrf;
+        double  x, y;
+        int     iy = evtCoords( x, y, evt, ny );
 
         win2LogicalCoords( x, y, iy );
         emit( lbutDoubleClicked( x, y, iy ) );
@@ -664,6 +637,31 @@ const MGraph *MGraph::getShr( const QString &usr )
         usr2Ref[usr] = shrRef( this );
 
     return 0;
+}
+
+
+// Window coords:
+// [L,R] = [0,width()],
+// [T,B] = [0,ypxPerGrf].
+//
+// Return iy graph index.
+//
+int MGraph::evtCoords( double &x, double &y, QMouseEvent *evt, int ny )
+{
+    x = evt->x();
+    y = evt->y() + X->clipTop;
+
+    int iy0 = X->clipTop / X->ypxPerGrf,
+        iy  = y / X->ypxPerGrf;
+
+    if( iy >= ny )
+        iy = ny - 1;
+    else if( iy < iy0 )
+        iy = iy0;
+
+    y -= iy * X->ypxPerGrf;
+
+    return iy;
 }
 
 

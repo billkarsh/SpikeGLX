@@ -14,6 +14,257 @@
 
 
 /* ---------------------------------------------------------------- */
+/* Click ---------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void ShankEditTab::Click::down( int s, int r )
+{
+    this->s         = s;
+    this->rclick    = r;
+    code            = where();
+    ib              = -1;   // not dragging
+
+    if( code < 0 )
+        se->beep( "Forbidden" );
+    else if( code == 0 ) {
+        if( !se->isFull( s ) )
+            newBox();
+    }
+    else {
+        ib = selectBox();
+
+        if( ib >= 0 )
+            se->setSel( s, ib );
+    }
+}
+
+
+void ShankEditTab::Click::drag( int s, int r )
+{
+    if( ib < 0 )
+        return;
+
+    IMRO_ROI    &B  = se->vR[ib];
+    int         del = r - rclick,
+                rView;
+
+    if( s != this->s ) {
+        if( code == 1 ) {
+            if( edge0 == B.r0 )
+                return;
+            B.r0 = edge0;
+        }
+        else {
+            if( edge0 == B.rLim )
+                return;
+            B.rLim = edge0;
+        }
+        rView = edge0;
+    }
+    else {
+        int newEdge;
+        if( code == 1 ) {
+            newEdge = qBound( gap0, edge0 + del, gapLim );
+            if( newEdge == B.r0 )
+                return;
+            B.r0 = newEdge;
+        }
+        else {
+            newEdge = qBound( gap0, edge0 + del, gapLim );
+            if( newEdge == B.rLim )
+                return;
+            B.rLim = newEdge;
+        }
+        rView = newEdge;
+    }
+
+    se->SC->drawMtx.lock();
+        se->SC->scroll()->scrollToRow( rView );
+    se->SC->drawMtx.unlock();
+
+    se->setSel( this->s, ib );
+    se->updateSums( this->s );
+    se->color();
+}
+
+
+void ShankEditTab::Click::up()
+{
+    if( ib >= 0 ) {
+        se->updateAll( ib, s );
+        ib = -1;    // cancel dragging
+    }
+}
+
+
+// Return:
+// -1: click in forbidden range.
+//  0: click in gap, range given.
+//  1: extend low  part within given range.
+//  2: extend high part within given range.
+//
+int ShankEditTab::Click::where()
+{
+    std::vector<IMRO_ROI>   vT;
+    buildTestBoxes( vT );
+
+// Default range
+    gap0    = 0;
+    gapLim  = se->R->nRow();
+
+    for( int ib = 0, nb = vT.size(); ib < nb; ++ib ) {
+
+        const IMRO_ROI  &B = vT[ib];
+
+        if( B.s < s )
+            continue;
+        else if( B.s > s )
+            break;
+
+        if( B.rLim <= rclick ) {
+            // box fully below click
+            gap0 = B.rLim;
+        }
+        else if( B.r0 > rclick ) {
+            // box fully above
+            gapLim = B.r0;
+            return 0;
+        }
+        else if( B.cLim == -2 ) {
+            // in forbidden box
+            return -1;
+        }
+        else {
+            // in extensible box
+            int mid = (B.r0 + B.rLim) / 2;
+
+            if( rclick <= mid ) {
+                gapLim = B.rLim - 1;
+                return 1;
+            }
+            else {
+                gap0 = B.r0 + 1;
+
+                if( ++ib < nb )
+                    gapLim = vT[ib].r0;
+
+                return 2;
+            }
+        }
+    }
+
+// Shank clear
+    return 0;
+}
+
+
+// Build sorted list of boxes on this shank for gap checking:
+// - Existing ROIs.
+// - Ranges of excludes, assembled into boxes.
+//
+void ShankEditTab::Click::buildTestBoxes( tImroROIs vT )
+{
+    for( int ib = 0, nb = se->vR.size(); ib < nb; ++ib ) {
+
+        const IMRO_ROI  &B = se->vR[ib];
+
+        if( B.s == s )
+            vT.push_back( B );
+    }
+
+    int r0 = -1, nr = 0;
+
+    for( int ix = 0, nx = se->vX.size(); ix < nx; ++ix ) {
+
+        const IMRO_Site &S = se->vX[ix];
+
+        if( S.s < s )
+            continue;
+        else if( S.s > s )
+            break;
+
+        if( r0 == -1 ) {
+            r0 = S.r;
+            nr = 1;
+        }
+        else if( S.r < r0 + nr )
+            ;
+        else if( S.r == r0 + nr )
+            ++nr;
+        else {
+            vT.push_back( IMRO_ROI( s, r0, r0 + nr, -1, -2 ) );
+            r0 = S.r;
+            nr = 1;
+        }
+    }
+
+    if( r0 >= 0 )
+        vT.push_back( IMRO_ROI( s, r0, r0 + nr, -1, -2 ) );
+
+    std::sort( vT.begin(), vT.end() );
+}
+
+
+void ShankEditTab::Click::newBox()
+{
+    IMRO_ROI    B;
+    int         maxRows = qMin( se->seTabUI->rowsSB->value(),
+                                se->rowsShortfall( s ) );
+
+    B.s = s;
+
+    if( maxRows >= gapLim - gap0 ) {
+        // If box doesn't fit, then make same size as gap
+        B.r0   = gap0;
+        B.rLim = gapLim;
+    }
+    else {
+        // Box fits, center at click
+        B.r0   = rclick - maxRows/2;
+        B.rLim = B.r0 + maxRows;
+
+        // Slide to stay within gap
+        if( B.r0 < gap0 ) {
+            B.r0   = gap0;
+            B.rLim = B.r0 + maxRows;
+        }
+        else if( B.rLim > gapLim ) {
+            B.rLim = gapLim;
+            B.r0   = B.rLim - maxRows;
+        }
+    }
+
+    se->addBox( B, s );
+}
+
+
+// Return index of clicked box, or -1.
+//
+int ShankEditTab::Click::selectBox()
+{
+    int g0 = gap0   - 1,
+        gL = gapLim + 1;
+
+    for( int ib = 0, nb = se->vR.size(); ib < nb; ++ib ) {
+        const IMRO_ROI  &B = se->vR[ib];
+        if( B.s != s )
+            continue;
+        if( code == 1 && B.rLim == gL ) {
+            gap0  = B.r0 - qMin( se->rowsShortfall( s ), B.r0 - gap0 );
+            edge0 = B.r0;
+            return ib;
+        }
+        if( code == 2 && B.r0 == g0 ) {
+            gapLim = B.rLim + qMin( se->rowsShortfall( s ), gapLim - B.rLim );
+            edge0  = B.rLim;
+            return ib;
+        }
+    }
+
+    return -1;
+}
+
+/* ---------------------------------------------------------------- */
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
@@ -24,7 +275,7 @@ ShankEditTab::ShankEditTab(
     :   QObject(0), SC(SC), seTabUI(0), mClear(0),
         R0(IMROTbl::alloc( inR->pn )),
         Rfile(IMROTbl::alloc( inR->pn )),
-        R(IMROTbl::alloc( inR->pn ))
+        R(IMROTbl::alloc( inR->pn )), click(this)
 {
     seTabUI = new Ui::ShankEditTab;
     seTabUI->setupUi( tab );
@@ -112,8 +363,13 @@ void ShankEditTab::syncYPix( int y )
 }
 
 
-void ShankEditTab::gridHover( int s, int r )
+void ShankEditTab::gridHover( int s, int r, bool quiet )
 {
+    click.drag( s, r );
+
+    if( quiet )
+        return;
+
     if( s < 0 ) {
         SC->setStatus( "" );
         return;
@@ -125,18 +381,18 @@ void ShankEditTab::gridHover( int s, int r )
 
 void ShankEditTab::gridClicked( int s, int r, bool shift )
 {
+// Actionable?
+
     if( !canEdit ) {
         beep( "Non-standard IMRO; can not be edited" );
         return;
     }
 
-    int nb = vR.size();
-
 // Clear if shift
 
     if( shift ) {
 
-        for( int ib = 0; ib < nb; ++ib ) {
+        for( int ib = 0, nb = vR.size(); ib < nb; ++ib ) {
 
             IMRO_ROI    &B = vR[ib];
 
@@ -144,29 +400,14 @@ void ShankEditTab::gridClicked( int s, int r, bool shift )
 
                 vR.erase( vR.begin() + ib );
                 R->edit_exclude( vX, vR );
+                setSel( s, -1 );
                 updateSums( s );
-                getSelObj( s )->setText( "" );
                 color();
                 SC->setStatus( "" );
                 return;
             }
         }
         return;
-    }
-
-// Full?
-
-    if( G.nBase == 1 ) {
-        if( getSum( 0 ) >= getRqd( 0 ) ) {
-            beep( "All channels set" );
-            return;
-        }
-    }
-    else {
-        if( getSum( s ) >= getRqd( s ) ) {
-            beep( "All channels on shank set" );
-            return;
-        }
     }
 
 // Only one possible?
@@ -176,55 +417,19 @@ void ShankEditTab::gridClicked( int s, int r, bool shift )
         R->edit_defaultROI( vR );
         enableItems( true );
         color();
-        SC->setStatus( "Probe requires default pattern" );
+        SC->setStatus( "Probe requires default sites" );
         return;
     }
 
-// Where is the click?
+// Handle click
 
-    int gap0, gapLim, code = where( gap0, gapLim, s, r );
+    click.down( s, r );
+}
 
-// Forbidden?
 
-    if( code < 0 ) {
-        beep( "Forbidden" );
-        return;
-    }
-
-// Place into gap?
-
-    if( code == 0 ) {
-        IMRO_ROI    C;
-        clickHere( C, gap0, gapLim, s, r );
-        vR.push_back( C );
-        getSelObj( s )->
-        setText( QString("%1").arg( (C.rLim - C.r0)*R->nCol_hwr() ) );
-    }
-
-// Selected?
-
-    if( code == 1 || code == 2 ) {
-
-        int ib = selected( gap0, gapLim, code, s );
-
-        if( ib >= 0 ) {
-            const IMRO_ROI  &B = vR[ib];
-            getSelObj( s )->
-            setText( QString("%1").arg( (B.rLim - B.r0)*R->nCol_hwr() ) );
-        }
-    }
-
-// Update
-
-    updateSums( s );
-
-    if( isDone() )
-        vX.clear();
-    else
-        R->edit_exclude( vX, vR );
-
-    color();
-    SC->setStatus( "" );
+void ShankEditTab::lbutReleased()
+{
+    click.up();
 }
 
 
@@ -613,10 +818,10 @@ void ShankEditTab::clearShank( int s )
     }
 
     R->edit_exclude( vX, vR );
-    getSelObj( s )->setText( "" );
+    setSel( s, -1 );
     getSumObj( s )->setText( "0" );
-    SC->setStatus( "" );
     color();
+    SC->setStatus( "" );
 }
 
 
@@ -661,19 +866,6 @@ bool ShankEditTab::GUI2R()
 }
 
 
-bool ShankEditTab::isDone()
-{
-    if( G.nBase == 1 )
-        return getSum( 0 ) >= getRqd( 0 );
-    else {
-        return getSum( 0 ) >= getRqd( 0 ) &&
-               getSum( 1 ) >= getRqd( 1 ) &&
-               getSum( 2 ) >= getRqd( 2 ) &&
-               getSum( 3 ) >= getRqd( 3 );
-    }
-}
-
-
 bool ShankEditTab::isDefault()
 {
     bool    isdef;
@@ -687,169 +879,57 @@ bool ShankEditTab::isDefault()
 }
 
 
-// Return:
-// -1: click in forbidden range.
-//  0: click in gap, range given.
-//  1: extend low  part within given range.
-//  2: extend high part within given range.
-//
-int ShankEditTab::where( int &gap0, int &gapLim, int s, int r )
-{
-    std::vector<IMRO_ROI>   vT;
-    buildTestBoxes( vT, s );
-
-// Default range
-    gap0    = 0;
-    gapLim  = R->nRow();
-
-    for( int ib = 0, nb = vT.size(); ib < nb; ++ib ) {
-
-        const IMRO_ROI  &B = vT[ib];
-
-        if( B.s < s )
-            continue;
-        else if( B.s > s )
-            break;
-
-        if( B.rLim <= r ) {
-            // box fully below click
-            gap0 = B.rLim;
-        }
-        else if( B.r0 > r ) {
-            // box fully above
-            gapLim = B.r0;
-            return 0;
-        }
-        else if( B.cLim == -2 ) {
-            // in forbidden box
-            return -1;
-        }
-        else {
-            // in extensible box
-            int mid = (B.r0 + B.rLim) / 2;
-
-            if( r <= mid ) {
-                gapLim = B.rLim - 1;
-                return 1;
-            }
-            else {
-                gap0 = B.r0 + 1;
-                return 2;
-            }
-        }
-    }
-
-// Shank clear
-    return 0;
-}
-
-
-// Return index of clicked box, or -1.
-//
-int ShankEditTab::selected( int gap0, int gapLim, int code, int s )
-{
-    --gap0;
-    ++gapLim;
-
-    for( int ib = 0, nb = vR.size(); ib < nb; ++ib ) {
-        const IMRO_ROI  &B = vR[ib];
-        if( B.s < s )
-            continue;
-        if( code == 1 && B.rLim == gapLim )
-            return ib;
-        if( code == 2 && B.r0 == gap0 )
-            return ib;
-    }
-
-    return -1;
-}
-
-
-void ShankEditTab::clickHere( IMRO_ROI &C, int gap0, int gapLim, int s, int r )
-{
-    int maxRows = qMin( seTabUI->rowsSB->value(), shortfall( s ) );
-
-    C.s = s;
-
-// If box doesn't fit, then make = gap
-
-    if( maxRows >= gapLim - gap0 ) {
-        C.r0   = gap0;
-        C.rLim = gapLim;
-        return;
-    }
-
-// Box fits, center at click
-
-    C.r0   = r - maxRows/2;
-    C.rLim = C.r0 + maxRows;
-
-// But slide to stay within gapC.rLim = C.r0 + maxRows;
-
-    if( C.r0 < gap0 ) {
-        C.r0   = gap0;
-        C.rLim = C.r0 + maxRows;
-    }
-    else if( C.rLim > gapLim ) {
-        C.rLim = gapLim;
-        C.r0   = C.rLim - maxRows;
-    }
-}
-
-
-// Build sorted list of boxes on this shank for gap checking:
-// - Existing ROIs.
-// - Ranges of excludes, assembled into boxes.
-//
-void ShankEditTab::buildTestBoxes( tImroROIs vT, int s )
-{
-    for( int ib = 0, nb = vR.size(); ib < nb; ++ib ) {
-
-        const IMRO_ROI  &B = vR[ib];
-
-        if( B.s == s )
-            vT.push_back( B );
-    }
-
-    int r0 = -1, nr = 0;
-
-    for( int ix = 0, nx = vX.size(); ix < nx; ++ix ) {
-
-        const IMRO_Site &S = vX[ix];
-
-        if( S.s < s )
-            continue;
-        else if( S.s > s )
-            break;
-
-        if( r0 == -1 ) {
-            r0 = S.r;
-            nr = 1;
-        }
-        else if( S.r < r0 + nr )
-            ;
-        else if( S.r == r0 + nr )
-            ++nr;
-        else {
-            vT.push_back( IMRO_ROI( s, r0, r0 + nr, -1, -2 ) );
-            r0 = S.r;
-            nr = 1;
-        }
-    }
-
-    if( r0 >= 0 )
-        vT.push_back( IMRO_ROI( s, r0, r0 + nr, -1, -2 ) );
-
-    std::sort( vT.begin(), vT.end() );
-}
-
-
-int ShankEditTab::shortfall( int s )
+bool ShankEditTab::isDone()
 {
     if( G.nBase == 1 )
-        return qMax( (getRqd( 0 ) - getSum( 0 )) / R->nCol_hwr(), 0 );
+        return getSum( 0 ) >= getRqd( 0 );
+    else {
+        return getSum( 0 ) >= getRqd( 0 ) &&
+               getSum( 1 ) >= getRqd( 1 ) &&
+               getSum( 2 ) >= getRqd( 2 ) &&
+               getSum( 3 ) >= getRqd( 3 );
+    }
+}
+
+
+bool ShankEditTab::isFull( int s )
+{
+    if( G.nBase == 1 ) {
+        if( getSum( 0 ) >= getRqd( 0 ) ) {
+            beep( "All channels set" );
+            return true;
+        }
+    }
+    else {
+        if( getSum( s ) >= getRqd( s ) ) {
+            beep( "All channels on shank set" );
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+void ShankEditTab::addBox( const IMRO_ROI &B, int s )
+{
+    vR.push_back( B );
+    updateAll( vR.size() - 1, s );
+}
+
+
+void ShankEditTab::updateAll( int ib, int s )
+{
+    setSel( s, ib );
+    updateSums( s );
+
+    if( isDone() )
+        vX.clear();
     else
-        return qMax( (getRqd( s ) - getSum( s )) / R->nCol_hwr(), 0 );
+        R->edit_exclude( vX, vR );
+
+    color();
+    SC->setStatus( "" );
 }
 
 
@@ -868,6 +948,15 @@ void ShankEditTab::updateSums( int s )
 }
 
 
+int ShankEditTab::rowsShortfall( int s )
+{
+    if( G.nBase == 1 )
+        return qMax( (getRqd( 0 ) - getSum( 0 )) / R->nCol_hwr(), 0 );
+    else
+        return qMax( (getRqd( s ) - getSum( s )) / R->nCol_hwr(), 0 );
+}
+
+
 int ShankEditTab::getSum( int s )
 {
     return getSumObj( s )->text().toInt();
@@ -880,18 +969,36 @@ int ShankEditTab::getRqd( int s )
 }
 
 
-QLabel *ShankEditTab::getSelObj( int s )
+void ShankEditTab::setSel( int s, int ib )
 {
+    QLabel  *obj;
+
     if( G.nBase == 1 )
-        return seTabUI->sel0;
+        obj = seTabUI->sel0;
     else {
         switch( s ) {
-            case 0:  return seTabUI->sel0;
-            case 1:  return seTabUI->sel1;
-            case 2:  return seTabUI->sel2;
-            default: return seTabUI->sel3;
+            case 0:  obj = seTabUI->sel0; break;
+            case 1:  obj = seTabUI->sel1; break;
+            case 2:  obj = seTabUI->sel2; break;
+            default: obj = seTabUI->sel3;
         }
+
+        if( obj != seTabUI->sel0 )
+            seTabUI->sel0->setText( "" );
+        if( obj != seTabUI->sel1 )
+            seTabUI->sel1->setText( "" );
+        if( obj != seTabUI->sel2 )
+            seTabUI->sel2->setText( "" );
+        if( obj != seTabUI->sel3 )
+            seTabUI->sel3->setText( "" );
     }
+
+    int val = -1;
+
+    if( ib >= 0 )
+        val = (vR[ib].rLim - vR[ib].r0) * R->nCol_hwr();
+
+    obj->setText( val >= 0 ? QString("%1").arg( val ) : "" );
 }
 
 

@@ -27,29 +27,45 @@ arrow or page keys.
 
 ### Boxes
 
-Define your region(s) of interest:
+Define your region(s) of interest (ROI):
 
-1. Set the `Boxes` menu to the number of desired regions.
-2. Click on the probe to place the centers of boxes.
+#### Readouts
 
-* Dark outlines indicate excluded sites.
-* Boxes snap into place next to existing boxes or forbidden zones.
-* Click in an existing box to delete it.
-* `Clear` removes all boxes.
-* Reducing the `Boxes` count will remove all existing boxes.
-* Increasing the `Boxes` count will evenly split all existing boxes.
+The `Rqd` readout reminds you how many total channels/sites you must
+select to make a valid table. Most probes have 384 channels that are
+shared over the whole probe surface. Some probes have fewer than 384
+readout channels, NXT probes have 912 or 1536 channels, and quad-probes
+have 384 channels on each of the four shanks. In all cases, Rqd tells
+you the required total channel count.
 
->Note: Each probe type may limit the maximum number of boxes available,
-and may impose an internal grid that prevents placing boxes at illegal
-locations.
+`Sum` is the channel count summed over your current set of boxes. You are
+done making a valid ROI when **Sum = Rqd**.
 
->Tip: It might become tedious placing 16 boxes on some probe types due
-to their complicated selection rules. Make your life easier by using the
-smallest `Boxes` count that adequately samples the activity. Also, this
-strategy can help: Use the splitting feature. Set `Boxes` small to start
-and place a full set (perhaps, 4) over the activity. Next, increase
-`Boxes`, which splits those into 8. Finally move some of the smaller
-boxes to better locations. Split again to get to 16 if you need to.
+When you click in an existing box `Sel` reads out its size, in channels.
+
+#### Making New Boxes
+
+1. Use `Nrows` to set the number of rows you want a new box to have.
+2. Click where you want to place the center of the new box.
+
+* Dark outlines indicate excluded/forbidden sites.
+* If a box won't fit where you clicked, the box is downsized.
+* If a box overlaps a forbidden zone or another box, the box is moved.
+* If a box goes off the top or bottom of the shank, the box is moved.
+
+#### Resizing Boxes
+
+* `Click-and-drag` in the upper-half of a box to adjust its top edge.
+* `Click-and-drag` in the lower-half of a box to adjust its bottom edge.
+* The size is limited by other objects, and by Rqd.
+* The view will scroll as you drag beyond the top/bottom edge.
+* Drag off the side of the shank to revert to the original size.
+* Let the mouse button up to finish the operation.
+
+#### Clearing/Erasing Boxes
+
+* The `Clear All` button erases all boxes.
+* `Shift-click` in a box to clear it.
 
 --------
 
@@ -88,7 +104,7 @@ Note that clicking `Pause` in the Graphs window pauses/resumes both the
 graphs and the shank activity mapping.
 
 By default, both the online and offline Shank Viewers apply a
-`300Hz highpass` and `global CAR` filter to AP-band channels and a
+`300Hz high-pass` and `global CAR` filter to AP-band channels and a
 `0.2Hz - 300Hz bandpass` filter to the LFP channels. These filters
 reduce out-of-band electrical noise, including DC offsets, which allows
 better comparison to your requested spike threshold voltage.
@@ -105,7 +121,7 @@ same time.
 
 ### File Viewer Data Flow
 
-`Average current window` applies a 300Hz highpass and global CAR filer,
+`Average current window` applies a 300Hz high-pass and global CAR filer,
 then counts spikes and tallies peak-to-peak voltages over the data currently
 displayed in the File Viewer window. The Shank Viewer updates as you scroll.
 
