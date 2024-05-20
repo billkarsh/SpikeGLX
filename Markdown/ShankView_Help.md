@@ -46,7 +46,8 @@ When you click in an existing box `Sel` reads out its size, in channels.
 #### Making New Boxes
 
 1. Use `Nrows` to set the number of rows you want a new box to have.
-2. Click where you want to place the center of the new box.
+2. Set the `New boxes` width either to full- or half-shank.
+3. Click where you want to place the center of the new box.
 
 * Dark outlines indicate excluded/forbidden sites.
 * If a box won't fit where you clicked, the box is downsized.

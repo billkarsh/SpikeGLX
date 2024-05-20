@@ -301,7 +301,7 @@ void ShankView::mousePressEvent( QMouseEvent *evt )
         if( it != ISM.end() )
             emit( lbutClicked( it.value(), shift ) );
 
-        emit( gridClicked( s, r, shift ) );
+        emit( gridClicked( s, c, r, shift ) );
     }
 }
 
@@ -742,12 +742,12 @@ void ShankView::drawROIs()
 
     for( int ib = 0; ib < nb; ++ib ) {
 
-        IMRO_ROI    &B = vROI[ib];
+        IMRO_ROI    &B      = vROI[ib];
         float       *V;
         float       vert[8];
-        int         nrow    = B.rLim - B.r0,
-                    c0      = qMax( 0, B.c0 ),
-                    cL      = (B.cLim >= 1 ? B.cLim : _ncolhwr) - 1;
+        int         nrow    = B.height(),
+                    c0      = B.c_0(),
+                    cL      = B.c_lim( _ncolhwr ) - 1;
 
         if( nrow > 1 ) {
             c0 = qMin( col2vis_ev[c0], col2vis_od[c0] );

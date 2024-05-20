@@ -63,7 +63,7 @@ signals:
 
 public slots:
     void gridHover( int s, int r, bool quiet );
-    void gridClicked( int s, int r, bool shift );
+    void gridClicked( int s, int c, int r, bool shift );
     void lbutReleased();
 
 protected:

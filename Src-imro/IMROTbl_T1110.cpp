@@ -670,8 +670,8 @@ void IMROTbl_T1110::edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
 
         const IMRO_ROI  &B = vR[ib];
 
-        int c0 = qMax( 0, B.c0 ),
-            cL = (B.cLim >= 0 ? B.cLim : _ncolhwr);
+        int c0 = B.c_0(),
+            cL = B.c_lim( _ncolhwr );
 
         for( int r = B.r0; r < B.rLim; ++r ) {
 

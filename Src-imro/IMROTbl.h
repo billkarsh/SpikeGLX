@@ -26,12 +26,21 @@ struct IMRO_Site {
 // Editing helper - columns in hwr coords
 //
 struct IMRO_ROI {
-// if c0   <= 0  full left  included
-// if cLim == -1 full right included
+// if c0   <= 0 full left  included
+// if cLim <  0 full right included
     int s, r0, rLim, c0, cLim;
     IMRO_ROI() : s(0), r0(0), rLim(0), c0(-1), cLim(-1)     {}
     IMRO_ROI( int s, int r0, int rLim, int c0 = -1, int cLim = -1 )
         :   s(s), r0(r0), rLim(rLim), c0(c0), cLim(cLim)    {}
+    int c_0() const                 {return (c0 >= 0 ? c0 : 0);}
+    int c_lim( int wmax ) const     {return (cLim >= 0 ? cLim : wmax);}
+    int width( int wmax ) const     {return c_lim( wmax ) - c_0();}
+    int height() const              {return rLim - r0;}
+    float midPt() const             {return (r0 + rLim) / 2.0;}
+    int area( int wmax ) const      {return width( wmax ) * height();}
+    bool containsR( int r ) const   {return (r >= r0 && r < rLim);}
+    bool containsC( int c ) const;
+    bool operator==( const IMRO_ROI &rhs ) const;
     bool operator<( const IMRO_ROI &rhs ) const;
 };
 

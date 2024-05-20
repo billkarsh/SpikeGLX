@@ -52,6 +52,32 @@ bool IMRO_Site::operator<( const IMRO_Site &rhs ) const
 /* IMRO_ROI ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+bool IMRO_ROI::containsC( int c ) const
+{
+// Within left?
+
+    if( c0 < 0 )
+        ;
+    else if( c < c0 )
+        return false;
+
+// Within right?
+
+    if( cLim < 0 )
+        return true;
+
+    return c < cLim;
+}
+
+
+bool IMRO_ROI::operator==( const IMRO_ROI &rhs ) const
+{
+    return s==rhs.s
+            && r0==rhs.r0 && rLim==rhs.rLim
+            && c0==rhs.c0 && cLim==rhs.cLim;
+}
+
+
 bool IMRO_ROI::operator<( const IMRO_ROI &rhs ) const
 {
     if( s < rhs.s )
@@ -392,6 +418,34 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _x0_ev      = 53;
                 _x0_od      = 53;
                 _xpitch     = 15;
+                _zpitch     = 15;
+                break;
+            case 3010:  // NXT single shank (Ph 1B)
+            case 3011:  // NXT single shank (Ph 1B) with cap
+                _ncolhwr    = 2;
+                _ncolvis    = 2;
+                col2vis_ev  = {0,1};
+                col2vis_od  = {0,1};
+                _shankpitch = 0;
+                _shankwid   = 70;
+                _tiplength  = 206;
+                _x0_ev      = 27;
+                _x0_od      = 27;
+                _xpitch     = 32;
+                _zpitch     = 15;
+                break;
+            case 3020:  // NXT multishank (Ph 1B)
+            case 3021:  // NXT multishank (Ph 1B) with cap
+                _ncolhwr    = 2;
+                _ncolvis    = 2;
+                col2vis_ev  = {0,1};
+                col2vis_od  = {0,1};
+                _shankpitch = 250;
+                _shankwid   = 70;
+                _tiplength  = 206;
+                _x0_ev      = 27;
+                _x0_od      = 27;
+                _xpitch     = 32;
                 _zpitch     = 15;
                 break;
             default:
@@ -823,7 +877,7 @@ void IMROTbl::edit_defaultROI( tImroROIs vR ) const
 }
 
 
-// - Boxes span shanks.
+// - Boxes are whole- or half-shank width.
 // - Boxes enclose all AP channels.
 // - Canonical attributes all channels.
 //
@@ -831,22 +885,21 @@ bool IMROTbl::edit_isCanonical( tImroROIs vR ) const
 {
 // Assess boxes
 
-    int nr = 0;
+    int ne = 0;
 
     for( int ib = 0; ib < vR.size(); ++ib ) {
 
         const IMRO_ROI  &B = vR[ib];
+        int             w  = B.width( _ncolhwr );
 
-        int c0 = qMax( 0, B.c0 ),
-            cL = (B.cLim >= 0 ? B.cLim : _ncolhwr);
 
-        if( c0 != 0 || cL != _ncolhwr )
+        if( !(w == _ncolhwr || w == _ncolhwr/2) )
             return false;
 
-        nr += B.rLim - B.r0;
+        ne += B.area( _ncolhwr );
     }
 
-    return nr * _ncolhwr == nAP() && edit_Attr_canonical();
+    return ne == nAP() && edit_Attr_canonical();
 }
 
 
@@ -949,8 +1002,8 @@ void IMROTbl::edit_exclude( tImroSites vX, tconstImroROIs vR ) const
 
         const IMRO_ROI  &B = vR[ib];
 
-        int c0 = qMax( 0, B.c0 ),
-            cL = (B.cLim >= 0 ? B.cLim : _ncolhwr);
+        int c0 = B.c_0(),
+            cL = B.c_lim( _ncolhwr );
 
         for( int r = B.r0; r < B.rLim; ++r ) {
 
@@ -1201,9 +1254,12 @@ QString IMROTbl::default_imroLE( int type )
 {
     switch( type ) {
         case 21:
-        case 2003: return "*Default (bank 0, ref ext)";
+        case 2003:
+        case 2020:
+        case 3010: return "*Default (bank 0, ref ext)";
         case 24:
         case 2013: return "*Default (shnk 0, bank 0, ref ext)";
+        case 3020: return "*Default (shnk 0+1, bank 0, ref ext)";
         case -3: return "*Default (bank 0, ref ext, gain 500/250)";
         default: return "*Default (bank 0, ref ext, gain 500/250, flt on)";
     }

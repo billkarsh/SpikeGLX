@@ -93,7 +93,7 @@ signals:
     void lbutClicked( int ic, bool shift );
     void lbutReleased();
     void gridHover( int s, int r, bool quiet = false );
-    void gridClicked( int s, int r, bool shift );
+    void gridClicked( int s, int c, int r, bool shift );
 
 public slots:
 #ifdef OPENGL54
