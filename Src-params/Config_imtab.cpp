@@ -499,10 +499,10 @@ void Config_imtab::forceBut()
 {
     fromTbl();
 
-    QDialog                     D;
-    Ui::IMForceDlg              ui;
-    int                         ip  = curProbe();
-    const CimCfg::ImProbeDat    &P  = cfg->prbTab.get_iProbe( ip );
+    QDialog             D;
+    Ui::IMForceDlg      ui;
+    int                 ip  = curProbe();
+    CimCfg::ImProbeDat  &P  = cfg->prbTab.mod_iProbe( ip );
 
     D.setWindowFlags( D.windowFlags()
         & ~(Qt::WindowContextHelpButtonHint
@@ -527,11 +527,14 @@ void Config_imtab::forceBut()
         QString sn  = ui.snNewLE->text().trimmed(),
                 pn  = ui.pnNewLE->text().trimmed();
 
-        if( !sn.isEmpty() || !pn.isEmpty() ) {
+        if( !sn.isEmpty() )
+            P.sn = sn.toULongLong();
 
+        if( !pn.isEmpty() )
+            P.pn = pn;
+
+        if( !sn.isEmpty() || !pn.isEmpty() )
             CimCfg::forceProbeData( P.slot, P.port, P.dock, sn, pn );
-            cfg->initUsing_im_ob();
-        }
     }
 }
 

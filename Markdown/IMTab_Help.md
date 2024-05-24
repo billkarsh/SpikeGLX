@@ -224,7 +224,9 @@ each listed AP channel. It's just a convenience.
 ## Fix Probe ID
 
 This tool allows you to alter the stored serial number and part number
-of the selected probe. It is only used for faulty EEPROM chips.
+of the selected probe. It is useful when a probe has a faulty EEPROM chip.
+The new values that you enter here will be used for this run. However, the
+values are not stored, so you will have to use the tool again for each run.
 
 --------
 
