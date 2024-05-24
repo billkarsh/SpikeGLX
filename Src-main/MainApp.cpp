@@ -56,7 +56,7 @@ const QString& AppData::getDataDir( int i ) const
     QMutexLocker    ml( &remoteMtx );
 
     if( i < 0 || i >= slDataDir.size() )
-        return empty;
+        return QString();
 
     return slDataDir[i];
 }
@@ -93,7 +93,7 @@ void AppData::dataDirDlg()
 }
 
 
-void AppData::updateDataDir(QStringList &sl, bool isMulti )
+void AppData::updateDataDir( QStringList &sl, bool isMulti )
 {
     QMutexLocker    ml( &remoteMtx );
     slDataDir   = sl;
@@ -104,7 +104,8 @@ void AppData::updateDataDir(QStringList &sl, bool isMulti )
 void AppData::setDir( const QString &path, int i )
 {
     QMutexLocker    ml( &remoteMtx );
-    resize_slDataDir( i + 1 );
+    while( slDataDir.size() < i + 1 )
+        slDataDir.append( QString() );
     slDataDir[i] = path;
 }
 
@@ -143,7 +144,6 @@ void AppData::loadSettings( QSettings &S )
     loadDataDir( S );
 
     lastViewedFile  = S.value( "lastViewedFile", getDataDir( 0 ) ).toString();
-    multidrive      = S.value( "multidrive", false ).toBool();
     debug           = S.value( "debug", false ).toBool();
     editLog         = S.value( "editLog", false ).toBool();
 
@@ -167,33 +167,23 @@ void AppData::saveSettings( QSettings &S ) const
 }
 
 
-void AppData::resize_slDataDir( int n )
-{
-    slDataDir.reserve( n );
-
-    for( int i = slDataDir.size(); i < n; ++i )
-        slDataDir.push_back( empty );
-}
-
-
 void AppData::loadDataDir( QSettings &S )
 {
-    QMutexLocker    ml( &remoteMtx );
-
-    const char  *defDataDir = "SGL_DATA";
-
-    slDataDir = S.value( "dataDir" ).toStringList();
+    slDataDir   = S.value( "dataDir" ).toStringList();
+    multidrive  = S.value( "multidrive", false ).toBool();
 
     if( slDataDir.isEmpty() || !QFileInfo( slDataDir[0] ).exists() ) {
 
-        resize_slDataDir( 1 );
+        const char  *defDataDir = "SGL_DATA";
+
+        multidrive = false;
 
 #ifdef Q_OS_WIN
-        slDataDir[0] =
-        QString("%1%2").arg( QDir::rootPath() ).arg( defDataDir );
+        slDataDir.prepend(
+        QString("%1%2").arg( QDir::rootPath() ).arg( defDataDir ) );
 #else
-        slDataDir[0] =
-        QString("%1/%2").arg( QDir::homePath() ).arg( defDataDir );
+        slDataDir.prepend(
+        QString("%1/%2").arg( QDir::homePath() ).arg( defDataDir ) );
 #endif
 
         if( !QDir().mkpath( slDataDir[0] ) ) {

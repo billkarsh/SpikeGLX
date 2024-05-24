@@ -30,8 +30,7 @@ class QSettings;
 
 struct AppData {
     QStringList     slDataDir;
-    QString         empty,
-                    lastViewedFile;
+    QString         lastViewedFile;
     bool            multidrive,
                     debug,
                     editLog;
@@ -51,7 +50,6 @@ struct AppData {
     void saveSettings( QSettings &S ) const;
 
 private:
-    void resize_slDataDir( int n );
     void loadDataDir( QSettings &S );
 };
 
