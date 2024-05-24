@@ -121,7 +121,7 @@ void CniCfg::fillSRateCB( QComboBox *CB, const QString &selKey ) const
 
     CB->clear();
 
-    foreach( const QString &key, nidev2srate.keys() )
+    foreach( const QString &key, key2NIRate.keys() )
         CB->addItem( key );
 
     CB->setCurrentIndex( CB->findText( selKey ) );
@@ -137,13 +137,49 @@ double CniCfg::key2SetRate( const QString &key ) const
     if( sl.count() < 2 )
         return 100.0;   // min NI rate Bill allows
 
-    return sl.at( 1 ).toDouble();
+    return sl[1].toDouble();
+}
+
+
+// F   = Master F
+// X   = F/D
+// Adj = X - (X - F/(D+1))*0.01
+//
+// Adj = X - X*(1 - D/(D+1))*0.01
+//
+double CniCfg::adjSetRate( const QString &key ) const
+{
+    double rate = key2SetRate( key );
+
+    const NIRate    &R = key2NIRate[key];
+
+    if( R.div )
+        rate -= rate * (1.0 - R.div/(R.div + 1.0)) * 0.01;
+
+    return rate;
 }
 
 
 double CniCfg::getSRate( const QString &key ) const
 {
-    return nidev2srate.value( key, key2SetRate( key ) );
+    if( key2NIRate.contains( key ) )
+        return key2NIRate[key].calRate;
+
+    return 100.0;
+}
+
+
+void CniCfg::newSRate(
+    const QString   &key,
+    double          srate,
+    int             div,
+    const QString   &devType )
+{
+    NIRate  R;
+    R.calRate   = srate;
+    R.devType   = devType;
+    R.div       = div;
+    key2NIRate[key] = R;
 }
 
 
@@ -157,12 +193,32 @@ void CniCfg::loadSRateTable()
                 QSettings::IniFormat );
     settings.beginGroup( "CalibratedNIDevices" );
 
-    nidev2srate.clear();
+    key2NIRate.clear();
 
     foreach( const QString &key, settings.childKeys() ) {
 
-        nidev2srate[key] =
-            settings.value( key, key2SetRate( key ) ).toDouble();
+        NIRate  R;
+        QStringList sl = settings.value( key ).toStringList();
+
+        switch( sl.size() ) {
+            case 1:
+                R.calRate   = sl[0].toDouble();
+                break;
+            case 2:
+                R.calRate   = sl[0].toDouble();
+                R.div       = sl[1].toInt();
+                break;
+            case 3:
+                R.calRate   = sl[0].toDouble();
+                R.div       = sl[1].toInt();
+                R.devType   = sl[2];
+                break;
+            default:
+                R.calRate   = key2SetRate( key );
+                break;
+        }
+
+        key2NIRate[key] = R;
     }
 }
 
@@ -177,10 +233,23 @@ void CniCfg::saveSRateTable() const
                 QSettings::IniFormat );
     settings.beginGroup( "CalibratedNIDevices" );
 
-    QMap<QString,double>::const_iterator    it;
+    QMap<QString,NIRate>::const_iterator    it;
 
-    for( it = nidev2srate.begin(); it != nidev2srate.end(); ++it )
-        settings.setValue( it.key(), it.value() );
+    for( it = key2NIRate.begin(); it != key2NIRate.end(); ++it ) {
+
+        QStringList sl;
+        sl.append( QString::number( it.value().calRate ) );
+
+        if( it.value().div ) {
+
+            sl.append( QString::number( it.value().div ) );
+
+            if( !it.value().devType.isEmpty() )
+                sl.append( it.value().devType );
+        }
+
+        settings.setValue( it.key(), sl );
+    }
 }
 
 
@@ -1037,6 +1106,26 @@ void CniCfg::probeAllDOLines()
 
     noDaqErrPrint = savedPrt;
 }
+
+/* ---------------------------------------------------------------- */
+/* devType -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+// E.g., PXIe-6342.
+//
+#ifdef HAVE_NIDAQmx
+QString CniCfg::devType( const QString &dev )
+{
+    char type[1024];
+    DAQmxGetDevProductType( STR2CHR( dev ), type, sizeof(type) );
+    return type;
+}
+#else
+QString CniCfg::devType( const QString &dev )
+{
+    return SIMAIDEV;
+}
+#endif
 
 /* ---------------------------------------------------------------- */
 /* supportsAISimultaneousSampling --------------------------------- */

@@ -49,6 +49,13 @@ public:
     // Types
     // -----
 
+    struct NIRate {
+        double  calRate;
+        QString devType;
+        int     div;
+        NIRate() : div(0)   {}
+    };
+
     // ------
     // Params
     // ------
@@ -65,8 +72,8 @@ private:
                     _uiXAStr2,
                     _uiXDStr2;
 
-    QMap<QString,double>
-                    nidev2srate;    // 'dev : setrate' -> srate
+    QMap<QString,NIRate>
+                    key2NIRate;     // key = 'dev : setrate'
 
 public:
     VRange          range;
@@ -128,9 +135,15 @@ public:
 
     void fillSRateCB( QComboBox *CB, const QString &selKey ) const;
     double key2SetRate( const QString &key ) const;
+    double adjSetRate( const QString &key ) const;
     double getSRate( const QString &key ) const;
     void setSRate( const QString &key, double srate )
-        {nidev2srate[key] = srate;}
+        {key2NIRate[key].calRate = srate;}
+    void newSRate(
+        const QString   &key,
+        double          srate,
+        int             div,
+        const QString   &devType );
 
     void loadSRateTable();
     void saveSRateTable() const;
@@ -186,6 +199,7 @@ public:
     static void probeAllDILines();
     static void probeAllDOLines();
 
+    static QString devType( const QString &dev );
     static bool supportsAISimultaneousSampling( const QString &dev );
     static double maxTimebase( const QString &dev );
     static double maxDigitalRate( const QString &dev );

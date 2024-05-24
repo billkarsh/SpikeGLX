@@ -662,8 +662,9 @@ void Config_nitab::newSourceBut()
 // Get settings
 // ------------
 
-    nisrc.dev   = devNames[CURDEV1];
-    nisrc.base  = CniCfg::maxTimebase( nisrc.dev );
+    nisrc.dev       = devNames[CURDEV1];
+    nisrc.devType   = CniCfg::devType( nisrc.dev );
+    nisrc.base      = CniCfg::maxTimebase( nisrc.dev );
 
     if( CniCfg::isDigitalDev( nisrc.dev ) ) {
 
@@ -830,6 +831,7 @@ redo:
 
         double  rate    = sourceUI->rateSB->value();
         QString key     = sourceUI->nameLE->text().trimmed();
+        int     div     = sourceUI->divSB->value();
 
         if( key.isEmpty() ) {
 
@@ -851,7 +853,7 @@ redo:
 
         key = QString("%1 : %2").arg( key ).arg( rate, 0, 'f', 6 );
 
-        cfg->acceptedParams.ni.setSRate( key, rate );
+        cfg->acceptedParams.ni.newSRate( key, rate, div, nisrc.devType );
         cfg->acceptedParams.ni.fillSRateCB( niTabUI->clkSourceCB, key );
         cfg->acceptedParams.ni.saveSRateTable();
         clkSourceCBChanged();
@@ -954,7 +956,7 @@ void Config_nitab::sourceSetDiv( int i )
 
 void Config_nitab::sourceMakeName()
 {
-    QString name = nisrc.dev;
+    QString name = nisrc.devType;
 
     if( !nisrc.simsam ) {
 

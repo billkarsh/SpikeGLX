@@ -29,7 +29,8 @@ private:
                 maxrate,
                 settle,
                 saferate;
-        QString dev;
+        QString dev,
+                devType;
         int     nAI;
         bool    simsam,
                 exttrig;
