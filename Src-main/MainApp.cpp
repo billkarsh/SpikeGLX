@@ -56,7 +56,7 @@ const QString& AppData::getDataDir( int i ) const
     QMutexLocker    ml( &remoteMtx );
 
     if( i < 0 || i >= slDataDir.size() )
-        return QString();
+        return empty;
 
     return slDataDir[i];
 }
@@ -1404,6 +1404,8 @@ QString MainApp::remoteSetsRunName( const QString &name )
 QString MainApp::remoteStartsRun()
 {
     QString err;
+
+    configCtl->dialog()->close();
 
     runCmdStart( &err );
 

@@ -551,7 +551,7 @@ bool CniAcqDmx::createAITasks(
      || DAQmxErrChkNoJump( DAQmxCfgSampClkTiming(
                             taskAI1,
                             STR2CHR( clk1 ),
-                            p.ni.key2SetRate( p.ni.clockSource ),
+                            p.ni.adjSetRate( p.ni.clockSource ),
                             DAQmx_Val_Rising,
                             DAQmx_Val_ContSamps,
                             maxMuxedSampPerChan ) )
@@ -591,7 +591,7 @@ device2:
      || DAQmxErrChkNoJump( DAQmxCfgSampClkTiming(
                             taskAI2,
                             STR2CHR( clk2 ),
-                            p.ni.key2SetRate( p.ni.clockSource ),
+                            p.ni.adjSetRate( p.ni.clockSource ),
                             DAQmx_Val_Rising,
                             DAQmx_Val_ContSamps,
                             maxMuxedSampPerChan ) )
@@ -665,7 +665,7 @@ bool CniAcqDmx::createDITasks(
      || DAQmxErrChkNoJump( DAQmxCfgSampClkTiming(
                             taskDI1,
                             STR2CHR( clk1 ),
-                            p.ni.key2SetRate( p.ni.clockSource ),
+                            p.ni.adjSetRate( p.ni.clockSource ),
                             DAQmx_Val_Rising,
                             DAQmx_Val_ContSamps,
                             maxMuxedSampPerChan ) )
@@ -707,7 +707,7 @@ device2:
      || DAQmxErrChkNoJump( DAQmxCfgSampClkTiming(
                             taskDI2,
                             STR2CHR( clk2 ),
-                            p.ni.key2SetRate( p.ni.clockSource ),
+                            p.ni.adjSetRate( p.ni.clockSource ),
                             DAQmx_Val_Rising,
                             DAQmx_Val_ContSamps,
                             maxMuxedSampPerChan ) )
@@ -737,6 +737,69 @@ device2:
 // tasks access this clock at Ctr0InternalOutput. External devices
 // can use pin 2 (PFI 12).
 //
+// Sample Clock Notes
+// ------------------
+// We want DI and AI to be synchronized, so we want a common waveform
+// driving both. With an external clock source we simply route that to
+// the DI and AI tasks. For the internal source, we could independently
+// set DI:: and AI::DAQmxCfgSampClkTiming() to use internal clock ("")
+// but these are asynchronous tasks and there is no guarantee they start
+// acquiring on the same edge.
+//
+// To solve that we implemented this scheme of programming counter-0 as
+// the common waveform when internal source is selected. Originally,
+// Ctr0InternalOutput was separately fed to DI and AI tasks. In Jan 2019
+// (see email that date) we discovered that ADLink chassis did not provide
+// a path from Ctr0InternalOutput to the DI task.
+//
+// At that time we solved the problem by ensuring that there is always an
+// AI task (a dummy one if need be) and that we could route ai/SampleClock
+// to the DI task. Probably we could have dispensed with counter-0 at that
+// point, but we did not think of that in time. It is now documented that
+// the internal sample clock is visible at Ctr0InternalOutput (PFI 12) and
+// Whispers are wired that way...so the common counter-0 scheme persists.
+//
+// In January 2024 Jennifer discovered that for a handful of sample rates,
+// programming that rate in DAQmxCreateCOPulseChanFreq() resulted in an
+// actual rate differing by as much as 100 Hz (typical delta is ~0.3 Hz).
+// This was true even of rates constructed in our Sample Rate dialog to
+// have the form master-rate/integer-divisor. The magnitude of the error
+// depends upon the target rate because what happens internally is the API
+// rounds to an alternate divisor. Usually it is odd divisors that lead
+// to an altered rate. The problematic divisors are different ones for
+// different devices. Further, which divisors appear to be problematic
+// depends upon how the desired frequency is calculated in test programs
+// because the issue is essentially about how values are rounded.
+//
+// Jennifer further found a means to actualize any rate of that form,
+// entailing slightly shifting the programmed rate. In particular, if
+// the master rate is (F) and the divisor is (D), desired rate X = F/D
+// is achieved by programming:
+// Jennifer altered rate = X - (X - F/(D+1))*0.01.
+//
+// Note that DAQmxCreateCOPulseChanFreq() requires the Jennifer rate, but
+// DAQmxCfgSampClkTiming() does not. Rather, DAQmxCfgSampClkTiming() will
+// produce the desired rate either by programming the Jennifer rate or the
+// desired rate. So the Jennifer rate can be used in the general case.
+//
+// This is a reason we are keeping the counter-0 scheme in place. Users
+// already have amassed favorite practices and rates. If we switched from
+// counter-0 to a DAQmxCfgSampClkTiming() scheme (always directly program
+// an AI task to drive a DI task) then the same user input rate would give
+// a different (yes, more correct) actual rate, but that could make their
+// experiments inconsistent and irreproducible.
+//
+// Rather, in light of Jennifer's formula to more accurately program rates,
+// we will now (May 2024) maintain the existing wrong rates for any pre-
+// existing user rate settings, and will correctly program newly created
+// rate settings. We will expand the data stored about user rate settings
+// to include the divisor. This will allow us to discriminate old from new
+// settings and provide the data needed to implement the Jennifer formula.
+// Moreover, the device type will now be stored with the rate so we can
+// check compatibility of a selected rate with the current actual device.
+// For example, a 'safe rate' is no longer safe if the device in the slot
+// was changed for a different type.
+//
 bool CniAcqDmx::createInternalCTRTask()
 {
     taskIntCTR = 0;
@@ -753,7 +816,7 @@ bool CniAcqDmx::createInternalCTRTask()
                             DAQmx_Val_Hz,
                             DAQmx_Val_Low,
                             0.0,
-                            p.ni.key2SetRate( p.ni.clockSource ),
+                            p.ni.adjSetRate( p.ni.clockSource ),
                             0.5 ) )
      || DAQmxErrChkNoJump( DAQmxCfgImplicitTiming(
                             taskIntCTR,

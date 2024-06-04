@@ -30,7 +30,8 @@ class QSettings;
 
 struct AppData {
     QStringList     slDataDir;
-    QString         lastViewedFile;
+    QString         lastViewedFile,
+                    empty;
     bool            multidrive,
                     debug,
                     editLog;
