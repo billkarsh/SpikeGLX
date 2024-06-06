@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+June 5, 2024
+
+* SpikeGLX-CPP-SDK supports Linux.
+
 April 24, 2024
 
 * C_Waves 2.6 (Handle int64 or uint64 spike times).

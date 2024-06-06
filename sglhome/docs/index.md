@@ -115,7 +115,7 @@ as 'the enclustra'.
 SDK = Software Development Kit<br>
 API = Application Programming Interface*
 
-SpikeGLX can be driven in real time by your own remote **Windows** application.
+SpikeGLX can be driven in real time by your own remote Windows or Linux application.
 The API uses the TCP/IP protocol. Your custom application can run on a separate
 computer (on the same network as SpikeGLX) or on the same computer. The API
 allows you to:
