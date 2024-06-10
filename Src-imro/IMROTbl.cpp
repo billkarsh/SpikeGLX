@@ -276,10 +276,10 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 col2vis_ev  = {0,1,2,3,4,5,6,7};
                 col2vis_od  = {0,1,2,3,4,5,6,7};
                 _shankpitch = 0;
-                _shankwid   = 70;
+                _shankwid   = 73;
                 _tiplength  = 203.5;
-                _x0_ev      = 14;
-                _x0_od      = 14;
+                _x0_ev      = 15.5f;
+                _x0_od      = 15.5f;
                 _xpitch     = 6;
                 _zpitch     = 6;
                 break;
@@ -337,7 +337,6 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 break;
             case 1200:  // NHP 128 channel analog 25mm
             case 1210:  // NHP 128 channel analog 45mm
-//@OBX Need true NP1200 xoffsets.
                 _ncolhwr    = 2;
                 _ncolvis    = 4;
                 col2vis_ev  = {1,3};
@@ -345,10 +344,10 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _shankpitch = 0;
                 _shankwid   = 125;
                 _tiplength  = 372;
-                _x0_ev      = 54.5;
-                _x0_od      = 38.5;
+                _x0_ev      = 56.5f;
+                _x0_od      = 36.5f;
                 _xpitch     = 32;
-                _zpitch     = 20;
+                _zpitch     = 31;
                 break;
             case 1300:  // Opto
                 _ncolhwr    = 2;
@@ -413,10 +412,9 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 col2vis_od  = {3};
                 _shankpitch = 0;
                 _shankwid   = 70;
-//@OBX Need true NP3000 tiplength.
                 _tiplength  = 206;
-                _x0_ev      = 53;
-                _x0_od      = 53;
+                _x0_ev      = 59;
+                _x0_od      = 59;
                 _xpitch     = 15;
                 _zpitch     = 15;
                 break;
@@ -428,7 +426,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 col2vis_od  = {0,1};
                 _shankpitch = 0;
                 _shankwid   = 70;
-                _tiplength  = 206;
+                _tiplength  = 203;
                 _x0_ev      = 27;
                 _x0_od      = 27;
                 _xpitch     = 32;
@@ -442,7 +440,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 col2vis_od  = {0,1};
                 _shankpitch = 250;
                 _shankwid   = 70;
-                _tiplength  = 206;
+                _tiplength  = 204;
                 _x0_ev      = 27;
                 _x0_od      = 27;
                 _xpitch     = 32;
