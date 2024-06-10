@@ -7,6 +7,7 @@
 + Improve selection in Configure Slots dialog.
 + Improve handling of unknown probe types.
 + Improve generation of NI sample rates.
++ Allow remote fetch of filtered IM stream.
 + Simplify run initialization progress dialog.
 + FileViewer gets LF-band filter.
 + New imro editor site selection scheme.

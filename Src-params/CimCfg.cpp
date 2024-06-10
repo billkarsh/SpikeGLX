@@ -1688,8 +1688,8 @@ void CimCfg::closeAllBS( bool report )
 
             np_closeBS( slot );
             np_openBS( slot );
-            np_switchmatrix_set( slot, SM_Output_SMA, SM_Input_SyncClk, false );
-            np_switchmatrix_set( slot, SM_Output_PXISYNC, SM_Input_SyncClk, false );
+            np_switchmatrix_clear( slot, SM_Output_SMA );
+            np_switchmatrix_clear( slot, SM_Output_PXISYNC );
             np_closeBS( slot );
         }
     }

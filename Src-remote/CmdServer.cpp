@@ -284,7 +284,13 @@ ConfigCtl* CmdWorker::okStreamToks( const QString &cmd, int &js, int &ip, const 
 
         js = toks[0].toInt();
         ip = toks[1].toInt();
-        return okjsip( cmd, js, ip );
+
+        int absjs = js;
+
+        if( js == -jsIM && cmd == "FETCH" )
+            absjs = jsIM;
+
+        return okjsip( cmd, absjs, ip );
     }
 
     errMsg = QString("%1: Requires at least 2 params.").arg( cmd );
@@ -901,7 +907,7 @@ void CmdWorker::fetch( const QStringList &toks )
         const AIQ*          aiQ = mainApp()->getRun()->getQ( js, ip );
 
         if( !aiQ )
-            errMsg = "FETCH: Not running.";
+            errMsg = "FETCH: Not running or stream not enabled.";
         else {
 
             // -----
@@ -917,9 +923,10 @@ void CmdWorker::fetch( const QStringList &toks )
             else if( toks.at( 4 ) == "-2#" ) {
 
                 switch( js ) {
-                    case jsNI: chanBits = p.ni.sns.saveBits; break;
-                    case jsOB: chanBits = p.im.obxj[ip].sns.saveBits; break;
-                    case jsIM: chanBits = p.im.prbj[ip].sns.saveBits; break;
+                    case jsNI:  chanBits = p.ni.sns.saveBits; break;
+                    case jsOB:  chanBits = p.im.obxj[ip].sns.saveBits; break;
+                    case jsIM:
+                    case -jsIM: chanBits = p.im.prbj[ip].sns.saveBits; break;
                 }
             }
             else {
