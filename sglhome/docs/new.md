@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+June 11, 2024
+
+* SpikeGLX 20240129-phase30 (New IMRO editor, imec v3.62.1).
+
 June 5, 2024
 
 * SpikeGLX-CPP-SDK supports Linux.
