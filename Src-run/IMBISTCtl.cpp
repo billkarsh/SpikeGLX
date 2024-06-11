@@ -287,10 +287,6 @@ bool IMBISTCtl::probeType()
     NP_ErrorCode    err;
     HardwareID      hID;
 
-// @@@ FIX This delay was needed for bad USB-C port
-//    if( slot >= 20 )
-//        QThread::msleep ( 500 );
-
 // ----
 // HSPN
 // ----

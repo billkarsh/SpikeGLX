@@ -18,7 +18,6 @@ using namespace Neuropixels;
 #include <QFileInfo>
 #include <QSettings>
 #include <QTableWidget>
-#include <QThread>
 
 
 /* ---------------------------------------------------------------- */
@@ -2153,10 +2152,6 @@ guiBreathe();
 
             continue;
         }
-
-// @@@ FIX This delay was needed for bad USB-C port
-//        if( P.slot >= imSlotUSBMin )
-//            QThread::msleep( 500 );
 
         // ----
         // HSPN
