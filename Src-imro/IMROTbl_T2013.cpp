@@ -16,7 +16,7 @@ int IMROTbl_T2013::refTypeAndFields( int &shank, int &bank, int ch ) const
     bank = 0;
 
     if( rid == 0 ) {
-        shank = 0;
+        shank = (ch < 4 ? ch : 0);
         return 0;
     }
     else if( rid == 1 ) {

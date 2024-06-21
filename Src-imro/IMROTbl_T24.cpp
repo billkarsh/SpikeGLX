@@ -21,7 +21,7 @@ int IMROTbl_T24::refTypeAndFields( int &shank, int &bank, int ch ) const
     int rid = e[ch].refid;
 
     if( rid == 0 ) {
-        shank   = 0;
+        shank   = (ch < 4 ? ch : 0);
         bank    = 0;
         return 0;
     }

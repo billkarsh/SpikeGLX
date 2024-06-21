@@ -775,6 +775,22 @@ int IMROTbl::selectSites( int slot, int port, int dock, bool write ) const
 int IMROTbl::selectRefs( int slot, int port, int dock ) const
 {
 #ifdef HAVE_IMEC
+// -------------------------------
+// Disconnect the 4 shank switches
+// -------------------------------
+
+    if( nShank() == 4 ) {
+
+        for( int ic = 0; ic < 4; ++ic ) {
+
+            NP_ErrorCode    err =
+            np_setReference( slot, port, dock, ic, ic, NONE_REF, 0 );
+
+            if( err != SUCCESS )
+                return err;
+        }
+    }
+
 // ---------------------------------------
 // Connect all according to table ref data
 // ---------------------------------------
