@@ -2285,6 +2285,11 @@ guiBreathe();
                     QString("IMEC getFlexHardwareID(slot %1, port %2, dock %3)%4")
                     .arg( P.slot ).arg( P.port ).arg( P.dock )
                     .arg( makeErrorString( err ) ) );
+                if( err == TIMEOUT ) {
+                    slVers.append("");
+                    slVers.append("Error 8 will occur if you detect with a headstage tester attached.");
+                    slVers.append("Use the headstage test dongle only with command: Tools/HST.");
+                }
                 return false;
             }
 
