@@ -4,6 +4,12 @@
 #include "CimAcqImec.h"
 #include "Util.h"
 
+#ifdef HAVE_VISA
+#define NIVISA_PXI  // include PXI VISA attributes
+#include "NI/visa.h"
+#include <QSettings>
+#endif
+
 
 #define STOPCHECK   if( isStopped() ) return false;
 
@@ -299,6 +305,161 @@ bool CimAcqImec::_aux_setPXISyncAsInput( int slot )
 }
 
 
+// Note:
+// Trigger bus settings applied here are undone by system reboot.
+// That allows NI-MAX to regain control of routes and reservations.
+//
+bool CimAcqImec::_aux_setPXITrigBus( const QVector<int> &vslots, int srcSlot )
+{
+#ifdef HAVE_VISA
+
+// --------------------------
+// More than 1 selected slot?
+// --------------------------
+
+    int ns = vslots.size();
+
+    if( ns < 2 )
+        return true;
+
+// ----------------------------
+// Chassis has more than 1 bus?
+// ----------------------------
+
+    QSettings   S( osPath() + "/pxisys.ini", QSettings::IniFormat );
+    QStringList busList;
+
+    S.beginGroup( "Chassis1" );
+    busList = S.value( "TriggerBusList" ).toString()
+                .split( ",", QString::SkipEmptyParts );
+    S.endGroup();
+
+    int nb = busList.size();
+
+    if( nb < 2 )
+        return true;
+
+// ------------------------------
+// Parse highest slot on each bus
+// ------------------------------
+
+    QVector<int>    ib2maxslot;
+
+    for( int ib = 0; ib < nb; ++ib ) {
+
+        S.beginGroup( QString("Chassis1TriggerBus%1").arg( busList[ib] ) );
+        QStringList sl = S.value( "SlotList" ).toString()
+                            .split( ",", QString::SkipEmptyParts );
+        S.endGroup();
+        ib2maxslot.push_back( sl.last().toInt() );
+    }
+
+// -------------------------------------
+// Which buses do selected slots occupy?
+// -------------------------------------
+
+    QVector<int>    ibOcc( nb, 0 );
+    int             src_ibus = 0;
+
+    for( int is = 0; is < ns; ++is ) {
+
+        int slot = vslots[is],
+            ibus = 0;
+
+        for( int ib = 0; ib < nb; ++ib ) {
+            if( slot <= ib2maxslot[ib] ) {
+                ibus = ib;
+                break;
+            }
+        }
+
+        if( slot == srcSlot )
+            src_ibus = ibus;
+
+        ++ibOcc[ibus];
+    }
+
+// --------------------------------------
+// Any occupied bus differs from src_bus?
+// --------------------------------------
+
+    bool    differs = false;
+
+    for( int ib = 0; ib < nb; ++ib ) {
+        if( ib != src_ibus && ibOcc[ib] > 0 ) {
+            differs = true;
+            break;
+        }
+    }
+
+    if( !differs )
+        return true;
+
+// ------------------------------------------
+// Need to reserve at least one bus with VISA
+// ------------------------------------------
+
+    ViSession   rsrcMgr, rsrc;
+    ViStatus    status;
+    bool        ok = false;
+
+    status = viOpenDefaultRM( &rsrcMgr );
+    if( status < VI_SUCCESS ) {
+        Error() <<
+        QString("VISA: (%1) Failed to open resource manager.").arg( status );
+        return false;
+    }
+
+    status = viOpen( rsrcMgr, "PXI::1::BACKPLANE", 0, 0, &rsrc );
+    if( status < VI_SUCCESS ) {
+        Error() <<
+        QString("VISA: (%1) Failed to open backplane resource.").arg( status );
+        goto closeMgr;
+    }
+
+    status = viSetAttribute( rsrc, VI_ATTR_PXI_SRC_TRIG_BUS, src_ibus + 1 );
+    if( status < VI_SUCCESS ) {
+        Error() <<
+        QString("VISA: (%1) Failed to set source trigger bus.").arg( status );
+        goto closeRsrc;
+    }
+
+    for( int ib = 0; ib < nb; ++ib ) {
+
+        if( ib != src_ibus && ibOcc[ib] > 0 ) {
+
+            status = viSetAttribute( rsrc, VI_ATTR_PXI_DEST_TRIG_BUS, ib + 1 );
+            if( status < VI_SUCCESS ) {
+                Error() <<
+                QString("VISA: (%1) Failed to set destination trigger bus.").arg( status );
+                goto closeRsrc;
+            }
+
+            status = viMapTrigger( rsrc, VI_TRIG_TTL7, VI_TRIG_TTL7, VI_NULL );
+            if( status < VI_SUCCESS ) {
+                Error() <<
+                QString("VISA: (%1) Failed to map bus line 7.").arg( status );
+                goto closeRsrc;
+            }
+        }
+    }
+
+    ok = true;
+
+closeRsrc:
+    status = viClose( rsrc );
+closeMgr:
+    status = viClose( rsrcMgr );
+    return ok;
+
+#else   // VISA disabled
+
+    return true;
+
+#endif
+}
+
+
 bool CimAcqImec::_aux_setSync( const CimCfg::ImProbeTable &T )
 {
     QVector<int>    vslots;
@@ -319,10 +480,14 @@ bool CimAcqImec::_aux_setSync( const CimCfg::ImProbeTable &T )
 
         ok = true;  // listener automatically
 
-        if( slot == srcSlot )
-            ok = _aux_setPXISyncAsOutput( slot );
-        else if( slot == p.sync.imPXIInputSlot )
-            ok = _aux_setPXISyncAsInput( slot );
+        if( slot == srcSlot ) {
+            ok = _aux_setPXITrigBus( vslots, slot ) &&
+                 _aux_setPXISyncAsOutput( slot );
+        }
+        else if( slot == p.sync.imPXIInputSlot ) {
+            ok = _aux_setPXITrigBus( vslots, slot ) &&
+                 _aux_setPXISyncAsInput( slot );
+        }
 
         if( !ok )
             return false;

@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20240620
+--------
++ Add VISA control of large PXI chassis.
+
 20240129
 --------
 + Fix geomMap indexing error.

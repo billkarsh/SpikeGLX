@@ -472,6 +472,7 @@ private:
     bool _aux_setObxSyncAsInput( int slot );
     bool _aux_setPXISyncAsOutput( int slot );
     bool _aux_setPXISyncAsInput( int slot );
+    bool _aux_setPXITrigBus( const QVector<int> &vslots, int srcSlot );
     bool _aux_setSync( const CimCfg::ImProbeTable &T );
     bool _aux_config();
 

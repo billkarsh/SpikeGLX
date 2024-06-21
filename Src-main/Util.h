@@ -162,6 +162,9 @@ void res2Str( QString &str, const QString resFile );
 // Remove terminal slash
 QString rmvLastSlash( const QString &path );
 
+// Windows directory
+QString osPath();
+
 // Current working directory
 QString appPath();
 

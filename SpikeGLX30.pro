@@ -4,13 +4,20 @@
 ######################################################################
 
 # Select real or simulated {IM,NI}:
+#DEFINES += HAVE_NXT
 DEFINES += HAVE_IMEC
+DEFINES += HAVE_VISA
 DEFINES += HAVE_NIDAQmx
 
 TEMPLATE = app
 
 contains(DEFINES, HAVE_NIDAQmx) {
-    TARGET = SpikeGLX
+    contains(DEFINES, HAVE_NXT) {
+        TARGET = SpikeGLX_NXT
+    }
+    else {
+        TARGET = SpikeGLX
+    }
 }
 else {
     TARGET = SpikeGLX_NISIM
@@ -106,20 +113,30 @@ win32 {
     contains(DEFINES, HAVE_IMEC) {
         QMAKE_LIBDIR += $${_PRO_FILE_PWD_}/IMEC
         contains(QT_ARCH, x86_64) {
-            LIBS += -lNeuropixAPI_x64_3_62_1
+            contains(DEFINES, HAVE_NXT) {
+                LIBS += -lNeuropixAPI_x64_3_69_dbg-NXT-PR2-77985af
+            }
+            else {
+                LIBS += -lNeuropixAPI_x64_3_62_1
+            }
         }
         else {
             LIBS += -lNeuropixAPI_x86_1_20
         }
     }
 
+    contains(QT_ARCH, x86_64) {
+        QMAKE_LIBDIR += $${_PRO_FILE_PWD_}/NI/lib64/msvc
+    }
+    else {
+        QMAKE_LIBDIR += $${_PRO_FILE_PWD_}/NI/lib32/msvc
+    }
+
+    contains(DEFINES, HAVE_VISA) {
+        LIBS += -lnivisa64
+    }
+
     contains(DEFINES, HAVE_NIDAQmx) {
-        contains(QT_ARCH, x86_64) {
-            QMAKE_LIBDIR += $${_PRO_FILE_PWD_}/NI/lib64/msvc
-        }
-        else {
-            QMAKE_LIBDIR += $${_PRO_FILE_PWD_}/NI/lib32/msvc
-        }
         LIBS += -lNIDAQmx
     }
 
