@@ -87,7 +87,7 @@ struct IMROTbl
 protected:
     std::vector<int>    col2vis_ev,
                         col2vis_od;
-    float               _shankpitch,
+    float               _shankpitch,    // microns for phys dims
                         _shankwid,
                         _tiplength,
                         _x0_ev,

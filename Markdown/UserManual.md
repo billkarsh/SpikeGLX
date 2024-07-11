@@ -112,6 +112,7 @@ The contents of a virgin (see below) SpikeGLX folder:
 SpikeGLX/
     _Calibration/
     _Help/
+    _ImroX/
     bearer/
     iconengines/
     imageformats/

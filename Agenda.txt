@@ -6,6 +6,7 @@
 + Add VISA control of large PXI chassis.
 + Imro editor can edit save-chan subset.
 + Improve passive probe PN/SN dialog.
++ Improve support for NPNH_HS_30, as custom "NP1221" probe.
 
 20240129
 --------

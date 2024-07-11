@@ -9,6 +9,7 @@
 #include "IMROTbl_T1122.h"
 #include "IMROTbl_T1123.h"
 #include "IMROTbl_T1200.h"
+#include "IMROTbl_T1221.h"
 #include "IMROTbl_T1300.h"
 #include "IMROTbl_T21.h"
 #include "IMROTbl_T24.h"
@@ -337,6 +338,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 break;
             case 1200:  // NHP 128 channel analog 25mm
             case 1210:  // NHP 128 channel analog 45mm
+            case 1221:  // Custom layout defaults
                 _ncolhwr    = 2;
                 _ncolvis    = 4;
                 col2vis_ev  = {1,3};
@@ -1148,6 +1150,7 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
                 break;
             case 1200:  // NHP 128 channel analog 25mm
             case 1210:  // NHP 128 channel analog 45mm
+            case 1221:  // Custom layout
                 type = 1200;
                 supp = true;
                 break;
@@ -1241,6 +1244,8 @@ IMROTbl* IMROTbl::alloc( const QString &pn )
             case 1210:  // NHP 128 channel analog 45mm
             case 3000:  // Passive NXT probe
                 return new IMROTbl_T1200( pn );
+            case 1221:  // Custom layout
+                return new IMROTbl_T1221( pn );
             case 1300:  // Opto
                 return new IMROTbl_T1300( pn );
             case 2000:  // NP 2.0 SS scrambled el 1280

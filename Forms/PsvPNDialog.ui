@@ -46,7 +46,7 @@
      <item>
       <widget class="QLabel" name="label_5">
        <property name="text">
-        <string>Use a comma-separated list, e.g., &quot;NP1200,NP1201&quot;</string>
+        <string>Use a comma-separated list, e.g., &quot;NP1200,NP1210,NP1221&quot;</string>
        </property>
       </widget>
      </item>
