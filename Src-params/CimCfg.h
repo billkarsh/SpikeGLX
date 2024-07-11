@@ -157,6 +157,7 @@ public:
         bool isOneBox() const   {return port == 9;}
         bool setProbeType();
         int nHSDocks() const;
+        quint64 calSN() const   {return (type == 1200 ? hssn : sn);}
 
         void loadSettings( QSettings &S, int i );
         void saveSettings( QSettings &S, int i ) const;

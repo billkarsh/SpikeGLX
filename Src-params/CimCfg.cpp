@@ -2379,8 +2379,6 @@ guiBreathe();
 #ifdef HAVE_IMEC
         if( !isHSpsv )
             P.sn = hID.SerialNumber;
-        else
-            P.sn = P.hssn;  // one SN for {HS+probe}
 #else
         P.sn = 10 * P.slot + P.port;
 #endif
@@ -2420,7 +2418,7 @@ guiBreathe();
         // ---
 
 #ifdef HAVE_IMEC
-        P.cal = testFixCalPath( P.sn );
+        P.cal = testFixCalPath( P.calSN() );
 #else
         P.cal = 1;
 #endif

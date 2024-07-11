@@ -504,8 +504,7 @@ void Config_devtab::psvPNDialog( const QVector<int> &vP )
         key += QString("(%1,%2) ").arg( P.slot ).arg( P.port );
     }
 
-    ui.pnKeyLbl->setText( key = key.trimmed() );
-    ui.snKeyLbl->setText( key );
+    ui.keyLbl->setText( key = key.trimmed() );
 
 // Set vals
 
@@ -521,10 +520,10 @@ void Config_devtab::psvPNDialog( const QVector<int> &vP )
         inipnval    = settings.value( "pnval", "" ).toString();
         inisnval    = settings.value( "snval", defsn ).toString();
 
-        if( key == inikey )
+        if( key == inikey ) {
             ui.pnLE->setText( inipnval );
-
-        ui.snLE->setText( inisnval );
+            ui.snLE->setText( inisnval );
+        }
     }
 
 // Run dialog

@@ -107,7 +107,7 @@ warn:
         else {
             runError(
                 QString("Can't find calibration folder '%1' for probe %2.")
-                .arg( P.sn ).arg( P.ip ) );
+                .arg( P.calSN() ).arg( P.ip ) );
             return false;
         }
     }
@@ -119,7 +119,7 @@ warn:
         return false;
     }
 
-    path = QString("%1/%2/%2_ADCCalibration.csv").arg( path ).arg( P.sn );
+    path = QString("%1/%2/%2_ADCCalibration.csv").arg( path ).arg( P.calSN() );
 
     if( !QFile( path ).exists() ) {
         runError( QString("Can't find file '%1'.").arg( path ) );
@@ -165,7 +165,7 @@ warn:
         else {
             runError(
                 QString("Can't find calibration folder '%1' for probe %2.")
-                .arg( P.sn ).arg( P.ip ) );
+                .arg( P.calSN() ).arg( P.ip ) );
             return false;
         }
     }
@@ -177,7 +177,7 @@ warn:
         return false;
     }
 
-    path = QString("%1/%2/%2_gainCalValues.csv").arg( path ).arg( P.sn );
+    path = QString("%1/%2/%2_gainCalValues.csv").arg( path ).arg( P.calSN() );
 
     if( !QFile( path ).exists() ) {
         runError( QString("Can't find file '%1'.").arg( path ) );
@@ -223,7 +223,7 @@ warn:
         else {
             runError(
                 QString("Can't find calibration folder '%1' for probe %2.")
-                .arg( P.sn ).arg( P.ip ) );
+                .arg( P.calSN() ).arg( P.ip ) );
             return false;
         }
     }
@@ -235,7 +235,7 @@ warn:
         return false;
     }
 
-    path = QString("%1/%2/%2_optoCalibration.csv").arg( path ).arg( P.sn );
+    path = QString("%1/%2/%2_optoCalibration.csv").arg( path ).arg( P.calSN() );
 
     if( !QFile( path ).exists() ) {
         runError( QString("Can't find file '%1'.").arg( path ) );
