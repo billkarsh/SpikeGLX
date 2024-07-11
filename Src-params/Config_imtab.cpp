@@ -408,6 +408,7 @@ void Config_imtab::editIMRO()
 // -------------
 
     ShankCtlBase*   shankCtl = new ShankCtlBase( cfg->dialog(), true );
+    ConnectUI( shankCtl, SIGNAL(runSaveChansDlg(QString)), this, SLOT(editSave(QString)) );
     ConnectUI( shankCtl, SIGNAL(modal_done(ShankCtlBase*,QString,bool)), this, SLOT(imro_done(ShankCtlBase*,QString,bool)) );
     shankCtl->baseInit( E.roTbl, false );
     shankCtl->setOriginal( E.imroFile );
@@ -463,27 +464,30 @@ void Config_imtab::editChan()
 // Here we don't do a fromTbl/toTbl cycle for the whole row...
 // Rather, we act only on saveChans cell via updateSaveChans().
 //
-void Config_imtab::editSave()
+void Config_imtab::editSave( QString sInit )
 {
     int             ip = curProbe();
     CimCfg::PrbEach &E = each[ip];
     SaveChansCtl    SV( cfg->dialog(), E, ip );
-    QString         err, saveStr;
+    QString         err, saveStr = sInit;
 
 // Validate IMRO
 
-    fromTbl( ip );
-    imro_cancelName.clear();
-    imro_ip = ip;
+    if( sInit.isEmpty() ) {
 
-    if( !cfg->validImROTbl( err, E, ip ) && !err.isEmpty() ) {
+        fromTbl( ip );
+        imro_cancelName.clear();
+        imro_ip = ip;
 
-        err += "\r\n\r\nReverting to default imro.";
-        QMessageBox::critical( cfg->dialog(), "IMRO File Error", err );
+        if( !cfg->validImROTbl( err, E, ip ) && !err.isEmpty() ) {
 
-        imro_cancelName = E.imroFile;
-        E.imroFile.clear();
-        cfg->validImROTbl( err, E, ip );
+            err += "\r\n\r\nReverting to default imro.";
+            QMessageBox::critical( cfg->dialog(), "IMRO File Error", err );
+
+            imro_cancelName = E.imroFile;
+            E.imroFile.clear();
+            cfg->validImROTbl( err, E, ip );
+        }
     }
 
 // Save dialog

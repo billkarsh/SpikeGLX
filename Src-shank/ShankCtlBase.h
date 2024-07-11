@@ -56,6 +56,7 @@ public:
     virtual void saveSettings() const   {}
 
 signals:
+    void runSaveChansDlg( QString sInit );
     void modal_done( ShankCtlBase *editor, QString fn, bool ok );
     void viewTabSyncYPix( int y );
     void feedMe( bool needMap );

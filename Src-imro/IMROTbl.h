@@ -8,6 +8,8 @@
 struct GeomMap;
 struct ShankMap;
 
+class QBitArray;
+
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -188,7 +190,7 @@ public:
 
 // Edit
 
-    virtual bool edit_able() const              {return false;}
+    virtual bool edit_able() const              {return true;}
     virtual void edit_init() const              {}
     virtual IMRO_GUI edit_GUI() const           {return IMRO_GUI();}
     virtual IMRO_Attr edit_Attr_def() const     {return IMRO_Attr();}
@@ -196,13 +198,15 @@ public:
     virtual bool edit_Attr_canonical() const    {return false;}
     virtual void edit_exclude_1( tImroSites vX, const IMRO_Site &s ) const
         {vX.clear(); Q_UNUSED( s )}
+    virtual int edit_site2Chan( const IMRO_Site &s ) const
+        {Q_UNUSED( s ) return 0;}
     virtual void edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
         {Q_UNUSED( vR ) Q_UNUSED( A )}
     virtual void edit_defaultROI( tImroROIs vR ) const;
     virtual bool edit_isCanonical( tImroROIs vR ) const;
     void edit_tbl2ROI( tImroROIs vR ) const;
     void edit_exclude( tImroSites vX, tconstImroROIs vR ) const;
-    bool edit_isAllowed( tconstImroSites vX, const IMRO_ROI &B ) const;
+    void edit_ROI2Bits( QBitArray &b, tconstImroROIs vR ) const;
 
 // Allocate
 

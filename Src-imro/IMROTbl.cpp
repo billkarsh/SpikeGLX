@@ -1030,24 +1030,24 @@ void IMROTbl::edit_exclude( tImroSites vX, tconstImroROIs vR ) const
 }
 
 
-// vS sorted s -> r -> c.
-//
-bool IMROTbl::edit_isAllowed( tconstImroSites vX, const IMRO_ROI &B ) const
+void IMROTbl::edit_ROI2Bits( QBitArray &b, tconstImroROIs vR ) const
 {
-    for( int ix = 0, nx = vX.size(); ix < nx; ++ix ) {
+    b.clear();
+    b.resize( nAP() );
 
-        const IMRO_Site &X = vX[ix];
+    for( int ib = 0, nb = vR.size(); ib < nb; ++ib ) {
 
-        if( X.s == B.s ) {
+        const IMRO_ROI  &B = vR[ib];
 
-            if( X.r >= B.r0 )
-                return X.r >= B.rLim;
+        int c0 = B.c_0(),
+            cL = B.c_lim( _ncolhwr );
+
+        for( int r = B.r0; r < B.rLim; ++r ) {
+
+            for( int c = c0; c < cL; ++c )
+                b.setBit( edit_site2Chan( IMRO_Site( B.s, c, r ) ) );
         }
-        else if( X.s > B.s )
-            break;
     }
-
-    return true;
 }
 
 /* ---------------------------------------------------------------- */

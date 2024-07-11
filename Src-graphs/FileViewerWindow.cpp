@@ -24,6 +24,7 @@
 #include "Biquad.h"
 #include "ExportCtl.h"
 #include "ClickableLabel.h"
+#include "SaveChansCtl.h"
 #include "Subset.h"
 #include "Version.h"
 
@@ -752,6 +753,7 @@ bool FileViewerWindow::viewFile( QString &error, const QString &fname )
                 }
             }
 
+            ConnectUI( shankCtl, SIGNAL(runSaveChansDlg(QString)), this, SLOT(editSave(QString)) );
             ConnectUI( shankCtl, SIGNAL(feedMe(bool)), this, SLOT(feedShankCtl(bool)) );
             ConnectUI( shankCtl, SIGNAL(gimmeTraces()), this, SLOT(colorTraces()) );
             ConnectUI( shankCtl, SIGNAL(selChanged(int)), this, SLOT(externSelectChan(int)) );
@@ -1456,6 +1458,20 @@ justR1:
 
     chanMap->userOrder( order2ig );
     layoutGraphs();
+}
+
+
+void FileViewerWindow::editSave( QString sInit )
+{
+    CimCfg::PrbEach E;
+    E.roTbl = IMROTbl::alloc( df->imro()->pn );
+
+    SaveChansCtl    SV( this, E, df->streamip() );
+    QString         saveStr = sInit;
+    bool            lfPair  = false;
+
+    if( SV.edit( saveStr, lfPair ) )
+        shankCtl->setStatus( "Save chans string copied to clipboard" );
 }
 
 

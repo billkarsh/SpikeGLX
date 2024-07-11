@@ -92,12 +92,14 @@ private slots:
     void clearShank1();
     void clearShank2();
     void clearShank3();
+    void saveChansBut();
     bool saveBut();
     void helpBut();
     void okBut();
     void cancelBut();
 
 private:
+    int usageMode();
     void initItems();
     void initClearMenu();
     void initBoxes();

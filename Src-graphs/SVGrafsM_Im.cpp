@@ -33,6 +33,7 @@ SVGrafsM_Im::SVGrafsM_Im(
 {
     shankCtl = new SVShankCtl_Im( p, ip, jpanel, gw );
     shankCtl->init();
+    ConnectUI( shankCtl, SIGNAL(runSaveChansDlg(QString)), this, SLOT(editSaved(QString)) );
     ConnectUI( shankCtl, SIGNAL(selChanged(int,bool)), this, SLOT(externSelectChan(int,bool)) );
     ConnectUI( shankCtl, SIGNAL(gimmeTraces()), this, SLOT(colorTraces()) );
     ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
@@ -792,12 +793,12 @@ void SVGrafsM_Im::editChanMap()
 }
 
 
-void SVGrafsM_Im::editSaved()
+void SVGrafsM_Im::editSaved( QString sInit )
 {
 // Launch editor
 
     SaveChansCtl    SV( this, p.im.prbj[ip], ip );
-    QString         saveStr;
+    QString         saveStr = sInit;
     bool            lfPair  = p.sns.lfPairChk;
 
     if( SV.edit( saveStr, lfPair ) ) {

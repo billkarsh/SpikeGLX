@@ -63,7 +63,7 @@ private slots:
     void setSpike4();
     void editStdby();
     void editChanMap();
-    void editSaved();
+    void editSaved( QString sInit = QString() );
 
 protected:
     virtual void myInit();

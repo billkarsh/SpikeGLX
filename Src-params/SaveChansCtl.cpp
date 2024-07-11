@@ -6,6 +6,7 @@
 #include "Subset.h"
 #include "Util.h"
 
+#include <QClipboard>
 #include <QDialog>
 #include <QMessageBox>
 
@@ -71,8 +72,11 @@ SaveChansCtl::~SaveChansCtl()
 
 // Return true if changed.
 //
-bool SaveChansCtl::edit( QString &out_uistr, bool &lfPairChk )
+bool SaveChansCtl::edit( QString &uistr, bool &lfPairChk )
 {
+    if( !uistr.isEmpty() )
+        svUI->saveChansLE->setText( uistr );
+
     svUI->pairChk->setChecked( lfPairChk );
 
 // Run dialog until ok or cancel
@@ -99,10 +103,8 @@ bool SaveChansCtl::edit( QString &out_uistr, bool &lfPairChk )
                 lfPairChk = svUI->pairChk->isChecked();
 
                 changed = E.sns.saveBits != sns.saveBits;
-
-                if( changed )
-                    out_uistr = sns.uiSaveChanStr;
-
+                uistr   = sns.uiSaveChanStr;
+                QGuiApplication::clipboard()->setText( uistr );
                 break;
             }
             else

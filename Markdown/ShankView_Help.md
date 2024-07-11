@@ -68,6 +68,19 @@ When you click in an existing box `Sel` reads out its size, in channels.
 * The `Clear All` button erases all boxes.
 * `Shift-click` in a box to clear it.
 
+#### Boxes => file chans
+
+* Click this button to turn the current set of boxes into a selective 'save
+channel subset' string. That is, change the set of channels to save in data
+files. You can use this to lasso activity hotspots when you use the feature
+either online or from the offline File Viewer.
+* You can do this as long as the current box `Sum` is nonzero.
+* It's the same 'Save Channels' dialog you'd see from the `IM Setup` tab,
+but the current list of channels reflects your current boxes.
+* If you use this from the Configure dialog or during a run, the result is
+applied to current run settings. If you use this from the offline File Viewer,
+the resulting string is merely copied to the clipboard.
+
 --------
 
 ### View Tab Quick Reference

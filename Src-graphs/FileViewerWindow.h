@@ -436,6 +436,7 @@ public slots:
     void cmApplyBut();
 
 // ShankView
+    void editSave( QString sInit );
     void feedShankCtl( bool needMap = false );
     void colorTraces();
     void externSelectChan( int ig );

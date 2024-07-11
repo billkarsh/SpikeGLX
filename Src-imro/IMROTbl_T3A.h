@@ -139,6 +139,10 @@ struct IMROTbl_T3A : public IMROTbl
 // Hardware
 
     virtual int selectAPFlts( int, int, int ) const {return 0;}
+
+// Edit
+
+    virtual bool edit_able() const  {return false;}
 };
 
 #endif  // IMROTBL_T3A_H

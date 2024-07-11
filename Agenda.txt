@@ -4,6 +4,7 @@
 20240620
 --------
 + Add VISA control of large PXI chassis.
++ Imro editor can edit save-chan subset.
 + Improve passive probe PN/SN dialog.
 
 20240129

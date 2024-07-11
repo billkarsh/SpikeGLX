@@ -55,7 +55,7 @@ private slots:
     void cellDoubleClicked( int ip, int col );
     void editIMRO();
     void editChan();
-    void editSave();
+    void editSave( QString sInit = QString() );
     void forceBut();
     void defBut();
     void copyAllBut();

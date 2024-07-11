@@ -115,13 +115,13 @@ struct IMROTbl_T21base : public IMROTbl
 
 // Edit
 
-    virtual bool edit_able() const  {return true;}
     virtual void edit_init() const;
     virtual IMRO_GUI edit_GUI() const;
     virtual IMRO_Attr edit_Attr_def() const;
     virtual IMRO_Attr edit_Attr_cur() const;
     virtual bool edit_Attr_canonical() const;
     virtual void edit_exclude_1( tImroSites vX, const IMRO_Site &s ) const;
+    virtual int edit_site2Chan( const IMRO_Site &s ) const;
     virtual void edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A );
 };
 

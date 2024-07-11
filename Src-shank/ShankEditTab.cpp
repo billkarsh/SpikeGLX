@@ -4,6 +4,7 @@
 #include "Util.h"
 #include "ShankCtlBase.h"
 #include "ShankView.h"
+#include "Subset.h"
 #include "SignalBlocker.h"
 
 #include <QFileDialog>
@@ -445,6 +446,7 @@ ShankEditTab::ShankEditTab(
     ConnectUI( seTabUI->loadBut, SIGNAL(clicked()), this, SLOT(loadBut()) );
     ConnectUI( seTabUI->defBut, SIGNAL(clicked()), this, SLOT(defBut()) );
     ConnectUI( seTabUI->clearBut, SIGNAL(clicked()), this, SLOT(clearAll()) );
+    ConnectUI( seTabUI->saveChansBut, SIGNAL(clicked()), this, SLOT(saveChansBut()) );
     ConnectUI( seTabUI->saveBut, SIGNAL(clicked()), this, SLOT(saveBut()) );
     ConnectUI( seTabUI->helpBut, SIGNAL(clicked()), this, SLOT(helpBut()) );
     ConnectUI( seTabUI->okBut, SIGNAL(clicked()), this, SLOT(okBut()) );
@@ -563,17 +565,6 @@ void ShankEditTab::gridClicked( int s, int c, int r, bool shift )
         return;
     }
 
-// Only one possible?
-
-    if( R->nBanks() == 1 ) {
-        vX.clear();
-        R->edit_defaultROI( vR );
-        enableItems( true );
-        color();
-        SC->setStatus( "Probe requires default sites" );
-        return;
-    }
-
 // Handle click
 
     click.down( s, c, r );
@@ -685,6 +676,36 @@ void ShankEditTab::clearShank3()
 }
 
 
+// Client expected behavior-
+// 0 (modal): Handle like "Save chans" on IM Setup tab.
+// 1 (FVW):   notify( "copied result to clipboard" ).
+// 2 (SV):    Handle like SVGrafsM_Im.
+//
+void ShankEditTab::saveChansBut()
+{
+// ----------
+// Any boxes?
+// ----------
+
+    int nC = getSum( 0 );
+    if( G.nBase == 4 )
+        nC += getSum( 1 ) + getSum( 2 ) + getSum( 3 );
+
+    if( !nC ) {
+        beep( "Select at least one channel to save" );
+        return;
+    }
+
+// ----------
+// Run dialog
+// ----------
+
+    QBitArray   b;
+    R->edit_ROI2Bits( b, vR );
+    emit SC->runSaveChansDlg( Subset::bits2RngStr( b ) );
+}
+
+
 bool ShankEditTab::saveBut()
 {
 // Editable?
@@ -770,7 +791,7 @@ void ShankEditTab::okBut()
 // Changed?
 
     if( *R == *R0 ) {
-        if( seTabUI->okBut->isVisible() && seTabUI->okBut->text() == "OK" ) {
+        if( usageMode() == 0 ) {
             emit SC->modal_done( SC, filename, true );
             return;
         }
@@ -811,6 +832,18 @@ void ShankEditTab::cancelBut()
 /* ---------------------------------------------------------------- */
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+// 0: Modal,    Config dialog
+// 1: Offline,  FVW
+// 2: Online,   SV
+//
+int ShankEditTab::usageMode()
+{
+    if( seTabUI->okBut->isVisible() )
+        return (seTabUI->okBut->text() == "OK" ? 0 : 2);
+    return 1;
+}
+
 
 void ShankEditTab::initItems()
 {
@@ -890,7 +923,7 @@ void ShankEditTab::initBoxes()
     seTabUI->rowsSB->setMaximum( cpb / R->nCol_hwr() );
     seTabUI->rowsSB->setValue( cpb / R->nCol_hwr() );
 
-    if( R->nBanks() == 1 || R->nCol_hwr() < 2 )
+    if( R->nCol_hwr() < 2 )
         seTabUI->widthCB->setEnabled( false );
 
     if( G.nBase == 1 ) {
