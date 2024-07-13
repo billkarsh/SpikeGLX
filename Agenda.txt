@@ -7,6 +7,7 @@
 + Imro editor can edit save-chan subset.
 + Improve passive probe PN/SN dialog.
 + Improve support for NPNH_HS_30, as custom "NP1221" probe.
++ Improve loading of custom imro files.
 
 20240129
 --------

@@ -391,6 +391,9 @@ bool IMROTbl_T21base::edit_Attr_canonical() const
 
     int refid = e[0].refid;
 
+    if( refid > tip0refID() )
+        return false;
+
     for( int ie = 1; ie < ne; ++ie ) {
         if( e[ie].refid != refid )
             return false;

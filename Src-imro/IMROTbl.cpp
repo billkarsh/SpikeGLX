@@ -908,7 +908,6 @@ bool IMROTbl::edit_isCanonical( tImroROIs vR ) const
         const IMRO_ROI  &B = vR[ib];
         int             w  = B.width( _ncolhwr );
 
-
         if( !(w == _ncolhwr || w == _ncolhwr/2) )
             return false;
 

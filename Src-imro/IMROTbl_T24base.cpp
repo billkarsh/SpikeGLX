@@ -372,6 +372,9 @@ bool IMROTbl_T24base::edit_Attr_canonical() const
 
     int refid = e[0].refid;
 
+    if( tip0refID() == 1 && refid > 4 )
+        return false;
+
     for( int ie = 4; ie < ne; ++ie ) {
         if( e[ie].refid != refid )
             return false;
