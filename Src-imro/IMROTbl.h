@@ -113,7 +113,10 @@ public:
     virtual int nSvyShank() const       {return nShank();}
             int nElecPerShank() const   {return nElec()/nShank();}
             float tipLength() const     {return _tiplength;}
+            float xPitch() const        {return _xpitch;}
             float zPitch() const        {return _zpitch;}
+            float x0EvenRow() const     {return _x0_ev;}
+            float x0OddRow() const      {return _x0_od;}
             int nCol_hwr() const        {return _ncolhwr;}
             int nCol_vis() const        {return _ncolvis;}
             int nRow() const            {return nElecPerShank()/_ncolhwr;}

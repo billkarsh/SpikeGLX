@@ -212,6 +212,12 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imMaxInt"]         = E.roTbl->maxInt();
     kvp["imChan0lfGain"]    = E.roTbl->lfGain( 0 );
     kvp["imTipLength"]      = E.roTbl->tipLength();
+    kvp["imColsPerShank"]   = E.roTbl->nCol_hwr();
+    kvp["imRowsPerShank"]   = E.roTbl->nRow();
+    kvp["imXPitch"]         = E.roTbl->xPitch();
+    kvp["imZPitch"]         = E.roTbl->zPitch();
+    kvp["imX0EvenRow"]      = E.roTbl->x0EvenRow();
+    kvp["imX0OddRow"]       = E.roTbl->x0OddRow();
     kvp["~imroTbl"]         = E.roTbl->toString();
     kvp["~muxTbl"]          = E.roTbl->muxTable_toString();
 

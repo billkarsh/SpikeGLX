@@ -207,6 +207,12 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imChan0apGain"]    = E.roTbl->apGain( 0 );
     kvp["imAnyChanFullBand"]= E.roTbl->anyChanFullBand();
     kvp["imTipLength"]      = E.roTbl->tipLength();
+    kvp["imColsPerShank"]   = E.roTbl->nCol_hwr();
+    kvp["imRowsPerShank"]   = E.roTbl->nRow();
+    kvp["imXPitch"]         = E.roTbl->xPitch();
+    kvp["imZPitch"]         = E.roTbl->zPitch();
+    kvp["imX0EvenRow"]      = E.roTbl->x0EvenRow();
+    kvp["imX0OddRow"]       = E.roTbl->x0OddRow();
     kvp["~imroTbl"]         = E.roTbl->toString();
     kvp["~muxTbl"]          = E.roTbl->muxTable_toString();
 

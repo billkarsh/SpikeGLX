@@ -641,6 +641,12 @@ The LF-band gain applied to channel 0. If you used the graphical imro editor
 to create your imro file then all channels will have this LF gain.
 
 ```
+imColsPerShank=2
+```
+
+Number of physical electrode columns on each shank row.
+
+```
 imDatApi=3.31
 ```
 
@@ -754,7 +760,7 @@ imErrFlags0_IS_CT_SR_LK_PP_SY=0 0 0 0 0 0
 
 For each imec stream we monitor the cumulative count of several error flags,
 hence, imErrFlags5 denotes the flags for probe steam 5. Note that quad-base
-probes (part number NP2020) record flags for each shank, hence, imErrFlags3-2
+probes (part number NP2020) record flags for each shank, hence, imErrFlags3_2
 denotes that stream 3 is a quad-probe and the flags are from shank 2.
 
 The flags are labeled {COUNT, SERDES, LOCK, POP, SYNC}. The metadata field
@@ -820,6 +826,12 @@ elect default settings no file is needed. The active table content is
 stored as tag `~imroTbl` whether custom or default.
 
 ```
+imRowsPerShank=480
+```
+
+Number of electrode rows on each shank.
+
+```
 imSampRate=30000
 ```
 
@@ -865,6 +877,32 @@ imTrgSource=0
 ```
 
 Selects the type of trigger that starts the run: {0=software}.
+
+```
+imX0EvenRow=27
+```
+
+Number of microns from left edge of shank to left-most electrode center
+on an even numbered row.
+
+```
+imX0OddRow=27
+```
+
+Number of microns from left edge of shank to left-most electrode center
+on an odd numbered row.
+
+```
+imXPitch=32
+```
+
+Electrode column-to-column stride in microns.
+
+```
+imZPitch=15
+```
+
+Electrode row-to-row stride in microns.
 
 ```
 snsApLfSy=384,0,1

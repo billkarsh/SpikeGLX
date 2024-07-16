@@ -1116,7 +1116,7 @@ void TrigBase::getErrFlags( int ip )
 {
     if( p.im.prbj[ip].roTbl->apiFetchType() == 4 ) {
         for( int is = 0; is < 4; ++is ) {
-            kvmRmt[QString("imErrFlags%1-%2_IS_CT_SR_LK_PP_SY").arg( ip ).arg( is )] =
+            kvmRmt[QString("imErrFlags%1_%2_IS_CT_SR_LK_PP_SY").arg( ip ).arg( is )] =
                 mainApp()->metrics()->getErrFlags( ip, is );
         }
     }
