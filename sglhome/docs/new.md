@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+September 19, 2024
+
+* C_Waves 2.7 (Median waveforms).
+
 September 18, 2024
 
 * CatGT 4.4 (Split shanks, better, smoother zero/line filling).
