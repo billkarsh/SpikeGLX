@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+September 18, 2024
+
+* CatGT 4.4 (Split shanks, better, smoother zero/line filling).
+
 June 11, 2024
 
 * SpikeGLX 20240129-phase30 (New IMRO editor, imec v3.62.1).
