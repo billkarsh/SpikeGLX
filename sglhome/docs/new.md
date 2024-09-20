@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+September 20, 2024
+
+* OverStrike 1.1 (Support NP2020 quad-probe, add -linefill option).
+
 September 19, 2024
 
 * C_Waves 2.7 (Median waveforms).

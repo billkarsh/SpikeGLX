@@ -239,11 +239,11 @@ CatGT, KS2, Noise Cluster Tagging, C_Waves, QC metrics, TPrime.
 
 * [ecephys_spike_sorting](https://github.com/jenniferColonell/ecephys_spike_sorting)
 
-Overwrite nasty parts of your binary data with zeros using OverStrike. This
-helps remove artifacts that are too tricky for CatGT.
+Overwrite nasty parts of your binary data with zeros or lines using OverStrike.
+This helps remove artifacts that are too tricky for CatGT.
 
-* [OverStrike 1.0 (Windows)](Support/OverStrikeWinApp.zip)
-* [OverStrike 1.0 (Linux)](Support/OverStrikeLnxApp.zip)
+* [OverStrike 1.1 (Windows)](Support/OverStrikeWinApp.zip)
+* [OverStrike 1.1 (Linux)](Support/OverStrikeLnxApp.zip)
 
 ------
 
