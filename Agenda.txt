@@ -3,7 +3,7 @@
 
 20240620
 --------
-+ API 3.67.
++ API 3.70.2.
 + Support NP2020 quad-probe.
 + Add VISA control of large PXI chassis.
 + Add more probe geometry to metadata.

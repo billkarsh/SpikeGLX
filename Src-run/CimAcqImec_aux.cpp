@@ -335,7 +335,7 @@ bool CimAcqImec::_aux_setPXISyncAsInput( int slot )
 
     NP_ErrorCode    err;
 
-    err = np_switchmatrix_set( slot, SM_Output_StatusBit, SM_Input_SMA, true );
+    err = np_switchmatrix_set( slot, SM_Output_StatusBit, SM_Input_SMASYNC, true );
 
     if( err != SUCCESS ) {
         runError(
@@ -344,7 +344,7 @@ bool CimAcqImec::_aux_setPXISyncAsInput( int slot )
         return false;
     }
 
-    err = np_switchmatrix_set( slot, SM_Output_PXISYNC, SM_Input_SMA, true );
+    err = np_switchmatrix_set( slot, SM_Output_PXISYNC, SM_Input_SMASYNC, true );
 
     if( err != SUCCESS ) {
         runError(
