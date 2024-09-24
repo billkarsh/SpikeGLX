@@ -5,14 +5,6 @@
 
 #include <math.h>
 
-#ifdef Q_WS_MACX
-#include <gl.h>
-#include <agl.h>
-#else
-#include <GL/gl.h>
-#include <GL/glu.h>
-#endif
-
 
 SOGraph::SOGraph( QWidget *parent )
     :   QOpenGLWidget(parent), yave(0), yscl(500), label(0)
@@ -161,11 +153,11 @@ void SOGraph::paintGL()
     QMutexLocker    ml( &dataMtx );
 
     glPushMatrix();
-    gluOrtho2D( 0, NPNT - 1, yave - yscl/2, yave + yscl/2 );
+    glOrtho( 0, NPNT - 1, yave - yscl/2, yave + yscl/2, -1, 1 );
     drawPoints();
     glPopMatrix();
 
-    gluOrtho2D( 0, w, h, 0 );
+    glOrtho( 0, w, h, 0, -1, 1 );
     drawRateBar();
     drawRateBox();
     drawLabels();

@@ -2609,7 +2609,6 @@ void FileViewerWindow::initDataIndepStuff()
     initContextMenu();
 
     MGraph  *theM = mscroll->theM;
-    theM->setImmedUpdate( true );
     ConnectUI( theM, SIGNAL(cursorOutside()), this, SLOT(mouseOutside()) );
     ConnectUI( theM, SIGNAL(cursorOver(double,double,int)), this, SLOT(mouseOverGraph(double,double,int)) );
     ConnectUI( theM, SIGNAL(lbutClicked(double,double,int)), this, SLOT(clickGraph(double,double,int)) );

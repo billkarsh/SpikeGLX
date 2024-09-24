@@ -7,11 +7,7 @@
 /* ShankViewLut --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-#ifdef OPENGL54
 class ShankViewLut : public QOpenGLWidget, protected QOpenGLFunctions
-#else
-class ShankViewLut : public QGLWidget, protected QGLFunctions
-#endif
 {
     Q_OBJECT
 

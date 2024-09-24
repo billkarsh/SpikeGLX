@@ -23,11 +23,7 @@ struct SVAnaRgn {
 /* ShankView ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-#ifdef OPENGL54
 class ShankView : public QOpenGLWidget, protected QOpenGLFunctions
-#else
-class ShankView : public QGLWidget, protected QGLFunctions
-#endif
 {
     Q_OBJECT
 
@@ -96,11 +92,7 @@ signals:
     void gridClicked( int s, int c, int r, bool shift );
 
 public slots:
-#ifdef OPENGL54
     void updateNow()    {update();}
-#else
-    void updateNow()    {updateGL();}
-#endif
 
 protected:
     void initializeGL();

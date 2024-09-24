@@ -615,7 +615,6 @@ void SVGrafsM::sAveTable( const ShankMap &SM, int nSpikeChans, int sel )
 
 void SVGrafsM::initGraphs()
 {
-    theM->setImmedUpdate( true );
     ConnectUI( theM, SIGNAL(cursorOver(double,double,int)), this, SLOT(myMouseOverGraph(double,double,int)) );
     ConnectUI( theM, SIGNAL(lbutClicked(double,double,int)), this, SLOT(myClickGraph(double,double,int)) );
     ConnectUI( theM, SIGNAL(lbutDoubleClicked(double,double,int)), this, SLOT(dblClickGraph(double,double,int)) );

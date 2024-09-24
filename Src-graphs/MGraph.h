@@ -6,13 +6,8 @@
 
 #include <QMutex>
 #include <QAbstractScrollArea>
-
-#ifdef OPENGL54
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
-#else
-#include <QGLWidget>
-#endif
 
 #include <deque>
 
@@ -140,11 +135,7 @@ public:
 /* MGraph --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-#ifdef OPENGL54
 class MGraph : public QOpenGLWidget, protected QOpenGLFunctions
-#else
-class MGraph : public QGLWidget
-#endif
 {
     Q_OBJECT
 
@@ -164,9 +155,7 @@ private:
 
     QString     usr;
     MGraphX     *X;
-    bool        ownsX,
-                immed_update,
-                need_update;
+    bool        ownsX;
 
 public:
     MGraph( const QString &usr, QWidget *parent = 0, MGraphX *X = 0 );
@@ -176,9 +165,6 @@ public:
     void detach();
 
     MGraphX *getX()     {return X;}
-
-    void setImmedUpdate( bool b ) {immed_update = b;}
-    bool needsUpdateGL() const {return need_update;}
 
 signals:
     // For these:
@@ -203,12 +189,7 @@ signals:
     void lbutDoubleClicked( int x, int y, int iy );
 
 public slots:
-#ifdef OPENGL54
     void updateNow()    {update();}
-#else
-    void update() {if(immed_update) updateGL(); else need_update=true;}
-    void updateNow()    {updateGL();}
-#endif
 
 protected:
     void initializeGL();
@@ -236,8 +217,6 @@ private:
     void draw1Analog( int iy );
     void drawPointsMain();
 
-    bool isAutoBufSwap();
-    void setAutoBufSwap( bool on );
     void clipToView( int *view );
 
     void renderTextWin(

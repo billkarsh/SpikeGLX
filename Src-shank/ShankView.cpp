@@ -4,14 +4,6 @@
 #include <QMouseEvent>
 #include <QScrollBar>
 
-#ifdef Q_WS_MACX
-#include <gl.h>
-#include <agl.h>
-#else
-#include <GL/gl.h>
-#include <GL/glu.h>
-#endif
-
 
 /* ---------------------------------------------------------------- */
 /* MACROS --------------------------------------------------------- */
@@ -42,19 +34,9 @@
 /* ---------------------------------------------------------------- */
 
 ShankView::ShankView( QWidget *parent )
-#ifdef OPENGL54
     :   QOpenGLWidget(parent),
-#else
-    :
-#endif
         smap(0), rowPix(8), bnkRws(0), slidePos(0), sel(0)
 {
-#ifndef OPENGL54
-    QGLFormat   fmt;
-    fmt.setSwapInterval( 0 );
-    QGLWidget( fmt, parent );
-#endif
-
     setAutoFillBackground( false );
     setUpdatesEnabled( true );
 
@@ -180,11 +162,7 @@ void ShankView::colorPads( const double *val, double rngMax )
 //
 void ShankView::initializeGL()
 {
-#ifdef OPENGL54
     initializeOpenGLFunctions();
-#else
-    initializeGLFunctions();
-#endif
 
     glDisable( GL_DEPTH_TEST );
     glDisable( GL_TEXTURE_2D );
@@ -225,13 +203,9 @@ void ShankView::paintGL()
 
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
-
-#ifdef OPENGL54
     glViewport( MRGPX, MRGPX, width() - 2*MRGPX, height() - 2*MRGPX );
-#endif
-
     setClipping();
-    gluOrtho2D( VLFT, VRGT, vBot, vTop );
+    glOrtho( VLFT, VRGT, vBot, vTop, -1, 1 );
 
 // -----
 // Paint
@@ -992,10 +966,7 @@ void ShankScroll::resizeEvent( QResizeEvent *e )
 
     theV->makeCurrent();
     theV->resizeGL( theV->width(), theV->height() );
-
-#ifdef OPENGL54
     theV->update();
-#endif
 }
 
 

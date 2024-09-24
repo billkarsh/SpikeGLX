@@ -12,14 +12,6 @@
 
 #include <math.h>
 
-#ifdef Q_WS_MACX
-#include <gl.h>
-#include <agl.h>
-#else
-#include <GL/gl.h>
-#include <GL/glu.h>
-#endif
-
 
 /* ---------------------------------------------------------------- */
 /* MGraphY -------------------------------------------------------- */
@@ -434,8 +426,6 @@ void MGraph::attach( MGraphX *newX )
         newX->attach( this );
         X = newX;
 
-        immed_update    = false;
-        need_update     = false;
         setMouseTracking( true );
         setUpdatesEnabled( true );
     }
@@ -446,8 +436,6 @@ void MGraph::detach()
 {
     setUpdatesEnabled( false );
     setMouseTracking( false );
-    immed_update    = false;
-    need_update     = false;
 
     if( X ) {
         X->detach();
@@ -460,9 +448,7 @@ void MGraph::detach()
 //
 void MGraph::initializeGL()
 {
-#ifdef OPENGL54
     initializeOpenGLFunctions();
-#endif
 
     glDisable( GL_DEPTH_TEST );
     glDisable( GL_TEXTURE_2D );
@@ -484,7 +470,7 @@ void MGraph::resizeGL( int w, int h )
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
     glViewport( 0, 0, w, h );
-    gluOrtho2D( 0.0, 1.0, -1.0, 1.0 );
+    glOrtho( 0.0, 1.0, -1.0, 1.0, -1, 1 );
 
     if( X )
         X->calcYpxPerGrf();
@@ -529,8 +515,6 @@ void MGraph::paintGL()
 
     drawLabels();
     drawYSel();
-
-    need_update = false;
 
 // -------
 // Restore
@@ -1386,26 +1370,6 @@ static inline bool project(
 }
 
 
-bool MGraph::isAutoBufSwap()
-{
-#ifdef OPENGL54
-    return true;
-#else
-    return autoBufferSwap();
-#endif
-}
-
-
-void MGraph::setAutoBufSwap( bool on )
-{
-#ifdef OPENGL54
-    Q_UNUSED( on )
-#else
-    setAutoBufferSwap( on );
-#endif
-}
-
-
 void MGraph::clipToView( int *view )
 {
     GLint   _view[4];
@@ -1476,15 +1440,9 @@ void MGraph::renderTextWin(
 
     clipToView( 0 );
 
-    bool    auto_swap = isAutoBufSwap();
-    setAutoBufSwap( false );
-
     QPainter    p( this );
-
     qt_gl_draw_text( p, x, y, str, font, X->bkgnd_Color );
-
     p.end();
-    setAutoBufSwap( auto_swap );
 
     qt_restore_gl_state( false );
 }
@@ -1548,15 +1506,9 @@ void MGraph::renderTextMdl(
     glAlphaFunc( GL_GREATER, 0.0 );
     glEnable( GL_ALPHA_TEST );
 
-    bool    auto_swap = isAutoBufSwap();
-    setAutoBufSwap( false );
-
     QPainter    p( this );
-
     qt_gl_draw_text( p, qRound( x ), qRound( y ), str, font, X->bkgnd_Color );
-
     p.end();
-    setAutoBufSwap( auto_swap );
 
     qt_restore_gl_state( true );
 }
@@ -1579,10 +1531,9 @@ MGScroll::MGScroll( const QString &usr, QWidget *parent )
 
     QVBoxLayout *VL = new QVBoxLayout( viewport() );
     VL->setSpacing( 0 );
-    VL->setMargin( 0 );
+    VL->setContentsMargins( 0, 0, 0, 0 );
     VL->addWidget( theM );
 
-    theM->setImmedUpdate( true );
     theM->setMouseTracking( true );
 
     setVerticalScrollBarPolicy( Qt::ScrollBarAsNeeded );

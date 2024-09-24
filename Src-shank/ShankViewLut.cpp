@@ -1,14 +1,6 @@
 
 #include "ShankViewLut.h"
 
-#ifdef Q_WS_MACX
-#include <gl.h>
-#include <agl.h>
-#else
-#include <GL/gl.h>
-#include <GL/glu.h>
-#endif
-
 
 /* ---------------------------------------------------------------- */
 /* MACROS --------------------------------------------------------- */
@@ -22,16 +14,8 @@
 /* ---------------------------------------------------------------- */
 
 ShankViewLut::ShankViewLut( QWidget *parent )
-#ifdef OPENGL54
     :   QOpenGLWidget(parent)
-#endif
 {
-#ifndef OPENGL54
-    QGLFormat   fmt;
-    fmt.setSwapInterval( 0 );
-    QGLWidget( fmt, parent );
-#endif
-
     setAutoFillBackground( false );
     setUpdatesEnabled( true );
 
@@ -43,11 +27,7 @@ ShankViewLut::ShankViewLut( QWidget *parent )
 //
 void ShankViewLut::initializeGL()
 {
-#ifdef OPENGL54
     initializeOpenGLFunctions();
-#else
-    initializeGLFunctions();
-#endif
 
     glDisable( GL_DEPTH_TEST );
     glDisable( GL_TEXTURE_2D );
@@ -71,7 +51,7 @@ void ShankViewLut::resizeGL( int w, int h )
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
     glViewport( MRGPX, MRGPX, w - 2*MRGPX, h - 2*MRGPX );
-    gluOrtho2D( 0.0, 1.0, 0.0, 256.0 );
+    glOrtho( 0.0, 1.0, 0.0, 256.0, -1, 1 );
 }
 
 
