@@ -59,7 +59,7 @@ struct ImSimApDat {
     bool init( QString &err, const QString pfName );
     bool load1();
     void fetchT0( struct electrodePacket* E, int* out, ImSimLfDat &LF );
-    void fetchT2( struct PacketInfo* H, int16_t* D, int* out );
+    void fetchT2( struct PacketInfo* H, int16_t* D, int is, int nAP, int smpMax, int* out );
 };
 
 
@@ -76,7 +76,7 @@ struct ImSimDat {
     void loadToN( qint64 N );
     void fifo( int *packets, int *empty ) const;
     void fetchT0( struct electrodePacket* E, int* out );
-    void fetchT2( struct PacketInfo* H, int16_t* D, int* out );
+    void fetchT2( struct PacketInfo* H, int16_t* D, int is, int nAP, int smpMax, int* out );
 };
 
 
@@ -298,11 +298,11 @@ struct ImAcqStream {
     ImAcqQFlt       *QFlt;
     QVector<uint>   vXA;
     mutable quint32 lastTStamp,
-                    errCOUNT,
-                    errSERDES,
-                    errLOCK,
-                    errPOP,
-                    errSYNC,
+                    errCOUNT[4],
+                    errSERDES[4],
+                    errLOCK[4],
+                    errPOP[4],
+                    errSYNC[4],
                     tStampLastFetch;
     mutable int     fifoAve,
                     fifoN,
@@ -317,7 +317,7 @@ struct ImAcqStream {
                     slot,
                     port,
                     dock,
-                    fetchType;  // {0=1.0, 2=2.0, 9=obx}
+                    fetchType;  // {0=1.0, 2=2.0, 4=2020, 9=obx}
     bool            simType;
 #ifdef PAUSEWHOLESLOT
     mutable bool    zeroFill;
@@ -331,10 +331,10 @@ struct ImAcqStream {
         int                         ip );
     virtual ~ImAcqStream();
 
-    QString metricsName() const;
+    QString metricsName( int shank = -1 ) const;
     void sendErrMetrics() const;
     void checkErrFlags_EPack( const electrodePacket* E, int nE ) const;
-    void checkErrFlags_PInfo( const PacketInfo* H, int nT ) const;
+    void checkErrFlags_PInfo( const PacketInfo* H, int nT, int shank ) const;
     bool checkFifo( int *packets, CimAcqImec *acq ) const;
 };
 
@@ -445,7 +445,14 @@ private:
 #endif
 
     bool fetchE_T0( int &nE, electrodePacket* E, const ImAcqStream &S );
-    bool fetchD_T2( int &nT, PacketInfo* H, qint16* D, const ImAcqStream &S );
+    bool fetchD_T2(
+        int                 &nT,
+        PacketInfo*         H,
+        qint16*             D,
+        const ImAcqStream   &S,
+        int                 nC,
+        int                 smpMax,
+        streamsource_t      shank = SourceAP );
     bool fetch_obx( int &nT, PacketInfo* H, qint16* D, const ImAcqStream &S );
     int fifoPct( int *packets, const ImAcqStream &S ) const;
 
@@ -468,10 +475,13 @@ private:
     bool _aux_sizeStreamBufs();
     bool _aux_initObxSlot( const CimCfg::ImProbeTable &T, int slot );
     bool _aux_open( const CimCfg::ImProbeTable &T );
+    bool _aux_clrObxSync( int slot );
     bool _aux_setObxSyncAsOutput( int slot );
     bool _aux_setObxSyncAsInput( int slot );
+    bool _aux_clrPXISync( int slot );
     bool _aux_setPXISyncAsOutput( int slot );
     bool _aux_setPXISyncAsInput( int slot );
+    bool _aux_setPXISyncAsListener( int slot );
     bool _aux_setPXITrigBus( const QVector<int> &vslots, int srcSlot );
     bool _aux_setSync( const CimCfg::ImProbeTable &T );
     bool _aux_config();

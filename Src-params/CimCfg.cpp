@@ -2138,7 +2138,8 @@ bool CimCfg::detect_Probes(
 
         ImProbeDat  &P = T.mod_iProbe( ip );
 #ifdef HAVE_IMEC
-        bool        isHSpsv = false;
+        bool        isHSpsv = false,
+                    isHS;
 #endif
 #if DBG
 Log()<<"start probe "<<ip;
@@ -2156,6 +2157,31 @@ guiBreathe();
 
             continue;
         }
+
+        // ----
+        // isHS
+        // ----
+
+#ifdef HAVE_IMEC
+        err = np_detectHeadStage( P.slot, P.port, &isHS );
+
+        if( err != SUCCESS ) {
+            slVers.append(
+                QString("IMEC np_detectHeadStage(slot %1, port %2)%3")
+                .arg( P.slot ).arg( P.port )
+                .arg( makeErrorString( err ) ) );
+            return false;
+        }
+
+        if( !isHS ) {
+            slVers.append("");
+            slVers.append(QString("No headstage at (slot %1, port %2)").arg( P.slot ).arg( P.port ));
+            slVers.append("Only check boxes for hardware you intend to run.");
+            if( !(P.port & 1) )
+                slVers.append("For Quad-probes (NP2020) only check ports (1 or 3).");
+            return false;
+        }
+#endif
 
         // ----
         // HSPN
@@ -2206,6 +2232,16 @@ guiBreathe();
             }
         }
 
+        // ---------------------------
+        // Test for Quad port (2 or 4)
+        // ---------------------------
+
+        else if( prod == "NPM_HSTC_ext" ) {
+            slVers.append("");
+            slVers.append("For Quad-probes (NP2020) only check ports (1 or 3).");
+            return false;
+        }
+
         P.hspn = prod;
 #else
         P.hspn = "sim";
@@ -2240,7 +2276,10 @@ guiBreathe();
         // HS20 (tests for no EEPROM)
         // --------------------------
 
-        if( !P.hssn && (hID.version_Major == 0 || hID.version_Major == 1) && !hID.version_Minor ) {
+        bool    noEEPROM;
+        noEEPROM = (hID.version_Major == 0 || hID.version_Major == 1) && !hID.version_Minor;
+
+        if( !P.hssn && noEEPROM ) {
 
             if( vHS20.isEmpty() )
                 vHS20.push_back( ip );
@@ -2637,7 +2676,9 @@ void CimCfg::forceProbeData(
     const QString   &sn,
     const QString   &pn )
 {
-#ifdef HAVE_IMEC
+//@OBX367 Need hidden call to access
+#if 0
+//#ifdef HAVE_IMEC
     if( SUCCESS == np_openBS( slot ) &&
         SUCCESS == np_openProbe( slot, port, dock ) ) {
 

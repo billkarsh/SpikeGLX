@@ -21,6 +21,7 @@ HEADERS += \
     $$PWD/IMROTbl_T1300.h \
     $$PWD/IMROTbl_T2003.h \
     $$PWD/IMROTbl_T2013.h \
+    $$PWD/IMROTbl_T2020.h \
     $$PWD/IMROTbl_T21.h \
     $$PWD/IMROTbl_T21base.h \
     $$PWD/IMROTbl_T24.h \
@@ -45,6 +46,7 @@ SOURCES += \
     $$PWD/IMROTbl_T1221.cpp \
     $$PWD/IMROTbl_T2003.cpp \
     $$PWD/IMROTbl_T2013.cpp \
+    $$PWD/IMROTbl_T2020.cpp \
     $$PWD/IMROTbl_T21.cpp \
     $$PWD/IMROTbl_T21base.cpp \
     $$PWD/IMROTbl_T24.cpp \

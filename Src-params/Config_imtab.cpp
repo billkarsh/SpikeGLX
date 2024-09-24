@@ -41,6 +41,10 @@ Config_imtab::Config_imtab( ConfigCtl *cfg, QWidget *tab )
 {
     imTabUI = new Ui::IMTab;
     imTabUI->setupUi( tab );
+
+//@OBX367 np_setProbeHardwareID hidden in API 3.67
+    imTabUI->forceBut->setDisabled( true );
+
     ConnectUI( imTabUI->calCB, SIGNAL(currentIndexChanged(int)), cfg, SLOT(updateCalWarning()) );
     ConnectUI( imTabUI->svyChk, SIGNAL(clicked(bool)), this, SLOT(svyChkClicked()) );
     ConnectUI( imTabUI->prbTbl, SIGNAL(itemSelectionChanged()), this, SLOT(selectionChanged()) );
@@ -356,7 +360,8 @@ void Config_imtab::selectionChanged()
     }
 
 none:
-    imTabUI->forceBut->setEnabled( enab );
+//@OBX367 np_setProbeHardwareID hidden in API 3.67
+//    imTabUI->forceBut->setEnabled( enab );
     imTabUI->defBut->setEnabled( enab );
 
     enab &= np > 1 && !imTabUI->svyChk->isChecked();

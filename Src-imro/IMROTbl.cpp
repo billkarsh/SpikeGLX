@@ -15,6 +15,7 @@
 #include "IMROTbl_T24.h"
 #include "IMROTbl_T2003.h"
 #include "IMROTbl_T2013.h"
+#include "IMROTbl_T2020.h"
 #include "IMROTbl_T3A.h"
 #include "GeomMap.h"
 #include "ShankMap.h"
@@ -1175,6 +1176,10 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
                 type = 2013;
                 supp = true;
                 break;
+            case 2020:  // Neuropixels 2.0 quad base (Ph 2C)
+                type = 2020;
+                supp = true;
+                break;
             case 3000:  // Passive NXT probe
                 type = 1200;
                 supp = true;
@@ -1257,6 +1262,8 @@ IMROTbl* IMROTbl::alloc( const QString &pn )
             case 2013:  // Neuropixels 2.0 multishank probe
             case 2014:  // Neuropixels 2.0 multishank probe with cap
                 return new IMROTbl_T2013( pn );
+            case 2020:  // Neuropixels 2.0 quad base (Ph 2C)
+                return new IMROTbl_T2020( pn );
             default:
                 return 0;
         }

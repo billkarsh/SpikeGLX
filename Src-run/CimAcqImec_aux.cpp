@@ -162,34 +162,53 @@ bool CimAcqImec::_aux_open( const CimCfg::ImProbeTable &T )
 }
 
 
-bool CimAcqImec::_aux_setObxSyncAsOutput( int slot )
+bool CimAcqImec::_aux_clrObxSync( int slot )
 {
     NP_ErrorCode    err;
 
-//@OBX Can't allow selecting obx as sync source if also running PXI!!
-    err = np_setParameter( NP_PARAM_SYNCMASTER, slot );
+    err = np_switchmatrix_clear( slot, SM_Output_StatusBit );
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setParameter(slot %1, SYNCMASTER)%2")
+            QString("IMEC switchmatrix_clear(slot %1, OBXBIT6SYNC)%2")
             .arg( slot ).arg( makeErrorString( err ) ) );
         return false;
     }
 
-    err = np_setParameter( NP_PARAM_SYNCSOURCE, SyncSource_Clock );
+    err = np_switchmatrix_clear( slot, SM_Output_SMA1 );
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setParameter(slot %1, SYNCSOURCE)%2")
+            QString("IMEC switchmatrix_clear(slot %1, OBXSMASYNC)%2")
             .arg( slot ).arg( makeErrorString( err ) ) );
         return false;
     }
 
-    err = np_setParameter( NP_PARAM_SYNCPERIOD_MS, 1000 );
+    return true;
+}
+
+
+bool CimAcqImec::_aux_setObxSyncAsOutput( int slot )
+{
+    if( !_aux_clrObxSync( slot ) )
+        return false;
+
+    NP_ErrorCode    err;
+
+    err = np_setSyncClockPeriod( slot, 1000 );
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setParameter(slot %1, SYNCPERIOD)%2")
+            QString("IMEC setOBXSyncClockPeriod(slot %1)%2")
+            .arg( slot ).arg( makeErrorString( err ) ) );
+        return false;
+    }
+
+    err = np_switchmatrix_set( slot, SM_Output_StatusBit, SM_Input_SyncClk, true );
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC switchmatrix_set(slot %1, OBXOUTBIT6SYNC)%2")
             .arg( slot ).arg( makeErrorString( err ) ) );
         return false;
     }
@@ -198,20 +217,10 @@ bool CimAcqImec::_aux_setObxSyncAsOutput( int slot )
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC switchmatrix_set(slot %1, OUTOBXSMASYNC)%2")
+            QString("IMEC switchmatrix_set(slot %1, OBXOUTSMASYNC)%2")
             .arg( slot ).arg( makeErrorString( err ) ) );
         return false;
     }
-
-//@OBX Not needed if use syncmaster calls to set clock
-//    err = np_switchmatrix_set( slot, SM_Output_StatusBit, SM_Input_SyncClk, true );
-
-//    if( err != SUCCESS ) {
-//        runError(
-//            QString("IMEC switchmatrix_set(slot %1, OUTOBXSTATSYNC)%2")
-//            .arg( slot ).arg( makeErrorString( err ) ) );
-//        return false;
-//    }
 
     return true;
 }
@@ -219,13 +228,51 @@ bool CimAcqImec::_aux_setObxSyncAsOutput( int slot )
 
 bool CimAcqImec::_aux_setObxSyncAsInput( int slot )
 {
+    if( !_aux_clrObxSync( slot ) )
+        return false;
+
     NP_ErrorCode    err;
 
     err = np_switchmatrix_set( slot, SM_Output_StatusBit, SM_Input_SMA1, true );
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC switchmatrix_set(slot %1, INOBXSTATSYNC)%2")
+            QString("IMEC switchmatrix_set(slot %1, OBXINBIT6SYNC)%2")
+            .arg( slot ).arg( makeErrorString( err ) ) );
+        return false;
+    }
+
+    return true;
+}
+
+
+bool CimAcqImec::_aux_clrPXISync( int slot )
+{
+    NP_ErrorCode    err;
+
+    err = np_switchmatrix_clear( slot, SM_Output_StatusBit );
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC switchmatrix_clear(slot %1, PXIBIT6SYNC)%2")
+            .arg( slot ).arg( makeErrorString( err ) ) );
+        return false;
+    }
+
+    err = np_switchmatrix_clear( slot, SM_Output_PXISYNC );
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC switchmatrix_clear(slot %1, PXIBKPLSYNC)%2")
+            .arg( slot ).arg( makeErrorString( err ) ) );
+        return false;
+    }
+
+    err = np_switchmatrix_clear( slot, SM_Output_SMA );
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC switchmatrix_clear(slot %1, PXISMASYNC)%2")
             .arg( slot ).arg( makeErrorString( err ) ) );
         return false;
     }
@@ -236,41 +283,43 @@ bool CimAcqImec::_aux_setObxSyncAsInput( int slot )
 
 bool CimAcqImec::_aux_setPXISyncAsOutput( int slot )
 {
+    if( !_aux_clrPXISync( slot ) )
+        return false;
+
     NP_ErrorCode    err;
 
-    err = np_setParameter( NP_PARAM_SYNCMASTER, slot );
+    err = np_setSyncClockPeriod( slot, 1000 );
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setParameter(slot %1, SYNCMASTER)%2")
+            QString("IMEC setSyncClockPeriod(slot %1)%2")
             .arg( slot ).arg( makeErrorString( err ) ) );
         return false;
     }
 
-    err = np_setParameter( NP_PARAM_SYNCSOURCE, SyncSource_Clock );
+    err = np_switchmatrix_set( slot, SM_Output_StatusBit, SM_Input_SyncClk, true );
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setParameter(slot %1, SYNCSOURCE)%2")
+            QString("IMEC switchmatrix_set(slot %1, PXIOUTBIT6SYNC)%2")
             .arg( slot ).arg( makeErrorString( err ) ) );
         return false;
     }
 
-    err = np_setParameter( NP_PARAM_SYNCPERIOD_MS, 1000 );
+    err = np_switchmatrix_set( slot, SM_Output_PXISYNC, SM_Input_SyncClk, true );
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setParameter(slot %1, SYNCPERIOD)%2")
+            QString("IMEC switchmatrix_set(slot %1, PXIOUTBKPLSYNC)%2")
             .arg( slot ).arg( makeErrorString( err ) ) );
         return false;
     }
 
-//@OBX Don't understand why this needed
     err = np_switchmatrix_set( slot, SM_Output_SMA, SM_Input_SyncClk, true );
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC switchmatrix_set(slot %1, OUTSMASYNC)%2")
+            QString("IMEC switchmatrix_set(slot %1, PXIOUTSMASYNC)%2")
             .arg( slot ).arg( makeErrorString( err ) ) );
         return false;
     }
@@ -281,22 +330,45 @@ bool CimAcqImec::_aux_setPXISyncAsOutput( int slot )
 
 bool CimAcqImec::_aux_setPXISyncAsInput( int slot )
 {
+    if( !_aux_clrPXISync( slot ) )
+        return false;
+
     NP_ErrorCode    err;
 
-    err = np_setParameter( NP_PARAM_SYNCMASTER, slot );
+    err = np_switchmatrix_set( slot, SM_Output_StatusBit, SM_Input_SMA, true );
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setParameter(slot %1, SYNCMASTER)%2")
+            QString("IMEC switchmatrix_set(slot %1, PXIINBIT6SYNC)%2")
             .arg( slot ).arg( makeErrorString( err ) ) );
         return false;
     }
 
-    err = np_setParameter( NP_PARAM_SYNCSOURCE, SyncSource_SMA );
+    err = np_switchmatrix_set( slot, SM_Output_PXISYNC, SM_Input_SMA, true );
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setParameter(slot %1, SYNCSOURCE)%2")
+            QString("IMEC switchmatrix_set(slot %1, PXIINBKPLSYNC)%2")
+            .arg( slot ).arg( makeErrorString( err ) ) );
+        return false;
+    }
+
+    return true;
+}
+
+
+bool CimAcqImec::_aux_setPXISyncAsListener( int slot )
+{
+    if( !_aux_clrPXISync( slot ) )
+        return false;
+
+    NP_ErrorCode    err;
+
+    err = np_switchmatrix_set( slot, SM_Output_StatusBit, SM_Input_PXISYNC, true );
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC switchmatrix_set(slot %1, PXILSTNBIT6SYNC)%2")
             .arg( slot ).arg( makeErrorString( err ) ) );
         return false;
     }
@@ -515,8 +587,6 @@ bool CimAcqImec::_aux_setSync( const CimCfg::ImProbeTable &T )
 
         int slot = vslots[is];
 
-        ok = true;  // listener automatically
-
         if( slot == srcSlot ) {
             ok = _aux_setPXITrigBus( vslots, slot ) &&
                  _aux_setPXISyncAsOutput( slot );
@@ -525,6 +595,8 @@ bool CimAcqImec::_aux_setSync( const CimCfg::ImProbeTable &T )
             ok = _aux_setPXITrigBus( vslots, slot ) &&
                  _aux_setPXISyncAsInput( slot );
         }
+        else
+            ok = _aux_setPXISyncAsListener( slot );
 
         if( !ok )
             return false;

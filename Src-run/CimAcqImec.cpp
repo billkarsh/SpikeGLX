@@ -312,34 +312,37 @@ void ImSimApDat::fetchT0( struct electrodePacket* E, int* out, ImSimLfDat &LF )
 }
 
 
-void ImSimApDat::fetchT2( struct PacketInfo* H, int16_t* D, int* out )
+void ImSimApDat::fetchT2(struct PacketInfo* H, int16_t* D, int is, int nAP, int smpMax, int* out )
 {
     if( !inbuf ) {
         *out = 0;
         return;
     }
 
-    int n = qMin( inbuf, MAXE * TPNTPERFETCH );
+    int n = qMin( inbuf, qMin( smpMax, MAXE * TPNTPERFETCH ) );
 
 // deliver
 
     qint16  *src = &ibuf_ic[0];
 
-    for( int i = 0; i < n; ++i, src += nC, D += acq[0], ++H ) {
+    for( int i = 0; i < n; ++i, src += nC, D += nAP, ++H ) {
 
-        memcpy( D, src, acq[0]*sizeof(qint16) );
+        memcpy( D, src + is * nAP, nAP*sizeof(qint16) );
         H->Timestamp    = 3 * (tstamp - inbuf + i);
-        H->Status       = src[acq[0]];
+        H->Status       = src[acq[0] + is];
     }
 
     *out = n;
 
-// retire
+// retire if all shanks fetched
 
-    if( inbuf > n )
-        memcpy( &ibuf_ic[0], &ibuf_ic[n*nC], (inbuf-n)*nC*sizeof(qint16) );
+    if( nAP == acq[0] || is == 3 ) {
 
-    inbuf -= n;
+        if( inbuf > n )
+            memcpy( &ibuf_ic[0], &ibuf_ic[n*nC], (inbuf-n)*nC*sizeof(qint16) );
+
+        inbuf -= n;
+    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -402,10 +405,10 @@ void ImSimDat::fetchT0( struct electrodePacket* E, int* out )
 }
 
 
-void ImSimDat::fetchT2( struct PacketInfo* H, int16_t* D, int* out )
+void ImSimDat::fetchT2(struct PacketInfo* H, int16_t* D, int is, int nAP, int smpMax, int* out )
 {
     QMutexLocker    ml( bufMtx );
-    AP.fetchT2( H, D, out );
+    AP.fetchT2( H, D, is, nAP, smpMax, out );
 }
 
 /* ---------------------------------------------------------------- */
@@ -696,7 +699,8 @@ ImAcqStream::ImAcqStream(
     int                         ip )
     :   tLastErrFlagsReport(0), tLastFifoReport(0), peakDT(0),
         sumTot(0), totPts(0ULL), Q(Q), QFlt(0), lastTStamp(0),
-        errCOUNT(0), errSERDES(0), errLOCK(0), errPOP(0), errSYNC(0),
+        errCOUNT{0,0,0,0}, errSERDES{0,0,0,0}, errLOCK{0,0,0,0},
+        errPOP{0,0,0,0}, errSYNC{0,0,0,0},
         fifoAve(0), fifoN(0), sumN(0), js(js), ip(ip), simType(false)
 #ifdef PAUSEWHOLESLOT
         , zeroFill(false)
@@ -771,15 +775,19 @@ ImAcqStream::~ImAcqStream()
 }
 
 
-QString ImAcqStream::metricsName() const
+QString ImAcqStream::metricsName( int shank ) const
 {
     QString stream;
 
-    switch( js ) {
-        case jsNI: stream = "  nidq"; break;
-        case jsOB: stream = QString(" obx%1").arg( ip, 2, 10, QChar('0') ); break;
-        case jsIM: stream = QString("imec%1").arg( ip, 2, 10, QChar('0') ); break;
+    if( shank < 0 || fetchType != 4 ) {
+        switch( js ) {
+            case jsNI: stream = "  nidq"; break;
+            case jsOB: stream = QString(" obx%1").arg( ip, 2, 10, QChar('0') ); break;
+            case jsIM: stream = QString("imec%1").arg( ip, 2, 10, QChar('0') ); break;
+        }
     }
+    else
+        stream = QString("quad%1-%2").arg( ip, 2, 10, QChar('0') ).arg( shank );
 
     return stream;
 }
@@ -789,18 +797,24 @@ QString ImAcqStream::metricsName() const
 //
 void ImAcqStream::sendErrMetrics() const
 {
-    if( errCOUNT + errSERDES + errLOCK + errPOP + errSYNC ) {
+    int sMax = (fetchType == 4 ? 4 : 1);
 
-        QMetaObject::invokeMethod(
-            mainApp()->metrics(),
-            "errUpdateFlags",
-            Qt::QueuedConnection,
-            Q_ARG(QString, metricsName()),
-            Q_ARG(quint32, errCOUNT),
-            Q_ARG(quint32, errSERDES),
-            Q_ARG(quint32, errLOCK),
-            Q_ARG(quint32, errPOP),
-            Q_ARG(quint32, errSYNC) );
+    for( int is = 0; is < sMax; ++is ) {
+
+        if( errCOUNT[is] + errSERDES[is] + errLOCK[is] +
+            errPOP[is] + errSYNC[is] ) {
+
+            QMetaObject::invokeMethod(
+                mainApp()->metrics(),
+                "errUpdateFlags",
+                Qt::QueuedConnection,
+                Q_ARG(QString, metricsName( fetchType == 4 ? is : -1 )),
+                Q_ARG(quint32, errCOUNT[is]),
+                Q_ARG(quint32, errSERDES[is]),
+                Q_ARG(quint32, errLOCK[is]),
+                Q_ARG(quint32, errPOP[is]),
+                Q_ARG(quint32, errSYNC[is]) );
+        }
     }
 }
 
@@ -815,11 +829,11 @@ void ImAcqStream::checkErrFlags_EPack( const electrodePacket* E, int nE ) const
 
             int err = errs[i];
 
-            if( err & ELECTRODEPACKET_STATUS_ERR_COUNT )    ++errCOUNT;
-            if( err & ELECTRODEPACKET_STATUS_ERR_SERDES )   ++errSERDES;
-            if( err & ELECTRODEPACKET_STATUS_ERR_LOCK )     ++errLOCK;
-            if( err & ELECTRODEPACKET_STATUS_ERR_POP )      ++errPOP;
-            if( err & ELECTRODEPACKET_STATUS_ERR_SYNC )     ++errSYNC;
+            if( err & ELECTRODEPACKET_STATUS_ERR_COUNT )    ++errCOUNT[0];
+            if( err & ELECTRODEPACKET_STATUS_ERR_SERDES )   ++errSERDES[0];
+            if( err & ELECTRODEPACKET_STATUS_ERR_LOCK )     ++errLOCK[0];
+            if( err & ELECTRODEPACKET_STATUS_ERR_POP )      ++errPOP[0];
+            if( err & ELECTRODEPACKET_STATUS_ERR_SYNC )     ++errSYNC[0];
         }
     }
 
@@ -833,25 +847,28 @@ void ImAcqStream::checkErrFlags_EPack( const electrodePacket* E, int nE ) const
 }
 
 
-void ImAcqStream::checkErrFlags_PInfo( const PacketInfo* H, int nT ) const
+void ImAcqStream::checkErrFlags_PInfo( const PacketInfo* H, int nT, int shank ) const
 {
     for( int it = 0; it < nT; ++it ) {
 
         const quint16   err = H[it].Status;
 
-        if( err & ELECTRODEPACKET_STATUS_ERR_COUNT )    ++errCOUNT;
-        if( err & ELECTRODEPACKET_STATUS_ERR_SERDES )   ++errSERDES;
-        if( err & ELECTRODEPACKET_STATUS_ERR_LOCK )     ++errLOCK;
-        if( err & ELECTRODEPACKET_STATUS_ERR_POP )      ++errPOP;
-        if( err & ELECTRODEPACKET_STATUS_ERR_SYNC )     ++errSYNC;
+        if( err & ELECTRODEPACKET_STATUS_ERR_COUNT )    ++errCOUNT[shank];
+        if( err & ELECTRODEPACKET_STATUS_ERR_SERDES )   ++errSERDES[shank];
+        if( err & ELECTRODEPACKET_STATUS_ERR_LOCK )     ++errLOCK[shank];
+        if( err & ELECTRODEPACKET_STATUS_ERR_POP )      ++errPOP[shank];
+        if( err & ELECTRODEPACKET_STATUS_ERR_SYNC )     ++errSYNC[shank];
     }
 
-    double  tFlags = getTime();
+    if( fetchType != 4 || shank == 3 ) {
 
-    if( tFlags - tLastErrFlagsReport >= 2.0 ) {
+        double  tFlags = getTime();
 
-        sendErrMetrics();
-        tLastErrFlagsReport = tFlags;
+        if( tFlags - tLastErrFlagsReport >= 2.0 ) {
+
+            sendErrMetrics();
+            tLastErrFlagsReport = tFlags;
+        }
     }
 }
 
@@ -929,7 +946,8 @@ void ImAcqWorker::run()
     int         nCHMax  = 0,
                 T2Chans = OBX_N_ACQ,
                 nT0     = 0,
-                nT2     = 0;    // NP 2.0 or OneBox
+                nT2     = 0,    // NP 2.0 or OneBox
+                nSY     = 1;    // for NP2020
 
     lfLast.resize( nID );
 
@@ -951,6 +969,7 @@ void ImAcqWorker::run()
 
         switch( S.fetchType ) {
             case 0: ++nT0; lfLast[iID].assign( S.nLF, 0.0F ); break;
+            case 4: nSY = 4;
             case 2: ++nT2; T2Chans = qMax( T2Chans, S.nAP ); break;
             case 9: ++nT2; T2Chans = qMax( T2Chans, OBX_N_ACQ ); break;
         }
@@ -964,7 +983,7 @@ void ImAcqWorker::run()
         D.resize( MAXE * TPNTPERFETCH * T2Chans * sizeof(qint16) / sizeof(qint32) );
 
     if( nT2 )
-        H.resize( MAXE * TPNTPERFETCH );
+        H.resize( MAXE * TPNTPERFETCH * nSY );
 
     if( !shr.wait() )
         goto exit;
@@ -1000,7 +1019,8 @@ void ImAcqWorker::run()
 
             switch( S.fetchType ) {
                 case 0: ok = doProbe_T0( &lfLast[iID][0], i16Buf, S ); break;
-                case 2: ok = doProbe_T2( i16Buf, S ); break;
+                case 2:
+                case 4: ok = doProbe_T2( i16Buf, S ); break;
                 case 9: ok = do_obx( i16Buf, S ); break;
             }
 
@@ -1261,14 +1281,47 @@ bool ImAcqWorker::doProbe_T2(
 
     qint16  *src = reinterpret_cast<qint16*>(&D[0]),
             *dst = &dst1D[0];
-    int     nT;
+    int     vNT[4], // each sub fetch
+            nT;     // total timepoints
 
 // -----
 // Fetch
 // -----
 
-    if( !acq->fetchD_T2( nT, &H[0], src, S ) )
-        return false;
+    if( S.fetchType == 2 ) {
+        if( !acq->fetchD_T2( nT, &H[0], src, S, S.nAP, MAXE * TPNTPERFETCH ) )
+            return false;
+    }
+    else {
+        nT = 0;
+
+        // lowest pending
+        int fmin = MAXE * TPNTPERFETCH, fifo, empty;
+        if( !S.simType ) {
+            for( int is = 0; is < 4; ++is ) {
+                np_getPacketFifoStatus( S.slot, S.port, S.dock,
+                    streamsource_t(is), &fifo, &empty );
+                fmin = qMin( fmin, fifo );
+            }
+        }
+        else {
+            acq->simDat[acq->ip2simdat[S.ip]].fifo( &fifo, &empty );
+            fmin = qMin( fmin, fifo );
+        }
+
+        // fetch each NP2020 shank
+        if( fmin ) {
+            for( int is = 0; is < 4; ++is ) {
+                if( !acq->fetchD_T2( vNT[is], &H[nT], src + nT*384,
+                            S, 384, fmin, streamsource_t(is) ) ) {
+
+                    return false;
+                }
+                nT += vNT[is];
+            }
+            nT = vNT[0];
+        }
+    }
 
     if( !nT ) {
 
@@ -1363,7 +1416,18 @@ S.tStampLastFetch = H[nT-1].Timestamp;
 
 // Option to invert sign; not needed in 3.0
 #if 1
-        memcpy( dst, src, S.nAP * sizeof(qint16) );
+        if( S.fetchType == 2 ) {
+            memcpy( dst, src, S.nAP * sizeof(qint16) );
+            src += S.nAP;
+        }
+        else {
+            int toff = 0;
+            for( int is = 0; is < 4; ++is ) {
+                memcpy( dst + is * 384, src + (toff + it) * 384,
+                    384 * sizeof(qint16) );
+                toff += vNT[is];
+            }
+        }
 #else
         for( int k = 0; k < S.nAP; ++k )
             dst[k] = -src[k];
@@ -1386,13 +1450,20 @@ dst[16] = count[S.ip] % 8000 - 4000;
 //------------------------------------------------------------------
 
         dst += S.nAP;
-        src += S.nAP;
 
         // ----
         // sync
         // ----
 
-        *dst++ = H[it].Status;
+        if( S.fetchType == 2 )
+            *dst++ = H[it].Status;
+        else {
+            int toff = 0;
+            for( int is = 0; is < 4; ++is ) {
+                *dst++ = H[toff + it].Status;
+                toff  += vNT[is];
+            }
+        }
 
         // ------------
         // TStamp check
@@ -2298,7 +2369,14 @@ if( S.ip == 0 ) {
 }
 
 
-bool CimAcqImec::fetchD_T2( int &nT, PacketInfo* H, qint16* D, const ImAcqStream &S )
+bool CimAcqImec::fetchD_T2(
+    int                 &nT,
+    PacketInfo*         H,
+    qint16*             D,
+    const ImAcqStream   &S,
+    int                 nC,
+    int                 smpMax,
+    streamsource_t      shank )
 {
     nT = 0;
 
@@ -2345,8 +2423,8 @@ ackPause:
 // Duplicate removal...
 //
     err = np_readPackets(
-            S.slot, S.port, S.dock, SourceAP,
-            H, D, S.nAP, MAXE * TPNTPERFETCH, &out );
+            S.slot, S.port, S.dock, shank,
+            H, D, nC, smpMax, &out );
 
     if( err == SUCCESS /*&& S.dock == 2*/ && out > 0 ) {
 
@@ -2383,7 +2461,7 @@ for( int k = 0; k < 60; ++k ) {
 
     do {
         err = np_readPacket(
-                S.slot, S.port, S.dock, SourceAP,
+                S.slot, S.port, S.dock, shank,
                 H + k, D + k*S.nAP, S.nAP, &out );
     } while( !out );
 
@@ -2397,16 +2475,16 @@ for( int k = 0; k < 60; ++k ) {
 //
     if( !S.simType ) {
         err = np_readPackets(
-                S.slot, S.port, S.dock, SourceAP,
-                H, D, S.nAP, MAXE * TPNTPERFETCH, &out );
+                S.slot, S.port, S.dock, shank,
+                H, D, nC, smpMax, &out );
     }
     else
-        simDat[ip2simdat[S.ip]].fetchT2( H, D, &out );
+        simDat[ip2simdat[S.ip]].fetchT2( H, D, shank, nC, smpMax, &out );
 #endif
 
 // @@@ FIX Experiment to report fetched packet count vs time.
 #ifdef LATENCYFILE
-if( S.ip == 0 ) {
+if( S.ip == 0 && shank == SourceAP ) {
     static double q0 = getTime();
     static QFile f;
     static QTextStream ts( &f );
@@ -2446,7 +2524,7 @@ if( S.ip == 0 ) {
 
 #ifdef TUNE
     // Tune AVEE and MAXE on designated probe
-    if( TUNE == S.ip ) {
+    if( TUNE == S.ip && shank == SourceAP ) {
         static std::vector<uint> pkthist( 1 + MAXE*TPNTPERFETCH, 0 ); // 0 + [1..MAX]
         static double tlastpkreport = getTime();
         double tpk = getTime() - tlastpkreport;
@@ -2470,7 +2548,7 @@ if( S.ip == 0 ) {
 // Check error flags
 // -----------------
 
-    S.checkErrFlags_PInfo( H, nT );
+    S.checkErrFlags_PInfo( H, nT, shank );
 
     return true;
 }
@@ -2586,7 +2664,7 @@ if( S.ip == 0 ) {
 // Check error flags
 // -----------------
 
-    S.checkErrFlags_PInfo( H, nT );
+    S.checkErrFlags_PInfo( H, nT, 0 );
 
     return true;
 }
@@ -2625,6 +2703,7 @@ int CimAcqImec::fifoPct( int *packets, const ImAcqStream &S ) const
                     }
                     break;
                 case 2:
+                case 4:
                     err = np_getPacketFifoStatus(
                             S.slot, S.port, S.dock, SourceAP, packets, &nempty );
                     if( err != SUCCESS ) {
@@ -2728,8 +2807,7 @@ bool CimAcqImec::configure()
 void CimAcqImec::createAcqWorkerThreads()
 {
 // @@@ FIX Tune streams per thread here and in triggers
-// @@@ Change from 3 to 1 stream per worker until API 3.63+
-    const int                   nStrPerThd = 1;
+    const int                   nStrPerThd = 3;
     std::vector<ImAcqStream>    streams;
 
     for( int ip = 0, np = p.stream_nIM(); ip < np; ++ip ) {

@@ -111,7 +111,9 @@ namespace Neuropixels {
     typedef enum {
         SourceDefault = 0,  /**< default stream source */
         SourceAP = 0,
-        SourceLFP = 1
+		SourceLFP = 1,
+		SourceSt2 = 2,
+		SourceSt3 = 3
     }streamsource_t;
 
     struct PacketInfo {
@@ -237,12 +239,6 @@ namespace Neuropixels {
         /// @brief Switch matrix signal supports inversion
         swcap_invert = (1 << 1)
     }swcapflags_t;
-
-    typedef enum {
-        SyncSource_None = SM_SyncSource_(0),
-        SyncSource_SMA  = SM_SyncSource_(1),
-        SyncSource_Clock = SM_SyncSource_(2),
-    }syncsource_t;
 
     typedef enum {
         SM_Input_None = SM_Input_(0),
@@ -412,15 +408,10 @@ namespace Neuropixels {
     typedef enum {
         NP_PARAM_BUFFERSIZE = 1,
         NP_PARAM_BUFFERCOUNT = 2,
-        NP_PARAM_SYNCMASTER = 3,
-        NP_PARAM_SYNCFREQUENCY_HZ = 4,
-        NP_PARAM_SYNCPERIOD_MS = 5,
-        NP_PARAM_SYNCSOURCE = 6,
         NP_PARAM_SIGNALINVERT = 7,
 
         // internal use only
-        NP_PARAM_IGNOREPROBESN = 0x1000,
-        NP_PARAM_ALLOWMANUALPXISYNCCONFIG = 0x1001
+		NP_PARAM_IGNOREPROBESN = 0x1000
     }np_parameter_t;
     /*
      * \brief Set the value of a system-wide parameter
@@ -468,11 +459,6 @@ namespace Neuropixels {
     NP_EXPORT NP_ErrorCode setSWTriggerEx(int slotID, swtriggerflags_t triggerflags);
 
     /*
-    * \brief Configures the input/output trigger signal edge as rising/falling sensitive
-    */
-    NP_EXPORT NP_ErrorCode setTriggerEdge(int slotID, bool rising);
-
-    /*
      * \brief Connect/disconnect a switch matrix input to/from an output signal
      */
     NP_EXPORT NP_ErrorCode switchmatrix_set(int slotID, switchmatrixoutput_t output, switchmatrixinput_t inputline, bool connect);
@@ -491,7 +477,45 @@ namespace Neuropixels {
     NP_EXPORT NP_ErrorCode switchmatrix_setOutputTriggerEdge(int slotID, switchmatrixoutput_t output, triggeredge_t edge);
     NP_EXPORT NP_ErrorCode switchmatrix_getOutputTriggerEdge(int slotID, switchmatrixoutput_t output, triggeredge_t* edge);
 
+	/**
+	 * Set the frequency of the internal sync clock.
+	 *
+	 * This function will attempt to set the frequency of the internal sync clock to
+	 * the target frequency. Because of rounding and conversion of the frequency to
+	 * a half period in milliseconds, the actual frequency may differ slightly from
+	 * the target frequency. The actual frequency can always be checked by using
+	 * `getSyncClockFrequency`.
+	 *
+	 * @param slotID Target slot
+	 * @param frequency Target frequency in Hz
+	 * @returns PARAMETER_INVALID if the target frequency is out-of-bounds or otherwise illegal
+	 */
+	NP_EXPORT NP_ErrorCode setSyncClockFrequency(int slotID, double frequency);
 
+	/**
+	 * Get the frequency of the internal sync clock.
+	 *
+	 * @param slotID Target slot
+	 * @param frequency Pointer to result
+	 */
+	NP_EXPORT NP_ErrorCode getSyncClockFrequency(int slotID, double* frequency);
+
+	/**
+	 * Set the period of the internal sync clock.
+	 *
+	 * @param slotID Target slot
+	 * @param period_ms Target period in milliseconds
+	 * @returns PARAMETER_INVALID if period is out-of-bounds or otherwise illegal
+	 */
+	NP_EXPORT NP_ErrorCode setSyncClockPeriod(int slotID, int period_ms);
+
+	/**
+	 * Get the period of the internal sync clock.
+	 *
+	 * @param slotID Target slot
+	 * @param period_ms Pointer to result
+	 */
+	NP_EXPORT NP_ErrorCode getSyncClockPeriod(int slotID, int* period_ms);
 
     typedef enum {
         NP_DATAMODE_OFF = 0,
@@ -545,17 +569,6 @@ namespace Neuropixels {
      */
     NP_EXPORT NP_ErrorCode bsc_updateFirmware(int slotID, const char* filename, int(*callback)(size_t byteswritten));
 
-
-    /* File stream API *****************************************************************************************/
-    /*
-     * \brief Associate a raw packet file dump stream with a mapped basestation
-    */
-    NP_EXPORT NP_ErrorCode setFileStream   (int slotID, const char* filename);
-    /*
-     * \brief Enable writing to the file stream (See setFileStream)
-    */
-    NP_EXPORT NP_ErrorCode enableFileStream(int slotID, bool enable);
-
     /**
     * @brief Get the amount of ports on the base station connect board
     * @param slotID: slot ID
@@ -591,20 +604,6 @@ namespace Neuropixels {
     NP_EXPORT NP_ErrorCode readBSCSN               (int slotID, uint64_t* sn);
     NP_EXPORT NP_ErrorCode getBSCVersion           (int slotID, int* version_major, int* version_minor);
 
-    /**
-     * Configures the sync pattern on the FPGA (NPM2b/c specific)
-     *
-     * Using this procedure the sync pattern can be configured on the FPGA.
-     * This sync pattern is used to detect sync errors by comparing the pattern
-     * with the pattern sent by the probe ASIC.
-     *
-     * @param slotID slot ID
-     * @param portID port ID
-     * @param sync_pattern Pointer to the 12 bytes to be used as sync pattern
-     */
-    NP_EXPORT NP_ErrorCode setPortSyncPattern(int slotID, int portID, uint8_t* sync_pattern);
-    NP_EXPORT NP_ErrorCode getPortSyncPattern(int slotID, int portID, uint8_t* sync_pattern);
-
     /* Probe functions *******************************************************************/
     NP_EXPORT NP_ErrorCode openProbe               (int slotID, int portID, int dockID);
     NP_EXPORT NP_ErrorCode closeProbe              (int slotID, int portID, int dockID);
@@ -612,20 +611,6 @@ namespace Neuropixels {
     NP_EXPORT NP_ErrorCode writeProbeConfiguration (int slotID, int portID, int dockID, bool readCheck);
     NP_EXPORT NP_ErrorCode setADCCalibration       (int slotID, int portID, const char* filename);
     NP_EXPORT NP_ErrorCode setGainCalibration      (int slotID, int portID, int dockID, const char* filename);
-
-    /**
-     * Configures the sync pattern on the probe ASIC (NPM2b/c specific)
-     *
-     * Using this procedure the sync pattern can be configured on the probe ASIC.
-     * This sync pattern is sent as sync word in the PSB frames.
-     *
-     * @param slotID slot ID
-     * @param portID port ID
-     * @param dockID dock ID
-     * @param sync_pattern Pointer to buffer for 12 sync bytes
-     */
-    NP_EXPORT NP_ErrorCode setProbeSyncPattern(int slotID, int portID, int dockID, uint8_t* sync_pattern);
-    NP_EXPORT NP_ErrorCode getProbeSyncPattern(int slotID, int portID, int dockID, uint8_t* sync_pattern);
 
 // <NP1 Specific>
 #define NP1_PROBE_CHANNEL_COUNT   384
@@ -1079,10 +1064,18 @@ namespace Neuropixels {
     */
     NP_EXPORT NP_ErrorCode bistEEPROM(int slotID, int portID);
 
-
-    /**
-    * @brief Test the shift registers
-    * This test verifies the functionality of the shank and base shift registers (SR_CHAIN 1 to 3). The function configures the shift register two times with the same code. After the 2nd write cycle the SR_OUT_OK bit in the STATUS register is read. If OK, the shift register configuration was successful. The test is done for all 3 registers. The configuration code used for the test is a dedicated code (to make sure the bits are not all 0 or 1).
+	/**
+	 * Test the shift registers
+	 *
+	 * This test verifies the functionality of the shank and base shift registers.
+	 * The function configures the shift register two or more times with the same code.
+	 * After the 2nd write cycle the SR_OUT_OK bit in the STATUS register is read.
+	 * If OK, the shift register configuration was successful.
+	 * The test is done for all applicable SR chain registers.
+	 * The configuration code used for the test is a dedicated code (to make sure the bits are not all 0 or 1).
+	 *
+	 * Note that this test overwrites and does not restore the data stored in the SR chains before the test.
+	 * Use writeProbeConfiguration to restore the configuration.
     *
     * @param slotID: which slot in the PXI chassis (valid range depends on the chassis)
     * @param port: for which HS (valid range 1 to 4)
@@ -1124,69 +1117,6 @@ namespace Neuropixels {
     NP_EXPORT NP_ErrorCode HSTestNRST(int slotID, int portID);
     NP_EXPORT NP_ErrorCode HSTestREC_NRESET(int slotID, int portID);
 
-
-    /********************* Raw Stream file API functions ****************************/
-
-    /**
-    * @brief Open an acquisition stream from an existing file.
-    * @param filename Specifies an existing file with probe acquisition data.
-    * @param port specifies the target port (1..4)
-    * @param dockID 1..2 (depending on type of probe. default=1)
-    * @param source data type (AP or LFP) if supported (default = AP)
-    * @param psh stream a pointer to the stream pointer that will receive the handle to the opened stream
-    * @returns FILE_OPEN_ERROR if unable to open file
-    */
-    NP_EXPORT NP_ErrorCode streamOpenFile(const char* filename, int portID, int dockID, streamsource_t source, np_streamhandle_t* pstream);
-
-    /**
-    * @brief Closes an acquisition stream.
-    * Closes the stream along with the optional recording file.
-    */
-    NP_EXPORT NP_ErrorCode streamClose(np_streamhandle_t sh);
-
-    /**
-    * @brief Moves the stream pointer to given timestamp.
-    * Stream seek is only supported on streams that are backed by a recording file store.
-    * @param stream: the acquisition stream handle
-    * @param filepos: The file position to navigate to.
-    * @param actualtimestamp: returns the timestamp at the stream pointer (NULL allowed)
-    * @returns TIMESTAMPNOTFOUND if no valid data packet is found beyond the specified file position
-    */
-    NP_EXPORT NP_ErrorCode streamSeek(np_streamhandle_t sh, uint64_t filepos, uint32_t* actualtimestamp);
-
-    NP_EXPORT NP_ErrorCode streamSetPos(np_streamhandle_t sh, uint64_t filepos);
-
-    /**
-    * @brief Report the current file position in the filestream.
-    * @param stream: the acquisition stream handle
-    * @returns the current file position at the stream cursor position.
-    */
-    NP_EXPORT uint64_t streamTell(np_streamhandle_t sh);
-
-    /**
-    * @brief read probe data from a recorded file stream.
-    * Example:
-    *    #define SAMPLECOUNT 128
-    *    uint16_t interleaveddata[SAMPLECOUNT * 384];
-    *    uint32_t timestamps[SAMPLECOUNT];
-    *
-    *    np_streamhandle_t sh;
-    *    streamOpenFile("myrecording.bin",1, false, &sh);
-    *    int actualread;
-    *    streamRead(sh, timestamps, interleaveddata, SAMPLECOUNT, &actualread);
-    *
-    * @param slotID: which slot in the PXI chassis (valid range depends on the chassis)
-    * @param timestamps: Optional timestamps buffer (NULL if not used). size should be 'samplecount'
-    * @param data: buffer of size samplecount*384. The buffer will be populated with channel interleaved, 16 bit per sample data.
-    * @param samplestoread: amount of timestamps to read.
-    * @param actualread: output parameter: amount of 16 timestamps actually read from the stream.
-    * @returns SUCCESS if succesfully read any sample from the stream
-    */
-    NP_EXPORT NP_ErrorCode streamRead(np_streamhandle_t sh, uint32_t* timestamps, int16_t* data, int samplestoread, int* actualread);
-
-    NP_EXPORT NP_ErrorCode streamReadPacket(np_streamhandle_t sh, pckhdr_t* header, int16_t* data, int samplestoread, int* actualread);
-
-
 // Configuration
 
     const int HARDWAREID_PN_LEN = 40;
@@ -1205,14 +1135,9 @@ namespace Neuropixels {
     NP_EXPORT NP_ErrorCode getProbeDriverID(int slotID, int portID, int dockID, char* name, size_t len);
 
     NP_EXPORT NP_ErrorCode getBSCHardwareID(int slotID, struct HardwareID* pHwid);
-    NP_EXPORT NP_ErrorCode setBSCHardwareID(int slotID, const struct HardwareID* pHwid);
     NP_EXPORT NP_ErrorCode getHeadstageHardwareID(int slotID, int portID, struct HardwareID* pHwid);
-    NP_EXPORT NP_ErrorCode setHeadstageHardwareID(int slotID, int portID, const struct HardwareID* pHwid);
     NP_EXPORT NP_ErrorCode getFlexHardwareID(int slotID, int portID, int dockID, struct HardwareID* pHwid);
-    NP_EXPORT NP_ErrorCode setFlexHardwareID(int slotID, int portID, int dockID, const struct HardwareID* pHwid);
     NP_EXPORT NP_ErrorCode getProbeHardwareID(int slotID, int portID, int dockID, struct HardwareID* pHwid);
-    NP_EXPORT NP_ErrorCode setProbeHardwareID(int slotID, int portID, int dockID, const struct HardwareID* pHwid);
-
 
 // Debug
 
@@ -1251,30 +1176,6 @@ namespace Neuropixels {
         uint32_t fifooverflow;       /**< last recorded sample counter */
     };
 
-    typedef enum {
-        NPSlotEmulatorMode_Off = 0, /**< No emulation data is generated */
-        NPSlotEmulatorMode_Static = 1, /**< static data per channel: value = channel number */
-        NPSlotEmulatorMode_Linear = 2, /**< a linear ramp is generated per channel (1 sample shift between channels) */
-    } slotemulatormode_t;
-
-    typedef enum
-    {
-        NPSlotEmulatorType_NP2,
-        NPSlotEmulatorType_NPM,
-        NPSlotEmulatorType_NPM2,
-        NPSlotEmulatorType_Colibri
-    } slotemulatortype_t;
-
-    typedef enum {
-        NPPortEmulatorMode_Off     = 0,
-        NPPortEmulatorMode_NP1_0   = 1,
-        NPPortEmulatorMode_NHP     = 2,
-        NPPortEmulatorMode_NPM     = 3,
-        NPPortEmulatorMode_NPM2b   = 4,
-        NPPortEmulatorMode_NPM2c   = 5,
-        NPPortEmulatorMode_Colibri = 6
-    } portemulatormode_t;
-
     typedef enum
     {
         // A new device was found
@@ -1292,15 +1193,6 @@ namespace Neuropixels {
      * \brief Register a system event callback handler.
      */
     NP_EXPORT NP_ErrorCode createSystemEventCallback(npcallbackhandle_t* handle, np_systemeventcallbackfn_t callback, const void* userdata);
-
-    NP_EXPORT NP_ErrorCode writeBSCMM(int slotID, uint32_t address, uint32_t data);
-    NP_EXPORT NP_ErrorCode readBSCMM(int slotID, uint32_t address, uint32_t* data);
-    NP_EXPORT NP_ErrorCode writeI2C(int slotID, int portID, uint8_t device, uint8_t address, uint8_t data);
-    NP_EXPORT NP_ErrorCode readI2C(int slotID, int portID, uint8_t device, uint8_t address, uint8_t* data);
-    NP_EXPORT NP_ErrorCode writeI2Cex(int slotID, int portID, uint8_t device, uint8_t address, const void* data, size_t len);
-    NP_EXPORT NP_ErrorCode readI2Cex(int slotID, int portID, uint8_t device, uint8_t address, void* data, size_t len);
-    NP_EXPORT NP_ErrorCode writeI2Cflex(int slotID, int portID, int dockID, uint8_t device, uint8_t address, uint8_t data);
-    NP_EXPORT NP_ErrorCode readI2Cflex(int slotID, int portID, int dockID, uint8_t device, uint8_t address, uint8_t* data);
 
     /* Neuropixels OPTO specific **********************************************************************************************************************/
     typedef enum
@@ -1491,47 +1383,10 @@ namespace Neuropixels {
     NP_EXPORT int          dbg_getlevel(void);
     NP_EXPORT void         dbg_setlogcallback(int minlevel, void(*callback)(int level, time_t ts, const char* module, const char* msg));
     NP_EXPORT void         dbg_getversion_datetime(char* dst, size_t maxlen);
-    NP_EXPORT NP_ErrorCode dbg_setSlotEmulatorMode(int slotID, slotemulatormode_t mode);
-    NP_EXPORT NP_ErrorCode dbg_getSlotEmulatorMode(int slotID, slotemulatormode_t* mode);
-    /** Sets the emulation type of the slot.
-     *
-     * To avoid conflicts between slot and port emulator types,
-     * the following actions will be executed when calling this function:
-     * - All open ports will be closed
-     * - The emulator mode of the port will be set to "Off"
-     *
-     * @param slotID slot ID
-     * @param type emulation type
-     */
-    NP_EXPORT NP_ErrorCode dbg_setSlotEmulatorType(int slotID, slotemulatortype_t type);
-    NP_EXPORT NP_ErrorCode dbg_getSlotEmulatorType(int slotID, slotemulatortype_t* type);
 
-    /**
-     * Set the sync pattern for the NPM 2b/c emulator.
-     *
-     * @param slotID slot ID
-     * @param sync_pattern Pointer to buffer containing 12 sync bytes.
-     */
-    NP_EXPORT NP_ErrorCode dbg_setSlotEmulatorSyncPattern(int slotID, uint8_t* sync_pattern);
-
-    /**
-     * Get the current sync pattern for the NPM 2b/c emulator.
-     *
-     * @param slotID slot ID
-     * @param sync_pattern Pointer to buffer for 12 sync bytes.
-     */
-    NP_EXPORT NP_ErrorCode dbg_getSlotEmulatorSyncPattern(int slotID, uint8_t* sync_pattern);
-
-    NP_EXPORT NP_ErrorCode dbg_setPortEmulatorMode(int slotID, int portID, portemulatormode_t emulationmode);
-    NP_EXPORT NP_ErrorCode dbg_getPortEmulatorMode(int slotID, int portID, portemulatormode_t* emulationmode);
     NP_EXPORT NP_ErrorCode dbg_stats_reset(int slotID);
     NP_EXPORT NP_ErrorCode dbg_diagstats_read(int slotID, struct np_diagstats* stats);
     NP_EXPORT NP_ErrorCode dbg_sourcestats_read(int slotID, uint8_t sourceID, struct np_sourcestats* stats);
-    NP_EXPORT NP_ErrorCode dbg_read_srchain(int slotID, int portID, int dockID, uint8_t SRChain_registeraddress, uint8_t* dst, size_t len, size_t* actualread);
-    NP_EXPORT NP_ErrorCode setVirtualHeadstage(int slotID, int portID);
-
-
-
 
 #define NP_APIC __stdcall
     extern "C" {
@@ -1557,7 +1412,6 @@ namespace Neuropixels {
         NP_EXPORT NP_ErrorCode NP_APIC np_arm(int slotID);
         NP_EXPORT NP_ErrorCode NP_APIC np_setSWTrigger(int slotID);
         NP_EXPORT NP_ErrorCode NP_APIC np_setSWTriggerEx(int slotID, swtriggerflags_t triggerflags);
-        NP_EXPORT NP_ErrorCode NP_APIC np_setTriggerEdge(int slotID, bool rising);
         NP_EXPORT NP_ErrorCode NP_APIC np_switchmatrix_set(int slotID, switchmatrixoutput_t output, switchmatrixinput_t inputline, bool connect);
         NP_EXPORT NP_ErrorCode NP_APIC np_switchmatrix_get(int slotID, switchmatrixoutput_t output, switchmatrixinput_t inputline, bool* isconnected);
         NP_EXPORT NP_ErrorCode NP_APIC np_switchmatrix_clear(int slotID, switchmatrixoutput_t output);
@@ -1567,6 +1421,10 @@ namespace Neuropixels {
         NP_EXPORT NP_ErrorCode NP_APIC np_switchmatrix_getOutputInversion(int slotID, switchmatrixoutput_t output, bool* invert);
         NP_EXPORT NP_ErrorCode NP_APIC np_switchmatrix_setOutputTriggerEdge(int slotID, switchmatrixoutput_t output, triggeredge_t edge);
         NP_EXPORT NP_ErrorCode NP_APIC np_switchmatrix_getOutputTriggerEdge(int slotID, switchmatrixoutput_t output, triggeredge_t* edge);
+		NP_EXPORT NP_ErrorCode NP_APIC np_setSyncClockFrequency(int slotID, double frequency);
+		NP_EXPORT NP_ErrorCode NP_APIC np_getSyncClockFrequency(int slotID, double* frequency);
+	    NP_EXPORT NP_ErrorCode NP_APIC np_setSyncClockPeriod(int slotID, int period_ms);
+		NP_EXPORT NP_ErrorCode NP_APIC np_getSyncClockPeriod(int slotID, int* period_ms);
         NP_EXPORT NP_ErrorCode NP_APIC np_setDataMode(int slotID, int portID, np_datamode_t mode);
         NP_EXPORT NP_ErrorCode NP_APIC np_getDataMode(int slotID, int portID, np_datamode_t* mode);
         NP_EXPORT NP_ErrorCode NP_APIC np_bs_getTemperature(int slotID, double* temperature_degC);
@@ -1575,8 +1433,6 @@ namespace Neuropixels {
         NP_EXPORT NP_ErrorCode NP_APIC np_bsc_getTemperature(int slotID, double* temperature_degC);
         NP_EXPORT NP_ErrorCode NP_APIC np_bsc_getFirmwareInfo(int slotID, struct firmware_Info* info);
         NP_EXPORT NP_ErrorCode NP_APIC np_bsc_updateFirmware(int slotID, const char* filename, int(*callback)(size_t byteswritten));
-        NP_EXPORT NP_ErrorCode NP_APIC np_setFileStream(int slotID, const char* filename);
-        NP_EXPORT NP_ErrorCode NP_APIC np_enableFileStream(int slotID, bool enable);
         NP_EXPORT NP_ErrorCode NP_APIC np_getBSCSupportedPortCount(int slotID, int* count);
         NP_EXPORT NP_ErrorCode NP_APIC np_getHSSupportedProbeCount(int slotID, int portID, int* count);
         NP_EXPORT NP_ErrorCode NP_APIC np_openPort(int slotID, int portID);
@@ -1594,16 +1450,12 @@ namespace Neuropixels {
         NP_EXPORT NP_ErrorCode NP_APIC np_readBSCPN(int slotID, char* pn, size_t len);
         NP_EXPORT NP_ErrorCode NP_APIC np_readBSCSN(int slotID, uint64_t* sn);
         NP_EXPORT NP_ErrorCode NP_APIC np_getBSCVersion(int slotID, int* version_major, int* version_minor);
-        NP_EXPORT NP_ErrorCode NP_APIC np_setPortSyncPattern(int slotID, int portID, uint8_t* sync_pattern);
-        NP_EXPORT NP_ErrorCode NP_APIC np_getPortSyncPattern(int slotID, int portID, uint8_t* sync_pattern);
         NP_EXPORT NP_ErrorCode NP_APIC np_openProbe(int slotID, int portID, int dockID);
         NP_EXPORT NP_ErrorCode NP_APIC np_closeProbe(int slotID, int portID, int dockID);
         NP_EXPORT NP_ErrorCode NP_APIC np_init(int slotID, int portID, int dockID);
         NP_EXPORT NP_ErrorCode NP_APIC np_writeProbeConfiguration(int slotID, int portID, int dockID, bool readCheck);
         NP_EXPORT NP_ErrorCode NP_APIC np_setADCCalibration(int slotID, int portID, const char* filename);
         NP_EXPORT NP_ErrorCode NP_APIC np_setGainCalibration(int slotID, int portID, int dockID, const char* filename);
-        NP_EXPORT NP_ErrorCode NP_APIC np_setProbeSyncPattern(int slotID, int portID, int dockID, uint8_t* sync_pattern);
-        NP_EXPORT NP_ErrorCode NP_APIC np_getProbeSyncPattern(int slotID, int portID, int dockID, uint8_t* sync_pattern);
         NP_EXPORT NP_ErrorCode NP_APIC np_readElectrodeData(int slotID, int portID, int dockID, struct electrodePacket* packets, int* actualAmount, int requestedAmount);
         NP_EXPORT NP_ErrorCode NP_APIC np_getElectrodeDataFifoState(int slotID, int portID, int dockID, int* packetsavailable, int* headroom);
         NP_EXPORT NP_ErrorCode NP_APIC np_setTestSignal(int slotID, int portID, int dockID, bool enable);
@@ -1670,53 +1522,25 @@ namespace Neuropixels {
         NP_EXPORT NP_ErrorCode NP_APIC np_HSTestNRST(int slotID, int portID);
         NP_EXPORT NP_ErrorCode NP_APIC np_HSTestREC_NRESET(int slotID, int portID);
 
-        NP_EXPORT NP_ErrorCode NP_APIC np_streamOpenFile(const char* filename, int portID, int dockID, streamsource_t source, np_streamhandle_t* pstream);
-        NP_EXPORT NP_ErrorCode NP_APIC np_streamClose(np_streamhandle_t sh);
-        NP_EXPORT NP_ErrorCode NP_APIC np_streamSeek(np_streamhandle_t sh, uint64_t filepos, uint32_t* actualtimestamp);
-        NP_EXPORT NP_ErrorCode NP_APIC np_streamSetPos(np_streamhandle_t sh, uint64_t filepos);
-        NP_EXPORT uint64_t     NP_APIC np_streamTell(np_streamhandle_t sh);
-        NP_EXPORT NP_ErrorCode NP_APIC np_streamRead(np_streamhandle_t sh, uint32_t* timestamps, int16_t* data, int samplestoread, int* actualread);
-        NP_EXPORT NP_ErrorCode NP_APIC np_streamReadPacket(np_streamhandle_t sh, pckhdr_t* header, int16_t* data, int samplestoread, int* actualread);
-
         //NeuropixAPI_configuration.h
         NP_EXPORT NP_ErrorCode NP_APIC np_getBasestationDriverID(int slotID, char* name, size_t len);
         NP_EXPORT NP_ErrorCode NP_APIC np_getHeadstageDriverID(int slotID, int portID, char* name, size_t len);
         NP_EXPORT NP_ErrorCode NP_APIC np_getFlexDriverID(int slotID, int portID, int dockID, char* name, size_t len);
         NP_EXPORT NP_ErrorCode NP_APIC np_getProbeDriverID(int slotID, int portID, int dockID, char* name, size_t len);
-        NP_EXPORT NP_ErrorCode NP_APIC np_getBSCHardwareID(int slotID, struct HardwareID* pHwid);
-        NP_EXPORT NP_ErrorCode NP_APIC np_setBSCHardwareID(int slotID, const struct HardwareID* pHwid);
+		NP_EXPORT NP_ErrorCode NP_APIC np_getBSCHardwareID(int slotID, struct HardwareID* pHwid);\
         NP_EXPORT NP_ErrorCode NP_APIC np_getHeadstageHardwareID(int slotID, int portID, struct HardwareID* pHwid);
-        NP_EXPORT NP_ErrorCode NP_APIC np_setHeadstageHardwareID(int slotID, int portID, const struct HardwareID* pHwid);
         NP_EXPORT NP_ErrorCode NP_APIC np_getFlexHardwareID(int slotID, int portID, int dockID, struct HardwareID* pHwid);
-        NP_EXPORT NP_ErrorCode NP_APIC np_setFlexHardwareID(int slotID, int portID, int dockID, const struct HardwareID* pHwid);
         NP_EXPORT NP_ErrorCode NP_APIC np_getProbeHardwareID(int slotID, int portID, int dockID, struct HardwareID* pHwid);
-        NP_EXPORT NP_ErrorCode NP_APIC np_setProbeHardwareID(int slotID, int portID, int dockID, const struct HardwareID* pHwid);
 
         //NeuropixAPI_debug.h
         NP_EXPORT NP_ErrorCode NP_APIC np_createSystemEventCallback(npcallbackhandle_t* handle, np_systemeventcallbackfn_t callback, const void* userdata);
-        NP_EXPORT NP_ErrorCode NP_APIC np_writeBSCMM(int slotID, uint32_t address, uint32_t data);
-        NP_EXPORT NP_ErrorCode NP_APIC np_readBSCMM(int slotID, uint32_t address, uint32_t* data);
-        NP_EXPORT NP_ErrorCode NP_APIC np_writeI2C(int slotID, int portID, uint8_t device, uint8_t address, uint8_t data);
-        NP_EXPORT NP_ErrorCode NP_APIC np_readI2C(int slotID, int portID, uint8_t device, uint8_t address, uint8_t* data);
-        NP_EXPORT NP_ErrorCode NP_APIC np_writeI2Cflex(int slotID, int portID, int dockID, uint8_t device, uint8_t address, uint8_t data);
-        NP_EXPORT NP_ErrorCode NP_APIC np_readI2Cflex(int slotID, int portID, int dockID, uint8_t device, uint8_t address, uint8_t* data);
         NP_EXPORT void         NP_APIC np_dbg_setlevel(int level);
         NP_EXPORT int          NP_APIC np_dbg_getlevel(void);
         NP_EXPORT void         NP_APIC np_dbg_setlogcallback(int minlevel, void(*callback)(int level, time_t ts, const char* module, const char* msg));
         NP_EXPORT void         NP_APIC np_dbg_getversion_datetime(char* dst, size_t maxlen);
-        NP_EXPORT NP_ErrorCode NP_APIC np_dbg_setSlotEmulatorMode(int slotID, slotemulatormode_t mode);
-        NP_EXPORT NP_ErrorCode NP_APIC np_dbg_getSlotEmulatorMode(int slotID, slotemulatormode_t* mode);
-        NP_EXPORT NP_ErrorCode NP_APIC np_dbg_setSlotEmulatorType(int slotID, slotemulatortype_t type);
-        NP_EXPORT NP_ErrorCode NP_APIC np_dbg_getSlotEmulatorType(int slotID, slotemulatortype_t* type);
-        NP_EXPORT NP_ErrorCode NP_APIC np_dbg_setSlotEmulatorSyncPattern(int slotID, uint8_t* sync_pattern);
-        NP_EXPORT NP_ErrorCode NP_APIC np_dbg_getSlotEmulatorSyncPattern(int slotID, uint8_t* sync_pattern);
-        NP_EXPORT NP_ErrorCode NP_APIC np_dbg_setPortEmulatorMode(int slotID, int portID, portemulatormode_t emulationmode);
-        NP_EXPORT NP_ErrorCode NP_APIC np_dbg_getPortEmulatorMode(int slotID, int portID, portemulatormode_t* emulationmode);
         NP_EXPORT NP_ErrorCode NP_APIC np_dbg_stats_reset(int slotID);
         NP_EXPORT NP_ErrorCode NP_APIC np_dbg_diagstats_read(int slotID, struct np_diagstats* stats);
         NP_EXPORT NP_ErrorCode NP_APIC np_dbg_sourcestats_read(int slotID, uint8_t sourceID, struct np_sourcestats* stats);
-        NP_EXPORT NP_ErrorCode NP_APIC np_dbg_read_srchain(int slotID, int portID, int dockID, uint8_t SRChain_registeraddress, uint8_t* dst, size_t len, size_t* actualread);
-        NP_EXPORT NP_ErrorCode NP_APIC np_setVirtualHeadstage(int slotID, int portID);
 
         // Opto specific
         NP_EXPORT NP_ErrorCode NP_APIC np_setOpticalCalibration(int slotID, int portID, int dockID, const char* filename);

@@ -3,6 +3,8 @@
 
 20240620
 --------
++ API 3.67.
++ Support NP2020 quad-probe.
 + Add VISA control of large PXI chassis.
 + Add more probe geometry to metadata.
 + Imro editor can edit save-chan subset.

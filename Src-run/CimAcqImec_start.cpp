@@ -36,7 +36,8 @@ bool CimAcqImec::_st_setHwrTriggers()
 
         // EDGE = rising
 
-        err = np_setTriggerEdge( slot, true );
+//@OBX367 Revisit TRIGGER
+//        err = np_setTriggerEdge( slot, true );
 
         if( err != SUCCESS ) {
             runError(
@@ -77,7 +78,8 @@ bool CimAcqImec::_st_setObxTriggers()
 
         // EDGE = rising
 
-        err = np_setTriggerEdge( slot, true );
+//@OBX367 Revisit TRIGGER
+//        err = np_setTriggerEdge( slot, true );
 
         if( err != SUCCESS ) {
             runError(
@@ -134,7 +136,8 @@ bool CimAcqImec::_st_setPXITriggers()
 
 // EDGE = rising
 
-    err = np_setTriggerEdge( slot0, true );
+//@OBX367 Revisit TRIGGER
+//    err = np_setTriggerEdge( slot0, true );
 
     if( err != SUCCESS ) {
         runError(
@@ -167,7 +170,8 @@ bool CimAcqImec::_st_setPXITriggers()
 
 // EDGE = rising
 
-        err = np_setTriggerEdge( slot, true );
+//@OBX367 Revisit TRIGGER
+//        err = np_setTriggerEdge( slot, true );
 
         if( err != SUCCESS ) {
             runError(
