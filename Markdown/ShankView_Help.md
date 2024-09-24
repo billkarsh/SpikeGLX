@@ -98,7 +98,8 @@ only apply to spike detection.
 to scroll that pad into view.
 * You can tab among the items in the viewer.
 * When the scrollbar has focus you can navigate along the probe with the
-arrow or page keys.
+arrow or page keys, or the mouse wheel. Hold the shift key down to wheel
+faster.
 
 ### Online Data Flow
 

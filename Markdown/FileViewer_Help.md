@@ -234,6 +234,15 @@ FileViewer and the Export dialog.
 
 --------
 
+## Wheel Scrolling
+
+As with most views in SpikeGLX, to scroll with the mouse wheel, hover the
+cursor over the desired scroll bar, then roll the wheel.
+
+To scroll faster, hold the shift key down while rolling the wheel.
+
+--------
+
 ## Performance Tips
 
 Navigating is faster if less work is needed to update the view(s).
