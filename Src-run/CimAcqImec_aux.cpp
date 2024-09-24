@@ -491,11 +491,21 @@ bool CimAcqImec::_aux_setSync( const CimCfg::ImProbeTable &T )
 {
     QVector<int>    vslots;
     int             ns,
-                    srcSlot = -1;
+                    srcSlot = -1,
+                    inpSlot = -1;
     bool            ok      = true;
 
-    if( p.sync.sourceIdx >= DAQ::eSyncSourceIM )
+// Special slot roles
+
+    if( p.sync.sourceIdx >= DAQ::eSyncSourceIM ) {
+
         srcSlot = T.getEnumSlot( p.sync.sourceIdx - DAQ::eSyncSourceIM );
+
+        if( !T.isSlotPXIType( srcSlot ) )
+            inpSlot = p.sync.imPXIInputSlot;
+    }
+    else
+        inpSlot = p.sync.imPXIInputSlot;
 
 // PXI
 
@@ -511,7 +521,7 @@ bool CimAcqImec::_aux_setSync( const CimCfg::ImProbeTable &T )
             ok = _aux_setPXITrigBus( vslots, slot ) &&
                  _aux_setPXISyncAsOutput( slot );
         }
-        else if( slot == p.sync.imPXIInputSlot ) {
+        else if( slot == inpSlot ) {
             ok = _aux_setPXITrigBus( vslots, slot ) &&
                  _aux_setPXISyncAsInput( slot );
         }
