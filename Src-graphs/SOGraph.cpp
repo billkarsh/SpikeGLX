@@ -1,6 +1,5 @@
 
 #include "SOGraph.h"
-#include "Util.h"
 
 #include <QPainter>
 

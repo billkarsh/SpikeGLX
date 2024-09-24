@@ -13,8 +13,8 @@
 
 // Rules for initial left and right selections:
 //
-// Left: Select imec0 if present, else obx0, else item 0.
-// Right: Select imec1, else item 0.
+// Left: Select imec0 if present, else obx0, else ni (item 0).
+// Right: Select different than left, priority: probe, obx, ni.
 // Grid: > 0 if more than one stream.
 //
 GWSelectWidget::GWSelectWidget( GraphsWindow *gw, const DAQ::Params &p )
@@ -22,6 +22,7 @@ GWSelectWidget::GWSelectWidget( GraphsWindow *gw, const DAQ::Params &p )
 {
     QHBoxLayout *HBX = new QHBoxLayout;
     QLabel      *LBL;
+    QString     lhs;
 
 // Left label
 
@@ -32,8 +33,12 @@ GWSelectWidget::GWSelectWidget( GraphsWindow *gw, const DAQ::Params &p )
 
     lCB = new QComboBox( this );
     p.streamCB_fillRuntime( lCB );
-    if( !p.streamCB_selItem( lCB, "imec0", true ) )
-        p.streamCB_selItem( lCB, "obx0", true );
+
+    if( !p.streamCB_selItem( lCB, (lhs = "imec0"), true ) ) {
+        if( !p.streamCB_selItem( lCB, (lhs = "obx0"), true ) )
+            lhs = "ni";
+    }
+
     ConnectUI( lCB, SIGNAL(currentIndexChanged(int)), gw, SLOT(initViews()) );
     HBX->addWidget( lCB );
 
@@ -46,7 +51,14 @@ GWSelectWidget::GWSelectWidget( GraphsWindow *gw, const DAQ::Params &p )
 
     rCB = new QComboBox( this );
     p.streamCB_fillRuntime( rCB );
-    p.streamCB_selItem( rCB, "imec1", true );
+
+    if( lhs == "imec0" ) {
+        if( !p.streamCB_selItem( rCB, "imec1", true ) )
+            p.streamCB_selItem( rCB, "obx0", true );
+    }
+    else if( lhs == "obx0" )
+        p.streamCB_selItem( rCB, "obx1", true );
+
     ConnectUI( rCB, SIGNAL(currentIndexChanged(int)), gw, SLOT(initViews()) );
     HBX->addWidget( rCB );
 

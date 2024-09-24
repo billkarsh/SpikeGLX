@@ -10,6 +10,7 @@
 #include "SignalBlocker.h"
 
 #include <QAction>
+#include <QKeyEvent>
 #include <QSettings>
 #include <QThread>
 

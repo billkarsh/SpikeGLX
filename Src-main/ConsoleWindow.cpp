@@ -155,8 +155,13 @@ bool ConsoleWindow::eventFilter( QObject *watched, QEvent *event )
 //
 void ConsoleWindow::closeEvent( QCloseEvent *e )
 {
-    e->ignore();
-    mainApp()->act.quitAct->trigger();
+    static bool firstTime = true;
+
+    if( firstTime ) {
+        firstTime = false;
+        e->ignore();
+        mainApp()->act.quitAct->trigger();
+    }
 }
 
 /* ---------------------------------------------------------------- */

@@ -51,7 +51,7 @@ static void visibleGrabHandle( QSplitter *sp )
     QSplitterHandle *handle = sp->handle( 1 );
     QVBoxLayout     *layout = new QVBoxLayout( handle );
     layout->setSpacing( 0 );
-    layout->setMargin( 0 );
+    layout->setContentsMargins( 0, 0, 0, 0 );
 
     QFrame  *line = new QFrame( handle );
     line->setFrameShape( QFrame::HLine );

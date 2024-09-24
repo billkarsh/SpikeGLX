@@ -395,9 +395,9 @@ bool CimAcqImec::_aux_setPXITrigBus( const QVector<int> &vslots, int srcSlot )
     if( !differs )
         return true;
 
-// ------------------------------------------
-// Need to reserve at least one bus with VISA
-// ------------------------------------------
+// --------------------------------------
+// Need to map at least one bus with VISA
+// --------------------------------------
 
     ViSession   rsrcMgr, rsrc;
     ViStatus    status;
@@ -416,6 +416,33 @@ bool CimAcqImec::_aux_setPXITrigBus( const QVector<int> &vslots, int srcSlot )
         QString("VISA: (%1) Failed to open backplane resource.").arg( status );
         goto closeMgr;
     }
+
+// ---------------
+// Unmap the world
+// ---------------
+
+    for( int is = 0; is < nb; ++is ) {
+
+        status = viSetAttribute( rsrc, VI_ATTR_PXI_SRC_TRIG_BUS, is + 1 );
+        if( status < VI_SUCCESS )
+            continue;
+
+        for( int id = 0; id < nb; ++id ) {
+
+            if( id == is )
+                continue;
+
+            status = viSetAttribute( rsrc, VI_ATTR_PXI_DEST_TRIG_BUS, id + 1 );
+            if( status < VI_SUCCESS )
+                continue;
+
+            viUnmapTrigger( rsrc, VI_TRIG_TTL7, VI_TRIG_TTL7 );
+        }
+    }
+
+// -----------
+// New mapping
+// -----------
 
     status = viSetAttribute( rsrc, VI_ATTR_PXI_SRC_TRIG_BUS, src_ibus + 1 );
     if( status < VI_SUCCESS ) {

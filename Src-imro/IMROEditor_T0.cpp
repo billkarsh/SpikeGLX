@@ -217,7 +217,7 @@ void IMROEditor_T0::saveBut()
     if( !table2Rcur() )
         return;
 
-    QFileDialog::Options    options = 0;
+    QFileDialog::Options    options = QFileDialog::Options();
 
     if( running )
         options = QFileDialog::DontConfirmOverwrite;

@@ -6,6 +6,7 @@
 #include "ShankCtlBase.h"
 
 #include <QAction>
+#include <QKeyEvent>
 
 
 /* ---------------------------------------------------------------- */

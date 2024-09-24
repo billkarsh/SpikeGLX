@@ -592,9 +592,9 @@ double CimCfg::ImProbeTable::get_iProbe_SRate( int i ) const
 double CimCfg::ImProbeTable::get_iOneBox_SRate( int i ) const
 {
     if( i < iobx2dat.size() )
-        return obsn2srate.value( probes[iobx2dat[i]].obsn, 30000.0 );
+        return obsn2srate.value( probes[iobx2dat[i]].obsn, imOBX_SRATE );
 
-    return 30000.0;
+    return imOBX_SRATE;
 }
 
 
@@ -650,7 +650,7 @@ void CimCfg::ImProbeTable::loadOneBoxSRates()
     foreach( const QString &obsn, settings.childKeys() ) {
 
         obsn2srate[obsn.toInt()] =
-            settings.value( obsn, 30000.0 ).toDouble();
+            settings.value( obsn, imOBX_SRATE ).toDouble();
     }
 }
 
@@ -1687,8 +1687,12 @@ void CimCfg::closeAllBS( bool report )
 
             np_closeBS( slot );
             np_openBS( slot );
-            np_switchmatrix_clear( slot, SM_Output_SMA );
-            np_switchmatrix_clear( slot, SM_Output_PXISYNC );
+            if( BS->platformid == NPPlatform_PXI ) {
+                np_switchmatrix_clear( slot, SM_Output_SMA );
+                np_switchmatrix_clear( slot, SM_Output_PXISYNC );
+            }
+            else
+                np_switchmatrix_clear( slot, SM_Output_SMA1 );
             np_closeBS( slot );
         }
     }
@@ -1814,11 +1818,11 @@ void CimCfg::detect_API(
     ImProbeTable    &T )
 {
 #ifdef HAVE_IMEC
-    int verMaj, verMin;
+    char vers[64];
 
-    np_getAPIVersion( &verMaj, &verMin );
+    np_getAPIVersionFull( vers, sizeof(vers) );
 
-    T.api = QString("%1.%2").arg( verMaj ).arg( verMin );
+    T.api = vers;
 #else
     T.api = "0.0";
 #endif
@@ -2264,7 +2268,7 @@ guiBreathe();
         // ----
         // HSFW
         // ----
-        
+
         P.hsfw = "0.0.0";
 
         slVers.append(

@@ -353,7 +353,7 @@ class TaggableLabel : public ClickableLabel
 private:
     int mtag;
 public:
-    TaggableLabel( QWidget *parent, Qt::WindowFlags f = 0 )
+    TaggableLabel( QWidget *parent, Qt::WindowFlags f = Qt::WindowFlags() )
     :   ClickableLabel(parent, f), mtag(-1) {}
     void noTag()            {mtag = -1;}
     void setTag( int tag )  {mtag = tag;}

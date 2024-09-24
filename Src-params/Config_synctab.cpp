@@ -150,9 +150,15 @@ void Config_synctab::syncSourceCBChanged()
         }
     }
     else if( cfg->usingIM || cfg->usingOB ) {
+        QString sma;
+        int     slot = cfg->prbTab.getEnumSlot( sourceIdx - DAQ::eSyncSourceIM );
+        if( cfg->prbTab.isSlotPXIType( slot ) )
+            sma = "TRIG";
+        else
+            sma = "SMA 1";
         syncTabUI->sourceLE->setText(
-            QString("Connect slot %1 'SMA 1' to stream inputs specified below")
-            .arg( cfg->prbTab.getEnumSlot( sourceIdx - DAQ::eSyncSourceIM ) ) );
+            QString("Connect slot %1 '%2' to stream inputs specified below")
+            .arg( slot ).arg( sma ) );
     }
     else {
         syncTabUI->sourceLE->setText( "Error: Imec not enabled" );

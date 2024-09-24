@@ -219,6 +219,12 @@ using namespace Neuropixels;
 void npcallback( int level, time_t ts, const char *module, const char *msg )
 {
     Log()<<QString("L%1 [%2] \"%3\"").arg( level ).arg( module ).arg( msg );
+    QFile   fo( "api_out.txt" );
+    fo.open( QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text );
+    QTextStream to( &fo );
+    to << QString("L%1 [%2] \"%3\"\n").arg( level ).arg( module ).arg( msg );
+    fo.flush();
+    fo.close();
 }
 #endif
 
@@ -313,7 +319,7 @@ MainApp::MainApp( int &argc, char **argv )
     showStartupMessages();
 
 #ifdef NPDEBUG
-//    np_dbg_setlogcallback( DBG_VERBOSE, npcallback );
+    np_dbg_setlogcallback( DBG_VERBOSE, npcallback );
     np_dbg_setlevel( DBG_VERBOSE );
 #endif
 }
@@ -1146,7 +1152,7 @@ void MainApp::tools_CalSRate()
         return;
     }
 
-    CalSRateCtl( consoleWindow );
+    CalSRateCtl rateCtl( consoleWindow );
 }
 
 
@@ -1179,7 +1185,7 @@ void MainApp::tools_ImBist()
         return;
     }
 
-    IMBISTCtl( consoleWindow );
+    IMBISTCtl bistCtl( consoleWindow );
 #endif
 }
 
@@ -1196,7 +1202,7 @@ void MainApp::tools_ImHst()
         return;
     }
 
-    IMHSTCtl( consoleWindow );
+    IMHSTCtl hstCtl( consoleWindow );
 #endif
 }
 
@@ -1213,7 +1219,7 @@ void MainApp::tools_ImFirmware()
         return;
     }
 
-    IMFirmCtl( consoleWindow );
+    IMFirmCtl firmCtl( consoleWindow );
 #endif
 }
 

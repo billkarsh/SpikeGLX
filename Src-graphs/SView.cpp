@@ -24,7 +24,7 @@ SViewM_Im::SViewM_Im(
 
     QVBoxLayout *L = new QVBoxLayout( this );
     L->setSpacing( 0 );
-    L->setMargin( 0 );
+    L->setContentsMargins( 0, 0, 0, 0 );
     L->addWidget( tb );
     L->addWidget( vw );
     adjustSize();
@@ -45,7 +45,7 @@ SViewM_Ob::SViewM_Ob(
 
     QVBoxLayout *L = new QVBoxLayout( this );
     L->setSpacing( 0 );
-    L->setMargin( 0 );
+    L->setContentsMargins( 0, 0, 0, 0 );
     L->addWidget( tb );
     L->addWidget( vw );
     adjustSize();
@@ -65,7 +65,7 @@ SViewM_Ni::SViewM_Ni(
 
     QVBoxLayout *L = new QVBoxLayout( this );
     L->setSpacing( 0 );
-    L->setMargin( 0 );
+    L->setContentsMargins( 0, 0, 0, 0 );
     L->addWidget( tb );
     L->addWidget( vw );
     adjustSize();

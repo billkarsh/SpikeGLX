@@ -3,7 +3,6 @@
 
 #include "ExportCtl.h"
 #include "Util.h"
-#include "ConfigCtl.h"
 #include "FileViewerWindow.h"
 #include "DataFileIMAP.h"
 #include "DataFileIMLF.h"

@@ -8,7 +8,6 @@
 #include "Run.h"
 #include "SignalBlocker.h"
 #include "AODevRtAudio.h"
-#include "AODevSim.h"
 
 #include <QKeyEvent>
 #include <QMessageBox>
@@ -216,12 +215,12 @@ AOCtl::AOCtl( const DAQ::Params &p, QWidget *parent )
 
     aoUI = new Ui::AOWindow;
     aoUI->setupUi( this );
-    ConnectUI( aoUI->streamCB, SIGNAL(activated(QString)), this, SLOT(streamCBChanged()) );
+    ConnectUI( aoUI->streamCB, SIGNAL(activated(int)), this, SLOT(streamCBChanged()) );
     ConnectUI( aoUI->qfChk, SIGNAL(clicked(bool)), this, SLOT(qfChecked(bool)) );
     ConnectUI( aoUI->leftSB, SIGNAL(valueChanged(int)), this, SLOT(leftSBChanged(int)) );
     ConnectUI( aoUI->rightSB, SIGNAL(valueChanged(int)), this, SLOT(rightSBChanged(int)) );
-    ConnectUI( aoUI->loCB, SIGNAL(currentIndexChanged(QString)), this, SLOT(loCBChanged(QString)) );
-    ConnectUI( aoUI->hiCB, SIGNAL(currentIndexChanged(QString)), this, SLOT(hiCBChanged(QString)) );
+    ConnectUI( aoUI->loCB, SIGNAL(currentTextChanged(QString)), this, SLOT(loCBChanged(QString)) );
+    ConnectUI( aoUI->hiCB, SIGNAL(currentTextChanged(QString)), this, SLOT(hiCBChanged(QString)) );
     ConnectUI( aoUI->volSB, SIGNAL(valueChanged(double)), this, SLOT(volSBChanged(double)) );
     ConnectUI( aoUI->helpBut, SIGNAL(clicked()), this, SLOT(help()) );
     ConnectUI( aoUI->resetBut, SIGNAL(clicked()), this, SLOT(reset()) );

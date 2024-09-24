@@ -15,13 +15,13 @@ class ClickableLabel : public QLabel
 public:
     ClickableLabel(
         QWidget         *parent = 0,
-        Qt::WindowFlags f = 0 )
+        Qt::WindowFlags f = Qt::WindowFlags() )
     :   QLabel(parent, f)           {}
 
     ClickableLabel(
         const QString   &txt,
         QWidget         *parent = 0,
-        Qt::WindowFlags f = 0 )
+        Qt::WindowFlags f = Qt::WindowFlags() )
     :   QLabel(txt, parent, f)      {}
 
     virtual ~ClickableLabel()       {}

@@ -1315,7 +1315,7 @@ next_j:;
             static double duplast = 0;
             double t = getTime();
             if( t - duplast >= 1 ) {
-                Log() << "Dups " << ndup << " nT " << nT;
+                Log() << "PRB Dups " << ndup << " nT " << nT;
                 QString s;
                 for( int i = 0; i < ndup; ++i )
                     s += QString(" %1/%2").arg( v[2*i] ).arg( v[2*i+1] );
@@ -1501,7 +1501,7 @@ next_j:;
             static double duplast = 0;
             double t = getTime();
             if( t - duplast >= 1 ) {
-                Log() << "Dups " << ndup << " nT " << nT;
+                Log() << "OBX Dups " << ndup << " nT " << nT;
                 QString s;
                 for( int i = 0; i < ndup; ++i )
                     s += QString(" %1/%2").arg( v[2*i] ).arg( v[2*i+1] );
@@ -1817,8 +1817,12 @@ CimAcqImec::~CimAcqImec()
         int slot = T.getEnumSlot( is );
 
         if( !T.simprb.isSimSlot( slot ) ) {
-            np_switchmatrix_clear( slot, SM_Output_SMA );
-            np_switchmatrix_clear( slot, SM_Output_PXISYNC );
+            if( T.isSlotPXIType( slot ) ) {
+                np_switchmatrix_clear( slot, SM_Output_SMA );
+                np_switchmatrix_clear( slot, SM_Output_PXISYNC );
+            }
+            else
+                np_switchmatrix_clear( slot, SM_Output_SMA1 );
             np_closeBS( slot );
         }
     }

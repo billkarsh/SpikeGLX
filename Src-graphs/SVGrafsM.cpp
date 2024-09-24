@@ -167,7 +167,7 @@ void SVGrafsM::init( SVToolsM *tb )
 
     QVBoxLayout *V = new QVBoxLayout( this );
     V->setSpacing( 0 );
-    V->setMargin( 0 );
+    V->setContentsMargins( 0, 0, 0, 0 );
     V->addWidget( nv );
     V->addWidget( theM, 1 );
 

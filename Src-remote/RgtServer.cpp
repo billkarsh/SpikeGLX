@@ -214,7 +214,7 @@ bool RgtServer::beginListening(
     else if( iface == "localhost" || iface == "127.0.0.1" )
         haddr = QHostAddress::LocalHost;
     else
-        haddr = iface;
+        haddr.setAddress( iface );
 
     if( !listen( haddr, port ) ) {
         Error() << QString("Gate/Trigger server could not listen on (%1:%2) [%3].")
