@@ -8,6 +8,7 @@ nav:
         - 'Noise: Learn How To Solder': 'help/solder/solder.md'
         - 'Sharpening Apparatus (MS.Word.docx)': 'Support/NPix_sharpening.docx'
         - 'Installing NI Drivers': 'help/NIDriverInstall/NI_driver_installation.md'
+        - 'OneBox Quickstart': 'Sgl_help/SpikeGLX_OneBox_Quickstart.html'
         - 'SpikeGLX UserManual': 'Sgl_help/UserManual.html'
         - 'SpikeGLX QuickRef (MS.PowerPoint)': 'Support/SGLX_QuickRef.zip'
         - 'SpikeGLX FAQ': 'Sgl_help/SpikeGLX_FAQ.html'

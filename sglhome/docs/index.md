@@ -50,21 +50,22 @@ site's [Firmware tab](firmware.md).*
 
 ## Latest Application Downloads
 
-**SpikeGLX 3.0 (PXI, all probe types later than 3A)**:
+**SpikeGLX 3.0 (PXI, OneBox, all probe types later than 3A)**:
 
 Latest release highlights:
 
 - Replaces all previous releases.
+- Supports OneBox.
 - Supports all probes.
 - Does whole probe activity surveys.
-- Has cool graphical site selection tools.
+- Has newer graphical site selection tools.
 - Supports the (now separate) MATLAB and C++ remote SDKs.
 - Has many GUI enhancements and better help.
 
 >Important: Please read the `README` file for instructions regarding imec
 firmware versions.
 
-* [Release 20240129-phase30](App/Release_v20240129-phase30.zip)...[Readme](Readme/Readme_v20240129-phase30.txt) : New IMRO editor, imec v3.62.1
+* [Release 20240620-phase30](App/Release_v20240620-phase30.zip)...[Readme](Readme/Readme_v20240620-phase30.txt) : OneBox, Quad-probes, imec v3.70.2
 
 **Xilinx Kintex versions not covered by 3.0**:
 
@@ -77,9 +78,9 @@ versions there as long as you run one at a time:
 
 ```
 SpikeGLX\
-    Release_v20240129-phase30.zip
+    Release_v20240620-phase30.zip
     Release_v20200520-phase3B2.zip
-    Release_v20240129-phase30\
+    Release_v20240620-phase30\
     Release_v20200520-phase3B2\
     Drivers\
         Enclustra_Windows_10&11\
@@ -297,6 +298,7 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.
 * [Noise: Learn How To Solder](help/solder/solder.md)
 * [Sharpening Apparatus (MS.Word.docx)](Support/NPix_sharpening.docx)
 * [Installing NI Drivers](help/NIDriverInstall/NI_driver_installation.md)
+* [OneBox Quickstart](Sgl_help/SpikeGLX_OneBox_Quickstart.html)
 * [SpikeGLX UserManual](Sgl_help/UserManual.html)
 * [SpikeGLX QuickRef (MS.PowerPoint)](Support/SGLX_QuickRef.zip)
 * [SpikeGLX FAQ](Sgl_help/SpikeGLX_FAQ.html)

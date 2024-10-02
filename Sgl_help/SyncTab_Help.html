@@ -21,9 +21,12 @@
 <li><p><code>Imec slot N</code> will program the indicated BS (PXI or OneBox) to produce the sync waveform and make it available at its SMA connector.</p></li>
 </ul>
 <p>Whichever pulser source you select, the programmed (set) period is 1 second, but the actual period may differ from that. If you have measured the actual period of the generator's output with a high precision frequency/period analyzer, then enter that value in the <code>Measured period</code> box. If you have not measured it, enter <strong>1</strong> in the box.</p>
+<blockquote>
+<p>The calibration procedure measures the rates of clocks relative to the square wave generator clock. You should use the same generator for real runs that you use for the calibration.</p>
+</blockquote>
 <hr />
-<h2 id="imec-sma-connector">Imec SMA Connector</h2>
-<p>Each imec BS cards has a single SMA connector on its front panel.</p>
+<h2 id="imec-onebox-sma-connectors">Imec, OneBox SMA Connectors</h2>
+<p>Each imec PXI BS card has a single SMA connector 'TRIG' on its front panel. Each OneBox has a Sync connector on its back panel 'SMA 1.'</p>
 <p>In a PXI chassis you might have more than one imec BS module. However, the modules share the (input/output) sync signal on chassis backplane line &lt;7&gt;. Hence, in all conditions, you should connect the entire set of PXI modules to the rest of the world via <strong>one and only one</strong> SMA connector.</p>
 <p><strong>Example</strong>: If an Imec PXI BS is selected as the source, all Imec BS modules in the chassis will automatically get the signal via the chassis backplane. Connect only the designated source SMA to other devices.</p>
 <p><strong>Example</strong>: Whenever the selected source is <strong>NOT</strong> an imec PXI slot, then all imec PXI modules are set to input mode, and will share whatever signal you connect to the specified <strong>input</strong> <code>Imec PXI SMA slot</code>. Connect only the designated input SMA to other devices.</p>

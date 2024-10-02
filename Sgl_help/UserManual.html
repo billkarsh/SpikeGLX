@@ -14,6 +14,12 @@
 <ul>
 <li><a href="#overview">Overview</a>
 <ul>
+<li><a href="#additional-guides">Additional Guides</a>
+<ul>
+<li><a href="#pxie">PXIe</a></li>
+<li><a href="#onebox">OneBox</a></li>
+<li><a href="#help">Help</a></li>
+</ul></li>
 <li><a href="#spikeglx-ecosystem">SpikeGLX Ecosystem</a></li>
 <li><a href="#installation-and-setup">Installation and Setup</a>
 <ul>
@@ -66,6 +72,17 @@
 </ul>
 <hr />
 <h2 id="overview">Overview</h2>
+<h3 id="additional-guides">Additional Guides</h3>
+<h4 id="pxie">PXIe</h4>
+<p><a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_PXI.md">System requirements for PXI</a>.</p>
+<h4 id="onebox">OneBox</h4>
+<p><a href="SpikeGLX_OneBox_Quickstart.html" class="uri">SpikeGLX_OneBox_Quickstart.html</a>.</p>
+<h4 id="help">Help</h4>
+<ul>
+<li><a href="https://billkarsh.github.io/SpikeGLX/#help">Help Docs</a></li>
+<li><a href="https://billkarsh.github.io/SpikeGLX/#how-to-videos">How to Videos</a></li>
+</ul>
+<hr />
 <h3 id="spikeglx-ecosystem">SpikeGLX Ecosystem</h3>
 <p>SpikeGLX, the acquisition app, is just one component of our Neuropixels data processing system:</p>
 <h4 id="data-review">Data Review</h4>
@@ -98,8 +115,8 @@
 <li><strong>ecephys_spike_sorting</strong>: Spike sorting pipeline.</li>
 </ul>
 <p>And more.</p>
-<h4 id="help">Help</h4>
-<p>Also on our <a href="https://billkarsh.github.io/SpikeGLX/">download page</a>, you'll find many videos and help documents on installing, getting started, running and troubleshooting. There's also a link to the Neuropixels Slack channel which hosts a community of over 1600 users.</p>
+<h4 id="help-1">Help</h4>
+<p>Also on our <a href="https://billkarsh.github.io/SpikeGLX/">download page</a>, you'll find many videos and help documents on installing, getting started, running and troubleshooting. There's also a link to the Neuropixels Slack channel which hosts a community of over 2200 users.</p>
 <hr />
 <h3 id="installation-and-setup">Installation and Setup</h3>
 <p>To install SpikeGLX on a new system, just copy a virgin SpikeGLX folder to your C-drive and double click SpikeGLX.exe to begin.</p>
@@ -125,6 +142,7 @@
     libGLESV2.dll
     libstdc++-6.dll
     libwinpthread-1.dll
+    msvcp(version).dll
     NeuropixAPI_version_info.dll
     opengl32sw.dll
     Qt5Core.dll
@@ -135,7 +153,8 @@
     Qt5Widgets.dll
     SpikeGLX.exe
     SpikeGLX_NISIM.exe
-    vcruntime(version).dll</code></pre>
+    vcruntime(version).dll
+    vcruntime(version_1).dll</code></pre>
 <blockquote>
 <p>Virgin: The SpikeGLX folder does not contain a <code>_Configs</code> subfolder.</p>
 </blockquote>
@@ -439,6 +458,9 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <li><p>You connect the output of the generator to one input channel of each stream and name these channels in the <code>Sync tab</code> in the Configuration dialog.</p></li>
 <li><p>In the <code>Sync tab</code> you check the box to do a calibration run. This will automatically acquire and analyze data appropriate to measuring the sample rates of each enabled stream. These rates are stored in a database (by device SN) for use in subsequent runs. The database is in the <code>_Calibration</code> subfolder. Be sure to transplant this folder to the new SpikeGLX folder when you upgrade the software.</p></li>
 </ol>
+<blockquote>
+<p>The calibration procedure measures the rates of clocks relative to the square wave generator clock. You should use the same generator for real runs that you use for the calibration.</p>
+</blockquote>
 <blockquote>
 <p>Full detail on the procedure is found in the help for the Configuration dialog's <a href="SyncTab_Help.html"><code>Sync tab</code></a>.</p>
 </blockquote>

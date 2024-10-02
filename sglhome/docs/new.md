@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+October 1, 2024
+
+* SpikeGLX 20240620-phase30 (OneBox, Quad-probes, imec v3.70.2).
+
 September 20, 2024
 
 * OverStrike 1.1 (Support NP2020 quad-probe, add -linefill option).

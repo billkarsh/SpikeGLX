@@ -48,6 +48,7 @@ can be used after updating their firmware, which can be done via SpikeGLX.
 
 **30**:
 
+* [Release 20240129-phase30](../App/Release_v20240129-phase30.zip)...[Readme](../Readme/Readme_v20240129-phase30.txt) : New IMRO editor, imec v3.62.1
 * [Release 20231207-phase30](../App/Release_v20231207-phase30.zip)...[Readme](../Readme/Readme_v20231207-phase30.txt) : NP1016, imec v3.62.1
 * [Release 20230905-phase30](../App/Release_v20230905-phase30.zip)...[Readme](../Readme/Readme_v20230905-phase30.txt) : Spike Viewer, bug fixes, imec v3.62
 * [Release 20230815-phase30](../App/Release_v20230815-phase30.zip)...[Readme](../Readme/Readme_v20230815-phase30.txt) : NP2014, low latency mode, imec v3.62
