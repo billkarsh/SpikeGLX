@@ -32,11 +32,16 @@ the actual period of the generator's output with a high precision
 frequency/period analyzer, then enter that value in the `Measured period`
 box. If you have not measured it, enter **1** in the box.
 
+>The calibration procedure measures the rates of clocks relative to the
+square wave generator clock. You should use the same generator for real
+runs that you use for the calibration.
+
 --------
 
-## Imec SMA Connector
+## Imec, OneBox SMA Connectors
 
-Each imec BS cards has a single SMA connector on its front panel.
+Each imec PXI BS card has a single SMA connector 'TRIG' on its front panel.
+Each OneBox has a Sync connector on its back panel 'SMA 1.'
 
 In a PXI chassis you might have more than one imec BS module. However,
 the modules share the (input/output) sync signal on chassis backplane

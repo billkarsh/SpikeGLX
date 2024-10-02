@@ -86,7 +86,7 @@
      </column>
      <column>
       <property name="text">
-       <string>Onebox ID</string>
+       <string>OneBox ID</string>
       </property>
      </column>
      <column>

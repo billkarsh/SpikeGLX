@@ -345,7 +345,7 @@
       <item row="1" column="0" colspan="4">
        <widget class="QLabel" name="label_11">
         <property name="text">
-         <string>Imec Oneboxes: Connect sync in to each 'SMA 1' (if not source) </string>
+         <string>Imec OneBoxes: Connect sync in to each 'SMA 1' (if not source) </string>
         </property>
        </widget>
       </item>

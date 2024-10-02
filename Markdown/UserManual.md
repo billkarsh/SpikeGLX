@@ -3,6 +3,10 @@
 **Topics:**
 
 * [Overview](#overview)
+    + [Additional Guides](#additional-guides)
+        + [PXIe](#pxie)
+        + [OneBox](#onebox)
+        + [Help](#help)
     + [SpikeGLX Ecosystem](#spikeglx-ecosystem)
     + [Installation and Setup](#installation-and-setup)
         + [Calibration Data](#calibration-data)
@@ -47,6 +51,23 @@
 --------
 
 ## Overview
+
+### Additional Guides
+
+#### PXIe
+
+[System requirements for PXI](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_PXI.md).
+
+#### OneBox
+
+[SpikeGLX_OneBox_Quickstart.html](SpikeGLX_OneBox_Quickstart.html).
+
+#### Help
+
+* [Help Docs](https://billkarsh.github.io/SpikeGLX/#help)
+* [How to Videos](https://billkarsh.github.io/SpikeGLX/#how-to-videos)
+
+--------
 
 ### SpikeGLX Ecosystem
 
@@ -94,7 +115,7 @@ And more.
 Also on our [download page](https://billkarsh.github.io/SpikeGLX/), you'll
 find many videos and help documents on installing, getting started, running
 and troubleshooting. There's also a link to the Neuropixels Slack channel
-which hosts a community of over 1600 users.
+which hosts a community of over 2200 users.
 
 --------
 
@@ -127,6 +148,7 @@ SpikeGLX/
     libGLESV2.dll
     libstdc++-6.dll
     libwinpthread-1.dll
+    msvcp(version).dll
     NeuropixAPI_version_info.dll
     opengl32sw.dll
     Qt5Core.dll
@@ -138,6 +160,7 @@ SpikeGLX/
     SpikeGLX.exe
     SpikeGLX_NISIM.exe
     vcruntime(version).dll
+    vcruntime(version_1).dll
 ```
 
 >Virgin: The SpikeGLX folder does not contain a `_Configs` subfolder.
@@ -736,6 +759,10 @@ the sample rates of each enabled stream. These rates are stored in a
 database (by device SN) for use in subsequent runs. The database is in
 the `_Calibration` subfolder. Be sure to transplant this folder to the
 new SpikeGLX folder when you upgrade the software.
+
+>The calibration procedure measures the rates of clocks relative to the
+square wave generator clock. You should use the same generator for real
+runs that you use for the calibration.
 
 >Full detail on the procedure is found in the help for the
 Configuration dialog's [`Sync tab`](SyncTab_Help.html).

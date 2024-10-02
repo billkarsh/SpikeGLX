@@ -23,7 +23,7 @@
       </sizepolicy>
      </property>
      <property name="title">
-      <string>Each Onebox - scroll or resize dialog to see more; double-click cells to edit</string>
+      <string>Each OneBox - scroll or resize dialog to see more; double-click cells to edit</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_7">
       <item row="0" column="0" colspan="2">
