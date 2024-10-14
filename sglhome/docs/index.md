@@ -301,6 +301,7 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.
 * [OneBox Quickstart](Sgl_help/SpikeGLX_OneBox_Quickstart.html)
 * [SpikeGLX UserManual](Sgl_help/UserManual.html)
 * [SpikeGLX QuickRef (MS.PowerPoint)](Support/SGLX_QuickRef.zip)
+* [SpikeGLX UCL Course 2024 (MS.PowerPoint)](Support/UCL_Course_2024.zip)
 * [SpikeGLX FAQ](Sgl_help/SpikeGLX_FAQ.html)
 * [CatGT: Tshift, CAR, Gfix](help/catgt_tshift/catgt_tshift.md)
 * [Sync: Aligning with Edges](help/syncEdges/Sync_edges.md)

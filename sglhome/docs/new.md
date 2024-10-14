@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+October 14, 2024
+
+* Add UCL course slides to help.
+
 October 1, 2024
 
 * SpikeGLX 20240620-phase30 (OneBox, Quad-probes, imec v3.70.2).
