@@ -7,7 +7,6 @@ debug combinations of subsystems.
 
 | Test                  | Functional Area |
 | --------------------- | -------------------------------- |
-| --------------------- | -------------------------------- |
 | *Base Station*        | PC -> BS (slot) connection |
 | *Heartbeat*           | Probe -> BSC FPGA connection |
 | *SerDes Link*         | HS -> BSC communication |

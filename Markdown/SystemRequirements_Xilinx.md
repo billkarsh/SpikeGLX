@@ -1,4 +1,4 @@
-## System Requirements for Non-PXI
+## System Requirements for legacy Xilinx
 
 ### Overview
 

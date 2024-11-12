@@ -760,8 +760,9 @@ imErrFlags0_IS_CT_SR_LK_PP_SY=0 0 0 0 0 0
 
 For each imec stream we monitor the cumulative count of several error flags,
 hence, imErrFlags5 denotes the flags for probe steam 5. Note that quad-base
-probes (part number NP2020) record flags for each shank, hence, imErrFlags3_2
-denotes that stream 3 is a quad-probe and the flags are from shank 2.
+probes (part number NP2020/2021) record flags for each shank, hence,
+imErrFlags3_2 denotes that stream 3 is a quad-probe and the flags are from
+shank 2.
 
 The flags are labeled {COUNT, SERDES, LOCK, POP, SYNC}. The metadata field
 'IS' = 1 if any error occurred, 0 otherwise. I.e., "is an error."
@@ -991,7 +992,7 @@ The on-shnk ref electrodes of any shank are {127,511,895,1279}.
 Type-2013,2014 reference ID values are {0=ext, 1=gnd, [2..5]=tip[0..3]}. On-shank
 reference electrodes are removed from commercial 2B probes.
 
-**Type 2020 (Quad-probe)**:
+**Type {2020,2021} (Quad-probe)**:
 
 * Channel ID,
 * Shank ID (with tips pointing down, shank-0 is left-most),
@@ -999,7 +1000,7 @@ reference electrodes are removed from commercial 2B probes.
 * Reference ID index,
 * Electrode ID (range [0,1279] on each shank)
 
-Type-2020 reference ID values are {0=ext, 1=gnd, 2=tip on same shank as electode}.
+Quad-base reference ID values are {0=ext, 1=gnd, 2=tip on same shank as electode}.
 
 **Type 1110 (UHD programmable)**:
 

@@ -8,7 +8,6 @@ then running the tests in the HST Diagnostics dialog.
 
 | Test                  | Functional Area |
 | --------------------- | -------------------------------- |
-| --------------------- | -------------------------------- |
 | *Communication*       | PCLK signal and I2C bus |
 | *Supply Voltages*     | Power connections |
 | *Control Signals*     | NRST control signals |
