@@ -61,6 +61,12 @@ void SVShankCtl_Im::colorTraces( MGraphX *theX, std::vector<MGraphY> &vY )
     svTab->colorTraces( theX, vY );
 }
 
+
+QString SVShankCtl_Im::getLbl( int s, int r )
+{
+    return svTab->getLbl( s, r );
+}
+
 /* ---------------------------------------------------------------- */
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -77,15 +83,16 @@ void SVShankCtl_Im::cursorOver( int ic, bool shift )
 
     view()->setContextMenuPolicy( Qt::ActionsContextMenu );
 
-    int r = view()->getSmap()->e[ic].r;
+    const ShankMapDesc  &SMD = view()->getSmap()->e[ic];
 
     if( shift && E.roTbl->nLF() )
         ic += E.imCumTypCnt[CimCfg::imSumAP];
 
     setStatus(
-        QString("row %1 %2")
-        .arg( r, 3, 10, QChar('0') )
-        .arg( E.sns.chanMap.name( ic, p.trig_isChan( jsIM, ip, ic ) ) ) );
+        QString("row %1 %2 %3")
+        .arg( SMD.r, 3, 10, QChar('0') )
+        .arg( E.sns.chanMap.name( ic, p.trig_isChan( jsIM, ip, ic ) ) )
+        .arg( svTab->getLbl( SMD.s, SMD.r ) ) );
 }
 
 

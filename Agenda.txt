@@ -1,6 +1,11 @@
 // RELEASE NOTES
 // ==========================
 
+20241001
+--------
++ Imro editor shows hover-over anatomy region.
++ Support NP2021 quad-probe.
+
 20240620
 --------
 + API 3.70.2.

@@ -25,7 +25,9 @@ struct AnatomyRgn {
     quint8  shank,
             r, g, b;
 
-    AnatomyRgn( int sk ) : shank(sk)   {}
+    AnatomyRgn( int sk ) : shank(sk)    {}
+    bool contains( int s, int r ) const
+        {return s == shank && r >= row0 && r <= rowN;}
 };
 
 struct Anatomy {
@@ -36,6 +38,7 @@ struct Anatomy {
     void fillLegend( QTextEdit *leg ) const;
     void colorShanks( ShankView *view, bool on ) const;
     void colorTraces( MGraphX *theX, std::vector<MGraphY> &vY, bool on );
+    QString getLbl( int s, int r );
 };
 
 

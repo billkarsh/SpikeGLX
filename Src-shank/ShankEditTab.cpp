@@ -254,7 +254,7 @@ void ShankEditTab::Click::sel_set_gapLim( int sel_FLR )
 
 // Fill in:
 // - code {-1,0}
-// - gap0, gapLim if code 1
+// - gap0, gapLim if code 0
 //
 void ShankEditTab::Click::where( int c )
 {
@@ -530,7 +530,9 @@ void ShankEditTab::gridHover( int s, int r, bool quiet )
         return;
     }
 
-    SC->setStatus( QString("Grid Row %1").arg( r ) );
+    SC->setStatus( QString("Grid Row %1 %2")
+                    .arg( r )
+                    .arg( SC->getLbl( s, r ) ) );
 }
 
 

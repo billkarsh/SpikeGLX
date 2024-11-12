@@ -159,6 +159,12 @@ void FVShankViewTab::colorTraces( MGraphX *theX, std::vector<MGraphY> &vY )
 }
 
 
+QString FVShankViewTab::getLbl( int s, int r )
+{
+    return anat.getLbl( s, r );
+}
+
+
 void FVShankViewTab::mapChanged( const ShankMap *map )
 {
     if( !fvTabUI->howCB->currentIndex() ) {
@@ -252,8 +258,8 @@ void FVShankViewTab::cursorOver( int ig )
         return;
     }
 
-    int r = SC->view()->getSmap()->e[ig].r,
-        ic;
+    const ShankMapDesc  &SMD = SC->view()->getSmap()->e[ig];
+    int                 ic;
 
     if( fvTabUI->howCB->currentIndex() ) {
         ic = w_ig2sbg[ig].g;
@@ -263,9 +269,10 @@ void FVShankViewTab::cursorOver( int ig )
         ic = df->fileChans()[ig];
 
     SC->setStatus(
-        QString("row %1 %2")
-        .arg( r, 3, 10, QChar('0') )
-        .arg( chanMap->name( ig, df->trig_isChan( ic ) ) ) );
+        QString("row %1 %2 %3")
+        .arg( SMD.r, 3, 10, QChar('0') )
+        .arg( chanMap->name( ig, df->trig_isChan( ic ) ) )
+        .arg( anat.getLbl( SMD.s, SMD.r ) ) );
 }
 
 

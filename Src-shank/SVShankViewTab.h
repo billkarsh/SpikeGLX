@@ -59,8 +59,9 @@ public:
     void init();
     void setAnatomyPP( const QString &elems, int ip, int sk );
     void colorTraces( MGraphX *theX, std::vector<MGraphY> &vY );
+    QString getLbl( int s, int r )  {return anat.getLbl( s, r );}
 
-    void setWhat( int what )    {set.what = what;}
+    void setWhat( int what )        {set.what = what;}
     void mapChanged( const ShankMap *S );
     void selChan( int ic, const QString &name );
 

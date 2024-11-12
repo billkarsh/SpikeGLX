@@ -16,6 +16,7 @@ public:
     virtual void init( const ShankMap *map );
     virtual void setAnatomyPP( const QString &elems, int sk );
     virtual void colorTraces( MGraphX *theX, std::vector<MGraphY> &vY );
+    virtual QString getLbl( int s, int r );
 
 protected:
     QString settingsName() const;

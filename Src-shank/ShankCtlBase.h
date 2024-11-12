@@ -51,6 +51,8 @@ public:
         {}
     virtual void colorTraces( MGraphX* /*theX*/, std::vector<MGraphY>& /*vY*/ )
         {}
+    virtual QString getLbl( int /*s*/, int /*r*/ )
+        {return QString();}
 
     virtual void loadSettings()         {}
     virtual void saveSettings() const   {}

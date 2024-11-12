@@ -80,6 +80,7 @@ public:
     void init( const ShankMap *map );
     void setAnatomyPP( const QString &elems, int sk );
     void colorTraces( MGraphX *theX, std::vector<MGraphY> &vY );
+    QString getLbl( int s, int r );
 
     bool isLFP() const          {return lfp;}
     void setWhat( int what )    {set.what = what;}

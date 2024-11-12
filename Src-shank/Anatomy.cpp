@@ -164,3 +164,16 @@ next_rgn:;
 }
 
 
+QString Anatomy::getLbl( int s, int r )
+{
+    QMutexLocker    ml( &rgnMtx );
+
+    foreach( const AnatomyRgn &R, rgn ) {
+        if( R.contains( s, r ) )
+            return R.lbl;
+    }
+
+    return QString();
+}
+
+

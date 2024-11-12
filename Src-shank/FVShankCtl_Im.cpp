@@ -33,6 +33,12 @@ void FVShankCtl_Im::colorTraces( MGraphX *theX, std::vector<MGraphY> &vY )
     svTab->colorTraces( theX, vY );
 }
 
+
+QString FVShankCtl_Im::getLbl( int s, int r )
+{
+    return svTab->getLbl( s, r );
+}
+
 /* ---------------------------------------------------------------- */
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
