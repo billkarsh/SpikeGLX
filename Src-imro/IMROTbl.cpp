@@ -396,6 +396,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _zpitch     = 15;
                 break;
             case 2020:  // 2.0 quad base (Ph 2C)
+            case 2021:  // 2.0 quad base (Ph 2C) with cap
                 _ncolhwr    = 2;
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};
@@ -1177,6 +1178,7 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
                 supp = true;
                 break;
             case 2020:  // Neuropixels 2.0 quad base (Ph 2C)
+            case 2021:  // Neuropixels 2.0 quad base (Ph 2C) with cap
                 type = 2020;
                 supp = true;
                 break;
@@ -1263,6 +1265,7 @@ IMROTbl* IMROTbl::alloc( const QString &pn )
             case 2014:  // Neuropixels 2.0 multishank probe with cap
                 return new IMROTbl_T2013( pn );
             case 2020:  // Neuropixels 2.0 quad base (Ph 2C)
+            case 2021:  // Neuropixels 2.0 quad base (Ph 2C) with cap
                 return new IMROTbl_T2020( pn );
             default:
                 return 0;
