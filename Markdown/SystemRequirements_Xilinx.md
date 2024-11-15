@@ -1,4 +1,4 @@
-## System Requirements for legacy Xilinx
+## System Requirements for Legacy Xilinx
 
 ### Overview
 
