@@ -45,7 +45,7 @@ provided for both Python and MATLAB: [SpikeGLX_Datafile_Tools](https://github.co
 
 Requirements differ according to platform:
 
-* [For PXI or OneBox setups](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_PXI_OBX.md).
+* [For PXI or OneBox setups](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_PXI.md).
 * [For earlier (Xilinx) setups](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_Xilinx.md).
 
 >*OneBox Notes: Imec began selling OneBoxes October 5, 2024. Get data sheets
