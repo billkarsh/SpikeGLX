@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+November 14, 2024
+
+* C_Waves 2.8 (start/end secs, NP2021 probe).
+
 October 14, 2024
 
 * Add UCL course slides to help.

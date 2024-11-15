@@ -232,7 +232,7 @@ The latest commercial PXI-based components are:</p>
 is on concurrent synchronous recording from high channel count probes together
 with numerous auxiliary analog and digital channels:</p>
 <ul>
-<li>Concurrent, synchronized acquisition from imec probes, Oneboxes and NI-DAQ devices.</li>
+<li>Concurrent, synchronized acquisition from imec probes, OneBoxes and NI-DAQ devices.</li>
 <li>Supports all Neuropixels probe generations and types.</li>
 <li>Supports HHMI/Whisper system.</li>
 <li>Flexible visualization, filtering and sorting tools.</li>
@@ -240,15 +240,29 @@ with numerous auxiliary analog and digital channels:</p>
 <li>Remote control and extensibility via C++ or MATLAB.</li>
 <li>Powerful offline viewing and editing.</li>
 </ul>
+<p>In addition to the SpikeGLX acquisition application, we provide a large
+complement of post-processing tools that are also found on this page. Our
+tool set is maintained and updated in lock step with SpikeGLX to make sure
+the tools work together correctly and have full awareness of all the flexibility
+that SpikeGLX provides in selecting parameters and making custom output files.</p>
+<blockquote>
+<p><em>Note: If you want to craft your own post-processing tools, we strongly advise
+that you incorporate or at least consult the metadata parsing methods we have
+provided for both Python and MATLAB: <a href="https://github.com/jenniferColonell/SpikeGLX_Datafile_Tools">SpikeGLX_Datafile_Tools</a>.</em></p>
+</blockquote>
 <hr />
 <h2 id="system-requirements">System Requirements</h2>
 <p><strong>(What to Buy)</strong></p>
 <p>Requirements differ according to platform:</p>
 <ul>
-<li><a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_PXI.md">For PXI-based setups</a>.</li>
-<li><a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_Xilinx.md">For all earlier setups</a>.</li>
+<li><a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_PXI_OBX.md">For PXI or OneBox setups</a>.</li>
+<li><a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_Xilinx.md">For earlier (Xilinx) setups</a>.</li>
 </ul>
 <blockquote>
+<p><em>OneBox Notes: Imec began selling OneBoxes October 5, 2024. Get data sheets
+and submit purchase requests at the <a href="https://www.neuropixels.org">Neuropixels site</a>.
+OneBox does not depend upon any PXI hardware, hence, it does not require
+enclustra drivers.</em></p>
 <p><em>Important!: The enclustra drivers required for PXI do not work with
 AMD-based computers. The PXI-based imec hardware can only run on computers
 using Intel CPUs and chipsets.</em></p>
@@ -416,7 +430,7 @@ calibration files. Both tools can apply calibration files to existing runs.</em>
 <li><a href="Support/NIScalerWinApp.zip">NIScaler 1.1 (Windows)</a></li>
 <li><a href="Support/NIScalerLnxApp.zip">NIScaler 1.1 (Linux)</a></li>
 </ul>
-<p>MATLAB and Python tools for parsing SpikeGLX meta and binary datafiles (supports 3A, 3B1, 3B2, 20).</p>
+<p>MATLAB and Python tools for parsing SpikeGLX meta and binary datafiles (supports all probes except quad-base).</p>
 <ul>
 <li><a href="https://github.com/jenniferColonell/SpikeGLX_Datafile_Tools">SpikeGLX_Datafile_Tools</a></li>
 </ul>
@@ -435,8 +449,8 @@ calibration files. Both tools can apply calibration files to existing runs.</em>
 like CatGT or used with
 <a href="https://github.com/jenniferColonell/ecephys_spike_sorting">ecephys_spike_sorting</a>.</p>
 <ul>
-<li><a href="Support/C_WavesWinApp.zip">C_Waves 2.7 (Windows)</a></li>
-<li><a href="Support/C_WavesLnxApp.zip">C_Waves 2.7 (Linux)</a></li>
+<li><a href="Support/C_WavesWinApp.zip">C_Waves 2.8 (Windows)</a></li>
+<li><a href="Support/C_WavesLnxApp.zip">C_Waves 2.8 (Linux)</a></li>
 </ul>
 <p><em>Jennifer Colonell's</em> version of the <em>Allen Institute ecephys_spike_sorting</em>
 pipeline. This Python script-driven pipeline chains together:
@@ -603,5 +617,5 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.</p>
 
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2024-10-14 15:10:00.829363+00:00
+Build Date UTC : 2024-11-15 03:59:41.976966+00:00
 -->

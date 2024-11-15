@@ -20,13 +20,23 @@ SpikeGLX is a recording system for extracellular neural probes. The emphasis
 is on concurrent synchronous recording from high channel count probes together
 with numerous auxiliary analog and digital channels:
 
-* Concurrent, synchronized acquisition from imec probes, Oneboxes and NI-DAQ devices.
+* Concurrent, synchronized acquisition from imec probes, OneBoxes and NI-DAQ devices.
 * Supports all Neuropixels probe generations and types.
 * Supports HHMI/Whisper system.
 * Flexible visualization, filtering and sorting tools.
 * Programmable triggering.
 * Remote control and extensibility via C++ or MATLAB.
 * Powerful offline viewing and editing.
+
+In addition to the SpikeGLX acquisition application, we provide a large
+complement of post-processing tools that are also found on this page. Our
+tool set is maintained and updated in lock step with SpikeGLX to make sure
+the tools work together correctly and have full awareness of all the flexibility
+that SpikeGLX provides in selecting parameters and making custom output files.
+
+>*Note: If you want to craft your own post-processing tools, we strongly advise
+that you incorporate or at least consult the metadata parsing methods we have
+provided for both Python and MATLAB: [SpikeGLX_Datafile_Tools](https://github.com/jenniferColonell/SpikeGLX_Datafile_Tools).*
 
 ------
 
@@ -35,8 +45,13 @@ with numerous auxiliary analog and digital channels:
 
 Requirements differ according to platform:
 
-* [For PXI-based setups](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_PXI.md).
-* [For all earlier setups](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_Xilinx.md).
+* [For PXI or OneBox setups](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_PXI_OBX.md).
+* [For earlier (Xilinx) setups](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_Xilinx.md).
+
+>*OneBox Notes: Imec began selling OneBoxes October 5, 2024. Get data sheets
+and submit purchase requests at the [Neuropixels site](https://www.neuropixels.org).
+OneBox does not depend upon any PXI hardware, hence, it does not require
+enclustra drivers.*
 
 >*Important!: The enclustra drivers required for PXI do not work with
 AMD-based computers. The PXI-based imec hardware can only run on computers
@@ -215,7 +230,7 @@ calibration files. Both tools can apply calibration files to existing runs.*
 * [NIScaler 1.1 (Windows)](Support/NIScalerWinApp.zip)
 * [NIScaler 1.1 (Linux)](Support/NIScalerLnxApp.zip)
 
-MATLAB and Python tools for parsing SpikeGLX meta and binary datafiles (supports 3A, 3B1, 3B2, 20).
+MATLAB and Python tools for parsing SpikeGLX meta and binary datafiles (supports all probes except quad-base).
 
 * [SpikeGLX_Datafile_Tools](https://github.com/jenniferColonell/SpikeGLX_Datafile_Tools)
 
@@ -231,8 +246,8 @@ Average cluster waveforms and statistics command-line tool. This can be run sepa
 like CatGT or used with
 [ecephys_spike_sorting](https://github.com/jenniferColonell/ecephys_spike_sorting).
 
-* [C_Waves 2.7 (Windows)](Support/C_WavesWinApp.zip)
-* [C_Waves 2.7 (Linux)](Support/C_WavesLnxApp.zip)
+* [C_Waves 2.8 (Windows)](Support/C_WavesWinApp.zip)
+* [C_Waves 2.8 (Linux)](Support/C_WavesLnxApp.zip)
 
 *Jennifer Colonell's* version of the *Allen Institute ecephys_spike_sorting*
 pipeline. This Python script-driven pipeline chains together:
