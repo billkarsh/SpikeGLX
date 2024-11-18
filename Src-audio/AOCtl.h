@@ -44,6 +44,7 @@ private:
         std::vector<EachStream> each;
         QString                 stream;
         bool                    useQf,
+                                clickplay,
                                 autoStart;
 
         User( const DAQ::Params &p ) : p(p) {loadSettings(0);}
@@ -93,6 +94,7 @@ public:
 
     // LBR = {-1=L,0=B,1=R}
     void graphSetsChannel( int chan, int LBR, const QString &stream );
+    bool isClickPlay()          {return usr.clickplay;}
 
     // Development tests
     void test1()                {aoDev->test1();}
@@ -127,6 +129,7 @@ private slots:
     void rightSBChanged( int val );
     void loCBChanged( const QString &str );
     void hiCBChanged( const QString &str );
+    void cpChecked( bool checked );
     void volSBChanged( double val );
     void help();
     void stop();

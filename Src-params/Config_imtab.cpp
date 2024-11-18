@@ -11,7 +11,6 @@
 #include "ShankCtlBase.h"
 #include "ChanMapCtl.h"
 #include "ShankMapCtl.h"
-#include "Subset.h"
 #include "SignalBlocker.h"
 
 #include <QFileDialog>

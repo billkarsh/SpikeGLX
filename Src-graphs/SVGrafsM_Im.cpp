@@ -665,6 +665,9 @@ void SVGrafsM_Im::myClickGraph( double x, double y, int iy )
             lastMouseOverChan % p.im.prbj[ip].imCumTypCnt[CimCfg::imSumAP],
             myChanName( lastMouseOverChan ) );
     }
+
+    if( mainApp()->getAOCtl()->isClickPlay() )
+        setAudioB();
 }
 
 
@@ -690,9 +693,12 @@ void SVGrafsM_Im::externSelectChan( int ic, bool shift )
         ensureVisible();
 
         selected = -1;  // force tb update
-        selectChan( ic );
+        selectChan( lastMouseOverChan = ic );
 
         shankCtl->selChan( icUnshift, myChanName( ic ) );
+
+        if( mainApp()->getAOCtl()->isClickPlay() )
+            setAudioB();
     }
 }
 

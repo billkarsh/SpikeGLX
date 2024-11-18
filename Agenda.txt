@@ -4,6 +4,7 @@
 20241001
 --------
 + Imro editor shows hover-over anatomy region.
++ New audio dialog with click and play feature.
 + Support NP2021 quad-probe.
 
 20240620

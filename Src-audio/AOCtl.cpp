@@ -57,6 +57,7 @@ void AOCtl::User::loadSettings( bool remote )
     settings.beginGroup( "AOCtl_All" );
     stream      = settings.value( "stream", p.jsip2stream( jsNI, 0 ) ).toString();
     useQf       = settings.value( "useQflt", true ).toBool();
+    clickplay   = settings.value( "clickplay", false ).toBool();
     autoStart   = settings.value( "autoStart", false ).toBool();
 }
 
@@ -77,6 +78,7 @@ void AOCtl::User::saveSettings( bool remote ) const
     settings.beginGroup( "AOCtl_All" );
     settings.setValue( "stream", stream );
     settings.setValue( "useQflt", useQf );
+    settings.setValue( "clickplay", clickplay );
     settings.setValue( "autoStart", autoStart );
 }
 
@@ -221,6 +223,7 @@ AOCtl::AOCtl( const DAQ::Params &p, QWidget *parent )
     ConnectUI( aoUI->rightSB, SIGNAL(valueChanged(int)), this, SLOT(rightSBChanged(int)) );
     ConnectUI( aoUI->loCB, SIGNAL(currentTextChanged(QString)), this, SLOT(loCBChanged(QString)) );
     ConnectUI( aoUI->hiCB, SIGNAL(currentTextChanged(QString)), this, SLOT(hiCBChanged(QString)) );
+    ConnectUI( aoUI->cpChk, SIGNAL(clicked(bool)), this, SLOT(cpChecked(bool)) );
     ConnectUI( aoUI->volSB, SIGNAL(valueChanged(double)), this, SLOT(volSBChanged(double)) );
     ConnectUI( aoUI->helpBut, SIGNAL(clicked()), this, SLOT(help()) );
     ConnectUI( aoUI->resetBut, SIGNAL(clicked()), this, SLOT(reset()) );
@@ -392,10 +395,11 @@ void AOCtl::reset( bool remote )
 
     aoUI->qfChk->setChecked( usr.useQf );
 
-// ----
-// Auto
-// ----
+// -----
+// Modes
+// -----
 
+    aoUI->cpChk->setChecked( usr.clickplay );
     aoUI->autoChk->setChecked( usr.autoStart );
 
 // --------------------
@@ -502,8 +506,7 @@ void AOCtl::streamCBChanged( bool live )
     int iq = aoUI->streamCB->currentIndex(),
         ip,
         js = p.iq2jsip( ip, iq ),
-        nC = p.stream_nChans( js, ip ),
-        left, right;
+        nC = p.stream_nChans( js, ip );
 
 // --
 // Qf
@@ -515,22 +518,19 @@ void AOCtl::streamCBChanged( bool live )
 // Channels
 // --------
 
-    const EachStream    &E = usr.each[iq];
+    EachStream  &E = usr.each[iq];
 
-    left    = E.left;
-    right   = E.right;
+    if( E.left >= nC )
+        E.left = 0;
 
-    if( left >= nC )
-        left = 0;
-
-    if( right >= nC )
-        right = 0;
+    if( E.right >= nC )
+        E.right = 0;
 
     aoUI->leftSB->setMaximum( nC );
     aoUI->rightSB->setMaximum( nC );
 
-    aoUI->leftSB->setValue( left );
-    aoUI->rightSB->setValue( right );
+    aoUI->leftSB->setValue( E.left );
+    aoUI->rightSB->setValue( E.right );
 
 // -------
 // Filters
@@ -571,7 +571,6 @@ void AOCtl::qfChecked( bool checked )
 void AOCtl::leftSBChanged( int val )
 {
     usr.each[aoUI->streamCB->currentIndex()].left = val;
-
     liveChange();
 }
 
@@ -579,7 +578,6 @@ void AOCtl::leftSBChanged( int val )
 void AOCtl::rightSBChanged( int val )
 {
     usr.each[aoUI->streamCB->currentIndex()].right = val;
-
     liveChange();
 }
 
@@ -587,9 +585,7 @@ void AOCtl::rightSBChanged( int val )
 void AOCtl::loCBChanged( const QString &str )
 {
     usr.each[aoUI->streamCB->currentIndex()].loCutStr = str;
-
     aoUI->hiCB->setEnabled( str != "OFF" );
-
     liveChange();
 }
 
@@ -597,7 +593,13 @@ void AOCtl::loCBChanged( const QString &str )
 void AOCtl::hiCBChanged( const QString &str )
 {
     usr.each[aoUI->streamCB->currentIndex()].hiCutStr = str;
+    liveChange();
+}
 
+
+void AOCtl::cpChecked( bool checked )
+{
+    usr.clickplay = checked;
     liveChange();
 }
 
@@ -605,7 +607,6 @@ void AOCtl::hiCBChanged( const QString &str )
 void AOCtl::volSBChanged( double val )
 {
     usr.each[aoUI->streamCB->currentIndex()].volume = val;
-
     liveChange();
 }
 
@@ -734,6 +735,7 @@ bool AOCtl::valid( QString &err, bool remote )
 
     usr.stream      = aoUI->streamCB->currentText();
     usr.useQf       = aoUI->qfChk->isChecked();
+    usr.clickplay   = aoUI->cpChk->isChecked();
     usr.autoStart   = aoUI->autoChk->isChecked();
 
 // Stream available?

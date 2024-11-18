@@ -15,9 +15,8 @@ Audio is fine as long as the system is not at maximum stress.
 ## Output to Speakers and Headphones
 
 As of version **20170501** SpikeGLX  no longer uses NI-DAQ based analog out.
-Rather, selected channels are fed to the Windows sound drivers and, just
-like music, are accessed through the PC speakers and headphone jack. You
-can also use USB-based headphones.
+Rather, selected channels are fed to the Windows sound drivers and are accessed
+the same way as other audio on your PC.
 
 If you want, you can make a cable to go from the audio jack to a BNC and
 feed the signal into an A-M Systems 3300 Audio Monitor box. I've tested
@@ -48,14 +47,19 @@ from only one stream at a time.
 ## Channels
 
 You can select any channel you can see in the Graphs window, even the
-digital channels.
+digital channels. You can select channels via the ShankViewer.
 
 You can set the Left and Right channels the same, or, use your two ears
 to monitor two channels at the same time.
 
-You can **right-click on the Graphs window** to select channels. When you do
-that, the stream will change to the one you clicked on, and audio out
-will start immediately if not already running.
+### Click and play
+
+* If **not** checked, right-click on a trace, or, right-click in the
+ShankViewer and use the pop-up menu to send the channel to your left, right
+or both ears.
+
+* If checked, left-click on a trace, or, left-click in the
+ShankViewer. The selected channel is immediately sent to both ears.
 
 --------
 
