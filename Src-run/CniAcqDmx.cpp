@@ -617,7 +617,8 @@ device2:
 
 bool CniAcqDmx::createDITasks(
     const QString   &diChanStr1,
-    const QString   &diChanStr2 )
+    const QString   &diChanStr2,
+    const QString   &aiChanStr1 )
 {
     QString clk1, clk2;
 
@@ -650,6 +651,10 @@ bool CniAcqDmx::createDITasks(
                     .arg( p.ni.dev1 )
                     .arg( p.ni.clockLine1 );
         }
+    }
+    else if( aiChanStr1.isEmpty() ) {
+        clk1 = QString("/%1/Ctr0InternalOutput")
+                .arg( p.ni.dev1 );
     }
     else {
         clk1 = QString("/%1/ai/SampleClock")
@@ -687,16 +692,9 @@ device2:
     if( diChanStr2.isEmpty() )
         return true;
 
-    if( CniCfg::isDigitalDev( p.ni.dev2 ) ) {
-
-        clk2 = QString("/%1/%2")
-                .arg( p.ni.dev2 )
-                .arg( p.ni.clockLine2 );
-    }
-    else {
-        clk2 = QString("/%1/ai/SampleClock")
-                .arg( p.ni.dev2 );
-    }
+    clk2 = QString("/%1/%2")
+            .arg( p.ni.dev2 )
+            .arg( p.ni.clockLine2 );
 
     if( DAQmxErrChkNoJump( DAQmxCreateTask( "TaskDI2", &taskDI2 ) )
      || DAQmxErrChkNoJump( DAQmxCreateDIChan(
@@ -747,17 +745,15 @@ device2:
 // acquiring on the same edge.
 //
 // To solve that we implemented this scheme of programming counter-0 as
-// the common waveform when internal source is selected. Originally,
-// Ctr0InternalOutput was separately fed to DI and AI tasks. In Jan 2019
+// the common waveform when internal source is selected. Typically,
+// Ctr0InternalOutput is separately fed to DI and AI tasks. In Jan 2019
 // (see email that date) we discovered that ADLink chassis did not provide
-// a path from Ctr0InternalOutput to the DI task.
-//
-// At that time we solved the problem by ensuring that there is always an
-// AI task (a dummy one if need be) and that we could route ai/SampleClock
-// to the DI task. Probably we could have dispensed with counter-0 at that
-// point, but we did not think of that in time. It is now documented that
-// the internal sample clock is visible at Ctr0InternalOutput (PFI 12) and
-// Whispers are wired that way...so the common counter-0 scheme persists.
+// a path from Ctr0InternalOutput to the DI task. In such cases, we instead
+// ensure there is always an AI task (a dummy one if need be) and route
+// ai/SampleClock to the DI task. In either case we employ the Ctr0 task
+// and it is documented that the internal sample clock is visible at
+// Ctr0InternalOutput (PFI 12) and Whispers are wired that way...so the
+// common counter-0 scheme should persist.
 //
 // In January 2024 Jennifer discovered that for a handful of sample rates,
 // programming that rate in DAQmxCreateCOPulseChanFreq() resulted in an
@@ -1006,18 +1002,12 @@ bool CniAcqDmx::configure()
 // we ALWAYS want an analog task. In this case, we set up analog
 // for a single arbitrary channel but skip fetching of those data.
 
-    if( !diChanStr1.isEmpty() &&
+    if( aiChanStr1.isEmpty() &&
+        !diChanStr1.isEmpty() &&
         !CniCfg::isDigitalDev( p.ni.dev1 ) &&
-        aiChanStr1.isEmpty() ) {
+        !CniCfg::isCtr0ToDIPath( p.ni.dev1 ) ) {
 
         aiChanStr1 = QString("/%1/ai0").arg( p.ni.dev1 );
-    }
-
-    if( !diChanStr2.isEmpty() &&
-        !CniCfg::isDigitalDev( p.ni.dev2 ) &&
-        aiChanStr2.isEmpty() ) {
-
-        aiChanStr2 = QString("/%1/ai0").arg( p.ni.dev2 );
     }
 
 // ----------
@@ -1039,7 +1029,7 @@ bool CniAcqDmx::configure()
         return false;
     }
 
-    if( !createDITasks( diChanStr1, diChanStr2 ) ) {
+    if( !createDITasks( diChanStr1, diChanStr2, aiChanStr1 ) ) {
         runError();
         return false;
     }

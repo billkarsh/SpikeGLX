@@ -206,6 +206,7 @@ public:
     static double maxSampleRate( const QString &dev, int nChans = 1 );
     static double minSampleRate( const QString &dev );
     static int nWaveformLines( const QString &dev );
+    static bool isCtr0ToDIPath( const QString &dev );
 
     static bool wrongTermConfig(
         QString             &err,

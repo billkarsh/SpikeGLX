@@ -183,6 +183,29 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 <blockquote>
 <p>Note that the BNC should be supplying the multiplexed clock rate: <code>(nominal sample rate) X (muxing factor)</code>.</p>
 </blockquote>
+<hr />
+<hr />
+<h2 id="sharing-channels-with-other-programs">Sharing Channels With Other Programs</h2>
+<h3 id="digital-lines-xd">Digital Lines (XD)</h3>
+<p><em>Non-waveform lines are not clocked. If SpikeGLX is using that line, it owns that line; otherwise the line is available to external software.</em></p>
+<p><em>Waveform (clocked) digital lines are subject to sharing limitations that derive from use of clock resources as discussed below.</em></p>
+<h4 id="spikeglx-clock-source-external">SpikeGLX Clock Source External</h4>
+<p>The digital lines that are not being used in SpikeGLX should be available in other software on a line-by-line basis.</p>
+<h4 id="spikeglx-clock-source-internal">SpikeGLX Clock Source Internal</h4>
+<p>All digital lines are owned exclusively by SpikeGLX.</p>
+<hr />
+<h3 id="analog-channels-xa">Analog Channels (XA)</h3>
+<h4 id="listed-xa-channels">Listed XA Channels</h4>
+<p>If any XA channels are listed, then all analog channels are owned exclusively by SpikeGLX.</p>
+<h4 id="only-digital-xd-lines-no-xa-channels-listed">Only Digital XD Lines; No XA Channels Listed</h4>
+<p><strong>SpikeGLX Clock Source External</strong></p>
+<p>All analog channels are available to other software.</p>
+<p><strong>SpikeGLX Clock Source Internal</strong></p>
+<p>This case depends upon the type of chassis and the type of NI device.</p>
+<p>For NI chassis, we can clock digital acquisition directly from the internal clock without involving analog input, so in this case all analog channels remain available to external software.</p>
+<p>For ADLink chassis, some devices can clock digital lines directly from the internal clock, but other devices piggyback digital timing off of an intermediary (hidden) analog input task and in those cases the analog channels are exclusively owned by SpikeGLX. The only device we are currently aware of with this issue is the <strong>6133</strong>.</p>
+<p><em>Note1: We don't have experience with other chassis at this time.</em></p>
+<p><em>Note2: PCI-based and USB-based NI devices operate the same as if the PXI version of that device were pugged into an NI chassis.</em></p>
 <p><em>fin</em></p>
 </body>
 </html>

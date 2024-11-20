@@ -93,7 +93,8 @@ private:
 
     bool createDITasks(
         const QString   &diChanStr1,
-        const QString   &diChanStr2 );
+        const QString   &diChanStr2,
+        const QString   &aiChanStr1 );
 
     bool createInternalCTRTask();
     bool createSyncPulserTask();

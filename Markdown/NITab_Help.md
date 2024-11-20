@@ -359,6 +359,63 @@ PFI terminal on the NI breakout box for the secondary device.
 > Note that the BNC should be supplying the multiplexed clock rate:
 `(nominal sample rate) X (muxing factor)`.
 
+--------
+
+--------
+
+## Sharing Channels With Other Programs
+
+### Digital Lines (XD)
+
+*Non-waveform lines are not clocked. If SpikeGLX is using that line, it
+owns that line; otherwise the line is available to external software.*
+
+*Waveform (clocked) digital lines are subject to sharing limitations
+that derive from use of clock resources as discussed below.*
+
+#### SpikeGLX Clock Source External
+
+The digital lines that are not being used in SpikeGLX should be available
+in other software on a line-by-line basis.
+
+#### SpikeGLX Clock Source Internal
+
+All digital lines are owned exclusively by SpikeGLX.
+
+--------
+
+### Analog Channels (XA)
+
+#### Listed XA Channels
+
+If any XA channels are listed, then all analog channels are owned
+exclusively by SpikeGLX.
+
+#### Only Digital XD Lines; No XA Channels Listed
+
+**SpikeGLX Clock Source External**
+
+All analog channels are available to other software.
+
+**SpikeGLX Clock Source Internal**
+
+This case depends upon the type of chassis and the type of NI device.
+
+For NI chassis, we can clock digital acquisition directly from the
+internal clock without involving analog input, so in this case all
+analog channels remain available to external software.
+
+For ADLink chassis, some devices can clock digital lines directly from
+the internal clock, but other devices piggyback digital timing off of
+an intermediary (hidden) analog input task and in those cases the analog
+channels are exclusively owned by SpikeGLX. The only device we are
+currently aware of with this issue is the **6133**.
+
+*Note1: We don't have experience with other chassis at this time.*
+
+*Note2: PCI-based and USB-based NI devices operate the same as if the PXI
+version of that device were pugged into an NI chassis.*
+
 
 _fin_
 

@@ -881,7 +881,6 @@ QString CniCfg::termConfigToString( TermConfig t )
 #ifdef HAVE_NIDAQmx
 static bool isPFI2DI( const QString &dev, const QString &pfi )
 {
-    QString     s = QString("/%1/line0").arg( dev );
     TaskHandle  task;
     int         ret;
     bool        ok = false;
@@ -889,7 +888,8 @@ static bool isPFI2DI( const QString &dev, const QString &pfi )
     DAQmxCreateTask( "", &task );
 
     ret = DAQmxCreateDIChan( task,
-            STR2CHR( s ), "", DAQmx_Val_ChanForAllLines );
+            STR2CHR( QString("/%1/line0").arg( dev ) ),
+            "", DAQmx_Val_ChanForAllLines );
 
     if( DAQmxFailed( ret ) )
         goto exit;
@@ -1167,14 +1167,14 @@ double CniCfg::maxTimebase( const QString &dev )
 
     if( isDigitalDev( dev ) ) {
 
-        QString     s = QString("/%1/line0").arg( dev );
         TaskHandle  task;
         int         ret;
 
         DAQmxCreateTask( "", &task );
 
         ret = DAQmxCreateDIChan( task,
-                STR2CHR( s ), "", DAQmx_Val_ChanForAllLines );
+                STR2CHR( QString("/%1/line0").arg( dev ) ),
+                "", DAQmx_Val_ChanForAllLines );
 
         if( DAQmxFailed( ret ) )
             goto done;
@@ -1331,7 +1331,6 @@ int CniCfg::nWaveformLines( const QString &dev )
 {
     for( int i = 32; i >= 8; i -= 8  ) {
 
-        QString     s = QString("/%1/line%2").arg( dev ).arg( i - 1 );
         TaskHandle  task;
         int         ret;
         bool        ok = false;
@@ -1339,7 +1338,8 @@ int CniCfg::nWaveformLines( const QString &dev )
         DAQmxCreateTask( "", &task );
 
         ret = DAQmxCreateDIChan( task,
-                STR2CHR( s ), "", DAQmx_Val_ChanForAllLines );
+                STR2CHR( QString("/%1/line%2").arg( dev ).arg( i - 1 ) ),
+                "", DAQmx_Val_ChanForAllLines );
 
         if( DAQmxFailed( ret ) )
             goto next_line;
@@ -1370,6 +1370,54 @@ next_line:
 int CniCfg::nWaveformLines( const QString & )
 {
     return 8;
+}
+#endif
+
+/* ---------------------------------------------------------------- */
+/* isCtr0ToDIPath ------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+// True if there is an existing pathway from Ctr0InternalOutput
+// to di/SampleClock.
+//
+#ifdef HAVE_NIDAQmx
+bool CniCfg::isCtr0ToDIPath( const QString &dev )
+{
+    TaskHandle  task;
+    int         ret;
+    bool        ok = false;
+
+    DAQmxCreateTask( "", &task );
+
+    ret = DAQmxCreateDIChan( task,
+            STR2CHR( QString("/%1/line0").arg( dev ) ),
+            "", DAQmx_Val_ChanForAllLines );
+
+    if( DAQmxFailed( ret ) )
+        goto done;
+
+    ret = DAQmxCfgSampClkTiming( task,
+            STR2CHR( QString("/%1/Ctr0InternalOutput").arg( dev ) ),
+            100, DAQmx_Val_Rising, DAQmx_Val_ContSamps, 1000 );
+
+    if( DAQmxFailed( ret ) )
+        goto done;
+
+    ret = DAQmxTaskControl( task, DAQmx_Val_Task_Commit );
+
+    if( DAQmxFailed( ret ) )
+        goto done;
+
+    ok = true;
+
+done:
+    destroyTask( task );
+    return ok;
+}
+#else
+bool CniCfg::isCtr0ToDIPath( const QString & )
+{
+    return false;
 }
 #endif
 
