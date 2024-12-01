@@ -195,8 +195,8 @@ on SpikeGLX output files (all probe types):
 >+ Optionally join the above outputs across different runs (supercat feature).
 >+ [CatGT: Tshift, CAR, Gfix](help/catgt_tshift/catgt_tshift.md)
 
-* [CatGT 4.4 (Windows)](Support/CatGTWinApp.zip)
-* [CatGT 4.4 (Linux)](Support/CatGTLnxApp.zip)
+* [CatGT 4.5 (Windows)](Support/CatGTWinApp.zip)
+* [CatGT 4.5 (Linux)](Support/CatGTLnxApp.zip)
 
 ------
 
@@ -246,8 +246,8 @@ Average cluster waveforms and statistics command-line tool. This can be run sepa
 like CatGT or used with
 [ecephys_spike_sorting](https://github.com/jenniferColonell/ecephys_spike_sorting).
 
-* [C_Waves 2.8 (Windows)](Support/C_WavesWinApp.zip)
-* [C_Waves 2.8 (Linux)](Support/C_WavesLnxApp.zip)
+* [C_Waves 2.9 (Windows)](Support/C_WavesWinApp.zip)
+* [C_Waves 2.9 (Linux)](Support/C_WavesLnxApp.zip)
 
 *Jennifer Colonell's* version of the *Allen Institute ecephys_spike_sorting*
 pipeline. This Python script-driven pipeline chains together:
@@ -293,7 +293,8 @@ Descriptions of metafile items for each phase:
 1) For general How-To questions please consult the help documents and videos
 on this site, or pose your question to the
 [Neuropixels slack channel](https://join.slack.com/t/neuropixelsgroup/shared_invite/zt-2c8u0k21u-CC4wSkb8~U_Fkrf3HHf_kw)
-so everyone can learn together.
+so everyone can learn together. *If there is any problem with the slack
+channel invitation, email the [administrator](mailto:colonellj@hhmi.org).*
 
 2) If the community can't help, try emailing me directly. I'm also happy
 to hear about new feature requests, and very eager to hear about suspected

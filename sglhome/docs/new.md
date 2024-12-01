@@ -1,5 +1,10 @@
 # What's New On The Site?
 
+December 1, 2024
+
+* CatGT   4.5 (Support probe NP1014, NP1033, NP2005, NP2006, NP2021).
+* C_Waves 2.9 (Support probe NP1014, NP1033, NP2005, NP2006).
+
 November 14, 2024
 
 * C_Waves 2.8 (start/end secs, NP2021 probe).

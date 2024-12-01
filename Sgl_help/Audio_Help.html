@@ -15,7 +15,7 @@
 <p>Audio is fine as long as the system is not at maximum stress.</p>
 <hr />
 <h2 id="output-to-speakers-and-headphones">Output to Speakers and Headphones</h2>
-<p>As of version <strong>20170501</strong> SpikeGLX no longer uses NI-DAQ based analog out. Rather, selected channels are fed to the Windows sound drivers and, just like music, are accessed through the PC speakers and headphone jack. You can also use USB-based headphones.</p>
+<p>As of version <strong>20170501</strong> SpikeGLX no longer uses NI-DAQ based analog out. Rather, selected channels are fed to the Windows sound drivers and are accessed the same way as other audio on your PC.</p>
 <p>If you want, you can make a cable to go from the audio jack to a BNC and feed the signal into an A-M Systems 3300 Audio Monitor box. I've tested that.</p>
 <hr />
 <h2 id="hot-plugging-headphones">Hot-plugging Headphones</h2>
@@ -26,9 +26,13 @@
 <p>Because they run at different sample rates you can listen to channels from only one stream at a time.</p>
 <hr />
 <h2 id="channels">Channels</h2>
-<p>You can select any channel you can see in the Graphs window, even the digital channels.</p>
+<p>You can select any channel you can see in the Graphs window, even the digital channels. You can select channels via the ShankViewer.</p>
 <p>You can set the Left and Right channels the same, or, use your two ears to monitor two channels at the same time.</p>
-<p>You can <strong>right-click on the Graphs window</strong> to select channels. When you do that, the stream will change to the one you clicked on, and audio out will start immediately if not already running.</p>
+<h3 id="click-and-play">Click and play</h3>
+<ul>
+<li><p>If <strong>not</strong> checked, right-click on a trace, or, right-click in the ShankViewer and use the pop-up menu to send the channel to your left, right or both ears.</p></li>
+<li><p>If checked, left-click on a trace, or, left-click in the ShankViewer. The selected channel is immediately sent to both ears.</p></li>
+</ul>
 <hr />
 <h2 id="bandpass">Bandpass</h2>
 <p>The two popup menus work together to define a pass band. The left popup controls the left edge (the highpass part):</p>
