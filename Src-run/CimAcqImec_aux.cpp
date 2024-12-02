@@ -15,31 +15,27 @@
 
 
 // @@@ FIX Leave buffers at defaults until understand better.
-// @@@ FIX Need to scale buf size with probe count.
-// NP_PARAM_BUFFERSIZE:     default 128K
-// NP_PARAM_BUFFERCOUNT:    default 64
+// Setting is system-wide, affecting PXI and OneBox.
+// NP_PARAM_INPUT_LATENCY_US:   default 132, ~ 4 samples
+//
+// Testing notes:
+// - Minimum legal value is 20.
+// - At 50, sytems using Thunderbolt have difficulty waking
+//  up from screen saver.
+// - Performance looks stable at 100 and 132 (default), that was
+//  tested with eight NP2.0 probes in a single BS.
+// - Other values have not been tested.
 //
 bool CimAcqImec::_aux_sizeStreamBufs()
 {
 #if 0
     NP_ErrorCode    err;
 
-    err = np_setParameter( NP_PARAM_BUFFERSIZE, 128*1024 );
+    err = np_setParameter( NP_PARAM_INPUT_LATENCY_US, 132 );
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setParameter(BUFSIZE)%1")
-            .arg( makeErrorString( err ) ) );
-        return false;
-    }
-#endif
-
-#if 0
-    err = np_setParameter( NP_PARAM_BUFFERCOUNT, 64 );
-
-    if( err != SUCCESS ) {
-        runError(
-            QString("IMEC setParameter(BUFCOUNT)%1")
+            QString("IMEC setParameter(LATENCY)%1")
             .arg( makeErrorString( err ) ) );
         return false;
     }

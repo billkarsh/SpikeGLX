@@ -120,7 +120,7 @@ win32 {
                 LIBS += -lNeuropixAPI_x64_3_69_dbg-NXT-PR2-77985af
             }
             else {
-                LIBS += -lNeuropixAPI_x64_3_70_2
+                LIBS += -lNeuropixAPI_x64_3_70_3
             }
         }
         else {

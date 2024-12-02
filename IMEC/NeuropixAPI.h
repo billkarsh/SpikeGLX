@@ -83,6 +83,11 @@ namespace Neuropixels {
 	}np_packet_t;
 #pragma pack(pop)
 
+    typedef struct {
+        int vmajor;
+        int vminor;
+        int vbuild;
+	} ftdi_driver_version_t;
 	
 	typedef void(NP_CALLBACK* np_packetcallbackfn_t)(const np_packet_t& packet, const void* userdata);
 	
@@ -348,6 +353,28 @@ namespace Neuropixels {
     NP_EXPORT void getMinimumFtdiDriverVersion(int* version_major, int* version_minor, int* version_build);
 
 	/**
+     * \brief Checks if FTDI Driver is installed and the version of the driver is okay for the API
+     *
+     * This function will only be able to report the current installed driver version and its correctness
+     * if a OneBox is connected and powered on. This is due to an unfortunate limitation of the
+     * FTDI library: we can only detect the driver version in use by instantiating it and connecting to
+     * a working OneBox.
+     *
+     * The value of \p required will always be set when the function is called. If \p is_driver_present is
+     * true, then the API was able to determine the currently installed driver version and the values
+     * in \p current and \p is_version_ok can be used.
+     *
+     * @param[out] required Returns the minimum driver version required by the API
+     * @param[out] current Returns the currently installed driver version (if found)
+     * @param[out] is_driver_present True if we were able to determine the installed driver version
+     * @param[out] is_version_ok True if the installed driver version meets the minimum requirements
+     */
+    NP_EXPORT void checkFtdiDriver(ftdi_driver_version_t* required,
+                                   ftdi_driver_version_t* current,
+                                   bool* is_driver_present,
+                                   bool* is_version_ok);
+
+	/**
 	 * Read the last error message
 	 *
 	 * @param buffer Destination buffer
@@ -414,13 +441,12 @@ namespace Neuropixels {
 	NP_EXPORT NP_ErrorCode destroyHandle(npcallbackhandle_t* phandle);
 
 	typedef enum {
-		NP_PARAM_BUFFERSIZE = 1,
-		NP_PARAM_BUFFERCOUNT = 2,
-		NP_PARAM_SIGNALINVERT = 7,
+        NP_PARAM_INPUT_LATENCY_US = 1,  //!< Desired input buffer latency in micro-seconds
+        NP_PARAM_SIGNALINVERT = 7,
 
-		// internal use only
-		NP_PARAM_IGNOREPROBESN = 0x1000
-	}np_parameter_t;
+        // internal use only
+        NP_PARAM_IGNOREPROBESN = 0x1000
+    } np_parameter_t;
 	/*
 	 * \brief Set the value of a system-wide parameter
 	*/
@@ -624,6 +650,7 @@ namespace Neuropixels {
 #define NP1_PROBE_CHANNEL_COUNT   384
 #define NP1_PROBE_SUPERFRAMESIZE  12
 #define NP1_PROBE_ADC_COUNT       32
+#define NP1_PROBE_ADC_SAMPLE_RATE 390'000
 
 #define ELECTRODEPACKET_STATUS_TRIGGER    (1<<0)
 #define ELECTRODEPACKET_STATUS_SYNC       (1<<6)
@@ -677,7 +704,7 @@ namespace Neuropixels {
 	*                 size of this buffer is expected to be sizeof(struct PacketInfo)*packetcount
 	* @param data: unpacked 16 bit right aligned data. size of this buffer is expected to be 'channelcount*packetcount*sizeof(int16_t)'
 	* @param channelcount: amount of channels to read per packet. This value is also the data stride value in the result 'data' buffer.
-	* @param packetcount: amount of channels to read per packet. This value is also the data stride value in the result 'data' buffer.
+	* @param packetcount: Maximum number of packets to read per call.
 	* @param packetsread: amount of packets read from the fifo.
 	* @returns SUCCESS if successful. Note that this function also returns SUCCESS if no data was available (samplesread returns ==0)
 	*/
@@ -820,7 +847,7 @@ namespace Neuropixels {
 	NP_EXPORT NP_ErrorCode waveplayer_getSampleFrequency(int slotID, double* frequency_Hz);
 
 	/**
-	 * Directly reads the voltage of a particular ADC Channel.
+	 * Directly reads the voltage of a particular ADC channel.
 	 *
 	 * @param slotID The slot number of the device
 	 * @param ADCChannel The ADC channel to read the data from (valid range 0 to 11)
@@ -832,7 +859,7 @@ namespace Neuropixels {
 	/**
 	 * Directly reads the ADC comparator output state.
 	 *
-	 * The low/high comparator threshold values can be set using (ADC_setComparatorThreshold)
+	 * The low/high comparator threshold values can be set using #ADC_setComparatorThreshold
 	 *
 	 * @param slotID The slot number of the device
 	 * @param ADCChannel The ADC channel to read the data from
@@ -844,7 +871,7 @@ namespace Neuropixels {
 	/**
 	 * Directly reads the ADC comparator state of all ADC channels in a single output word.
 	 *
-	 * The low/high comparator threshold values can be set using (ADC_setComparatorThreshold)
+	 * The low/high comparator threshold values can be set using #ADC_setComparatorThreshold
 	 *
 	 * @param slotID The slot number of the device
 	 * @param flags A word containing the comparator state of each ADC channel (bit0 = ADCCH0, bit 1 = ADCCH1, etc...)
@@ -853,9 +880,13 @@ namespace Neuropixels {
 	NP_EXPORT NP_ErrorCode ADC_readComparators(int slotID, uint32_t* flags);
 
 	/**
-	 * Enable/Disables the auxiliary ADC probe
+	 * Enable or disables the auxiliary ADC probe.
 	 *
-	 * If disabled, no ADC channel or comparator values are updated.
+	 * Regardless of whether or not the ADC probe is enabled, the OneBox will actively sample the ADC.
+	 * When the ADC probe is enabled however, a stream of ADC and comparator data is sent to the PC together
+	 * with other data streams such as those from neural probes.
+	 * Data from the ADC and comparators can also be read using functions like #ADC_read and #ADC_readComparator,
+	 * even if the ADC probe is disabled.
 	 *
 	 * @param slotID The slot number of the device
 	 * @param enable True to enable, false to disable
@@ -864,9 +895,9 @@ namespace Neuropixels {
 	NP_EXPORT NP_ErrorCode ADC_enableProbe(int slotID, bool enable);
 
 	/**
-	 * Get the LSB to voltage conversion factor and bitdepth for the ADC probe channel.
+	 * Get the LSB to voltage conversion factor and bit depth for the ADC probe channel.
 	 *
-	 * This conversion changes with programmed ADC range (ADC_setVoltageRange)
+	 * This conversion changes with programmed ADC range (via #ADC_setVoltageRange)
 	 *
 	 * @param slotID The slot number of the device
 	 * @param lsb_to_voltage Conversion factor to convert 16 bit signed value to voltage
@@ -943,7 +974,7 @@ namespace Neuropixels {
 	/**
 	 * Set a DAC channel in digital tracking mode, and program its low and high voltage.
 	 *
-	 * In this mode, the DAC channel acts as an output of the switch matrix (See switchmatrix_set).
+	 * In this mode, the DAC channel acts as an output of the switch matrix (See #switchmatrix_set).
 	 *
 	 * @param slotID The slot number of the device
 	 * @param DACChannel The DAC channel to configure
@@ -979,16 +1010,28 @@ namespace Neuropixels {
 	NP_EXPORT NP_ErrorCode DAC_setProbeSniffer(int slotID, int DACChannel, int portID, int dockID, int channelnr, streamsource_t sourcetype);
 
 	/**
-	 * Read multiple packets from the auxiliary ADC probe stream.
+	 * Read multiple packets from the auxiliary ADC probe stream (non-blocking and thread-safe).
 	 *
-	 * Note that the ADC probe needs to be enabled (ADC_enableProbe). This is a non blocking function.
+	 * The OneBox actively samples an onboard 12-channel ADC to which external signals can be connected using the SDR connector.
+	 * Each ADC channel is also fed into a comparator which can be configured through #ADC_setComparatorThreshold.
+	 * When enabled through #ADC_enableProbe, the OneBox will send a packet stream of ADC and comparator data to the computer,
+	 * which can be read using this function.
+	 *
+	 * Each packet of the stream contains 24 samples:
+	 * - the first 12 samples are the ADC values (counts) for each channel, in order, and
+	 * - the last 12 samples are the ADC comparator values for each ADC channel
+	 * 
+	 * It is possible to only read the first N samples from each packet by setting the \p channelcount parameter to a value lower than 24.
+	 *
+	 * The ADC counts, which are 16-bit signed integers, can be converted to voltages by multiplying them with a conversion factor.
+	 * This conversion factor can be retrieved using #ADC_getStreamConversionFactor.
 	 *
 	 * @param slotID The slot number of the device
 	 * @param pckinfo Output data containing additional packet data: timestamp, stream status, and payload length.
 	 *                size of this buffer is expected to be sizeof(struct PacketInfo)*packetcount
-	 * @param data Unpacked 16 bit right aligned data. size of this buffer is expected to be 'channelcount*packetcount*sizeof(int16_t)'
+	 * @param data Unpacked 16 bit right aligned data. Size of this buffer is expected to be 'channelcount*packetcount*sizeof(int16_t)'
 	 * @param channelcount Amount of channels to read per packet. This value is also the data stride value in the result 'data' buffer. Onebox supports 12 ADC channels + 12 comparator channels
-	 * @param packetcount Amount of channels to read per packet. This value is also the data stride value in the result 'data' buffer.
+	 * @param packetcount Maximum number of packets to read per call.
 	 * @param packetsread Amount of packets read from the fifo.
 	 * @returns SUCCESS if successful. Note that this function also returns SUCCESS if no data was available (samplesread returns ==0). NOTSUPPORTED if this functionality is not supported by the device
 	 */
@@ -996,6 +1039,8 @@ namespace Neuropixels {
 
 	/**
 	 * Get status (available packets and remaining capacity) of auxilary ADC probe stream FIFO.
+	 *
+	 * This is a non-blocking and thread-safe function.
 	 *
 	 * @param slotID The slot number of the device
 	 * @param packetsavailable number of packets available for read
@@ -1402,6 +1447,10 @@ namespace Neuropixels {
 		NP_EXPORT void         NP_APIC np_getAPIVersion(int* version_major, int* version_minor);
 		NP_EXPORT size_t       NP_APIC np_getAPIVersionFull(char* buffer, size_t size);
 		NP_EXPORT void         NP_APIC np_getMinimumFtdiDriverVersion(int* version_major, int* version_minor, int* version_build);
+		NP_EXPORT void         NP_APIC np_checkFtdiDriver(ftdi_driver_version_t* required,
+                                       ftdi_driver_version_t* current,
+                                       bool* is_driver_present,
+                                       bool* is_version_ok);
 		NP_EXPORT size_t       NP_APIC np_getLastErrorMessage(char* buffer, size_t buffersize);
 		NP_EXPORT const char*  NP_APIC np_getErrorMessage(NP_ErrorCode code);
 		NP_EXPORT int          NP_APIC np_getDeviceList(struct basestationID* list, int count);

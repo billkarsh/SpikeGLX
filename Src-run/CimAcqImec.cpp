@@ -2810,6 +2810,8 @@ void CimAcqImec::createAcqWorkerThreads()
     const int                   nStrPerThd = 3;
     std::vector<ImAcqStream>    streams;
 
+// Probes, PXI & OneBox
+
     for( int ip = 0, np = p.stream_nIM(); ip < np; ++ip ) {
 
         if( p.stream_nChans( jsIM, ip ) > 384 ) {
@@ -2828,6 +2830,8 @@ void CimAcqImec::createAcqWorkerThreads()
         }
     }
 
+// OneBox ADC streams
+
     for( int ip = 0, np = p.stream_nOB(); ip < np; ++ip ) {
 
         streams.push_back( ImAcqStream( T, p, owner->obQ[ip], jsOB, ip ) );
@@ -2837,6 +2841,8 @@ void CimAcqImec::createAcqWorkerThreads()
             streams.clear();
         }
     }
+
+// Push last stream if needed
 
     if( streams.size() )
         acqThd.push_back( new ImAcqThread( this, acqShr, streams ) );
