@@ -16,7 +16,7 @@
         + [SDR and breakout board](#sdr-and-breakout-board)
         + [ADC connector](#adc-connector)
         + [Voltage levels](#voltage-levels)
-* [Driver Installation](#driver-insallation)
+* [Driver Installation](#driver-installation)
 * [Assign a Slot](#assign-a-slot)
 * [Data Streams, Files, Formats](#data-streams-files-formats)
 * [Sample Rate, Calibration](#sample-rate-calibration)
