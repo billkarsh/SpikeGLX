@@ -7,6 +7,7 @@
 + New audio dialog with click and play feature.
 + Improve sharing of NI analog with external apps.
 + Support NP2021 quad-probe.
++ Support NP1014, NP1033, NP2005, NP2006.
 
 20240620
 --------

@@ -175,8 +175,9 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
             case 1001:  // PRB_1_4_0480_1_C (Metal cap)
             case 1010:  // Sapiens (NHP 10mm SOI 125 with Metal cap)
             case 1011:  // 1.0 NHP short wired (with GND wire and tip sharpened)
-            case 1012:  // 1.0 NHP short biocompatible packaging (with parylene coating)
-            case 1013:  // 1.0 NHP short biocompatible packaging with cap + 1.0 head stage sterilized
+            case 1012:  // 1.0 NHP short biocompatible packaging (parylene coating), cap
+            case 1013:  // 1.0 NHP short biocompatible packaging (parylene coating) sterilized, cap
+            case 1014:  // 1.0 NHP short biocompatible packaging sterilized, cap
                 _ncolhwr    = 2;
                 _ncolvis    = 4;
                 col2vis_ev  = {1,3};
@@ -189,10 +190,9 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _xpitch     = 32;
                 _zpitch     = 20;
                 break;
-            case 1014:  // [[ unassigned ]]
-            case 1015:  // 1.0 NHP short linear
-            case 1016:  // 1.0 NHP short linear biocompatible packaging unsterilized with cap
-            case 1017:  // 1.0 NHP short linear biocompatible packaging sterilized with cap
+            case 1015:  // 1.0 NHP short linear, cap
+            case 1016:  // 1.0 NHP short linear biocompatible packaging unsterilized, cap
+            case 1017:  // 1.0 NHP short linear biocompatible packaging sterilized, cap
                 _ncolhwr    = 2;
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};
@@ -246,7 +246,8 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _xpitch     = 87;
                 _zpitch     = 20;
                 break;
-            case 1032:  // NHP phase 2 (active) 45 mm, SOI115 / 125 linear
+            case 1032:  // NHP phase 2 (active) 45 mm, SOI115 / 125 linear, cap
+            case 1033:  // NHP phase 2 (active) 45 mm, SOI115 / 125 linear sterilized, cap
                 _ncolhwr    = 2;
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};
@@ -368,6 +369,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
             case 2000:  // NP 2.0 SS scrambled el 1280
             case 2003:  // Neuropixels 2.0 single shank probe
             case 2004:  // Neuropixels 2.0 single shank probe with cap
+            case 2005:  // Neuropixels 2.0 single shank NHP short linear probe with cap
                 _ncolhwr    = 2;
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};
@@ -377,6 +379,19 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _tiplength  = 206;
                 _x0_ev      = 27;
                 _x0_od      = 27;
+                _xpitch     = 32;
+                _zpitch     = 15;
+                break;
+            case 2006:  // Neuropixels 2.0 single shank NHP short staggered sterilized, cap
+                _ncolhwr    = 2;
+                _ncolvis    = 4;
+                col2vis_ev  = {1,3};
+                col2vis_od  = {0,2};
+                _shankpitch = 0;
+                _shankwid   = 70;
+                _tiplength  = 206;
+                _x0_ev      = 27;
+                _x0_od      = 11;
                 _xpitch     = 32;
                 _zpitch     = 15;
                 break;
@@ -1104,12 +1119,12 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
             case 1001:  // PRB_1_4_0480_1_C (Metal cap)
             case 1010:  // Sapiens (NHP 10mm SOI 125 with Metal cap)
             case 1011:  // 1.0 NHP short wired (with GND wire and tip sharpened)
-            case 1012:  // 1.0 NHP short biocompatible packaging (with parylene coating)
-            case 1013:  // Neuropixels 1.0 NHP short biocompatible packaging with cap + Neuropixels 1.0 head stage sterilized
-            case 1014:  // [[ unassigned ]]
-            case 1015:  // 1.0 NHP short linear
-            case 1016:  // Neuropixels 1.0 NHP short linear biocompatible packaging unsterilized with cap
-            case 1017:  // Neuropixels 1.0 NHP short linear biocompatible packaging sterilized with cap
+            case 1012:  // 1.0 NHP short biocompatible packaging (parylene coating), cap
+            case 1013:  // 1.0 NHP short biocompatible packaging (parylene coating) sterilized, cap
+            case 1014:  // 1.0 NHP short biocompatible packaging sterilized, cap
+            case 1015:  // 1.0 NHP short linear, cap
+            case 1016:  // 1.0 NHP short linear biocompatible packaging unsterilized, cap
+            case 1017:  // 1.0 NHP short linear biocompatible packaging sterilized, cap
                 type = 0;
                 supp = true;
                 break;
@@ -1121,7 +1136,8 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
                 break;
             case 1030:  // NHP phase 2 (active) 45 mm, SOI90 el 4416
             case 1031:  // NHP phase 2 (active) 45 mm, SOI125 el 4416
-            case 1032:  // NHP phase 2 (active) 45 mm, SOI115 / 125 linear
+            case 1032:  // NHP phase 2 (active) 45 mm, SOI115 / 125 linear, cap
+            case 1033:  // NHP phase 2 (active) 45 mm, SOI115 / 125 linear sterilized, cap
                 type = 1030;
                 supp = true;
                 break;
@@ -1165,6 +1181,8 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
                 break;
             case 2003:  // Neuropixels 2.0 single shank probe
             case 2004:  // Neuropixels 2.0 single shank probe with cap
+            case 2005:  // Neuropixels 2.0 single shank NHP short linear probe with cap
+            case 2006:  // Neuropixels 2.0 single shank NHP short staggered sterilized, cap
                 type = 2003;
                 supp = true;
                 break;
@@ -1219,12 +1237,12 @@ IMROTbl* IMROTbl::alloc( const QString &pn )
             case 1001:  // PRB_1_4_0480_1_C (Metal cap)
             case 1010:  // Sapiens (NHP 10mm SOI 125 with Metal cap)
             case 1011:  // 1.0 NHP short wired (with GND wire and tip sharpened)
-            case 1012:  // 1.0 NHP short biocompatible packaging (with parylene coating)
-            case 1013:  // Neuropixels 1.0 NHP short biocompatible packaging with cap + Neuropixels 1.0 head stage sterilized
-            case 1014:  // [[ unassigned ]]
-            case 1015:  // 1.0 NHP short linear
-            case 1016:  // Neuropixels 1.0 NHP short linear biocompatible packaging unsterilized with cap
-            case 1017:  // Neuropixels 1.0 NHP short linear biocompatible packaging sterilized with cap
+            case 1012:  // 1.0 NHP short biocompatible packaging (parylene coating), cap
+            case 1013:  // 1.0 NHP short biocompatible packaging (parylene coating) sterilized, cap
+            case 1014:  // 1.0 NHP short biocompatible packaging sterilized, cap
+            case 1015:  // 1.0 NHP short linear, cap
+            case 1016:  // 1.0 NHP short linear biocompatible packaging unsterilized, cap
+            case 1017:  // 1.0 NHP short linear biocompatible packaging sterilized, cap
                 return new IMROTbl_T0( pn );
             case 1020:  // NHP phase 2 (active) 25 mm, SOI35 el 2496
             case 1021:  // NHP phase 2 (active) 25 mm, SOI60 el 2496
@@ -1232,7 +1250,8 @@ IMROTbl* IMROTbl::alloc( const QString &pn )
                 return new IMROTbl_T1020( pn );
             case 1030:  // NHP phase 2 (active) 45 mm, SOI90 el 4416
             case 1031:  // NHP phase 2 (active) 45 mm, SOI125 el 4416
-            case 1032:  // NHP phase 2 (active) 45 mm, SOI115 / 125 linear
+            case 1032:  // NHP phase 2 (active) 45 mm, SOI115 / 125 linear, cap
+            case 1033:  // NHP phase 2 (active) 45 mm, SOI115 / 125 linear sterilized, cap
                 return new IMROTbl_T1030( pn );
             case 1100:  // UHD phase 1 el 384
                 return new IMROTbl_T1100( pn );
@@ -1258,6 +1277,8 @@ IMROTbl* IMROTbl::alloc( const QString &pn )
                 return new IMROTbl_T21( pn );
             case 2003:  // Neuropixels 2.0 single shank probe
             case 2004:  // Neuropixels 2.0 single shank probe with cap
+            case 2005:  // Neuropixels 2.0 single shank NHP short linear probe with cap
+            case 2006:  // Neuropixels 2.0 single shank NHP short staggered sterilized, cap
                 return new IMROTbl_T2003( pn );
             case 2010:  // NP 2.0 MS el 1280
                 return new IMROTbl_T24( pn );
