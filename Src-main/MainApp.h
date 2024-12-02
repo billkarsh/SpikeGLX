@@ -229,9 +229,11 @@ public slots:
     void runCalFinished();
     void runUpdateSvyTimer();
     void runSvyFinished();
+#ifdef DO_SNAPSHOTS
     void runSnapBefore();
     void runSnapStarted();
     void runSnapStopping();
+#endif
 
 // -------
 // Private
