@@ -1685,6 +1685,46 @@ void MainApp::runSvyFinished()
     svyPrbRun = 0;
 }
 
+
+#ifdef DO_SNAPSHOTS
+void MainApp::runSnapBefore()
+{
+    QDir    dir("C://SGLTEST");
+    dir.removeRecursively();
+    dir.mkdir("C://SGLTEST");
+
+    QStringList cmd;
+    cmd << "tasklist /svc >> C://SGLTEST/before_run.out";
+    cmd << "\n";
+    cmd << "get-service >> C://SGLTEST/before_run.out";
+    QProcess::execute( "powershell", cmd );
+}
+
+
+void MainApp::runSnapStarted()
+{
+    QStringList cmd;
+    cmd << "tasklist /svc >> C://SGLTEST/started_run.out";
+    cmd << "\n";
+    cmd << "get-service >> C://SGLTEST/started_run.out";
+    QProcess::execute( "powershell", cmd );
+}
+
+
+void MainApp::runSnapStopping()
+{
+    QFile   f("C://SGLTEST/stopping_run.out");
+    if( f.exists() )
+        return;
+
+    QStringList cmd;
+    cmd << "tasklist /svc >> C://SGLTEST/stopping_run.out";
+    cmd << "\n";
+    cmd << "get-service >> C://SGLTEST/stopping_run.out";
+    QProcess::execute( "powershell", cmd );
+}
+#endif
+
 /* ---------------------------------------------------------------- */
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -1717,10 +1757,18 @@ bool MainApp::runCmdStart( QString *err )
     if( showDlg )
         err = &locErr;
 
+#ifdef DO_SNAPSHOTS
+    QTimer::singleShot( 0, this, SLOT(runSnapBefore()) );
+#endif
+
     ok = run->startRun( *err );
 
     if( !ok && showDlg )
         QMessageBox::critical( 0, "Run Startup Errors", locErr );
+
+#ifdef DO_SNAPSHOTS
+    QTimer::singleShot( 10, this, SLOT(runSnapStarted()) );
+#endif
 
     return ok;
 }

@@ -17,6 +17,10 @@
 #include <QAction>
 #include <QMessageBox>
 
+#ifdef DO_SNAPSHOTS
+#include <QTimer>
+#endif
+
 
 
 
@@ -671,6 +675,10 @@ bool Run::startRun( QString &err )
 
 void Run::stopRun()
 {
+#ifdef DO_SNAPSHOTS
+    QTimer::singleShot( 0, mainApp(), SLOT(runSnapStopping()) );
+#endif
+
     aoStopDev();
 
     QMutexLocker    ml( &runMtx );

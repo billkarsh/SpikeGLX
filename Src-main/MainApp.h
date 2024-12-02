@@ -229,6 +229,9 @@ public slots:
     void runCalFinished();
     void runUpdateSvyTimer();
     void runSvyFinished();
+    void runSnapBefore();
+    void runSnapStarted();
+    void runSnapStopping();
 
 // -------
 // Private

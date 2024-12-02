@@ -3,6 +3,9 @@
 # Manually edited since then! :)
 ######################################################################
 
+# Diagnostics
+#DEFINES += DO_SNAPSHOTS
+
 # Select real or simulated {IM,NI}:
 #DEFINES += HAVE_NXT
 DEFINES += HAVE_IMEC
