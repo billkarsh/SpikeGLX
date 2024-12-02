@@ -80,7 +80,7 @@ Latest release highlights:
 >Important: Please read the `README` file for instructions regarding imec
 firmware versions.
 
-* [Release 20240620-phase30](App/Release_v20240620-phase30.zip)...[Readme](Readme/Readme_v20240620-phase30.txt) : OneBox, Quad-probes, imec v3.70.2
+* [Release 20241001-phase30](App/Release_v20241001-phase30.zip)...[Readme](Readme/Readme_v20241001-phase30.txt) : Click and play, new probes, imec v3.70.3
 
 **Xilinx Kintex versions not covered by 3.0**:
 
@@ -93,9 +93,9 @@ versions there as long as you run one at a time:
 
 ```
 SpikeGLX\
-    Release_v20240620-phase30.zip
+    Release_v20241001-phase30.zip
     Release_v20200520-phase3B2.zip
-    Release_v20240620-phase30\
+    Release_v20241001-phase30\
     Release_v20200520-phase3B2\
     Drivers\
         Enclustra_Windows_10&11\

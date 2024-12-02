@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+December 2, 2024
+
+* SpikeGLX 20241001-phase30 (Click and play, new probes, imec v3.70.3).
+
 December 1, 2024
 
 * CatGT   4.5 (Support probe NP1014, NP1033, NP2005, NP2006, NP2021).
