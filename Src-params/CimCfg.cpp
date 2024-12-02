@@ -123,6 +123,7 @@ void CimCfg::ImProbeTable::init()
     iobx2dat.clear();
     slotsUsed.clear();
     slot2zIdx.clear();
+    slot2type.clear();
 
     api.clear();
     slot2Vers.clear();
@@ -337,6 +338,7 @@ bool CimCfg::ImProbeTable::scanCfgSlots( QVector<CfgSlot> &vCS, QString &msg ) c
 // Indices into table
 
     QMap<int,int>   slot2CS, ID2CS;
+    bool            usbInTbl = false;
 
     for( int i = 0, n = vCS.size(); i < n; ++i ) {
 
@@ -352,6 +354,9 @@ bool CimCfg::ImProbeTable::scanCfgSlots( QVector<CfgSlot> &vCS, QString &msg ) c
 
         if( CS.ID )
             ID2CS[CS.ID] = i;
+
+        if( CS.slot >= imSlotUSBMin && CS.slot < imSlotUSBLim )
+            usbInTbl = true;
     }
 
 #ifdef HAVE_IMEC
@@ -384,6 +389,9 @@ bool CimCfg::ImProbeTable::scanCfgSlots( QVector<CfgSlot> &vCS, QString &msg ) c
 
 // Detect OneBoxes
 
+    QString ftdi;
+    ftdiCheck( ftdi, usbInTbl );
+
     nBS = np_getDeviceList( BS, imSlotPhyLim );
 
     for( int ibs = 0; ibs < nBS; ++ibs ) {
@@ -406,7 +414,7 @@ bool CimCfg::ImProbeTable::scanCfgSlots( QVector<CfgSlot> &vCS, QString &msg ) c
 
     std::sort( vCS.begin(), vCS.end() );
 
-    msg = "Bus scan OK";
+    msg = (ftdi.isEmpty() ? "Bus scan OK" : ftdi);
     return true;
 }
 
@@ -513,6 +521,17 @@ bool CimCfg::ImProbeTable::anySlotPXIType() const
 {
     foreach( int slot, slotsUsed ) {
         if( isSlotPXIType( slot ) )
+            return true;
+    }
+
+    return false;
+}
+
+
+bool CimCfg::ImProbeTable::anySlotUSBType() const
+{
+    foreach( int slot, slotsUsed ) {
+        if( slot >= imSlotUSBMin && slot < imSlotUSBLim )
             return true;
     }
 
@@ -1745,6 +1764,15 @@ guiBreathe();
     for( int ip = 0, np = T.nLogOneBox(); ip < np; ++ip )
         T.simprb.addHwrSlot( T.get_iOneBox( ip ).slot );
 
+// check ftdi if using OneBox
+    if( T.anySlotUSBType() ) {
+        QString ftdi;
+        if( !ftdiCheck( ftdi, true ) ) {
+            slVers.append( ftdi );
+            return false;
+        }
+    }
+
     if( !T.mapObxSlots( slVers ) )
         return false;
 #if DBG
@@ -2666,6 +2694,36 @@ bool CimCfg::testFixCalPath( quint64 sn )
     }
 
     return ok;
+}
+
+
+bool CimCfg::ftdiCheck(QString &msg, bool usbInTbl )
+{
+#ifdef HAVE_IMEC
+    ftdi_driver_version_t   req, cur;
+    bool                    isDrv, okVer;
+    np_checkFtdiDriver( &req, &cur, &isDrv, &okVer );
+
+    if( !isDrv ) {
+        if( usbInTbl )
+            msg = "Can't find FTDI driver: Check OneBox power.";
+        else {
+            msg =
+            QString("To use OneBox: power on, install FTDI driver %1.%2.%3")
+            .arg( req.vmajor ).arg( req.vminor ).arg( req.vbuild );
+        }
+        return false;
+    }
+    else if( !okVer ) {
+        msg =
+        QString("Update OneBox FTDI driver version from %1.%2.%3 to %4.%5.%6.")
+        .arg( cur.vmajor ).arg( cur.vminor ).arg( cur.vbuild )
+        .arg( req.vmajor ).arg( req.vminor ).arg( req.vbuild );
+        return false;
+    }
+#endif
+
+    return true;
 }
 
 

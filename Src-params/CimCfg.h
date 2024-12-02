@@ -230,6 +230,7 @@ public:
             {return slot2type[slot];}
 
         bool anySlotPXIType() const;
+        bool anySlotUSBType() const;
 
         bool isSlotPXIType( int slot ) const;
         bool isSlotUSBType( int slot ) const;
@@ -518,6 +519,7 @@ public:
         ImProbeDat      &P );
     static void detect_OneBoxes( ImProbeTable &T );
     static bool testFixCalPath( quint64 sn );
+    static bool ftdiCheck( QString &msg, bool usbInTbl );
     static void forceProbeData(
         int             slot,
         int             port,
