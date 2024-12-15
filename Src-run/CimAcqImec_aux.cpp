@@ -114,7 +114,7 @@ bool CimAcqImec::_aux_initObxSlot( const CimCfg::ImProbeTable &T, int slot )
         return false;
     }
 
-    for( int ic = 0; ic <= 11; ++ic ) {
+    for( int ic = 0; ic < imOBX_NCHN; ++ic ) {
 
         err = np_ADC_setComparatorThreshold( slot, ic, 0.1 * v, 0.1 * v );
 

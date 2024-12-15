@@ -160,16 +160,22 @@ once data items get all the way to the left end they are discarded
 to make room for new data entering on the right. So data on the right
 are fresh/new and left-hand data are oldest.
 
-This metric describes where the recording system is getting its samples,
-as a percentage of the distance along the stream (the belt) from left
-to right. High values mean we are pulling the latest samples, which we
-should be able to do unless the system is bogging down. If the workers
-responsible for getting data are running slow and falling behind then
-their target samples will have travelled some distance to the left before
-being picked up for recording.
+This metric describes where the trigger (file writing) worker is getting
+its samples, as a percentage of the distance along the stream (the belt)
+from left to right. High values mean we are pulling the latest samples,
+which we should be able to do unless the system is bogging down. If the
+workers responsible for getting data are running slow and falling behind
+then their target samples will have travelled some distance to the left
+before being picked up for recording.
 
 SpikeGLX will stop the run if any recording streams are so late that
 their data have dropped off the left-hand side.
+
+> Note: If the trigger client persistently reports `101%` that tells us
+this client is running alright but the history queue isn't getting fresh
+samples at an adequate pace. Either the acquisition worker thread that
+moves data from the hardware buffer to this history queue is running too
+slowly, or the flow of data into the hardware buffer may have stopped.
 
 --------
 

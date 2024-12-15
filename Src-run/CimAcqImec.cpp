@@ -1620,7 +1620,6 @@ S.tStampLastFetch = H[nT-1].Timestamp;
 
         for( int ic = 0; ic < S.nXA; ++ic )
             *dst++ = src[S.vXA[ic]];
-//            *dst++ = src[11 - S.vXA[ic]];
 
 //------------------------------------------------------------------
 // Experiment to visualize timestamps as sawtooth in channel 1.
@@ -1648,7 +1647,6 @@ dst[1] = count[S.ip] % 8000 - 4000;
 
             for( int iline = 0; iline < 12; ++iline )
                 XD += src[12 + iline] << iline;
-//                XD += src[23 - iline] << iline;
 
             *dst++ = XD;
         }
