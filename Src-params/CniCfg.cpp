@@ -1564,12 +1564,12 @@ bool CniCfg::isDigitalDev( const QString & )
 // Return err string or null if success.
 //
 // Param (lines) can be a comma separated list of legal lines.
+// Only listed ports and lines are affected.
 //
 #ifdef HAVE_NIDAQmx
-QString CniCfg::setDO( const QString &lines, bool onoff )
+QString CniCfg::setDO( const QString &lines, quint32 bits )
 {
     TaskHandle  taskHandle  = 0;
-    uInt32      w_data      = (onoff ? -1 : 0);
 
     clearDmxErrors();
 
@@ -1583,7 +1583,7 @@ QString CniCfg::setDO( const QString &lines, bool onoff )
                     taskHandle,
                     true,           // autostart
                     2.5,            // timeout secs
-                    w_data,
+                    bits,
                     NULL ) );
 
 Error_Out:
@@ -1606,10 +1606,10 @@ Error_Out:
     return QString();
 }
 #else
-QString CniCfg::setDO( const QString &lines, bool onoff )
+QString CniCfg::setDO( const QString &lines, quint32 bits )
 {
     Q_UNUSED( lines )
-    Q_UNUSED( onoff )
+    Q_UNUSED( bits )
     return QString();
 }
 #endif
@@ -1627,7 +1627,7 @@ double CniCfg::sampleFreqMode(
 
     double  freq = 0;
 
-    if( !setDO( line, true ).isEmpty() )
+    if( !setDO( line, uint(-1) ).isEmpty() )
         return 0.0;
 
 // Wait turn on
@@ -1654,7 +1654,7 @@ double CniCfg::sampleFreqMode(
 
 // Turn off
 
-    setDO( line, false );
+    setDO( line, 0 );
 
 // Return most probable
 
@@ -1691,7 +1691,7 @@ double CniCfg::sampleFreqAve(
 
     double  freq = 0;
 
-    if( !setDO( line, true ).isEmpty() )
+    if( !setDO( line, uint(-1) ).isEmpty() )
         return 0.0;
 
 // Wait turn on
@@ -1714,7 +1714,7 @@ double CniCfg::sampleFreqAve(
 
 // Turn off
 
-    setDO( line, false );
+    setDO( line, 0 );
 
 // Return average
 

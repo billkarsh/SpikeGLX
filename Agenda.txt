@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20241215
+--------
++ New remote set_NI_DO patterned digital output.
+
 20241001
 --------
 + API 3.70.3.

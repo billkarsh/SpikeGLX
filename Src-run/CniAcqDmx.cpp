@@ -1137,7 +1137,7 @@ void CniAcqDmx::destroyTasks()
 
 void CniAcqDmx::setDO( bool onoff )
 {
-    QString err = CniCfg::setDO( p.ni.startLine, onoff );
+    QString err = CniCfg::setDO( p.ni.startLine, (onoff ? uint(-1) : 0) );
 
     if( !err.isEmpty() )
         emit owner->daqError( err );

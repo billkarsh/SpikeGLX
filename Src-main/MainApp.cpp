@@ -1425,9 +1425,9 @@ void MainApp::remoteStopsRun()
 }
 
 
-void MainApp::remoteSetsDigitalOut( const QString &chan, bool onoff )
+void MainApp::remoteSetsDigitalOut( const QString &lines, quint32 bits )
 {
-    CniCfg::setDO( chan, onoff );
+    CniCfg::setDO( lines, bits );
 }
 
 

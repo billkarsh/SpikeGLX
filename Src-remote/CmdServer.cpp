@@ -1308,50 +1308,26 @@ void CmdWorker::setDataDir( QStringList toks )
 
 
 // Expected tok params:
-// 0) Boolean 0/1
-// 1) channel string
+// 0) channel string
+// 1) uint32 bits
 //
-void CmdWorker::setDigOut( const QStringList &toks )
+void CmdWorker::setNIDO( const QStringList &toks )
 {
     if( toks.size() >= 2 ) {
 
-        QString devRem;
-        int     lineRem;
-        errMsg = CniCfg::parseDIStr( devRem, lineRem, toks.at( 1 ) );
-
-        if( !errMsg.isEmpty() ) {
-            errMsg = "SETDIGOUT: " + errMsg;
-            return;
-        }
-
-        MainApp *app = okAppValidated( "SETDIGOUT" );
+        MainApp *app = okAppValidated( "SETNIDO" );
 
         if( !app )
             return;
 
-        const DAQ::Params  &p = app->cfgCtl()->acceptedParams;
-
-        if( p.ni.startEnable ) {
-
-            QString devStart;
-            int     lineStart;
-            CniCfg::parseDIStr( devStart, lineStart, p.ni.startLine );
-
-            if( !devStart.compare( devRem, Qt::CaseInsensitive ) ) {
-                errMsg =
-                "SETDIGOUT: Cannot use start line for digital output.";
-                return;
-            }
-        }
-
         QMetaObject::invokeMethod(
             app, "remoteSetsDigitalOut",
             Qt::QueuedConnection,
-            Q_ARG(QString, toks.at( 1 )),
-            Q_ARG(bool, toks.at( 0 ).toInt()) );
+            Q_ARG(QString, toks.at( 0 )),
+            Q_ARG(quint32, toks.at( 1 ).toUInt()) );
     }
     else
-        errMsg = "SETDIGOUT: Requires at least 2 params.";
+        errMsg = "SETNIDO: Requires at least 2 params.";
 }
 
 
@@ -2014,8 +1990,8 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
         setAudioParams( toks.front().trimmed() );
     else if( cmd == "SETDATADIR" )
         setDataDir( toks );
-    else if( cmd == "SETDIGOUT" )
-        setDigOut( toks );
+    else if( cmd == "SETNIDO" )
+        setNIDO( toks );
     else if( cmd == "SETMETADATA" )
         setMetaData();
     else if( cmd == "SETMULTIDRIVEENABLE" )

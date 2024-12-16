@@ -118,7 +118,7 @@ private:
     void setAudioEnable( const QStringList &toks );
     void setAudioParams( const QString &group );
     void setDataDir( QStringList toks );
-    void setDigOut( const QStringList &toks );
+    void setNIDO( const QStringList &toks );
     void setMetaData();
     void setMultiDriveEnable( const QStringList &toks );
     void setNextFileName( const QString &name );

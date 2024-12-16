@@ -217,7 +217,7 @@ public:
     static QString getProductName( const QString &dev );
     static bool isDigitalDev( const QString &dev );
 
-    static QString setDO( const QString &lines, bool onoff );
+    static QString setDO( const QString &lines, quint32 bits );
 
     static double sampleFreqMode(
         const QString   &dev,
