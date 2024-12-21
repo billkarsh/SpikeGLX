@@ -31,7 +31,7 @@ SVGrafsM_Im::SVGrafsM_Im(
     int                 jpanel )
     :   SVGrafsM(gw, p, jsIM, ip, jpanel)
 {
-    shankCtl = new SVShankCtl_Im( p, ip, jpanel, gw );
+    shankCtl = new SVShankCtl_Im( p, ip, jpanel, this );
     shankCtl->init();
     ConnectUI( shankCtl, SIGNAL(runSaveChansDlg(QString)), this, SLOT(editSaved(QString)) );
     ConnectUI( shankCtl, SIGNAL(selChanged(int,bool)), this, SLOT(externSelectChan(int,bool)) );
