@@ -270,16 +270,11 @@ Windows may be using your computer's built-in graphics instead of your
 higher performance graphics card. Follow these steps:
 
 1. Type "Graphics settings" into the search box of the Windows Taskbar.
-
-2. In the Graphics settings control panel, find the section called "Choose
-an app to set preference," select `Desktop app` and click the `Browse`
-button. Navigate to your copy of SpikeGLX.exe. SpikeGLX.exe will be added
-to the list below the Browse button.
-
-3. Click on SpikeGLX.exe and click `Options`. Select the `High performance`
-option and click `Save`.
-
-4. Restart SpikeGLX.
+2. Select `Desktop app` and below that click `Browse`.
+3. Navigate to and select SpikeGLX.exe.
+4. SpikeGLX now appears below the `Browse` button; click on it.
+5. Click `Options`; select the `High performance` option and `Save`.
+6. Restart SpikeGLX.
 
 --------
 

@@ -90,7 +90,7 @@ RAM or CPU, but we don't think this will be necessary unless you are running
 
 SpikeGLX maintains a database of probe settings in the _Calibration folder.
 The settings are keyed to the probe's serial number. There is one entry per
-probe, hence, the software remembers last thing you did with that probe.
+probe, hence, the software remembers the last thing you did with that probe.
 The entries are each time-stamped. Individual entries are discarded after
 three years of disuse.
 

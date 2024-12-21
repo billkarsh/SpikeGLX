@@ -1,6 +1,8 @@
 # SpikeGLX OneBox Quickstart
 
-*>> Updated: September 27, 2024 <<*
+*>> Updated: December 19, 2024 <<*
+
+*>> AO (DAC) enabled in SpikeGLX <<*
 
 **Topics**:
 
@@ -30,8 +32,10 @@
 Think of the OneBox as three **separate** function units in one tidy package:
 
 1. **Neural unit**: The 2 headstage ports work just like PXI-based ports.
-2. **ADC unit**: There are 12 analog input (ADC) channels for aux signals.
-3. **DAC unit**: There are 12 analog output (DAC) channels. *Not implemented yet in SpikeGLX*.
+2. **ADC unit**: There are up to 12 analog input (ADC) channels for aux signals.
+3. **DAC unit**: There are up to 12 analog output (DAC) channels.
+
+>*There are 12 I/O channels in total; each configurable as an input or output.*
 
 ## Setup
 
@@ -43,7 +47,7 @@ It's easy to set up; basically three steps:
 
 There are additional details below, and in the Imec technical document:
 
-[*Imec document not yet public*](#overview)
+[*OneBox Technical User Manual.*](https://www.neuropixels.org/_files/ugd/328966_d832528710f14d6e85938d5de06e83cc.pdf)
 
 --------
 
@@ -128,9 +132,9 @@ you wish in the SY channels of each of the recorded data streams.
 
 - OneBox status
 - Neural ports (with status lights)
-- DAC connector *Not yet implemented in SpileGLX*
+- DAC connector: access to analog output channel-0.
 - SDR breakout connector
-- ADC connector: access to analog output channel-0.
+- ADC connector: access to analog input channel-0.
 
 ### Status lights
 
@@ -155,7 +159,8 @@ if you don't want to use the breakout board.
 
 The accessory breakout board provides access to the 12 analog input/output
 channels. Each channel can individually be configured for input (ADC) or
-output (DAC). Currently, in SpikeGLX, all channels are set for input.
+output (DAC). In SpikeGLX OneBoxes are configured on the `OBX Setup` tab
+of the main `Configuration` dialog.
 
 Connect it using the provided SDR (shrunk delta ribbon) cable. Note that
 one end of the cable is labeled "Camera Side" but that does not matter in
@@ -186,6 +191,12 @@ if you don't want to use the breakout board.
 * ADC channels are accessed via the breakout board or the front panel ADC SMA.
 * ADC voltage is selectable using the Obx tab in SpikeGLX: +/- {2.5, 5, 10} V.
 
+**DAC outputs**
+
+* DAC channels are accessed via the breakout board or the front panel DAC SMA.
+* DAC voltages are settable during a run using the SDK remote interface: range +/- 5V.
+* DAC voltages are initialized to zero when a run starts.
+
 --------
 
 # Driver Installation
@@ -213,6 +224,11 @@ If you see an entry like this,
 then check the version of the driver: Right-click >> Properties >> Driver tab.
 If the version is 1.3.0.10, you're done. If the version is earlier, you must
 update it.
+
+>*Update: SpikeGLX version 20241001 and later will automatically check the
+driver version and if there is an issue, will inform you what version you
+have and what version you need. This is simpler than consulting the Device
+Manager.*
 
 ## Getting the New Driver
 
@@ -276,7 +292,7 @@ In this example there are three added rows:
 * We asked for 1 dock/port, so there are two new rows for probes:
 (slot,port,dock) = (21,1,1) and (21,2,1).
 
-* Row (21,ADC) lets you enable this OneBox's ADC recording stream.
+* Row (21,XIO) lets you configure this OneBox's ADC/DAC options.
 
 ![](ObxCfgPrbTbl.png)
 
@@ -351,7 +367,8 @@ clock for probes is in the headstage. All headstages run asynchronously,
 so you will need to align/sync data from different probes as always.
 The nominal sample rate for a headstage is ~30 KHz.
 
-The ADC sample clock is in the OneBox. It runs at ~30303 Hz (non-adjustable).
+The ADC input sample clock is in the OneBox. It runs at ~30303 Hz
+(non-adjustable).
 
 ## Calibration
 
@@ -388,14 +405,22 @@ To run a probe with a OneBox:
 
 Detailed instructions for the `IM Setup` tab are [here](IMTab_Help.html).
 
-## ADC
+## XIO = ADC and/or DAC
 
-To record an ADC input stream from a OneBox:
+To record an ADC input stream from a OneBox, or to enable its DAC output
+features:
 
-1. Connect your input signals to a OneBox's breakout board.
-2. Check the `enable` checkbox for that (slot,ADC) in the `Probes` table.
+1. Connect your input and output signals to a OneBox breakout board.
+2. Check the `enable` checkbox for that (slot,XIO) in the `Probes` table.
 3. Click `Detect`.
-4. Visit the `Obx Setup` tab to set addition ADC recording parameters.
+4. Visit the `Obx Setup` tab to set ADC and DAC parameters.
+
+Each of the 12 channels can only be an input or an output.
+
+>*It is flagged as an error if the same channel is in the ADC and the DAC list.*
+
+>**CAUTION: You might damage the OneBox or other equipment if you
+cross-connect inputs to outputs.**
 
 Detailed instructions for the `Obx Setup` tab are [here](OBXTab_Help.html).
 
@@ -405,6 +430,8 @@ Detailed instructions for the `Obx Setup` tab are [here](OBXTab_Help.html).
 > - Enable Sync on the `Sync` tab
 > - Set your gate and trigger modes
 > - Name the run on the `Save` tab
+
+> Set DAC voltages during a run using the SDK remote interface functions.
 
 --------
 

@@ -147,7 +147,7 @@ Whether nidq stream was enabled for this run {1=yes, 0=no}.
 typeObEnabled=1
 ```
 
-Count of OneBox analog/digital streams enabled for this run.
+Count of OneBox analog/digital recording streams enabled for this run.
 
 ```
 typeThis=nidq
@@ -647,10 +647,10 @@ imColsPerShank=2
 Number of physical electrode columns on each shank row.
 
 ```
-imDatApi=3.31
+imDatApi=3.31.0
 ```
 
-This is the Imec API version number: major.minor.
+This is the Imec API version number: major.minor.build.
 
 ```
 imDatBs_fw=2.0.137
@@ -680,7 +680,7 @@ This is the BSC part number.
 imDatBsc_sn=175
 ```
 
-This is the PXI BSC serial number or OneBox ID number.
+This is the PXI BSC serial number or OneBox physical ID number.
 
 ```
 imDatFx_hw=1.7
@@ -1139,10 +1139,10 @@ This is the best estimator of the sample rate. It will be the calibrated
 rate if calibration was done.
 
 ```
-imDatApi=3.31
+imDatApi=3.31.0
 ```
 
-This is the Imec API version number: major.minor.
+This is the Imec API version number: major.minor.build.
 
 ```
 imDatBs_fw=2.0.137
@@ -1172,7 +1172,7 @@ This is the BSC part number.
 imDatBsc_sn=175
 ```
 
-This is the PXI BSC serial number or OneBox ID number.
+This is the PXI BSC serial number or OneBox physical ID number.
 
 ```
 imDatObx_slot=25

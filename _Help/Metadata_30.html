@@ -66,7 +66,7 @@ snsSaveChanSubset=all</code></pre>
 <pre><code>typeNiEnabled=1</code></pre>
 <p>Whether nidq stream was enabled for this run {1=yes, 0=no}.</p>
 <pre><code>typeObEnabled=1</code></pre>
-<p>Count of OneBox analog/digital streams enabled for this run.</p>
+<p>Count of OneBox analog/digital recording streams enabled for this run.</p>
 <pre><code>typeThis=nidq</code></pre>
 <p>Which stream type is described in this file {nidq, imec, obx}.</p>
 <pre><code>userNotes=Line1\nLine2...</code></pre>
@@ -251,8 +251,8 @@ snsSaveChanSubset=all</code></pre>
 <p>The LF-band gain applied to channel 0. If you used the graphical imro editor to create your imro file then all channels will have this LF gain.</p>
 <pre><code>imColsPerShank=2</code></pre>
 <p>Number of physical electrode columns on each shank row.</p>
-<pre><code>imDatApi=3.31</code></pre>
-<p>This is the Imec API version number: major.minor.</p>
+<pre><code>imDatApi=3.31.0</code></pre>
+<p>This is the Imec API version number: major.minor.build.</p>
 <pre><code>imDatBs_fw=2.0.137</code></pre>
 <p>This is the BS firmware version number: major.minor.build.</p>
 <pre><code>imDatBsc_fw=3.2.176</code></pre>
@@ -262,7 +262,7 @@ snsSaveChanSubset=all</code></pre>
 <pre><code>imDatBsc_pn=NP2_QBSC_00</code></pre>
 <p>This is the BSC part number.</p>
 <pre><code>imDatBsc_sn=175</code></pre>
-<p>This is the PXI BSC serial number or OneBox ID number.</p>
+<p>This is the PXI BSC serial number or OneBox physical ID number.</p>
 <pre><code>imDatFx_hw=1.7</code></pre>
 <p>This is the Flex hardware version number: major.minor.</p>
 <pre><code>imDatFx_pn=NPM_FLEX_0</code></pre>
@@ -457,8 +457,8 @@ bit 7: SYNC error (unrelated to sync waveform)</code></pre>
 <p>Maximum amplitude integer encoded in the 16-bit analog channels. Really, in this example [-32768..32767]. The reason for this apparent asymmetry is that, by convention, zero is grouped with the positive values. The stream is 16-bit so can encode 2^16 = 65536 values. There are 32768 negative values: [-32768..-1] and 32768 positives: [0..32767]. This convention (zero is a positive number) applies in all signed computer arithmetic.</p>
 <pre><code>obSampRate=30000</code></pre>
 <p>This is the best estimator of the sample rate. It will be the calibrated rate if calibration was done.</p>
-<pre><code>imDatApi=3.31</code></pre>
-<p>This is the Imec API version number: major.minor.</p>
+<pre><code>imDatApi=3.31.0</code></pre>
+<p>This is the Imec API version number: major.minor.build.</p>
 <pre><code>imDatBs_fw=2.0.137</code></pre>
 <p>This is the BS firmware version number: major.minor.build.</p>
 <pre><code>imDatBsc_fw=3.2.176</code></pre>
@@ -468,7 +468,7 @@ bit 7: SYNC error (unrelated to sync waveform)</code></pre>
 <pre><code>imDatBsc_pn=NP2_QBSC_00</code></pre>
 <p>This is the BSC part number.</p>
 <pre><code>imDatBsc_sn=175</code></pre>
-<p>This is the PXI BSC serial number or OneBox ID number.</p>
+<p>This is the PXI BSC serial number or OneBox physical ID number.</p>
 <pre><code>imDatObx_slot=25</code></pre>
 <p>This is the obx slot number, range [20..31].</p>
 <pre><code>imTrgRising=true</code></pre>

@@ -67,10 +67,10 @@ can attach the five-meter cables from your probe headstages:
 >All ports can be used for NP 1.0 or NP 2.0 components.
 
 >Each OneBox can also record 12 non-neural analog and digital channels, and
->these are treated as their own data streams. OneBox streams each:
+>these compose an "Obx" data stream. OneBox streams each:
 >
->* Are listed/selected in the `probe table` with port = `ADC`.
->* Are configured on their own `Obx Tab`.
+>* Are listed/selected in the `probe table` with port = `XIO`.
+>* Are configured on their own `Obx Setup` tab.
 >* Get their own file, e.g., **run_g0_t0.obx3.obx.bin/meta**.
 
 ### Docks

@@ -175,6 +175,7 @@
 <p>By the way, the <code>_Calibration</code> subfolder also contains supplementary SpikeGLX data:</p>
 <ul>
 <li>The results of imec headstage sample rate calibration.</li>
+<li>The results of imec OneBox sample rate calibration.</li>
 <li>The results of NI device sample rate calibration.</li>
 <li>Your settings choices for each probe.</li>
 <li>Your settings choices for each OneBox.</li>
@@ -212,6 +213,15 @@
 <p>The mod operation is just the remainder when dividing j by N. For example, 7 mod 3 = 1.</p>
 </blockquote>
 <h4 id="display-settings">Display Settings</h4>
+<p>Make sure SpikeGLX is taking advantage of your add-on graphics card instead of the built-in graphics. Doing this will boost acquisition performance and improve the aesthetics:</p>
+<ol style="list-style-type: decimal">
+<li>Type &quot;Graphics settings&quot; into the search box of the Windows Taskbar.</li>
+<li>Select <code>Desktop app</code> and below that click <code>Browse</code>.</li>
+<li>Navigate to and select SpikeGLX.exe.</li>
+<li>SpikeGLX now appears below the <code>Browse</code> button; click on it.</li>
+<li>Click <code>Options</code>; select the <code>High performance</code> option and <code>Save</code>.</li>
+<li>Restart SpikeGLX.</li>
+</ol>
 <p>Depending upon your monitor size and resolution, you might find that the text in menus, buttons and lists is either fuzzy or too small to read. If that's the case, try altering the following Windows setting:</p>
 <ol style="list-style-type: decimal">
 <li>Right-click on your Windows desktop and select 'Display settings.'</li>
@@ -584,7 +594,7 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <p><strong>Hardware -&gt; Memory -&gt; Visualization -&gt; Files</strong></p>
 <pre><code>   Devices tab: Select which streams/hardware to acquire.
         IM tab: Configure imec neural probe streams.
-       Obx tab: Configure imec OneBox (ADC) streams.
+       Obx tab: Configure imec OneBox ADC streams, and DAC output.
         NI tab: Configure NI ADC streams.
       Sync tab: Cross-connect streams for precision alignment.
      Gates tab: Together with...

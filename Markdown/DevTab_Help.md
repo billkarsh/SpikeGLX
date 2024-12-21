@@ -76,7 +76,7 @@ want to include in this run.
 The message box shows how many streams are checked for each slot.
 
 * Probes are identified by their **(slot,port,dock)**.
-* OneBoxes are identified by **(slot,"ADC")**.
+* OneBoxes are identified by **(slot,"XIO")**.
 
 ### Enable Probe Shortcuts
 
@@ -132,6 +132,8 @@ If all is well, the final text is "**OK**."
 
 ### Logical Index Numbers
 
+These numbers are input recording stream identifiers.
+
 After you specify which physical slots, ports and docks are enabled and
 click `Detect`, the table will assign each probe a `logical ID` number
 in a simple manner, slot by slot, then port by port, then dock by dock.
@@ -140,17 +142,25 @@ For example, if you enabled (slot,port,dock): (2,2,2), (2,3,1), (4,1,1),
 (4,1,2), they would get logical probe #s: (2,2,2)=0, (2,3,1)=1, (4,1,1)=2,
 (4,1,2)=3.
 
-Likewise, slot by slot, the table assigns each OneBox a zero-based
-logical ID number, independently of the probes.
+Likewise, slot by slot, the table assigns each OneBox (that is being used
+for ADC input) a zero-based logical ID number, independently of the probes.
+Said another way, if a OneBox has been given any combination of analog or
+digital input channels {XA, XD} it will get a logical ID (input stream index).
+If you only configured the output AO (DAC) channels, that OneBox will not
+get a logical ID because it is not an input recorder.
 
->**SpikeGLX uses the zero-based logical ID's of probes and OneBoxes
-EVERYWHERE:**
+>Note: *In the SDK remote interface for talking to OneBoxes, functions
+relating to recording operations take (js,ip) indices, where js is the
+stream-type (js=1 for OneBox) and ip is the logical ID. Functions relating
+to the output (DAC) features refer to a OneBox by its slot number.
+
+>**SpikeGLX uses the zero-based logical stream ID's of probes and OneBoxes
+in numerous places:**
 >
->* Lines of tables.
 >* Setting up Sync.
 >* Setting up triggers.
 >* Names of files, e.g., "imec3", "obx2".
->* Remote {MATLAB,C++} API commands to address active streams.
+>* Remote {MATLAB,C++} API commands to address recording streams.
 
 --------
 

@@ -13,7 +13,7 @@ Use this tab to configure parameters for each OneBox, individually.
 
 SpikeGLX maintains a database of OneBox settings in the _Calibration folder.
 The settings are keyed to the OneBox's serial number. There is one entry per
-device, hence, the software remembers last thing you did with that OneBox.
+device, hence, the software remembers the last thing you did with that OneBox.
 The entries are each time-stamped. Individual entries are discarded after
 three years of disuse.
 
@@ -45,9 +45,10 @@ database for future runs.
 
 For each OneBox, you can edit its:
 
-* XA list of acquired analog (AI) channels.
+* XA list of input analog (AI) channels.
 * XD whether to acquire digital lines.
 * AI voltage range: +/- {2, 5, 10} volts.
+* AO list of output analog (DAC) channels.
 * Channel map.
 * Save channels.
 
@@ -59,8 +60,8 @@ More details below.
 
 Not editable.
 
-This is the OneBox's measured sample rate as determined by the
-calibration procedures on the `Sync` tab (See User Manual).
+This is the OneBox's measured input sample rate as determined by
+the calibration procedures on the `Sync` tab (See User Manual).
 
 --------
 
@@ -71,9 +72,7 @@ just as you do for saved channels. E.g., 0:3,7.
 
 Each OneBox can record from up to 12 16-bit analog channels.
 
-You must record at least one channel. If desired, the XA box can be blank
-(specfying **NO** analog channels) provided you also check the XD box to
-record digital lines.
+If desired, the XA box can be blank (specfying **NO** analog channels).
 
 --------
 
@@ -83,16 +82,51 @@ If you enable the XD (digital) option, then, regardless of your XA channel
 list, **ALL 12** analog inputs are digitized using a fixed threshold value
 equal to 10% of: {2.5, 5, 10} as determined by your AI Range selection.
 The 12 resulting digital lines are read out together as the lowest 12 bits
-f a single 16-bit `XD` word.
+of a single 16-bit `XD` word.
 
 In other words, your Obx data stream either has no digital word, or it has
 a single digital word containing 12 digital lines.
+
+A OneBox is configured for recording if at least one XA channel is listed,
+or if XD is enabled. In this case, the OneBox is assigned a logical recording
+stream ID index that you can see in the big Probes table of the Devices tab.
+In SDK remote interface functions you can access this device using indices:
+`(js,ip) = (1,ID)`.
 
 --------
 
 ## AI Range
 
-The selected scale +/- {2.5,5,10} volts is applied to all analog channels.
+The selected scale +/- {2.5,5,10} volts is applied to all input analog
+channels.
+
+--------
+
+## AO Analog (DAC) Channels
+
+Edit directly in the table cell by specifying a channel list,
+just as you do for saved channels. E.g., 0:3,7.
+
+Each OneBox can output voltages on up to 12 analog channels.
+
+Each of the 12 channels can only be an input or an output.
+
+>*It is flagged as an error if the same channel is in the XA and the AO list.*
+
+>**CAUTION: You might damage the OneBox or other equipment if you
+cross-connect inputs to outputs.**
+
+>Yes it is safe and permitted, to enable XD and specify AO channels.
+The digital lines for AO channels are disabled and read as zeros.
+
+A OneBox is configured for output if at least one AO channel is listed.
+In SDK remote interface functions you can access the output features for
+this device using its assigned `slot number`.
+
+### AO Voltages
+
+* Use the SDK during a run to set constant AO voltage levels: range +/- 5V.
+* All listed AO channels are initialized to zero when a run starts.
 
 --------
 
@@ -129,6 +163,7 @@ This is a handy way to set all of the editable fields:
 * XA: 0:11.
 * XD: true.
 * AI range: 5V.
+* AO: blank.
 * Channel map: acquisition channel order.
 * Save chans: all.
 

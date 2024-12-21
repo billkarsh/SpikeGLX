@@ -213,6 +213,7 @@ By the way, the `_Calibration` subfolder also contains supplementary
 SpikeGLX data:
 
 * The results of imec headstage sample rate calibration.
+* The results of imec OneBox sample rate calibration.
 * The results of NI device sample rate calibration.
 * Your settings choices for each probe.
 * Your settings choices for each OneBox.
@@ -274,6 +275,17 @@ The result is as follows:
 7 mod 3 = 1.
 
 #### Display Settings
+
+Make sure SpikeGLX is taking advantage of your add-on graphics card instead
+of the built-in graphics. Doing this will boost acquisition performance and
+improve the aesthetics:
+
+1. Type "Graphics settings" into the search box of the Windows Taskbar.
+2. Select `Desktop app` and below that click `Browse`.
+3. Navigate to and select SpikeGLX.exe.
+4. SpikeGLX now appears below the `Browse` button; click on it.
+5. Click `Options`; select the `High performance` option and `Save`.
+6. Restart SpikeGLX.
 
 Depending upon your monitor size and resolution, you might find that the
 text in menus, buttons and lists is either fuzzy or too small to read. If
@@ -1064,7 +1076,7 @@ through SpikeGLX:
 ```
    Devices tab: Select which streams/hardware to acquire.
         IM tab: Configure imec neural probe streams.
-       Obx tab: Configure imec OneBox (ADC) streams.
+       Obx tab: Configure imec OneBox ADC streams, and DAC output.
         NI tab: Configure NI ADC streams.
       Sync tab: Cross-connect streams for precision alignment.
      Gates tab: Together with...
