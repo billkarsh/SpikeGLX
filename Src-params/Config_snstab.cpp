@@ -164,7 +164,7 @@ void Config_snstab::diskBut()
 
                 for( int ip = 0, np = q.stream_nOB(); ip < np; ++ip ) {
 
-                    const CimCfg::ObxEach   &E = q.im.obxj[ip];
+                    const CimCfg::ObxEach   &E = q.im.get_iStrOneBox( ip );
 
                     int     ch  = E.sns.saveBits.count( true );
                     double  bps = ch * E.srate * 2;

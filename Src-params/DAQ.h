@@ -142,7 +142,7 @@ struct Params {
         {return stream.startsWith( "i" );}
 
     inline int stream_nNI() const   {return ni.enabled;}
-    inline int stream_nOB() const   {return im.get_nOneBox();}
+    inline int stream_nOB() const   {return im.get_nObxStr();}
     inline int stream_nIM() const   {return im.get_nProbes();}
     inline int stream_nq() const    {return stream_nNI() + stream_nOB() + stream_nIM();}
 
@@ -167,9 +167,6 @@ struct Params {
     int trigChan() const;
     bool trig_isChan( int js, int ip, int chan ) const
         {return jsip2stream( js, ip ) == trigStream() && chan == trigChan();}
-    bool trigStream_isNI( const QString &stream ) const;
-    bool trigStream_isOB( const QString &stream ) const;
-    bool trigStream_isIM( const QString &stream ) const;
 
     void loadSettings( bool remote = false );
     void saveSettings( bool remote = false ) const;

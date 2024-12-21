@@ -336,7 +336,7 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
             for( int ip = 0; ip < nObQ; ++ip ) {
                 firstCtOb.push_back( 0 );
                 dfOb.push_back(
-                    p.im.obxj[ip].sns.saveBits.count( true ) ?
+                    p.im.get_iStrOneBox( ip ).sns.saveBits.count( true ) ?
                     new DataFileOB( ip ) : 0 );
             }
         }

@@ -32,11 +32,11 @@ public:
     void toGUI();
     void fromGUI( DAQ::Params &q );
 
-    void updateSaveChans( CimCfg::ObxEach &E, int ip );
-    void updateObx( const CimCfg::ObxEach &E, int ip );
+    void updateSaveChans( CimCfg::ObxEach &E, int isel );
+    void updateObx( const CimCfg::ObxEach &E, int isel );
     void saveSettings();
 
-    QString remoteSetObxEach( const QString &s, int ip );
+    QString remoteSetObxEach( const QString &s, int istr );
 
 private slots:
     void selectionChanged();

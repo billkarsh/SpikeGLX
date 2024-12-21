@@ -34,6 +34,7 @@ public:
 
     void showCalWarning( bool show );
     void updateIMParams();
+    void updateObxIDs( DAQ::Params &q );
 
 private slots:
     void cfgSlotsBut();

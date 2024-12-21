@@ -117,7 +117,7 @@ bool ColorTTLCtl::TTLClrEach::validOb(
         return false;
     }
 
-    const CimCfg::ObxEach   &E = p.im.obxj[ip];
+    const CimCfg::ObxEach   &E = p.im.get_iStrOneBox( ip );
 
     if( isAnalog ) {
 
@@ -154,7 +154,7 @@ bool ColorTTLCtl::TTLClrEach::validOb(
 
         // Tests for digital bit (XD + SY)
 
-        int nL = 16 * E.digital + 6;
+        int nL = 16 * E.isXD + 6;
 
         if( bit >= nL ) {
 
@@ -679,7 +679,7 @@ bool ColorTTLCtl::getChan(
 
         switch( js ) {
             case jsNI: thresh = p.ni.vToInt16( C.T, chan ); break;
-            case jsOB: thresh = p.im.obxj[ip].vToInt16( C.T ); break;
+            case jsOB: thresh = p.im.get_iStrOneBox( ip ).vToInt16( C.T ); break;
             case jsIM: thresh = p.im.prbj[ip].vToInt( C.T, chan ); break;
         }
     }
@@ -687,7 +687,7 @@ bool ColorTTLCtl::getChan(
 
         switch( js ) {
             case jsNI: chan = p.ni.niCumTypCnt[CniCfg::niSumAnalog] + C.bit/16; break;
-            case jsOB: chan = p.im.obxj[ip].obCumTypCnt[CimCfg::obSumAnalog]; break;
+            case jsOB: chan = p.im.get_iStrOneBox( ip ).obCumTypCnt[CimCfg::obSumAnalog]; break;
             case jsIM: chan = p.im.prbj[ip].imCumTypCnt[CimCfg::imSumNeural]; break;
         }
 

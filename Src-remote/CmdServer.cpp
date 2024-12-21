@@ -539,7 +539,7 @@ void CmdWorker::getStreamAcqChans( QString &resp, const QStringList &toks )
             break;
         case jsOB:
             {
-                const int*  cum = p.im.obxj[ip].obCumTypCnt;
+                const int*  cum = p.im.get_iStrOneBox( ip ).obCumTypCnt;
                 int         XA, XD, SY;
 
                 XA = cum[CimCfg::obTypeXA];
@@ -580,7 +580,7 @@ void CmdWorker::getStreamI16ToVolts( QString &resp, const QStringList &toks )
 
     switch( js ) {
         case jsNI: M = p.ni.int16ToV( 1, toks[2].toInt() ); break;
-        case jsOB: M = p.im.obxj[ip].int16ToV( 1 ); break;
+        case jsOB: M = p.im.get_iStrOneBox( ip ).int16ToV( 1 ); break;
         case jsIM: M = p.im.prbj[ip].intToV( 1, toks[2].toInt() ); break;
         default: errMsg = "GETSTREAMI16TOVOLTS: js must be in range [0..2]."; return;
     }
@@ -695,7 +695,9 @@ void CmdWorker::getStreamSN( QString &resp, const QStringList &toks )
     switch( js ) {
         case jsOB:
             {
-                const CimCfg::ImProbeDat    &P = C->prbTab.get_iOneBox( ip );
+                const DAQ::Params           &p = C->acceptedParams;
+                const CimCfg::ImProbeDat    &P = C->prbTab.get_iOneBox(
+                                                    p.im.obx_istr2isel( ip ) );
                 resp = QString("%1 %2\n").arg( P.obsn ).arg( P.slot );
             }
             break;
@@ -727,7 +729,7 @@ void CmdWorker::getStreamVoltageRange( QString &resp, const QStringList &toks )
             resp = QString("%1 %2\n").arg( p.ni.range.rmin ).arg( p.ni.range.rmax );
             break;
         case jsOB:
-            V       = p.im.obxj[ip].range.rmax;
+            V       = p.im.get_iStrOneBox( ip ).range.rmax;
             resp    = QString("%1 %2\n").arg( -V ).arg( V );
             break;
         case jsIM:
@@ -924,7 +926,7 @@ void CmdWorker::fetch( const QStringList &toks )
 
                 switch( js ) {
                     case jsNI:  chanBits = p.ni.sns.saveBits; break;
-                    case jsOB:  chanBits = p.im.obxj[ip].sns.saveBits; break;
+                    case jsOB:  chanBits = p.im.get_iStrOneBox( ip ).sns.saveBits; break;
                     case jsIM:
                     case -jsIM: chanBits = p.im.prbj[ip].sns.saveBits; break;
                 }

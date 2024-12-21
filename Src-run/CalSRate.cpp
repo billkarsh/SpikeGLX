@@ -722,7 +722,7 @@ void CalSRRun::initRun()
 
     for( int ip = 0, np = p.stream_nOB(); ip < np; ++ip ) {
 
-        CimCfg::ObxEach     &E = p.im.obxj[ip];
+        CimCfg::ObxEach     &E = p.im.mod_iStrOneBox( ip );
         int                 nC = p.stream_nChans( jsOB, ip );
 
         E.sns.saveBits.clear();
@@ -976,8 +976,8 @@ void CalSRRun::finish_cleanup()
             const CalSRStream   &S = vOB[is];
 
             if( S.av > 0 ) {
-                oldParams.im.obxj[S.ip].srate = S.av;
-                cfg->prbTab.set_iOneBox_SRate( S.ip, S.av );
+                oldParams.im.mod_iStrOneBox( S.ip ).srate = S.av;
+                cfg->prbTab.set_iOneBox_SRate( p.im.obx_istr2isel( S.ip ), S.av );
             }
         }
 

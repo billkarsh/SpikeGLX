@@ -224,7 +224,7 @@ void SVGrafsM_Ob::updateRHSFlags()
 
 // First consider only save flags for all channels
 
-    const QBitArray &saveBits = p.im.obxj[ip].sns.saveBits;
+    const QBitArray &saveBits = p.im.get_iStrOneBox( ip ).sns.saveBits;
 
     for( int ic = 0, nC = ic2Y.size(); ic < nC; ++ic ) {
 
@@ -266,7 +266,7 @@ int SVGrafsM_Ob::chanCount() const
 
 int SVGrafsM_Ob::analogChanCount() const
 {
-    return p.im.obxj[ip].obCumTypCnt[CimCfg::obSumAnalog];
+    return p.im.get_iStrOneBox( ip ).obCumTypCnt[CimCfg::obSumAnalog];
 }
 
 
@@ -458,7 +458,7 @@ double SVGrafsM_Ob::mySampRate() const
 
 void SVGrafsM_Ob::mySort_ig2ic()
 {
-    const CimCfg::ObxEach   &E = p.im.obxj[ip];
+    const CimCfg::ObxEach   &E = p.im.get_iStrOneBox( ip );
 
     if( set.usrOrder )
         E.sns.chanMap.userOrder( ig2ic );
@@ -469,13 +469,14 @@ void SVGrafsM_Ob::mySort_ig2ic()
 
 QString SVGrafsM_Ob::myChanName( int ic ) const
 {
-    return p.im.obxj[ip].sns.chanMap.name( ic, p.trig_isChan( jsOB, ip, ic ) );
+    return p.im.get_iStrOneBox( ip )
+            .sns.chanMap.name( ic, p.trig_isChan( jsOB, ip, ic ) );
 }
 
 
 const QBitArray& SVGrafsM_Ob::mySaveBits() const
 {
-    return p.im.obxj[ip].sns.saveBits;
+    return p.im.get_iStrOneBox( ip ).sns.saveBits;
 }
 
 
@@ -561,7 +562,7 @@ void SVGrafsM_Ob::setAudio( int LBR )
 //
 double SVGrafsM_Ob::scalePlotValue( double v ) const
 {
-    return p.im.obxj[ip].range.unityToVolts( (v+1)/2 );
+    return p.im.get_iStrOneBox( ip ).range.unityToVolts( (v+1)/2 );
 }
 
 
@@ -587,7 +588,7 @@ void SVGrafsM_Ob::computeGraphMouseOverVars(
     rms     = scalePlotValue( stat.rms() );
     drawMtx.unlock();
 
-    vmax = p.im.obxj[ip].range.rmax / ic2Y[ic].yscl;
+    vmax = p.im.get_iStrOneBox( ip ).range.rmax / ic2Y[ic].yscl;
     unit = "V";
 
     if( vmax < 0.001 ) {
@@ -611,7 +612,7 @@ bool SVGrafsM_Ob::chanMapDialog( QString &cmFile )
 {
 // Create default map
 
-    const CimCfg::ObxEach   &E      = p.im.obxj[ip];
+    const CimCfg::ObxEach   &E      = p.im.get_iStrOneBox( ip );
     const int               *cum    = E.obCumTypCnt;
 
     ChanMapOB defMap(
@@ -641,7 +642,7 @@ bool SVGrafsM_Ob::chanMapDialog( QString &cmFile )
 
 bool SVGrafsM_Ob::saveDialog( QString &saveStr )
 {
-    const CimCfg::ObxEach   &E = p.im.obxj[ip];
+    const CimCfg::ObxEach   &E = p.im.get_iStrOneBox( ip );
 
     QDialog             dlg;
     Ui::ChanListDialog  ui;

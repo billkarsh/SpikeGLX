@@ -39,7 +39,7 @@ void Heatmap::setStream( const DAQ::Params &p, int js, int ip )
             nC      = p.ni.niCumTypCnt[CniCfg::niSumAll];
             break;
         case jsOB:
-            VMAX    = p.im.obxj[ip].range.rmax;
+            VMAX    = p.im.get_iStrOneBox( ip ).range.rmax;
             maxInt  = SHRT_MAX;
             nAP     = 0;
             nLF     = 0;

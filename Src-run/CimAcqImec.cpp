@@ -745,7 +745,7 @@ ImAcqStream::ImAcqStream(
     }
     else {
 
-        const CimCfg::ObxEach   &E      = p.im.obxj[ip];
+        const CimCfg::ObxEach   &E      = p.im.get_iStrOneBox( ip );
         const int               *cum    = E.obCumTypCnt;
 
         Subset::rngStr2Vec( vXA, E.uiXAStr );
@@ -754,7 +754,7 @@ ImAcqStream::ImAcqStream(
         nXD = cum[CimCfg::obTypeXD] - nXA;
         nCH = cum[CimCfg::obSumAll];
 
-        const CimCfg::ImProbeDat    &P = T.get_iOneBox( ip );
+        const CimCfg::ImProbeDat    &P = T.get_iOneBox( p.im.obx_istr2isel( ip ) );
         slot = P.slot;
         port = P.port;
         dock = P.dock;
@@ -1745,7 +1745,7 @@ bool ImAcqWorker::workerYield()
                 "prfUpdateAwake",
                 Qt::QueuedConnection,
                 Q_ARG(QString, streams[iID].metricsName()),
-                Q_ARG(int,  awakePct) );
+                Q_ARG(int, awakePct) );
         }
 
         yieldSum            = 0;
@@ -1881,7 +1881,7 @@ CimAcqImec::~CimAcqImec()
 
 // Disable sync, close hardware
 
-    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
+    for( int is = 0, ns = T.nSelSlots(); is < ns; ++is ) {
 
         int slot = T.getEnumSlot( is );
 

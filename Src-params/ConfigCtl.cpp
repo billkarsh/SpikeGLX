@@ -311,7 +311,7 @@ void ConfigCtl::graphSetsImChanMap( const QString &cmFile, int ip )
 
 void ConfigCtl::graphSetsObChanMap( const QString &cmFile, int ip )
 {
-    CimCfg::ObxEach &E      = acceptedParams.im.obxj[ip];
+    CimCfg::ObxEach &E      = acceptedParams.im.mod_iStrOneBox( ip );
     ChanMapOB       &M      = E.sns.chanMap;
     QString         msg,
                     err;
@@ -343,7 +343,7 @@ void ConfigCtl::graphSetsObChanMap( const QString &cmFile, int ip )
     if( err.isEmpty() ) {
 
         E.sns.chanMapFile = cmFile;
-        obxTab->updateObx( E, ip );
+        obxTab->updateObx( E, acceptedParams.im.obx_istr2isel( ip ) );
         obxTab->saveSettings();
     }
     else
@@ -426,7 +426,7 @@ void ConfigCtl::graphSetsImSaveStr( const QString &saveStr, int ip, bool lfPairC
 void ConfigCtl::graphSetsObSaveStr( const QString &saveStr, int ip )
 {
     DAQ::Params     &p = acceptedParams;
-    CimCfg::ObxEach &E = p.im.obxj[ip];
+    CimCfg::ObxEach &E = p.im.mod_iStrOneBox( ip );
     QString         oldStr, err;
 
     oldStr = E.sns.uiSaveChanStr;
@@ -434,7 +434,7 @@ void ConfigCtl::graphSetsObSaveStr( const QString &saveStr, int ip )
 
     if( validObSaveBits( err, p, ip ) ) {
 
-        obxTab->updateObx( E, ip );
+        obxTab->updateObx( E, p.im.obx_istr2isel( ip ) );
         obxTab->saveSettings();
     }
     else {
@@ -486,7 +486,7 @@ void ConfigCtl::graphSetsImSaveBit( int chan, bool setOn, int ip )
 void ConfigCtl::graphSetsObSaveBit( int chan, bool setOn, int ip )
 {
     DAQ::Params     &p  = acceptedParams;
-    CimCfg::ObxEach &E  = p.im.obxj[ip];
+    CimCfg::ObxEach &E  = p.im.mod_iStrOneBox( ip );
 
     if( chan >= 0 && chan < p.stream_nChans( jsOB, ip ) ) {
 
@@ -494,10 +494,10 @@ void ConfigCtl::graphSetsObSaveBit( int chan, bool setOn, int ip )
         E.sns.uiSaveChanStr = Subset::bits2RngStr( E.sns.saveBits );
 
         Debug()
-            << QString("New obx  %1 subset string: ").arg( ip )
+            << QString("New obx %1 subset string: ").arg( ip )
             << E.sns.uiSaveChanStr;
 
-        obxTab->updateObx( E, ip );
+        obxTab->updateObx( E, p.im.obx_istr2isel( ip ) );
         obxTab->saveSettings();
     }
 }
@@ -589,8 +589,8 @@ void ConfigCtl::setSelectiveAccess( bool availIM, bool availNI )
 {
     if( availIM ) {
         prbTab.buildQualIndexTables();
-        usingIM = prbTab.nLogProbes() > 0;
-        usingOB = prbTab.nLogOneBox() > 0;
+        usingIM = prbTab.nSelProbes() > 0;
+        usingOB = prbTab.nSelOneBox() > 0;
     }
 
     usingNI = availNI;
@@ -645,12 +645,12 @@ void ConfigCtl::streamCB_fillConfig( QComboBox *CB ) const
         CB->addItem( DAQ::Params::jsip2stream( jsNI, 0 ) );
 
     if( usingOB ) {
-        for( int ip = 0, np = prbTab.nLogOneBox(); ip < np; ++ip )
+        for( int ip = 0, np = prbTab.nSelOneBox(); ip < np; ++ip )
             CB->addItem( DAQ::Params::jsip2stream( jsOB, ip ) );
     }
 
     if( usingIM ) {
-        for( int ip = 0, np = prbTab.nLogProbes(); ip < np; ++ip )
+        for( int ip = 0, np = prbTab.nSelProbes(); ip < np; ++ip )
             CB->addItem( DAQ::Params::jsip2stream( jsIM, ip ) );
     }
 }
@@ -745,9 +745,12 @@ bool ConfigCtl::diskParamsToQ( QString &err, DAQ::Params &q ) const
             return false;
     }
 
+    if( usingOB )
+        q.im.set_cfg_obxj_istr_data();
+
     for( int ip = 0, np = q.stream_nOB(); ip < np; ++ip ) {
 
-        if( !validObChannels( err, q.im.obxj[ip], ip ) )
+        if( !validObChannels( err, q, ip ) )
             return false;
 
         if( !validObSaveBits( err, q, ip ) )
@@ -811,7 +814,7 @@ QString ConfigCtl::cmdSrvGetsSaveChansOb( int ip ) const
 
     if( ip < acceptedParams.stream_nOB() ) {
 
-        const QBitArray &B = acceptedParams.im.obxj[ip].sns.saveBits;
+        const QBitArray &B = acceptedParams.im.get_iStrOneBox( ip ).sns.saveBits;
         int             nb = B.size();
 
         for( int i = 0; i < nb; ++i ) {
@@ -870,7 +873,7 @@ QString ConfigCtl::cmdSrvGetsParamStr( int type, int ip ) const
         case 0: return DAQ::Params::remoteGetDAQParams();
         case 1: return CimCfg::PrbAll::remoteGetPrbAll();
         case 2: return acceptedParams.im.prbj[ip].remoteGetPrbEach();
-        case 3: return acceptedParams.im.obxj[ip].remoteGetObxEach();
+        case 3: return acceptedParams.im.get_iStrOneBox( ip ).remoteGetObxEach();
     }
 }
 
@@ -937,8 +940,8 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &paramString, int type, int
 
     if( p.im.enabled ) {
         prbTab.buildQualIndexTables();
-        usingIM = prbTab.nLogProbes() > 0;
-        usingOB = prbTab.nLogOneBox() > 0;
+        usingIM = prbTab.nSelProbes() > 0;
+        usingOB = prbTab.nSelOneBox() > 0;
     }
     else {
         usingIM = false;
@@ -1255,32 +1258,67 @@ bool ConfigCtl::validImStdbyBits( QString &err, CimCfg::PrbEach &E, int ip ) con
 }
 
 
-bool ConfigCtl::validObChannels( QString &err, CimCfg::ObxEach &E, int ip ) const
+bool ConfigCtl::validObChannels( QString &err, DAQ::Params &q, int istr ) const
 {
     if( !usingOB )
         return true;
 
-    QVector<uint>   vc;
-    int             nAI;
+    const CimCfg::ObxEach   &E = q.im.get_iStrOneBox( istr );
+    QVector<uint>           vAI, vAO;
+    int                     nAI, nAO;
 
-    if( !Subset::rngStr2Vec( vc, E.uiXAStr ) ) {
-        err = QString("Obx %1: XA format error.").arg( ip );
+    if( !Subset::rngStr2Vec( vAI, E.uiXAStr ) ) {
+        err = QString("Obx %1: XA format error.").arg( istr );
+        return false;
+    }
+
+    if( !Subset::rngStr2Vec( vAO, E.uiAOStr ) ) {
+        err = QString("Obx %1: AO format error.").arg( istr );
         return false;
     }
 
 // No channels?
 
-    nAI = vc.size();
+    nAI = vAI.size();
+    nAO = vAO.size();
 
-    if( !(nAI + E.digital) ) {
-        err = QString("Obx %1: No channels specified.").arg( ip );
+    if( !(nAI + nAO) ) {
+        err = QString("Obx %1: No channels specified.").arg( istr );
         return false;
     }
 
 // Illegal channels?
 
-    if( nAI && vc.last() > 11 ) {
-        err = QString("Obx %1: XA channel indices must not exceed 11.").arg( ip );
+    if( nAI && vAI.last() >= imOBX_NCHN ) {
+        err =
+        QString("Obx %1: XA channel indices must not exceed %2.")
+        .arg( istr ).arg( imOBX_NCHN - 1 );
+        return false;
+    }
+
+    if( nAO && vAO.last() >= imOBX_NCHN ) {
+        err =
+        QString("Obx %1: AO channel indices must not exceed %2.")
+        .arg( istr ).arg( imOBX_NCHN - 1 );
+        return false;
+    }
+
+// AI, AO exclusive?
+
+    QBitArray   bAI, bAO;
+
+    Subset::rngStr2Bits( bAI, E.uiXAStr );
+    Subset::rngStr2Bits( bAO, E.uiAOStr );
+
+    bAI.resize( imOBX_NCHN );
+    bAO.resize( imOBX_NCHN );
+
+    bAI &= bAO;
+
+    if( bAI.count( true ) ) {
+        err =
+        QString("Obx %1: XA and AO share these channels {%2}.")
+        .arg( istr ).arg( Subset::bits2RngStr( bAI ) );
         return false;
     }
 
@@ -1816,9 +1854,12 @@ bool ConfigCtl::validImChanMap( QString &err, CimCfg::PrbEach &E, int ip ) const
 }
 
 
-bool ConfigCtl::validObChanMap( QString &err, DAQ::Params &q, int ip ) const
+bool ConfigCtl::validObChanMap( QString &err, DAQ::Params &q, int istr ) const
 {
-    CimCfg::ObxEach &E = q.im.obxj[ip];
+    if( !usingOB || istr >= q.im.get_nObxStr() )
+        return true;
+
+    CimCfg::ObxEach &E = q.im.mod_iStrOneBox( istr );
 
 // Pretties ini file, even if not using device
     if( E.sns.chanMapFile.contains( "*" ) )
@@ -1845,7 +1886,7 @@ bool ConfigCtl::validObChanMap( QString &err, DAQ::Params &q, int ip ) const
 
     if( !M.loadFile( msg, E.sns.chanMapFile ) ) {
 
-        err = QString("OBX %1 ChanMap: %2.").arg( ip ).arg( msg );
+        err = QString("OBX %1 ChanMap: %2.").arg( istr ).arg( msg );
         return false;
     }
 
@@ -1855,7 +1896,7 @@ bool ConfigCtl::validObChanMap( QString &err, DAQ::Params &q, int ip ) const
                 "OBX %1 ChanMap header mismatch--\n\n"
                 "  - Cur config: (%2 %3 %4)\n"
                 "  - Named file: (%5 %6 %7).")
-                .arg( ip )
+                .arg( istr )
                 .arg( D.XA ).arg( D.XD ).arg( D.SY )
                 .arg( M.XA ).arg( M.XD ).arg( M.SY );
         return false;
@@ -1936,19 +1977,19 @@ bool ConfigCtl::validImSaveBits( QString &err, DAQ::Params &q, int ip ) const
 }
 
 
-bool ConfigCtl::validObSaveBits( QString &err, DAQ::Params &q, int ip ) const
+bool ConfigCtl::validObSaveBits( QString &err, DAQ::Params &q, int istr ) const
 {
-    if( !usingOB )
+    if( !usingOB || istr >= q.im.get_nObxStr() )
         return true;
 
-    CimCfg::ObxEach &E = q.im.obxj[ip];
-    int             nC = q.stream_nChans( jsOB, ip );
+    CimCfg::ObxEach &E = q.im.mod_iStrOneBox( istr );
+    int             nC = q.stream_nChans( jsOB, istr );
     bool            ok;
 
-    ok = E.sns.deriveSaveData( err, q.jsip2stream( jsOB, ip ), nC );
+    ok = E.sns.deriveSaveData( err, q.jsip2stream( jsOB, istr ), nC );
 
     if( ok )
-        obxTab->updateSaveChans( E, ip );
+        obxTab->updateSaveChans( E, q.im.obx_istr2isel( istr ) );
 
     return ok;
 }
@@ -2138,6 +2179,29 @@ bool ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
 }
 
 
+bool ConfigCtl::validTriggerStream( QString &err, DAQ::Params &q ) const
+{
+    QString stream = q.trigStream();
+
+    if( !stream.isEmpty() ) {
+
+        int ip;
+
+        if( q.stream2jsip( ip, stream ) < 0 ) {
+
+            err =
+            QString(
+            "Trigger '%1' stream [%2] is invalid.")
+            .arg( DAQ::trigModeToString( q.mode.mTrig ) )
+            .arg( stream );
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
 bool ConfigCtl::validImTriggering( QString &err, DAQ::Params &q ) const
 {
     if( !usingIM ) {
@@ -2218,7 +2282,7 @@ bool ConfigCtl::validImTriggering( QString &err, DAQ::Params &q ) const
 
 bool ConfigCtl::validObTriggering( QString &err, DAQ::Params &q ) const
 {
-    if( !usingOB ) {
+    if( !usingOB || !q.im.get_nObxStr() ) {
 
         err =
         QString(
@@ -2227,9 +2291,9 @@ bool ConfigCtl::validObTriggering( QString &err, DAQ::Params &q ) const
         return false;
     }
 
-    int ip = q.stream2ip( q.trigStream() );
+    int istr = q.stream2ip( q.trigStream() );
 
-    const CimCfg::ObxEach   &E = q.im.obxj[ip];
+    const CimCfg::ObxEach   &E = q.im.get_iStrOneBox( istr );
 
     if( q.mode.mTrig == DAQ::eTrigSpike
         || (q.mode.mTrig == DAQ::eTrigTTL && q.trgTTL.isAnalog) ) {
@@ -2292,7 +2356,7 @@ bool ConfigCtl::validObTriggering( QString &err, DAQ::Params &q ) const
 
         // Tests for digital bit
 
-        if( !E.digital ) {
+        if( !E.isXD ) {
 
             err = "Trigger Tab: No obx digital lines have been specified.";
             return false;
@@ -2520,7 +2584,7 @@ bool ConfigCtl::validDiskAvail( QString &err, DAQ::Params &q ) const
 
                 for( int ip = 0, np = q.stream_nOB(); ip < np; ++ip ) {
 
-                    const CimCfg::ObxEach   &E = q.im.obxj[ip];
+                    const CimCfg::ObxEach   &E = q.im.get_iStrOneBox( ip );
                     BPS += E.sns.saveBits.count( true ) * E.srate * 2;
                 }
             }
@@ -2840,9 +2904,12 @@ bool ConfigCtl::valid( QString &err, QWidget *parent, int iprb )
             return false;
     }
 
-    for( int ip = 0, np = q.stream_nOB(); ip < np; ++ip ) {
+    if( usingOB )
+        q.im.set_cfg_obxj_istr_data();
 
-        if( !validObChannels( err, q.im.obxj[ip], ip ) )
+    for( int ip = 0, np = prbTab.nSelOneBox(); ip < np; ++ip ) {
+
+        if( !validObChannels( err, q, ip ) )
             return false;
 
         if( !validObChanMap( err, q, ip ) )
@@ -2866,6 +2933,9 @@ bool ConfigCtl::valid( QString &err, QWidget *parent, int iprb )
     }
 
     if( !validSyncTab( err, q ) )
+        return false;
+
+    if( !validTriggerStream( err, q ) )
         return false;
 
     if( q.stream_isIM( q.trigStream() ) && !validImTriggering( err, q ) )
@@ -2939,8 +3009,10 @@ bool ConfigCtl::valid( QString &err, QWidget *parent, int iprb )
         setParams( q, true );
         prbTab.saveProbeTable();
 
-        if( usingOB )
+        if( usingOB ) {
             obxTab->saveSettings();
+            devTab->updateObxIDs( q );
+        }
     }
     else
         running_setProbe( q, iprb );

@@ -66,8 +66,8 @@ bool DataFileOB::subclassParseMetaData( QString *error )
 void DataFileOB::subclassStoreMetaData( const DAQ::Params &p )
 {
     const CimCfg::ImProbeTable  &T  = mainApp()->cfgCtl()->prbTab;
-    const CimCfg::ImProbeDat    &P  = T.get_iOneBox( ip );
-    const CimCfg::ObxEach       &E  = p.im.obxj[ip];
+    const CimCfg::ImProbeDat    &P  = T.get_iOneBox( p.im.obx_istr2isel( ip ) );
+    const CimCfg::ObxEach       &E  = p.im.get_iStrOneBox( ip );
 
     sRate = E.srate;
 
@@ -123,7 +123,7 @@ int DataFileOB::subclassGetSavChanCount( const DAQ::Params &p )
     int nSaved = 0;
 
     if( subclassGetAcqChanCount( p ) )
-        nSaved = p.im.obxj[ip].sns.saveBits.count( true );
+        nSaved = p.im.get_iStrOneBox( ip ).sns.saveBits.count( true );
 
     return nSaved;
 }
@@ -142,7 +142,7 @@ void DataFileOB::subclassSetSNSChanCounts(
     const int   *cum;
 
     if( p )
-        cum = p->im.obxj[ip].obCumTypCnt;
+        cum = p->im.get_iStrOneBox( ip ).obCumTypCnt;
     else
         cum = dfSrc->cumTypCnt();
 

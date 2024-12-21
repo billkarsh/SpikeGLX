@@ -449,7 +449,7 @@ bool CimCfg::ImProbeTable::mapObxSlots( QStringList &slVers )
 
 // Loop over enabled slots
 
-    for( int is = 0, ns = nLogSlots(); is < ns; ++is ) {
+    for( int is = 0, ns = nSelSlots(); is < ns; ++is ) {
 
         int slot = getEnumSlot( is );
 
@@ -608,10 +608,10 @@ double CimCfg::ImProbeTable::get_iProbe_SRate( int i ) const
 }
 
 
-double CimCfg::ImProbeTable::get_iOneBox_SRate( int i ) const
+double CimCfg::ImProbeTable::get_iOneBox_SRate( int isel ) const
 {
-    if( i < iobx2dat.size() )
-        return obsn2srate.value( probes[iobx2dat[i]].obsn, imOBX_SRATE );
+    if( isel < iobx2dat.size() )
+        return obsn2srate.value( probes[iobx2dat[isel]].obsn, imOBX_SRATE );
 
     return imOBX_SRATE;
 }
@@ -823,7 +823,7 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
         if( P.isProbe() )
             ti->setText( QString::number( P.port ) );
         else
-            ti->setText( "ADC" );
+            ti->setText( "XIO" );
 
         // ----
         // HSSN
@@ -947,8 +947,12 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
             ti->setFlags( Qt::NoItemFlags );
         }
 
-        if( P.ip == quint16(-1) )
-            ti->setText( "???" );
+        if( P.ip == quint16(-1) ) {
+            if( P.enab && P.isOneBox() )
+                ti->setText( "DAC" );
+            else
+                ti->setText( "???" );
+        }
         else
             ti->setText( QString::number( P.ip ) );
     }
@@ -1513,8 +1517,8 @@ void CimCfg::ObxEach::deriveChanCounts()
 
     Subset::rngStr2Vec( vc, uiXAStr );
     obCumTypCnt[obTypeXA] = vc.size();
-    obCumTypCnt[obTypeXD] = (digital ? 1 : 0);
-    obCumTypCnt[obTypeSY] = 1;
+    obCumTypCnt[obTypeXD] = (isXD ? 1 : 0);
+    obCumTypCnt[obTypeSY] = (isStream() ? 1 : 0);
 
 // ---------
 // Integrate
@@ -1543,8 +1547,7 @@ void CimCfg::ObxEach::loadSettings( QSettings &S )
     range.rmin          = -range.rmax;
     when                = S.value( "__when", QDateTime::currentDateTime().toString() ).toString();
     uiXAStr             = S.value( "obXAChans", "0:11" ).toString();
-    digital             = S.value( "obDigital", true ).toBool();
-//    sns.shankMapFile    = S.value( "obSnsShankMapFile", QString() ).toString();
+    isXD                = S.value( "obDigital", true ).toBool();
     sns.chanMapFile     = S.value( "obSnsChanMapFile", QString() ).toString();
     sns.uiSaveChanStr   = S.value( "obSnsSaveChanSubset", "all" ).toString();
 }
@@ -1555,8 +1558,7 @@ void CimCfg::ObxEach::saveSettings( QSettings &S ) const
     S.setValue( "obAiRangeMax", range.rmax );
     S.setValue( "__when", when );
     S.setValue( "obXAChans", uiXAStr );
-    S.setValue( "obDigital", digital );
-//    S.setValue( "obSnsShankMapFile", sns.shankMapFile );
+    S.setValue( "obDigital", isXD );
     S.setValue( "obSnsChanMapFile", sns.chanMapFile );
     S.setValue( "obSnsSaveChanSubset", sns.uiSaveChanStr );
 }
@@ -1568,8 +1570,7 @@ QString CimCfg::ObxEach::remoteGetObxEach() const
 
     s  = QString("obAiRangeMax=%1\n").arg( range.rmax );
     s += QString("obXAChans=%1\n").arg( uiXAStr );
-    s += QString("obDigital=%1\n").arg( digital );
-//    s += QString("obSnsShankMapFile=%1\n").arg( sns.shankMapFile );
+    s += QString("obDigital=%1\n").arg( isXD );
     s += QString("obSnsChanMapFile=%1\n").arg( sns.chanMapFile );
     s += QString("obSnsSaveChanSubset=%1\n").arg( sns.uiSaveChanStr );
 
@@ -1582,45 +1583,69 @@ QString CimCfg::ObxEach::remoteGetObxEach() const
 
 void CimCfg::set_ini_nprb_nobx( int nprb, int nobx )
 {
-    nProbes = nprb;
-    nOneBox = nobx;
-    prbj.resize( nprb );
     obxj.resize( nobx );
+    istr2isel.clear();
+    nObxStr = 0;
+    prbj.resize( nprb );
 }
 
 
 void CimCfg::set_cfg_def_no_streams( const CimCfg &RHS )
 {
     *this   = RHS;
-    enabled = false;
-    nProbes = 0;
-    nOneBox = 0;
-    prbj.clear();
     obxj.clear();
+    istr2isel.clear();
+    nObxStr = 0;
+    prbj.clear();
+    enabled = false;
 }
 
 
 void CimCfg::set_cfg_nprb( const QVector<PrbEach> &each, int nprb )
 {
-    enabled = nprb > 0;
-    nProbes = nprb;
     prbj    = each;
     prbj.resize( nprb );
+    enabled = nprb > 0;
 
-    for( int ip = 0; ip < nProbes; ++ip )
+    for( int ip = 0; ip < nprb; ++ip )
         prbj[ip].deriveChanCounts();
 }
 
 
 void CimCfg::set_cfg_nobx( const QVector<ObxEach> &each, int nobx )
 {
-    enabled = nobx > 0;
-    nOneBox = nobx;
     obxj    = each;
     obxj.resize( nobx );
+    enabled = nobx > 0;
 
-    for( int ip = 0; ip < nOneBox; ++ip )
+    for( int ip = 0; ip < nobx; ++ip )
         obxj[ip].deriveChanCounts();
+}
+
+// Post-validation, create mapping from {istr} to {isel},
+// and calculate nObxStr (num recording streams).
+//
+// The istr are major-sorted by isRecording (lowest if yes),
+// and subsorted by slot.
+//
+void CimCfg::set_cfg_obxj_istr_data()
+{
+    QVector<int>    vNoXA;
+
+    istr2isel.clear();
+    nObxStr = 0;
+
+    for( int ip = 0, np = obxj.size(); ip < np; ++ip ) {
+
+        if( obxj[ip].isStream() ) {
+            istr2isel.push_back( ip );
+            ++nObxStr;
+        }
+        else
+            vNoXA.push_back( ip );
+    }
+
+    istr2isel.append( vNoXA );
 }
 
 
@@ -1634,10 +1659,10 @@ void CimCfg::loadSettings( QSettings &S )
 
     prbAll.loadSettings( S );
 
-    nProbes =
+    int nprb =
     S.value( "imNProbes", 0 ).toInt();
 
-    nOneBox =
+    int nobx =
     S.value( "obNOneBox", 0 ).toInt();
 
     enabled =
@@ -1645,7 +1670,7 @@ void CimCfg::loadSettings( QSettings &S )
 
     S.endGroup();
 
-    set_ini_nprb_nobx( nProbes, nOneBox );
+    set_ini_nprb_nobx( nprb, nobx );
 }
 
 
@@ -1659,8 +1684,8 @@ void CimCfg::saveSettings( QSettings &S ) const
 
     prbAll.saveSettings( S );
 
-    S.setValue( "imNProbes", nProbes );
-    S.setValue( "obNOneBox", nOneBox );
+    S.setValue( "imNProbes", prbj.size() );
+    S.setValue( "obNOneBox", obxj.size() );
     S.setValue( "imEnabled", enabled );
 
     S.endGroup();
@@ -1754,14 +1779,14 @@ guiBreathe();
     T.simprb.loadSettings();
 
 // slot real if running any real probe
-    for( int ip = 0, np = T.nLogProbes(); ip < np; ++ip ) {
+    for( int ip = 0, np = T.nSelProbes(); ip < np; ++ip ) {
         const ImProbeDat    &P = T.get_iProbe( ip );
         if( !T.simprb.isSimProbe( P.slot, P.port, P.dock ) )
             T.simprb.addHwrSlot( P.slot );
     }
 
 // slot real if running obx
-    for( int ip = 0, np = T.nLogOneBox(); ip < np; ++ip )
+    for( int ip = 0, np = T.nSelOneBox(); ip < np; ++ip )
         T.simprb.addHwrSlot( T.get_iOneBox( ip ).slot );
 
 // check ftdi if using OneBox
@@ -1825,7 +1850,7 @@ guiBreathe();
 #ifdef HAVE_IMEC
 // @@@ FIX closeAllBS is preferred but disrupts OneBox mapping
 //    closeAllBS( false );
-    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
+    for( int is = 0, ns = T.nSelSlots(); is < ns; ++is ) {
         int slot = T.getEnumSlot( is );
         if( !T.simprb.isSimSlot( slot ) )
             np_closeBS( slot );
@@ -1874,7 +1899,7 @@ bool CimCfg::detect_Slots(
     HardwareID      hID;
 #endif
 
-    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
+    for( int is = 0, ns = T.nSelSlots(); is < ns; ++is ) {
 
         // ---------
         // Slot type
@@ -2162,7 +2187,7 @@ bool CimCfg::detect_Probes(
     Q_UNUSED( doBIST )
 #endif
 
-    for( int ip = 0, np = T.nLogProbes(); ip < np; ++ip ) {
+    for( int ip = 0, np = T.nSelProbes(); ip < np; ++ip ) {
 
         ImProbeDat  &P = T.mod_iProbe( ip );
 #ifdef HAVE_IMEC
@@ -2639,7 +2664,7 @@ bool CimCfg::detect_simProbe(
 
 void CimCfg::detect_OneBoxes( ImProbeTable &T )
 {
-    for( int ip = 0, np = T.nLogOneBox(); ip < np; ++ip ) {
+    for( int ip = 0, np = T.nSelOneBox(); ip < np; ++ip ) {
 
         ImProbeDat  &P = T.mod_iOneBox( ip );
 

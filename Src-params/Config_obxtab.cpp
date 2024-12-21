@@ -2,6 +2,7 @@
 #include "ui_ObxTab.h"
 
 #include "Util.h"
+#include "MainApp.h"
 #include "ConfigCtl.h"
 #include "Config_obxtab.h"
 #include "ChanMapCtl.h"
@@ -18,8 +19,9 @@
 #define TBL_XA      2
 #define TBL_XD      3
 #define TBL_V       4
-#define TBL_CHAN    5
-#define TBL_SAVE    6
+#define TBL_AO      5
+#define TBL_CHAN    6
+#define TBL_SAVE    7
 
 static const char *DEF_OBCHMP_LE = "*Default (acquired channel order)";
 
@@ -85,23 +87,23 @@ void Config_obxtab::fromGUI( DAQ::Params &q )
 }
 
 
-void Config_obxtab::updateSaveChans( CimCfg::ObxEach &E, int ip )
+void Config_obxtab::updateSaveChans( CimCfg::ObxEach &E, int isel )
 {
     SignalBlocker   b0(obxTabUI->obxTbl);
 
 // Update GUI
 
     QTableWidget        *T  = obxTabUI->obxTbl;
-    QTableWidgetItem    *ti = T->item( ip, TBL_SAVE );
+    QTableWidgetItem    *ti = T->item( isel, TBL_SAVE );
 
-    each[ip].sns.uiSaveChanStr = E.sns.uiSaveChanStr;
+    each[isel].sns.uiSaveChanStr = E.sns.uiSaveChanStr;
     ti->setText( E.sns.uiSaveChanStr );
 }
 
 
-void Config_obxtab::updateObx( const CimCfg::ObxEach &E, int ip )
+void Config_obxtab::updateObx( const CimCfg::ObxEach &E, int isel )
 {
-    each[ip] = E;
+    each[isel] = E;
 }
 
 
@@ -140,11 +142,15 @@ void Config_obxtab::saveSettings()
 }
 
 
-QString Config_obxtab::remoteSetObxEach( const QString &s, int ip )
+QString Config_obxtab::remoteSetObxEach( const QString &s, int istr )
 {
-    CimCfg::ObxEach &E = each[ip];
-    QTextStream     ts( s.toUtf8(), QIODevice::ReadOnly | QIODevice::Text );
-    QString         line;
+    ConfigCtl           *C      = mainApp()->cfgCtl();
+    const DAQ::Params   &p      = C->acceptedParams;
+    int                 isel    = p.im.obx_istr2isel( istr ),
+                        obsn    = C->prbTab.get_iOneBox( isel ).obsn;
+    CimCfg::ObxEach     &E      = each[isel];
+    QTextStream         ts( s.toUtf8(), QIODevice::ReadOnly | QIODevice::Text );
+    QString             line;
 
     while( !(line = ts.readLine( 65536 )).isNull() ) {
 
@@ -155,7 +161,21 @@ QString Config_obxtab::remoteSetObxEach( const QString &s, int ip )
             QString k = line.left( eq ).trimmed(),
                     v = line.mid( eq + 1 ).trimmed();
 
-            if( k == "obAiRangeMax" ) {
+            if( k == "obXAChans" )
+                E.uiXAStr = v;
+            else if( k == "obDigital" ) {
+                bool    ok;
+                E.isXD = v.toInt( &ok );
+                if( !ok ) {
+                    if( v.startsWith( "t", Qt::CaseInsensitive ) )
+                        E.isXD = true;
+                    else if( v.startsWith( "f", Qt::CaseInsensitive ) )
+                        E.isXD = false;
+                    else
+                        return "SETPARAMSOBX: obDigital is one of {true,false}.";
+                }
+            }
+            else if( k == "obAiRangeMax" ) {
                 if( v == "2.5" || v == "5" || v == "10" ) {
                     E.range.rmax = v.toDouble();
                     E.range.rmin = -E.range.rmax;
@@ -163,22 +183,8 @@ QString Config_obxtab::remoteSetObxEach( const QString &s, int ip )
                 else
                     return "SETPARAMSOBX: obAiRangeMax is one of {2.5,5,10}.";
             }
-            else if( k == "obXAChans" )
-                E.uiXAStr = v;
-            else if( k == "obDigital" ) {
-                bool    ok;
-                E.digital = v.toInt( &ok );
-                if( !ok ) {
-                    if( v.startsWith( "t", Qt::CaseInsensitive ) )
-                        E.digital = true;
-                    else if( v.startsWith( "f", Qt::CaseInsensitive ) )
-                        E.digital = false;
-                    else
-                        return "SETPARAMSOBX: obDigital is one of {true,false}.";
-                }
-            }
-//            else if( k == "obSnsShankMapFile" )
-//                E.sns.shankMapFile = v;
+            else if( k == "obAOChans" )
+                E.uiAOStr = v;
             else if( k == "obSnsChanMapFile" )
                 E.sns.chanMapFile = v;
             else if( k == "obSnsSaveChanSubset" )
@@ -186,7 +192,22 @@ QString Config_obxtab::remoteSetObxEach( const QString &s, int ip )
         }
     }
 
-    toTbl( ip );
+    const CimCfg::ObxEach   &e = p.im.get_iStrOneBox( istr );
+
+    if( e.isStream() && !E.isStream() ) {
+        return
+        QString("SETPARAMSOBX: Obx ip %1 sn %2 was a recording device"
+        " at Detect; recording cannot be disabled remotely.")
+        .arg( istr ).arg( obsn );
+    }
+    else if( !e.isStream() && E.isStream() ) {
+        return
+        QString("SETPARAMSOBX: Obx ip %1 sn %2 was not a recording device"
+        " at Detect; recording cannot be enabled remotely.")
+        .arg( istr ).arg( obsn );
+    }
+
+    toTbl( isel );
 
     return QString();
 }
@@ -202,7 +223,7 @@ void Config_obxtab::selectionChanged()
     QTableWidget        *T      = obxTabUI->obxTbl;
     QTableWidgetItem    *ti     = T->currentItem();
     int                 ip      = -1,
-                        np      = cfg->prbTab.nLogOneBox();
+                        np      = cfg->prbTab.nSelOneBox();
     bool                enab    = false;
 
     if( ti ) {
@@ -304,7 +325,8 @@ void Config_obxtab::defBut()
     E.range.rmin    = -5.0;
     E.range.rmax    = 5.0;
     E.uiXAStr       = "0:11";
-    E.digital       = true;
+    E.uiAOStr       = "";
+    E.isXD          = true;
     E.sns.shankMapFile.clear();
     E.sns.chanMapFile.clear();
     E.sns.uiSaveChanStr.clear();
@@ -371,7 +393,7 @@ void Config_obxtab::loadSettings()
 
 void Config_obxtab::onDetect()
 {
-    int np = cfg->prbTab.nLogOneBox();
+    int np = cfg->prbTab.nSelOneBox();
 
     each.clear();
 
@@ -408,7 +430,7 @@ void Config_obxtab::toTbl()
 {
     QTableWidget    *T = obxTabUI->obxTbl;
     SignalBlocker   b0(T);
-    int             np = cfg->prbTab.nLogOneBox();
+    int             np = cfg->prbTab.nSelOneBox();
 
     T->setRowCount( np );
 
@@ -462,8 +484,10 @@ void Config_obxtab::toTbl()
 
     T->resizeColumnToContents( TBL_SN );
     T->resizeColumnToContents( TBL_RATE );
+    T->resizeColumnToContents( TBL_XA );
     T->resizeColumnToContents( TBL_XD );
     T->resizeColumnToContents( TBL_V );
+    T->resizeColumnToContents( TBL_AO );
 }
 
 
@@ -507,7 +531,7 @@ void Config_obxtab::toTbl( int ip )
                         | Qt::ItemIsUserCheckable );
     }
 
-    ti->setCheckState( E.digital ? Qt::Checked : Qt::Unchecked );
+    ti->setCheckState( E.isXD ? Qt::Checked : Qt::Unchecked );
 
 // -
 // V
@@ -531,6 +555,20 @@ void Config_obxtab::toTbl( int ip )
         cb->setCurrentIndex( 1 );
     else
         cb->setCurrentIndex( 0 );
+
+// --
+// AO
+// --
+
+    if( !(ti = T->item( ip, TBL_AO )) ) {
+        ti = new QTableWidgetItem;
+        T->setItem( ip, TBL_AO, ti );
+        ti->setFlags( Qt::ItemIsSelectable
+                        | Qt::ItemIsEnabled
+                        | Qt::ItemIsEditable );
+    }
+
+    ti->setText( E.uiAOStr );
 
 // --------
 // Chan map
@@ -584,8 +622,8 @@ void Config_obxtab::fromTbl( int ip )
 // XD
 // --
 
-    ti          = T->item( ip, TBL_XD );
-    E.digital   = (ti->checkState() == Qt::Checked);
+    ti      = T->item( ip, TBL_XD );
+    E.isXD  = (ti->checkState() == Qt::Checked);
 
 // -
 // V
@@ -598,6 +636,13 @@ void Config_obxtab::fromTbl( int ip )
         case 2: E.range.rmax = 10;  break;
     }
     E.range.rmin = -E.range.rmax;
+
+// --
+// AO
+// --
+
+    ti          = T->item( ip, TBL_AO );
+    E.uiAOStr   = ti->text().trimmed();
 
 // --------
 // Chan map

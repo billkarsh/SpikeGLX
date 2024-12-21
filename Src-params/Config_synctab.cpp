@@ -45,7 +45,7 @@ void Config_synctab::toGUI( const DAQ::Params &p )
         syncTabUI->sourceCB->removeItem( DAQ::eSyncSourceIM );
 
     // Add new Imec entries
-    int nS = cfg->prbTab.nLogSlots(),
+    int nS = cfg->prbTab.nSelSlots(),
         ns = 0;
 
     for( int is = 0; is < nS; ++is ) {

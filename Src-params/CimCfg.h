@@ -188,8 +188,8 @@ public:
     struct ImProbeTable {
 private:
         QVector<ImProbeDat>     probes;
-        QVector<int>            iprb2dat;   // log probeID -> ImProbeDat
-        QVector<int>            iobx2dat;   // log obxID   -> ImProbeDat
+        QVector<int>            iprb2dat;   // sel probeID -> ImProbeDat
+        QVector<int>            iobx2dat;   // sel obxID   -> ImProbeDat
         QVector<int>            slotsUsed;  // used slots
         QMap<int,int>           slot2zIdx;  // slot -> zero-based order idx
         QMap<int,int>           slot2type;  // slot -> {0=PXI,1=OneBox}
@@ -206,10 +206,10 @@ public:
         int buildEnabIndexTables();
         int buildQualIndexTables();
         bool haveQualCalFiles() const;
-        int nLogSlots() const       {return slotsUsed.size();}
         int nTblEntries() const     {return probes.size();}
-        int nLogProbes() const      {return iprb2dat.size();}
-        int nLogOneBox() const      {return iobx2dat.size();}
+        int nSelSlots() const       {return slotsUsed.size();}
+        int nSelProbes() const      {return iprb2dat.size();}
+        int nSelOneBox() const      {return iobx2dat.size();}
 
         void setCfgSlots( const QVector<CfgSlot> &vCS );
         void getCfgSlots( QVector<CfgSlot> &vCS );
@@ -240,8 +240,8 @@ public:
         ImProbeDat& mod_iProbe( int i )
             {return probes[iprb2dat[i]];}
 
-        ImProbeDat& mod_iOneBox( int i )
-            {return probes[iobx2dat[i]];}
+        ImProbeDat& mod_iOneBox( int isel )
+            {return probes[iobx2dat[isel]];}
 
         const ImProbeDat& get_kTblEntry( int k ) const
             {return probes[k];}
@@ -249,8 +249,8 @@ public:
         const ImProbeDat& get_iProbe( int i ) const
             {return probes[iprb2dat[i]];}
 
-        const ImProbeDat& get_iOneBox( int i ) const
-            {return probes[iobx2dat[i]];}
+        const ImProbeDat& get_iOneBox( int isel ) const
+            {return probes[iobx2dat[isel]];}
 
         int nQualStreamsThisSlot( int slot ) const;
 
@@ -260,9 +260,9 @@ public:
         void set_hssn_SRate( quint64 hssn, double srate )
             {hssn2srate[hssn] = srate;}
 
-        double get_iOneBox_SRate( int i ) const;
-        void set_iOneBox_SRate( int i, double srate )
-            {obsn2srate[probes[iobx2dat[i]].obsn] = srate;}
+        double get_iOneBox_SRate( int isel ) const;
+        void set_iOneBox_SRate( int isel, double srate )
+            {obsn2srate[probes[iobx2dat[isel]].obsn] = srate;}
         void set_obsn_SRate( int obsn, double srate )
             {obsn2srate[obsn] = srate;}
 
@@ -434,16 +434,19 @@ public:
         VRange          range;
         double          srate;
         QString         when,       // last set by user
-                        uiXAStr;
+                        uiXAStr,
+                        uiAOStr;
         int             obCumTypCnt[obNTypes];
-        bool            digital;
+        bool            isXD;
         SnsChansObx     sns;
 
         ObxEach()
         :   range(-5,5), srate(imOBX_SRATE),
-            uiXAStr("0:11"), digital(true)  {}
+            uiXAStr("0:11"), isXD(true) {}
 
         void deriveChanCounts();
+
+        bool isStream() const   {return isXD || !uiXAStr.isEmpty();}
 
         int vToInt16( double v ) const;
         double int16ToV( int i16 ) const;
@@ -459,12 +462,12 @@ public:
     // ------
 
 private:
-    int                 nProbes,
-                        nOneBox;
+    QVector<ObxEach>    obxj;       // selected params
+    QVector<int>        istr2isel;  // stream-ip -> selected-ip
+    int                 nObxStr;    // num recording
 public:
     PrbAll              prbAll;
-    QVector<PrbEach>    prbj;
-    QVector<ObxEach>    obxj;
+    QVector<PrbEach>    prbj;       // selected params
     bool                enabled;
 
     CimCfg() : enabled(false)   {set_ini_nprb_nobx(0, 0);}
@@ -478,8 +481,16 @@ public:
     void set_cfg_def_no_streams( const CimCfg &RHS );
     void set_cfg_nprb( const QVector<PrbEach> &each, int nprb );
     void set_cfg_nobx( const QVector<ObxEach> &each, int nobx );
-    int get_nProbes() const     {return (enabled ? nProbes : 0);}
-    int get_nOneBox() const     {return (enabled ? nOneBox : 0);}
+    void set_cfg_obxj_istr_data();
+    int get_nProbes() const             {return (enabled ? prbj.size() : 0);}
+    int get_nOneBox() const             {return (enabled ? obxj.size() : 0);}
+    int get_nObxStr() const             {return (enabled ? nObxStr : 0);}
+    int obx_istr2isel( int istr ) const {return istr2isel[istr];}
+
+    ObxEach& mod_iSelOneBox( int isel )             {return obxj[isel];}
+    ObxEach& mod_iStrOneBox( int istr )             {return obxj[istr2isel[istr]];}
+    const ObxEach& get_iSelOneBox( int isel ) const {return obxj[isel];}
+    const ObxEach& get_iStrOneBox( int istr ) const {return obxj[istr2isel[istr]];}
 
     void loadSettings( QSettings &S );
     void saveSettings( QSettings &S ) const;

@@ -137,6 +137,23 @@ void Config_devtab::updateIMParams()
     imWriteCurrent();
 }
 
+
+void Config_devtab::updateObxIDs( DAQ::Params &q )
+{
+    q.im.set_cfg_obxj_istr_data();
+
+    for( int istr = 0, np = cfg->prbTab.nSelOneBox(); istr < np; ++istr ) {
+
+        int                     isel = q.im.obx_istr2isel( istr );
+        const CimCfg::ObxEach   &E   = q.im.get_iStrOneBox( istr );
+        CimCfg::ImProbeDat      &P   = cfg->prbTab.mod_iOneBox( isel );
+
+        P.ip = (E.isStream() ? istr : -1);
+    }
+
+    prbTabToGUI();
+}
+
 /* ---------------------------------------------------------------- */
 /* Private slots -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -582,7 +599,7 @@ runDialog:
 
         // Store to table
 
-        int nTbl = T.nLogProbes();
+        int nTbl = T.nSelProbes();
 
         for( int ip = 0, np = vP.size(); ip < np; ++ip ) {
 
@@ -684,7 +701,7 @@ runDialog:
 
         // Store to table
 
-        int nTbl = T.nLogProbes();
+        int nTbl = T.nSelProbes();
 
         for( int ip = 0, np = vP.size(); ip < np; ++ip ) {
 

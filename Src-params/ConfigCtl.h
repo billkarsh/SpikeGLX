@@ -138,7 +138,7 @@ private:
     bool validDevTab( QString &err, DAQ::Params &q ) const;
     bool validImLEDs( QString &err, DAQ::Params &q ) const;
     bool validImStdbyBits( QString &err, CimCfg::PrbEach &E, int ip ) const;
-    bool validObChannels( QString &err, CimCfg::ObxEach &E, int ip ) const;
+    bool validObChannels( QString &err, DAQ::Params &q, int istr ) const;
     bool validNiDevices( QString &err, DAQ::Params &q ) const;
     bool validNiClock( QString &err, DAQ::Params &q ) const;
     bool validNiChannels(
@@ -157,12 +157,13 @@ private:
     void validImShankMap( CimCfg::PrbEach &E ) const;
     bool validNiShankMap( QString &err, DAQ::Params &q ) const;
     bool validImChanMap( QString &err, CimCfg::PrbEach &E, int ip ) const;
-    bool validObChanMap( QString &err, DAQ::Params &q, int ip ) const;
+    bool validObChanMap( QString &err, DAQ::Params &q, int istr ) const;
     bool validNiChanMap( QString &err, DAQ::Params &q ) const;
     bool validImSaveBits( QString &err, DAQ::Params &q, int ip ) const;
-    bool validObSaveBits( QString &err, DAQ::Params &q, int ip ) const;
+    bool validObSaveBits( QString &err, DAQ::Params &q, int istr ) const;
     bool validNiSaveBits( QString &err, DAQ::Params &q ) const;
     bool validSyncTab( QString &err, DAQ::Params &q ) const;
+    bool validTriggerStream( QString &err, DAQ::Params &q ) const;
     bool validImTriggering( QString &err, DAQ::Params &q ) const;
     bool validObTriggering( QString &err, DAQ::Params &q ) const;
     bool validNiTriggering( QString &err, DAQ::Params &q ) const;

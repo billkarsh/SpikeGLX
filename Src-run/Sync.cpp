@@ -30,7 +30,7 @@ void SyncStream::init( const AIQ *Q, int js, int ip, const DAQ::Params &p )
             }
             break;
         case jsOB:
-            chan = p.im.obxj[ip].obCumTypCnt[CimCfg::obSumData];
+            chan = p.im.get_iStrOneBox( ip ).obCumTypCnt[CimCfg::obSumData];
             bit  = 6;   // Sync signal always at bit 6 of AUX word
             break;
         case jsIM:

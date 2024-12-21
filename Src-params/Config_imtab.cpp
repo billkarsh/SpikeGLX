@@ -232,6 +232,12 @@ QString Config_imtab::remoteVfyPrbAll( const CimCfg &next, const CimCfg &prev )
                 .arg( prev.get_nOneBox() );
     }
 
+    if( next.get_nObxStr() != prev.get_nObxStr() ) {
+
+        return QString("SETPARAMSIMALL: Remote cannot change count of recording OneBoxes [%1].")
+                .arg( prev.get_nObxStr() );
+    }
+
     if( next.prbAll.calPolicy < 0 || next.prbAll.calPolicy > 2 )
         return "SETPARAMSIMALL: Calibration file policy is one of {0=required,1=avail,2=never}.";
 
@@ -345,7 +351,7 @@ void Config_imtab::selectionChanged()
     QTableWidget        *T      = imTabUI->prbTbl;
     QTableWidgetItem    *ti     = T->currentItem();
     int                 ip      = -1,
-                        np      = cfg->prbTab.nLogProbes();
+                        np      = cfg->prbTab.nSelProbes();
     bool                enab    = false;
 
     if( ti ) {
@@ -625,7 +631,7 @@ void Config_imtab::loadSettings()
 
 void Config_imtab::onDetect()
 {
-    int np = cfg->prbTab.nLogProbes();
+    int np = cfg->prbTab.nSelProbes();
 
     each.clear();
 
@@ -731,7 +737,7 @@ void Config_imtab::toTbl()
 {
     QTableWidget    *T = imTabUI->prbTbl;
     SignalBlocker   b0(T);
-    int             np = cfg->prbTab.nLogProbes();
+    int             np = cfg->prbTab.nSelProbes();
 
     T->setRowCount( np );
 

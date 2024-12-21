@@ -206,7 +206,7 @@ bool CimAcqImec::_st_setTriggers()
 
 bool CimAcqImec::_st_setArm()
 {
-    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
+    for( int is = 0, ns = T.nSelSlots(); is < ns; ++is ) {
 
         int slot = T.getEnumSlot( is );
 

@@ -209,7 +209,7 @@ double Params::stream_rate( int js, int ip ) const
 {
     switch( js ) {
         case jsNI: return ni.srate;
-        case jsOB: return im.obxj[ip].srate;
+        case jsOB: return im.get_iStrOneBox( ip ).srate;
         case jsIM: return im.prbj[ip].srate;
     }
 
@@ -221,7 +221,7 @@ int Params::stream_nChans( int js, int ip ) const
 {
     switch( js ) {
         case jsNI: return ni.niCumTypCnt[CniCfg::niSumAll];
-        case jsOB: return im.obxj[ip].obCumTypCnt[CimCfg::obSumAll];
+        case jsOB: return im.get_iStrOneBox( ip ).obCumTypCnt[CimCfg::obSumAll];
         case jsIM: return im.prbj[ip].imCumTypCnt[CimCfg::imSumAll];
     }
 
@@ -301,8 +301,10 @@ int Params::trigThreshAsInt() const
 
         if( stream_isNI( trgTTL.stream ) )
             return ni.vToInt16( trgTTL.T, trgTTL.chan );
-        else if( stream_isOB( trgTTL.stream ) )
-            return im.obxj[stream2ip( trgTTL.stream )].vToInt16( trgTTL.T );
+        else if( stream_isOB( trgTTL.stream ) ) {
+            return im.get_iStrOneBox( stream2ip( trgTTL.stream ) )
+                    .vToInt16( trgTTL.T );
+        }
         else {
             return im.prbj[stream2ip( trgTTL.stream )]
                     .vToInt( trgTTL.T, trgTTL.chan );
@@ -312,8 +314,10 @@ int Params::trigThreshAsInt() const
 
         if( stream_isNI( trgSpike.stream ) )
             return ni.vToInt16( trgSpike.T, trgSpike.aiChan );
-        else if( stream_isOB( trgSpike.stream ) )
-            return im.obxj[stream2ip( trgSpike.stream )].vToInt16( trgSpike.T );
+        else if( stream_isOB( trgSpike.stream ) ) {
+            return im.get_iStrOneBox( stream2ip( trgSpike.stream ) )
+                    .vToInt16( trgSpike.T );
+        }
         else {
             return im.prbj[stream2ip( trgSpike.stream )]
                     .vToInt( trgSpike.T, trgSpike.aiChan );
@@ -335,7 +339,7 @@ int Params::trigChan() const
         else if( stream_isNI( trgTTL.stream ) )
             return ni.niCumTypCnt[CniCfg::niSumAnalog] + trgTTL.bit/16;
         else if( stream_isOB( trgTTL.stream ) ) {
-            return im.obxj[stream2ip( trgTTL.stream )]
+            return im.get_iStrOneBox( stream2ip( trgTTL.stream ) )
                     .obCumTypCnt[CimCfg::obSumAnalog];
         }
         else {

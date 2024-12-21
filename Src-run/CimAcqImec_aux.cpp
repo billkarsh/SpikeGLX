@@ -3,6 +3,7 @@
 
 #include "CimAcqImec.h"
 #include "Util.h"
+#include "Subset.h"
 
 #ifdef HAVE_VISA
 #define NIVISA_PXI  // include PXI VISA attributes
@@ -46,15 +47,16 @@ bool CimAcqImec::_aux_sizeStreamBufs()
 
 
 // Standard settings for Obx:
-// - ADC_enableProbe( true ) enable sync/bit-6 and/or ADC.
-// - DAC_enableOutput( false ) all channels input by default.
-// - ADC_setVoltageRange( config or 5 ).
+// - ADC_enableProbe( if XA ) enable sync/bit-6 and/or ADC.
+// - ADC_setVoltageRange( config ).
 // - ADC_setComparatorThreshold( rmax/10, rmax/10 ) all channels.
+// - DAC_enableOutput( by channel ).
+// - DAC_setVoltage( by channel ) = 0.
 //
 bool CimAcqImec::_aux_initObxSlot( const CimCfg::ImProbeTable &T, int slot )
 {
     double          v       = 5.0;
-    int             ob_ip   = -1;
+    int             isel    = -1;
     ADCrange_t      rng     = ADC_RANGE_5V;
     NP_ErrorCode    err;
 
@@ -62,30 +64,72 @@ bool CimAcqImec::_aux_initObxSlot( const CimCfg::ImProbeTable &T, int slot )
 // Find OneBox ip with this slot
 // -----------------------------
 
-    for( int ip = 0, np = p.stream_nOB(); ip < np; ++ip ) {
+    for( int ip = 0, np = T.nSelOneBox(); ip < np; ++ip ) {
 
         if( T.get_iOneBox( ip ).slot == slot ) {
-            ob_ip = ip;
+            isel = ip;
             break;
         }
     }
 
-// -------
-// Program
-// -------
+// ---
+// ADC
+// ---
 
-    err = np_ADC_enableProbe( slot, true );
+    const CimCfg::ObxEach   &E = p.im.get_iSelOneBox( isel );
 
-    if( err != SUCCESS ) {
-        runError(
-            QString("IMEC ADC_enableProbe(slot %1)%2")
-            .arg( slot ).arg( makeErrorString( err ) ) );
-        return false;
+    if( E.isStream() ) {
+
+        err = np_ADC_enableProbe( slot, true );
+
+        if( err != SUCCESS ) {
+            runError(
+                QString("IMEC ADC_enableProbe(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
+            return false;
+        }
+
+        v = E.range.rmax;
+
+        if( E.range.rmax < 4.0 )
+            rng = ADC_RANGE_2_5V;
+        else if( E.range.rmax > 6.0 )
+            rng = ADC_RANGE_10V;
+
+        err = np_ADC_setVoltageRange( slot, rng );
+
+        if( err != SUCCESS ) {
+            runError(
+                QString("IMEC ADC_setVoltageRange(slot %1 %2V)%3")
+                .arg( slot ).arg( v ).arg( makeErrorString( err ) ) );
+            return false;
+        }
+
+        for( int ic = 0; ic < imOBX_NCHN; ++ic ) {
+
+            err = np_ADC_setComparatorThreshold( slot, ic, 0.1 * v, 0.1 * v );
+
+            if( err != SUCCESS ) {
+                runError(
+                    QString("IMEC ADC_setComparatorThreshold(slot %1 chn %2 T %3)%4")
+                    .arg( slot ).arg( ic ).arg( 0.1 * v ).arg( makeErrorString( err ) ) );
+                return false;
+            }
+        }
     }
+
+// ---------
+// ADC / DAC
+// ---------
+
+    QVector<uint>   vAO;
+    Subset::rngStr2Vec( vAO, E.uiAOStr );
 
     for( int ic = 0; ic < imOBX_NCHN; ++ic ) {
 
-        err = np_DAC_enableOutput( slot, ic, false );
+        bool    isDAC = vAO.contains( ic );
+
+        err = np_DAC_enableOutput( slot, ic, isDAC );
 
         if( err != SUCCESS ) {
             runError(
@@ -93,36 +137,17 @@ bool CimAcqImec::_aux_initObxSlot( const CimCfg::ImProbeTable &T, int slot )
                 .arg( slot ).arg( ic ).arg( makeErrorString( err ) ) );
             return false;
         }
-    }
 
-    if( ob_ip >= 0 ) {
+        if( isDAC ) {
 
-        v = p.im.obxj[ob_ip].range.rmax;
+            err = np_DAC_setVoltage( slot, ic, 0 );
 
-        if( v < 4.0 )
-            rng = ADC_RANGE_2_5V;
-        else if( v > 6.0 )
-            rng = ADC_RANGE_10V;
-    }
-
-    err = np_ADC_setVoltageRange( slot, rng );
-
-    if( err != SUCCESS ) {
-        runError(
-            QString("IMEC ADC_setVoltageRange(slot %1 %2V)%3")
-            .arg( slot ).arg( v ).arg( makeErrorString( err ) ) );
-        return false;
-    }
-
-    for( int ic = 0; ic < imOBX_NCHN; ++ic ) {
-
-        err = np_ADC_setComparatorThreshold( slot, ic, 0.1 * v, 0.1 * v );
-
-        if( err != SUCCESS ) {
-            runError(
-                QString("IMEC ADC_setComparatorThreshold(slot %1 chn %2 lo 0.5 hi 1.8)%3")
-                .arg( slot ).arg( ic ).arg( makeErrorString( err ) ) );
-            return false;
+            if( err != SUCCESS ) {
+                runError(
+                    QString("IMEC DAC_setVoltage(slot %1, chn %2, 0)%3")
+                    .arg( slot ).arg( ic ).arg( makeErrorString( err ) ) );
+                return false;
+            }
         }
     }
 
@@ -132,7 +157,7 @@ bool CimAcqImec::_aux_initObxSlot( const CimCfg::ImProbeTable &T, int slot )
 
 bool CimAcqImec::_aux_open( const CimCfg::ImProbeTable &T )
 {
-    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
+    for( int is = 0, ns = T.nSelSlots(); is < ns; ++is ) {
 
         int slot = T.getEnumSlot( is );
 

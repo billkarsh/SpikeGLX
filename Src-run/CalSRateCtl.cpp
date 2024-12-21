@@ -280,7 +280,7 @@ void CalSRateCtl::apply()
                 // Update the current PrbEach records that
                 // correspond to this hssn.
 
-                for( int ip = 0, np = prbTab.nLogProbes(); ip < np; ++ip ) {
+                for( int ip = 0, np = prbTab.nSelProbes(); ip < np; ++ip ) {
 
                     if( prbTab.get_iProbe( ip ).hssn == hssn )
                         p.im.prbj[ip].srate = S.av;
@@ -362,10 +362,10 @@ void CalSRateCtl::apply()
                 // Update the current ObxEach records that
                 // correspond to this obsn.
 
-                for( int ip = 0, np = prbTab.nLogOneBox(); ip < np; ++ip ) {
+                for( int ip = 0, np = prbTab.nSelOneBox(); ip < np; ++ip ) {
 
                     if( prbTab.get_iOneBox( ip ).obsn == obsn )
-                        p.im.obxj[ip].srate = S.av;
+                        p.im.mod_iSelOneBox( ip ).srate = S.av;
                 }
 
                 // Update database
