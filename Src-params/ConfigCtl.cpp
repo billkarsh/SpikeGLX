@@ -1282,7 +1282,7 @@ bool ConfigCtl::validObChannels( QString &err, DAQ::Params &q, int istr ) const
     nAI = vAI.size();
     nAO = vAO.size();
 
-    if( !(nAI + nAO) ) {
+    if( !(nAI + E.isXD + nAO) ) {
         err = QString("Obx %1: No channels specified.").arg( istr );
         return false;
     }
