@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+December 20, 2024
+
+* CatGT 4.6 (For AP->LF: -ap flag not needed).
+
 December 2, 2024
 
 * SpikeGLX 20241001-phase30 (Click and play, new probes, imec v3.70.3).
