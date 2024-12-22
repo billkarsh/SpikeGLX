@@ -87,11 +87,11 @@ of a single 16-bit `XD` word.
 In other words, your Obx data stream either has no digital word, or it has
 a single digital word containing 12 digital lines.
 
-A OneBox is configured for recording if at least one XA channel is listed,
-or if XD is enabled. In this case, the OneBox is assigned a logical recording
-stream ID index that you can see in the big Probes table of the Devices tab.
-In SDK remote interface functions you can access this device using indices:
-`(js,ip) = (1,ID)`.
+A OneBox Obx stream is configured for recording if at least one XA channel
+is listed, or if XD is enabled. In this case, the OneBox is assigned a
+logical recording stream ID index that you can see in the big Probes table
+of the Devices tab. In SDK remote interface functions you can access this
+device using indices: `(js,ip) = (1,ID)`.
 
 --------
 

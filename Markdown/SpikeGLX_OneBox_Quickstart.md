@@ -99,7 +99,7 @@ on the front of a PXI basestation, which also uses 0-5V TTL signals.
 
 #### Sync output
 
-In SpikeGLX, on the Configuration dialog Sync tab, you can select one
+In SpikeGLX, on the Configuration dialog `Sync` tab, you can select one
 device in the run for Sync output. This can be a separate pulser device,
 an NI device, a OneBox, or a PXI module. All the other devices in that run
 must then be wired to receive that common shared Sync signal.
@@ -119,6 +119,14 @@ connected whether bringing signals in or out of the chassis as a whole.
 However, if using more than one OneBox, there is no backplane connecting
 these, so you will need to cable up the SMA 1 connector of each OneBox
 in the run.
+
+>IMPORTANT: Sync is automatically shared among all the probes and ADC
+streams running on a given OneBox. However, there has to be a Sync signal
+in order to share it. If you are running a single OneBox and nothing else,
+you should select the OneBox as the Sync output source on the `Sync` tab
+of the Configuration dialog: this will generate the shared signal. Since
+all the streams are being run by this single device, there is no need to
+connect wires to **SMA 1**.
 
 #### Non-sync input
 

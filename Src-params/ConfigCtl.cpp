@@ -1317,7 +1317,7 @@ bool ConfigCtl::validObChannels( QString &err, DAQ::Params &q, int istr ) const
 
     if( bAI.count( true ) ) {
         err =
-        QString("Obx %1: XA and AO share these channels {%2}.")
+        QString("Obx %1: XA and AO conflict; channels in both {%2}.")
         .arg( istr ).arg( Subset::bits2RngStr( bAI ) );
         return false;
     }

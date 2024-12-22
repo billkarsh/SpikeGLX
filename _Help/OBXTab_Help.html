@@ -56,7 +56,7 @@
 <h2 id="xd-digital-lines">XD Digital Lines</h2>
 <p>If you enable the XD (digital) option, then, regardless of your XA channel list, <strong>ALL 12</strong> analog inputs are digitized using a fixed threshold value equal to 10% of: {2.5, 5, 10} as determined by your AI Range selection. The 12 resulting digital lines are read out together as the lowest 12 bits of a single 16-bit <code>XD</code> word.</p>
 <p>In other words, your Obx data stream either has no digital word, or it has a single digital word containing 12 digital lines.</p>
-<p>A OneBox is configured for recording if at least one XA channel is listed, or if XD is enabled. In this case, the OneBox is assigned a logical recording stream ID index that you can see in the big Probes table of the Devices tab. In SDK remote interface functions you can access this device using indices: <code>(js,ip) = (1,ID)</code>.</p>
+<p>A OneBox Obx stream is configured for recording if at least one XA channel is listed, or if XD is enabled. In this case, the OneBox is assigned a logical recording stream ID index that you can see in the big Probes table of the Devices tab. In SDK remote interface functions you can access this device using indices: <code>(js,ip) = (1,ID)</code>.</p>
 <hr />
 <h2 id="ai-range">AI Range</h2>
 <p>The selected scale +/- {2.5,5,10} volts is applied to all input analog channels.</p>

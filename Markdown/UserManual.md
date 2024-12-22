@@ -45,6 +45,7 @@
 
 **Appendix:**
 
+* [SpikeGLX_OneBox_Quickstart](SpikeGLX_OneBox_Quickstart.html)
 * [SpikeGLX FAQ](SpikeGLX_FAQ.html)
 * [Metadata Tags](Metadata_30.html)
 
@@ -60,7 +61,7 @@
 
 #### OneBox
 
-[SpikeGLX_OneBox_Quickstart.html](SpikeGLX_OneBox_Quickstart.html).
+[SpikeGLX_OneBox_Quickstart](SpikeGLX_OneBox_Quickstart.html).
 
 #### Help
 

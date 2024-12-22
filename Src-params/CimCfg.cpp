@@ -1,5 +1,7 @@
 
 #include "Util.h"
+#include "MainApp.h"
+#include "ConfigCtl.h"
 #include "CimCfg.h"
 #include "KVParams.h"
 #include "GeomMap.h"
@@ -948,7 +950,7 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
         }
 
         if( P.ip == quint16(-1) ) {
-            if( P.enab && P.isOneBox() )
+            if( P.enab && P.isOneBox() && mainApp()->cfgCtl()->validated )
                 ti->setText( "DAC" );
             else
                 ti->setText( "???" );
