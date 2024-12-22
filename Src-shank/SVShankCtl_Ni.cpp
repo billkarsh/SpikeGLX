@@ -96,6 +96,12 @@ void SVShankCtl_Ni::saveSettings() const
     settings.endGroup();
 }
 
+
+QString SVShankCtl_Ni::screenStateName() const
+{
+    return QString("WinLayout_GRF_%1_ShankView_Nidq/geometry").arg( jpanel );
+}
+
 /* ---------------------------------------------------------------- */
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */

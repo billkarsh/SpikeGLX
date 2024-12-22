@@ -208,6 +208,13 @@ void SVShankCtl_Im::saveSettings() const
     settings.endGroup();
 }
 
+
+QString SVShankCtl_Im::screenStateName() const
+{
+    return QString("WinLayout_GRF_%1_ShankView_Imec_T%2/geometry")
+            .arg( jpanel ).arg( p.im.prbj[ip].roTbl->pn );
+}
+
 /* ---------------------------------------------------------------- */
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */

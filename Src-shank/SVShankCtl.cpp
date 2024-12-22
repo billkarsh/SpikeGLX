@@ -3,7 +3,6 @@
 
 #include "Util.h"
 #include "SVShankCtl.h"
-#include "GraphsWindow.h"
 #include "DAQ.h"
 
 #include <QCloseEvent>
@@ -25,9 +24,6 @@ SVShankCtl::~SVShankCtl()
         delete svTab;
         svTab = 0;
     }
-
-    GraphsWindow::setShankGeom( saveGeometry(), jpanel );
-    emit closed( this );
 }
 
 /* ---------------------------------------------------------------- */
@@ -59,6 +55,10 @@ void SVShankCtl::parInit( int js, int ip )
 
     mapChanged();
     selChan( 0, "" );
+
+// Window
+
+    restoreScreenState();
 }
 
 
@@ -68,11 +68,10 @@ void SVShankCtl::closeEvent( QCloseEvent *e )
 
     if( e->isAccepted() ) {
 
-        GraphsWindow::setShankGeom( saveGeometry(), jpanel );
-
         // reset for next showing of window
         svTab->winClosed();
 
+        saveScreenState();
         emit closed( this );
     }
 }

@@ -53,6 +53,8 @@ protected:
     virtual void loadSettings();
     virtual void saveSettings() const;
 
+    virtual QString screenStateName() const;
+
 private:
     void initMenu();
     void setAudio( int LBR );

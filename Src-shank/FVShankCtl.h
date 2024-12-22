@@ -30,7 +30,7 @@ public:
 
 signals:
     void selChanged( int ig );
-    void closed( QWidget *w );
+    void feedMe( bool needMap );
 
 public slots:
     void cursorOver( int ig )               {svTab->cursorOver( ig );}
@@ -39,10 +39,6 @@ public slots:
 protected:
     void parInit( const ShankMap *map );
     virtual void closeEvent( QCloseEvent *e );
-
-    virtual QString screenStateName() const = 0;
-    void restoreScreenState();
-    void saveScreenState() const;
 };
 
 #endif  // FVSHANKCTL_H

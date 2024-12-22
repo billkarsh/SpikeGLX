@@ -228,6 +228,11 @@ SVGrafsM::~SVGrafsM()
     drawMtx.lock();
     drawMtx.unlock();
 
+// Tell shankCtl to save screen state
+
+    if( shankCtl )
+        shankCtl->close();
+
 // OK to destroy
 
     fltMtx.lock();
@@ -242,30 +247,6 @@ SVGrafsM::~SVGrafsM()
 /* Public --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool SVGrafsM::shankCtlGeomGet( QByteArray &geom ) const
-{
-    if( shankCtl && shankCtl->isVisible() ) {
-
-        geom = shankCtl->saveGeometry();
-        return true;
-    }
-
-    return false;
-}
-
-
-void SVGrafsM::shankCtlGeomSet( const QByteArray &geom, bool show )
-{
-    if( shankCtl && geom.size() ) {
-
-        shankCtl->restoreGeometry( geom );
-
-        if( show )
-            showShanks( false );
-    }
-}
-
-
 void SVGrafsM::eraseGraphs()
 {
     drawMtx.lock();
@@ -276,6 +257,12 @@ void SVGrafsM::eraseGraphs()
 
     theX->dataMtx.unlock();
     drawMtx.unlock();
+}
+
+
+bool SVGrafsM::isShankVis() const
+{
+    return shankCtl && shankCtl->isVisible();
 }
 
 
@@ -301,15 +288,10 @@ void SVGrafsM::toggleSorting()
 }
 
 
-void SVGrafsM::showShanks( bool getGeom )
+void SVGrafsM::showShanks()
 {
-    if( shankCtl ) {
-
-        if( getGeom )
-            gw->shankCtlWantGeom( jpanel );
-
+    if( shankCtl )
         shankCtl->showDialog();
-    }
 }
 
 

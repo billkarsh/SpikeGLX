@@ -31,7 +31,6 @@ public:
 
 signals:
     void selChanged( int ic, bool shift );
-    void closed( QWidget *w );
 
 public slots:
     virtual void cursorOver( int ic, bool shift ) = 0;

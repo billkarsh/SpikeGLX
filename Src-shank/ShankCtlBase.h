@@ -61,8 +61,8 @@ signals:
     void runSaveChansDlg( QString sInit );
     void modal_done( ShankCtlBase *editor, QString fn, bool ok );
     void viewTabSyncYPix( int y );
-    void feedMe( bool needMap );
     void gimmeTraces();
+    void closed( QWidget *w );
 
 public slots:
     void gridHover( int s, int r, bool quiet );
@@ -72,6 +72,10 @@ public slots:
 protected:
     virtual bool eventFilter( QObject *watched, QEvent *event );
     virtual void keyPressEvent( QKeyEvent *e );
+
+    virtual QString screenStateName() const {}
+    void restoreScreenState();
+    void saveScreenState() const;
 };
 
 #endif  // SHANKCTLBASE_H

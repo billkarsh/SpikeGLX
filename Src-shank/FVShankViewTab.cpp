@@ -338,7 +338,7 @@ void FVShankViewTab::howChanged( int i )
         if( w_ig2sbg.size() > sel )
             SC->view()->setSel( w_ig2sbg[sel].g, false );
 
-        emit SC->feedMe( true );
+        emit dynamic_cast<FVShankCtl*>(SC)->feedMe( true );
     }
 }
 
@@ -369,7 +369,7 @@ void FVShankViewTab::whatChanged( int i )
     if( fvTabUI->howCB->currentIndex() )
         color();
     else
-        emit SC->feedMe( false );
+        emit dynamic_cast<FVShankCtl*>(SC)->feedMe( false );
 }
 
 

@@ -126,9 +126,6 @@ public:
     QWidget *getGWWidget()  {return (QWidget*)gw;}
     MGraphX *getTheX()      {return theX;}
 
-    bool shankCtlGeomGet( QByteArray &geom ) const;
-    void shankCtlGeomSet( const QByteArray &geom, bool show );
-
     void eraseGraphs();
     virtual void putSamps( vec_i16 &data, quint64 headCt ) = 0;
     virtual void updateRHSFlags() = 0;
@@ -148,6 +145,7 @@ public:
     bool isBinMaxOn()       const   {return set.binMaxOn;}
     bool isUsrOrder()       const   {return set.usrOrder;}
     bool isMaximized()      const   {return maximized > -1;}
+    bool isShankVis() const;
     void getSelScales( double &xSpn, double &yScl ) const;
     QColor getSelColor() const;
     virtual bool isSelAnalog() const = 0;
@@ -158,7 +156,7 @@ public:
 public slots:
     // Navbar
     void toggleSorting();
-    void showShanks( bool getGeom = true );
+    void showShanks();
     void nchanChanged( int val, int first );
     void firstChanged( int first );
     // SVTools

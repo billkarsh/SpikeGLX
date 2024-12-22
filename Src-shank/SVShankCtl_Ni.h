@@ -27,6 +27,8 @@ protected:
     QString settingsName() const;
     virtual void loadSettings();
     virtual void saveSettings() const;
+
+    virtual QString screenStateName() const;
 };
 
 #endif  // SVSHANKCTL_NI_H

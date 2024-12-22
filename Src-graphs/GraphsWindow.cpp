@@ -1,6 +1,7 @@
 
 #include "Util.h"
 #include "MainApp.h"
+#include "ConfigCtl.h"
 #include "Run.h"
 #include "GraphFetcher.h"
 #include "GraphsWindow.h"
@@ -11,21 +12,13 @@
 #include "SVGrafsM.h"
 #include "ColorTTLCtl.h"
 #include "SOCtl.h"
-#include "ConfigCtl.h"
 
 #include <QSplitter>
-//#include <QVBoxLayout>
 #include <QKeyEvent>
 #include <QStatusBar>
 #include <QMessageBox>
 #include <QSettings>
 
-
-/* ---------------------------------------------------------------- */
-/* Statics -------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-std::vector<QByteArray> GraphsWindow::vShankGeom;
 
 /* ---------------------------------------------------------------- */
 /* Globals -------------------------------------------------------- */
@@ -89,7 +82,6 @@ GraphsWindow::GraphsWindow( const DAQ::Params &p, int igw )
 
 // Screen state
 
-    loadShankScreenState();
     restoreScreenState();
 
 // Other helpers
@@ -109,7 +101,6 @@ GraphsWindow::GraphsWindow( const DAQ::Params &p, int igw )
 //
 GraphsWindow::~GraphsWindow()
 {
-    saveShankScreenState();
     saveScreenState();
     setUpdatesEnabled( false );
 }
@@ -126,13 +117,6 @@ void GraphsWindow::soStopFetching()
 {
     if( soctl )
         soctl->stopFetching();
-}
-
-
-void GraphsWindow::shankCtlWantGeom( int jpanel ) const
-{
-    SVGrafsM    *W = (jpanel == 2*igw ? lW : rW);
-    W->shankCtlGeomSet( vShankGeom[jpanel], false );
 }
 
 
@@ -494,10 +478,11 @@ void GraphsWindow::installLeft( QSplitter *sp )
     QWidget *w;
     int     ip, js  = SEL->ljsip( ip ),
             jpanel  = 2 * igw;
+    bool    vis;
 
     if( sp->count() > 0 ) {
 
-        bool    vis = lW->shankCtlGeomGet( vShankGeom[jpanel] );
+        vis = lW->isShankVis();
 
         switch( js ) {
             case jsNI: w = new SViewM_Ni( lW, this, p, jpanel ); break;
@@ -510,7 +495,8 @@ void GraphsWindow::installLeft( QSplitter *sp )
         if( w )
             delete w;
 
-        lW->shankCtlGeomSet( vShankGeom[jpanel], vis );
+        if( vis )
+            lW->showShanks();
 
         QMetaObject::invokeMethod(
             SEL, "setFocus",
@@ -526,7 +512,6 @@ void GraphsWindow::installLeft( QSplitter *sp )
         }
 
         sp->addWidget( w );
-        lW->shankCtlGeomSet( vShankGeom[jpanel], false );
     }
 }
 
@@ -546,7 +531,7 @@ bool GraphsWindow::installRight( QSplitter *sp )
                 QWidget *w;
                 int     ip, js  = SEL->rjsip( ip ),
                         jpanel  = 2*igw + 1;
-                bool    vis     = rW->shankCtlGeomGet( vShankGeom[jpanel] );
+                bool    vis     = rW->isShankVis();
 
                 switch( js ) {
                     case jsNI: w = new SViewM_Ni( rW, this, p, jpanel ); break;
@@ -559,7 +544,8 @@ bool GraphsWindow::installRight( QSplitter *sp )
                 if( w )
                     delete w;
 
-                rW->shankCtlGeomSet( vShankGeom[jpanel], vis );
+                if( vis )
+                    rW->showShanks();
 
                 QMetaObject::invokeMethod(
                     SEL, "setFocus",
@@ -594,8 +580,6 @@ bool GraphsWindow::installRight( QSplitter *sp )
         }
 
         sp->addWidget( w );
-        rW->shankCtlGeomSet( vShankGeom[jpanel], false );
-
         return true;
     }
 
@@ -642,43 +626,6 @@ void GraphsWindow::initGFStreams()
         gfs.push_back( GFStream( SEL->rStream(), rW ) );
 
     mainApp()->getRun()->grfSetStreams( gfs, igw );
-}
-
-
-void GraphsWindow::loadShankScreenState()
-{
-    STDSETTINGS( settings, "windowlayout" );
-
-    int numPanels = 2 * (1 + igw);
-
-    if( int(vShankGeom.size()) < numPanels )
-        vShankGeom.resize( numPanels );
-
-    for( int jpanel = 2*igw; jpanel <= 2*igw + 1; ++jpanel ) {
-
-        vShankGeom[jpanel] =
-            settings.value(
-                QString("WinLayout_ShankView_Panel%1/geometry")
-                .arg( jpanel ) ).toByteArray();
-    }
-}
-
-
-void GraphsWindow::saveShankScreenState() const
-{
-    STDSETTINGS( settings, "windowlayout" );
-
-    for( int jpanel = 2*igw; jpanel <= 2*igw + 1; ++jpanel ) {
-
-        SVGrafsM    *W = (jpanel == 2*igw ? lW : rW);
-
-        if( W )
-            W->shankCtlGeomGet( vShankGeom[jpanel] );
-
-        settings.setValue(
-            QString("WinLayout_ShankView_Panel%1/geometry")
-            .arg( jpanel ), vShankGeom[jpanel] );
-    }
 }
 
 

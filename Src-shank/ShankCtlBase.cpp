@@ -7,6 +7,7 @@
 
 #include <QAction>
 #include <QKeyEvent>
+#include <QSettings>
 
 
 /* ---------------------------------------------------------------- */
@@ -220,6 +221,30 @@ void ShankCtlBase::keyPressEvent( QKeyEvent *e )
     }
     else
         QDialog::keyPressEvent( e );
+}
+
+
+// Note:
+// restoreScreenState() must be called after initializing
+// a window's controls with setupUI().
+//
+void ShankCtlBase::restoreScreenState()
+{
+    STDSETTINGS( settings, "windowlayout" );
+
+    if( !restoreGeometry(
+        settings.value( screenStateName() ).toByteArray() ) ) {
+
+        // Get size from form, or do nothing.
+    }
+}
+
+
+void ShankCtlBase::saveScreenState() const
+{
+    STDSETTINGS( settings, "windowlayout" );
+
+    settings.setValue( screenStateName(), saveGeometry() );
 }
 
 

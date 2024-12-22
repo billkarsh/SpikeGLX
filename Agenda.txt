@@ -3,6 +3,7 @@
 
 20241215
 --------
++ Better ShankViewer window management.
 + New remote set_NI_DO patterned digital output.
 
 20241001

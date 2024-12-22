@@ -6,7 +6,6 @@
 #include "DataFile.h"
 
 #include <QCloseEvent>
-#include <QSettings>
 
 
 /* ---------------------------------------------------------------- */
@@ -82,30 +81,6 @@ void FVShankCtl::closeEvent( QCloseEvent *e )
         saveScreenState();
         emit closed( this );
     }
-}
-
-
-// Note:
-// restoreScreenState() must be called after initializing
-// a window's controls with setupUI().
-//
-void FVShankCtl::restoreScreenState()
-{
-    STDSETTINGS( settings, "windowlayout" );
-
-    if( !restoreGeometry(
-        settings.value( screenStateName() ).toByteArray() ) ) {
-
-        // Get size from form, or do nothing.
-    }
-}
-
-
-void FVShankCtl::saveScreenState() const
-{
-    STDSETTINGS( settings, "windowlayout" );
-
-    settings.setValue( screenStateName(), saveGeometry() );
 }
 
 
