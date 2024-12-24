@@ -305,6 +305,7 @@ struct ImAcqStream {
                     errSYNC[4],
                     tStampLastFetch;
     mutable int     fifoAve,
+                    fifoDqb,
                     fifoN,
                     sumN;
     int             js,
@@ -454,7 +455,7 @@ private:
         int                 smpMax,
         streamsource_t      shank = SourceAP );
     bool fetch_obx( int &nT, PacketInfo* H, qint16* D, const ImAcqStream &S );
-    int fifoPct( int *packets, const ImAcqStream &S ) const;
+    int fifoPct( int *packets, int *dqb, const ImAcqStream &S ) const;
 
 // --------
 // Callback

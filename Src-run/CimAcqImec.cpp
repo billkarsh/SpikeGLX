@@ -701,7 +701,8 @@ ImAcqStream::ImAcqStream(
         sumTot(0), totPts(0ULL), Q(Q), QFlt(0), lastTStamp(0),
         errCOUNT{0,0,0,0}, errSERDES{0,0,0,0}, errLOCK{0,0,0,0},
         errPOP{0,0,0,0}, errSYNC{0,0,0,0},
-        fifoAve(0), fifoN(0), sumN(0), js(js), ip(ip), simType(false)
+        fifoAve(0), fifoDqb(0), fifoN(0),
+        sumN(0), js(js), ip(ip), simType(false)
 #ifdef PAUSEWHOLESLOT
         , zeroFill(false)
 #endif
@@ -876,14 +877,18 @@ void ImAcqStream::checkErrFlags_PInfo( const PacketInfo* H, int nT, int shank ) 
 bool ImAcqStream::checkFifo( int *packets, CimAcqImec *acq ) const
 {
     double  tFifo = getTime();
+    int     dqd;
 
-    fifoAve += acq->fifoPct( packets, *this );
+    fifoAve += acq->fifoPct( packets, &dqd, *this );
+    fifoDqb += dqd;
     ++fifoN;
 
     if( tFifo - tLastFifoReport >= 5.0 ) {
 
-        if( fifoN > 0 )
+        if( fifoN > 0 ) {
             fifoAve /= fifoN;
+            fifoDqb /= fifoN;
+        }
 
         QString stream = metricsName();
 
@@ -909,7 +914,23 @@ bool ImAcqStream::checkFifo( int *packets, CimAcqImec *acq ) const
             }
         }
 
+        if( fifoDqb >= 2 ) {
+
+            Warning() <<
+                QString("IMEC Quad-base %1 shank disparity %2 samples.")
+                .arg( stream )
+                .arg( fifoDqb, 2, 10, QChar('0') );
+
+            if( fifoDqb >= 10 ) {
+                acq->runError(
+                    QString("IMEC Quad-base %1 shanks desynchronized; stopping run.")
+                    .arg( stream ) );
+                return false;
+            }
+        }
+
         fifoAve         = 0;
+        fifoDqb         = 0;
         fifoN           = 0;
         tLastFifoReport = tFifo;
     }
@@ -1719,6 +1740,10 @@ bool ImAcqWorker::workerYield()
             packets /= TPNTPERFETCH;
             if( pkt - packets * TPNTPERFETCH >= TPNTPERFETCH/2 )
                 ++packets;
+// Demo exagerating the workload of a high channel count probe
+//
+//            if( S.nAP > 384 )
+//                packets *= S.nAP / 384;
         }
 
         if( packets > maxQPkts )
@@ -1773,6 +1798,7 @@ void ImAcqWorker::profile( const ImAcqStream &S )
 #ifndef PROFILE
     Q_UNUSED( S )
 #else
+    int dqb;
     Log() <<
         QString(
         "%1 %2 loop ms <%3> lag<%4> get<%5> scl<%6> enq<%7> n(%8) %(%9)")
@@ -1784,7 +1810,7 @@ void ImAcqWorker::profile( const ImAcqStream &S )
         .arg( 1000*S.sumScl/S.sumN, 0, 'f', 3 )
         .arg( 1000*S.sumEnq/S.sumN, 0, 'f', 3 )
         .arg( S.sumN )
-        .arg( acq->fifoPct( 0, S ), 2, 10, QChar('0') );
+        .arg( acq->fifoPct( 0, &dqb, S ), 2, 10, QChar('0') );
 
     S.sumLag    = 0;
     S.sumGet    = 0;
@@ -1812,6 +1838,12 @@ ImAcqThread::ImAcqThread(
     Connect( worker, SIGNAL(destroyed()), thread, SLOT(quit()), Qt::DirectConnection );
 
     thread->start();
+
+// Demo how to boost priority for: worker handling
+// single high channel count probe.
+//
+//    if( streams.size() == 1 && streams[0].nAP > 384 )
+//        thread->setPriority( QThread::HighPriority );
 }
 
 
@@ -2257,10 +2289,11 @@ ackPause:
     double tFetch = getTime();
     if( S.tLastFetch ) {
         if( tFetch - S.tLastFetch > 0.010 ) {
+            int dqb;
             Log() <<
                 QString("       IM %1  dt %2  Q% %3")
                 .arg( S.ip ).arg( int(1000*(tFetch - S.tLastFetch)) )
-                .arg( fifoPct( 0, S ) );
+                .arg( fifoPct( 0, &dqb, S ) );
         }
     }
     S.tLastFetch = tFetch;
@@ -2404,10 +2437,11 @@ ackPause:
     double tFetch = getTime();
     if( S.tLastFetch ) {
         if( tFetch - S.tLastFetch > 0.010 ) {
+            int dqb;
             Log() <<
                 QString("       IM %1  dt %2  Q% %3")
                 .arg( S.ip ).arg( int(1000*(tFetch - S.tLastFetch)) )
-                .arg( fifoPct( 0, S ) );
+                .arg( fifoPct( 0, &dqb, S ) );
         }
     }
     S.tLastFetch = tFetch;
@@ -2582,10 +2616,11 @@ ackPause:
     double tFetch = getTime();
     if( S.tLastFetch ) {
         if( tFetch - S.tLastFetch > 0.010 ) {
+            int dqb;
             Log() <<
                 QString("       OB %1  dt %2  Q% %3")
                 .arg( S.ip ).arg( int(1000*(tFetch - S.tLastFetch)) )
-                .arg( fifoPct( 0, S ) );
+                .arg( fifoPct( 0, &dqb, S ) );
         }
     }
     S.tLastFetch = tFetch;
@@ -2671,9 +2706,11 @@ if( S.ip == 0 ) {
 /* fifoPct -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-int CimAcqImec::fifoPct( int *packets, const ImAcqStream &S ) const
+int CimAcqImec::fifoPct( int *packets, int *dqb, const ImAcqStream &S ) const
 {
     int pct = 0;
+
+    *dqb = 0;
 
 #ifdef PAUSEWHOLESLOT
     if( pausedSlot() != S.slot ) {
@@ -2701,7 +2738,6 @@ int CimAcqImec::fifoPct( int *packets, const ImAcqStream &S ) const
                     }
                     break;
                 case 2:
-                case 4:
                     err = np_getPacketFifoStatus(
                             S.slot, S.port, S.dock, SourceAP, packets, &nempty );
                     if( err != SUCCESS ) {
@@ -2709,6 +2745,27 @@ int CimAcqImec::fifoPct( int *packets, const ImAcqStream &S ) const
                             QString("IMEC getPacketFifoStatus(slot %1, port %2, dock %3)%4")
                             .arg( S.slot ).arg( S.port ).arg( S.dock )
                             .arg( makeErrorString( err ) );
+                    }
+                    break;
+                case 4:
+                    {
+                    int fmin = MAXE * TPNTPERFETCH,
+                        fmax = 0;
+                    for( int is = 0; is < 4; ++is ) {
+                        err = np_getPacketFifoStatus(
+                            S.slot, S.port, S.dock,
+                            streamsource_t(is), packets, &nempty );
+                        if( err != SUCCESS ) {
+                            Warning() <<
+                                QString("IMEC getPacketFifoStatus(slot %1, port %2, dock %3)%4")
+                                .arg( S.slot ).arg( S.port ).arg( S.dock )
+                                .arg( makeErrorString( err ) );
+                        }
+                        fmin = qMin( fmin, *packets );
+                        fmax = qMax( fmax, *packets );
+                    }
+                    *packets = fmax;
+                    *dqb     = fmax - fmin;
                     }
                     break;
                 case 9:
