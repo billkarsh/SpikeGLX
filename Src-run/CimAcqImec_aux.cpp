@@ -46,23 +46,14 @@ bool CimAcqImec::_aux_sizeStreamBufs()
 }
 
 
-// Standard settings for Obx:
-// - ADC_enableProbe( if XA ) enable sync/bit-6 and/or ADC.
-// - ADC_setVoltageRange( config ).
-// - ADC_setComparatorThreshold( rmax/10, rmax/10 ) all channels.
-// - DAC_enableOutput( by channel ).
-// - DAC_setVoltage( by channel ) = 0.
-//
 bool CimAcqImec::_aux_initObxSlot( const CimCfg::ImProbeTable &T, int slot )
 {
-    double          v       = 5.0;
-    int             isel    = -1;
-    ADCrange_t      rng     = ADC_RANGE_5V;
+    int             isel = -1;
     NP_ErrorCode    err;
 
-// -----------------------------
-// Find OneBox ip with this slot
-// -----------------------------
+// --------------------------
+// Find XIO ip with this slot
+// --------------------------
 
     for( int ip = 0, np = T.nSelOneBox(); ip < np; ++ip ) {
 
@@ -70,6 +61,40 @@ bool CimAcqImec::_aux_initObxSlot( const CimCfg::ImProbeTable &T, int slot )
             isel = ip;
             break;
         }
+    }
+
+// ------
+// Always
+// ------
+
+// Enable Sync
+
+    err = np_ADC_enableProbe( slot, true );
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC ADC_enableProbe(slot %1)%2")
+            .arg( slot ).arg( makeErrorString( err ) ) );
+        return false;
+    }
+
+// Not XIO
+
+    if( isel < 0 ) {
+
+        for( int ic = 0; ic < imOBX_NCHN; ++ic ) {
+
+            err = np_DAC_enableOutput( slot, ic, false );
+
+            if( err != SUCCESS ) {
+                runError(
+                    QString("IMEC DAC_enableOutput(slot %1, chn %2, false)%3")
+                    .arg( slot ).arg( ic ).arg( makeErrorString( err ) ) );
+                return false;
+            }
+        }
+
+        return true;
     }
 
 // ---
@@ -80,16 +105,8 @@ bool CimAcqImec::_aux_initObxSlot( const CimCfg::ImProbeTable &T, int slot )
 
     if( E.isStream() ) {
 
-        err = np_ADC_enableProbe( slot, true );
-
-        if( err != SUCCESS ) {
-            runError(
-                QString("IMEC ADC_enableProbe(slot %1)%2")
-                .arg( slot ).arg( makeErrorString( err ) ) );
-            return false;
-        }
-
-        v = E.range.rmax;
+        double      v   = E.range.rmax;
+        ADCrange_t  rng = ADC_RANGE_5V;
 
         if( E.range.rmax < 4.0 )
             rng = ADC_RANGE_2_5V;
