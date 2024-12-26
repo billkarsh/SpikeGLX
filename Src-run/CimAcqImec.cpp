@@ -1666,8 +1666,8 @@ dst[1] = count[S.ip] % 8000 - 4000;
 
             int XD = 0;
 
-            for( int iline = 0; iline < 12; ++iline )
-                XD += src[12 + iline] << iline;
+            for( int iline = 0; iline < imOBX_NCHN; ++iline )
+                XD += src[imOBX_NCHN + iline] << iline;
 
             *dst++ = XD;
         }

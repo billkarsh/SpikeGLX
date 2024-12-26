@@ -1549,6 +1549,7 @@ void CimCfg::ObxEach::loadSettings( QSettings &S )
     range.rmin          = -range.rmax;
     when                = S.value( "__when", QDateTime::currentDateTime().toString() ).toString();
     uiXAStr             = S.value( "obXAChans", "0:11" ).toString();
+    uiAOStr             = S.value( "obAOChans", "" ).toString();
     isXD                = S.value( "obDigital", true ).toBool();
     sns.chanMapFile     = S.value( "obSnsChanMapFile", QString() ).toString();
     sns.uiSaveChanStr   = S.value( "obSnsSaveChanSubset", "all" ).toString();
@@ -1560,6 +1561,7 @@ void CimCfg::ObxEach::saveSettings( QSettings &S ) const
     S.setValue( "obAiRangeMax", range.rmax );
     S.setValue( "__when", when );
     S.setValue( "obXAChans", uiXAStr );
+    S.setValue( "obAOChans", uiAOStr );
     S.setValue( "obDigital", isXD );
     S.setValue( "obSnsChanMapFile", sns.chanMapFile );
     S.setValue( "obSnsSaveChanSubset", sns.uiSaveChanStr );
@@ -1572,6 +1574,7 @@ QString CimCfg::ObxEach::remoteGetObxEach() const
 
     s  = QString("obAiRangeMax=%1\n").arg( range.rmax );
     s += QString("obXAChans=%1\n").arg( uiXAStr );
+    s += QString("obAOChans=%1\n").arg( uiAOStr );
     s += QString("obDigital=%1\n").arg( isXD );
     s += QString("obSnsChanMapFile=%1\n").arg( sns.chanMapFile );
     s += QString("obSnsSaveChanSubset=%1\n").arg( sns.uiSaveChanStr );
@@ -1587,6 +1590,7 @@ void CimCfg::set_ini_nprb_nobx( int nprb, int nobx )
 {
     obxj.resize( nobx );
     istr2isel.clear();
+    slot2istr.clear();
     nObxStr = 0;
     prbj.resize( nprb );
 }
@@ -1597,6 +1601,7 @@ void CimCfg::set_cfg_def_no_streams( const CimCfg &RHS )
     *this   = RHS;
     obxj.clear();
     istr2isel.clear();
+    slot2istr.clear();
     nObxStr = 0;
     prbj.clear();
     enabled = false;
@@ -1630,11 +1635,12 @@ void CimCfg::set_cfg_nobx( const QVector<ObxEach> &each, int nobx )
 // The istr are major-sorted by isRecording (lowest if yes),
 // and subsorted by slot.
 //
-void CimCfg::set_cfg_obxj_istr_data()
+void CimCfg::set_cfg_obxj_istr_data( const ImProbeTable &T )
 {
-    QVector<int>    vNoXA;
+    QVector<int>    vAO_istr;
 
     istr2isel.clear();
+    slot2istr.clear();
     nObxStr = 0;
 
     for( int ip = 0, np = obxj.size(); ip < np; ++ip ) {
@@ -1644,10 +1650,26 @@ void CimCfg::set_cfg_obxj_istr_data()
             ++nObxStr;
         }
         else
-            vNoXA.push_back( ip );
+            vAO_istr.push_back( ip );
     }
 
-    istr2isel.append( vNoXA );
+    istr2isel.append( vAO_istr );
+
+    for( int istr = 0, n = obxj.size(); istr < n; ++istr )
+        slot2istr[T.get_iOneBox( istr2isel[istr] ).slot] = istr;
+}
+
+
+// Return istr for the slot, or -1 if slot isn't OneBox.
+//
+int CimCfg::obx_slot2istr( int slot ) const
+{
+    QMap<int,int>::const_iterator   it = slot2istr.find( slot );
+
+    if( it != slot2istr.end() )
+        return it.value();
+
+    return -1;
 }
 
 

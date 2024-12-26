@@ -464,6 +464,7 @@ public:
 private:
     QVector<ObxEach>    obxj;       // selected params
     QVector<int>        istr2isel;  // stream-ip -> selected-ip
+    QMap<int,int>       slot2istr;  // slot -> stream-ip
     int                 nObxStr;    // num recording
 public:
     PrbAll              prbAll;
@@ -481,11 +482,12 @@ public:
     void set_cfg_def_no_streams( const CimCfg &RHS );
     void set_cfg_nprb( const QVector<PrbEach> &each, int nprb );
     void set_cfg_nobx( const QVector<ObxEach> &each, int nobx );
-    void set_cfg_obxj_istr_data();
+    void set_cfg_obxj_istr_data( const ImProbeTable &T );
     int get_nProbes() const             {return (enabled ? prbj.size() : 0);}
     int get_nOneBox() const             {return (enabled ? obxj.size() : 0);}
     int get_nObxStr() const             {return (enabled ? nObxStr : 0);}
     int obx_istr2isel( int istr ) const {return istr2isel[istr];}
+    int obx_slot2istr( int slot ) const;
 
     ObxEach& mod_iSelOneBox( int isel )             {return obxj[isel];}
     ObxEach& mod_iStrOneBox( int istr )             {return obxj[istr2isel[istr]];}

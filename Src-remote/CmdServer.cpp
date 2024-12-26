@@ -447,32 +447,42 @@ void CmdWorker::getParamsOneBox( QString &resp, const QStringList &toks )
     if( toks.size() >= 1 ) {
 
         ConfigCtl   *C = okCfgValidated( "GETPARAMSOBX" );
-        int         ip = toks[0].toInt(),
-                    np;
 
         if( !C )
             return;
 
-        const DAQ::Params   &p = C->acceptedParams;
+        const DAQ::Params   &p   = C->acceptedParams;
+        int                 ip   = toks[0].toInt();
 
-        np = p.stream_nOB();
-
-        if( !np )
-            errMsg = "GETPARAMSOBX: Obx stream not enabled.";
-        else if( ip >= 0 && ip < np ) {
-
-            QMetaObject::invokeMethod(
-                C, "cmdSrvGetsParamStr",
-                Qt::BlockingQueuedConnection,
-                Q_RETURN_ARG(QString, resp),
-                Q_ARG(int, 3),
-                Q_ARG(int, ip) );
+        if( ip >= 0 ) {
+            int np = p.stream_nOB();
+            if( !np ) {
+                errMsg = "GETPARAMSOBX: Obx stream not enabled.";
+                return;
+            }
+            else if( ip >= np ) {
+                errMsg = QString("GETPARAMSOBX: Obx stream-ip must be in range[0..%1].").arg( np - 1 );
+                return;
+            }
         }
-        else
-            errMsg = QString("GETPARAMSOBX: Obx stream-ip must be in range[0..%1].").arg( np - 1 );
+        else {
+            int slot = toks[1].toInt();
+            ip = p.im.obx_slot2istr( slot );
+            if( ip < 0 ) {
+                errMsg = QString("GETPARAMSOBX: Slot %1 is not s selected OneBox.").arg( slot );
+                return;
+            }
+        }
+
+        QMetaObject::invokeMethod(
+            C, "cmdSrvGetsParamStr",
+            Qt::BlockingQueuedConnection,
+            Q_RETURN_ARG(QString, resp),
+            Q_ARG(int, 3),
+            Q_ARG(int, ip) );
     }
     else
-        errMsg = "GETPARAMSOBX: Requires parameter ip.";
+        errMsg = "GETPARAMSOBX: Requires parameters ip, slot.";
 }
 
 
@@ -1570,8 +1580,6 @@ void CmdWorker::setParamsOneBox( const QStringList &toks )
     if( toks.size() >= 1 ) {
 
         ConfigCtl   *C = okCfgValidated( "SETPARAMSOBX" );
-        int         ip = toks[0].toInt(),
-                    np;
 
         if( !C )
             return;
@@ -1581,48 +1589,60 @@ void CmdWorker::setParamsOneBox( const QStringList &toks )
             return;
         }
 
-        const DAQ::Params   &p = C->acceptedParams;
+        const DAQ::Params   &p   = C->acceptedParams;
+        int                 ip   = toks[0].toInt();
 
-        np = p.stream_nOB();
-
-        if( !np )
-            errMsg = "SETPARAMSOBX: Obx stream not enabled.";
-        else if( ip >= 0 && ip < np ) {
-
-            if( SU.send( "READY\n", true ) ) {
-
-                QString params, line;
-
-                while( !(line = SU.readLine()).isNull() ) {
-
-                    if( !line.length() )
-                        break; // done on blank line
-
-                    params += QString("%1\n").arg( line );
-                }
-
-                if( !params.isEmpty() ) {
-
-                    QMetaObject::invokeMethod(
-                        C, "cmdSrvSetsParamStr",
-                        Qt::BlockingQueuedConnection,
-                        Q_RETURN_ARG(QString, errMsg),
-                        Q_ARG(QString, params),
-                        Q_ARG(int, 3),
-                        Q_ARG(int, ip) );
-
-                    if( !errMsg.isEmpty() )
-                        errMsg = "SETPARAMSOBX: " + errMsg;
-                }
-                else
-                    errMsg = "SETPARAMSOBX: Param string is empty.";
+        if( ip >= 0 ) {
+            int np = p.stream_nOB();
+            if( !np ) {
+                errMsg = "SETPARAMSOBX: Obx stream not enabled.";
+                return;
+            }
+            else if( ip >= np ) {
+                errMsg = QString("SETPARAMSOBX: Obx stream-ip must be in range[0..%1].").arg( np - 1 );
+                return;
             }
         }
-        else
-            errMsg = QString("SETPARAMSOBX: Obx stream-ip must be in range[0..%1].").arg( np - 1 );
+        else {
+            int slot = toks[1].toInt();
+            ip = p.im.obx_slot2istr( slot );
+            if( ip < 0 ) {
+                errMsg = QString("SETPARAMSOBX: Slot %1 is not s selected OneBox.").arg( slot );
+                return;
+            }
+        }
+
+        if( SU.send( "READY\n", true ) ) {
+
+            QString params, line;
+
+            while( !(line = SU.readLine()).isNull() ) {
+
+                if( !line.length() )
+                    break; // done on blank line
+
+                params += QString("%1\n").arg( line );
+            }
+
+            if( !params.isEmpty() ) {
+
+                QMetaObject::invokeMethod(
+                    C, "cmdSrvSetsParamStr",
+                    Qt::BlockingQueuedConnection,
+                    Q_RETURN_ARG(QString, errMsg),
+                    Q_ARG(QString, params),
+                    Q_ARG(int, 3),
+                    Q_ARG(int, ip) );
+
+                if( !errMsg.isEmpty() )
+                    errMsg = "SETPARAMSOBX: " + errMsg;
+            }
+            else
+                errMsg = "SETPARAMSOBX: Param string is empty.";
+        }
     }
     else
-        errMsg = "SETPARAMSOBX: Requires parameter ip.";
+        errMsg = "SETPARAMSOBX: Requires parameters ip, slot.";
 }
 
 

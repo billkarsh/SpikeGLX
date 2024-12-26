@@ -474,7 +474,7 @@ private:
 
 // Config common aux
     bool _aux_sizeStreamBufs();
-    bool _aux_initObxSlot( const CimCfg::ImProbeTable &T, int slot );
+    bool _aux_initObxSlot( int slot );
     bool _aux_open( const CimCfg::ImProbeTable &T );
     bool _aux_clrObxSync( int slot );
     bool _aux_setObxSyncAsOutput( int slot );

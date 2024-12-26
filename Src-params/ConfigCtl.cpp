@@ -746,7 +746,7 @@ bool ConfigCtl::diskParamsToQ( QString &err, DAQ::Params &q ) const
     }
 
     if( usingOB )
-        q.im.set_cfg_obxj_istr_data();
+        q.im.set_cfg_obxj_istr_data( prbTab );
 
     for( int ip = 0, np = q.stream_nOB(); ip < np; ++ip ) {
 
@@ -2905,7 +2905,7 @@ bool ConfigCtl::valid( QString &err, QWidget *parent, int iprb )
     }
 
     if( usingOB )
-        q.im.set_cfg_obxj_istr_data();
+        q.im.set_cfg_obxj_istr_data( prbTab );
 
     for( int ip = 0, np = prbTab.nSelOneBox(); ip < np; ++ip ) {
 

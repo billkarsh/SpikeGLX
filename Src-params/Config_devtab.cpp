@@ -140,7 +140,7 @@ void Config_devtab::updateIMParams()
 
 void Config_devtab::updateObxIDs( DAQ::Params &q )
 {
-    q.im.set_cfg_obxj_istr_data();
+    q.im.set_cfg_obxj_istr_data( cfg->prbTab );
 
     for( int istr = 0, np = cfg->prbTab.nSelOneBox(); istr < np; ++istr ) {
 

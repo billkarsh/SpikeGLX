@@ -147,7 +147,7 @@ QString Config_obxtab::remoteSetObxEach( const QString &s, int istr )
     ConfigCtl           *C      = mainApp()->cfgCtl();
     const DAQ::Params   &p      = C->acceptedParams;
     int                 isel    = p.im.obx_istr2isel( istr ),
-                        obsn    = C->prbTab.get_iOneBox( isel ).obsn;
+                        slot    = C->prbTab.get_iOneBox( isel ).slot;
     CimCfg::ObxEach     &E      = each[isel];
     QTextStream         ts( s.toUtf8(), QIODevice::ReadOnly | QIODevice::Text );
     QString             line;
@@ -196,15 +196,15 @@ QString Config_obxtab::remoteSetObxEach( const QString &s, int istr )
 
     if( e.isStream() && !E.isStream() ) {
         return
-        QString("SETPARAMSOBX: Obx ip %1 sn %2 was a recording device"
+        QString("SETPARAMSOBX: Obx ip %1 slot %2 was a recording device"
         " at Detect; recording cannot be disabled remotely.")
-        .arg( istr ).arg( obsn );
+        .arg( istr ).arg( slot );
     }
     else if( !e.isStream() && E.isStream() ) {
         return
-        QString("SETPARAMSOBX: Obx ip %1 sn %2 was not a recording device"
+        QString("SETPARAMSOBX: Obx slot %1 was not a recording device"
         " at Detect; recording cannot be enabled remotely.")
-        .arg( istr ).arg( obsn );
+        .arg( slot );
     }
 
     toTbl( isel );

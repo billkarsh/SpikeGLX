@@ -46,22 +46,10 @@ bool CimAcqImec::_aux_sizeStreamBufs()
 }
 
 
-bool CimAcqImec::_aux_initObxSlot( const CimCfg::ImProbeTable &T, int slot )
+bool CimAcqImec::_aux_initObxSlot( int slot )
 {
-    int             isel = -1;
+    int             istr = p.im.obx_slot2istr( slot );
     NP_ErrorCode    err;
-
-// --------------------------
-// Find XIO ip with this slot
-// --------------------------
-
-    for( int ip = 0, np = T.nSelOneBox(); ip < np; ++ip ) {
-
-        if( T.get_iOneBox( ip ).slot == slot ) {
-            isel = ip;
-            break;
-        }
-    }
 
 // ------
 // Always
@@ -80,7 +68,7 @@ bool CimAcqImec::_aux_initObxSlot( const CimCfg::ImProbeTable &T, int slot )
 
 // Not XIO
 
-    if( isel < 0 ) {
+    if( istr < 0 ) {
 
         for( int ic = 0; ic < imOBX_NCHN; ++ic ) {
 
@@ -101,7 +89,7 @@ bool CimAcqImec::_aux_initObxSlot( const CimCfg::ImProbeTable &T, int slot )
 // ADC
 // ---
 
-    const CimCfg::ObxEach   &E = p.im.get_iSelOneBox( isel );
+    const CimCfg::ObxEach   &E = p.im.get_iStrOneBox( istr );
 
     if( E.isStream() ) {
 
@@ -191,7 +179,7 @@ bool CimAcqImec::_aux_open( const CimCfg::ImProbeTable &T )
         }
 
         if( T.isSlotUSBType( slot ) ) {
-            if( !_aux_initObxSlot( T, slot ) )
+            if( !_aux_initObxSlot( slot ) )
                 return false;
         }
     }
