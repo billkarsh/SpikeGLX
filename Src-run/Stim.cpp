@@ -32,6 +32,7 @@ static void square10K( qint16 *B )
 
 void CStim::stimtest()
 {
+#ifdef HAVE_IMEC
     vec_i16 buf;
     buf.resize( NDATA );
     square10K( &buf[0] );
@@ -53,6 +54,7 @@ void CStim::stimtest()
 
     QThread::msleep( 5000 );
     Log()<<"kill "<<np_waveplayer_arm( slot, true );
+#endif
 }
 
 
@@ -123,6 +125,7 @@ QString CStim::obx_set_AO( int istr, const QString &chn_vlt )
 
 // Set values
 
+#ifdef HAVE_IMEC
     for( int ip = 0; ip < nprn; ++ip ) {
 
         NP_ErrorCode err = np_DAC_setVoltage( slot, chn[ip], vlt[ip] );
@@ -134,6 +137,7 @@ QString CStim::obx_set_AO( int istr, const QString &chn_vlt )
             .arg( makeErrorString( err ) );
         }
     }
+#endif
 
     return QString();
 }
@@ -141,6 +145,7 @@ QString CStim::obx_set_AO( int istr, const QString &chn_vlt )
 
 QString CStim::makeErrorString( int err )
 {
+#ifdef HAVE_IMEC
     char    buf[2048];
     size_t  n = np_getLastErrorMessage( buf, sizeof(buf) );
 
@@ -150,6 +155,10 @@ QString CStim::makeErrorString( int err )
     buf[n] = 0;
 
     return QString(" error %1 '%2'.").arg( err ).arg( QString(buf) );
+#else
+    Q_UNUSED( err )
+    return QString();
+#endif
 }
 
 

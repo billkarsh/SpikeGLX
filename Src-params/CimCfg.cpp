@@ -340,6 +340,7 @@ bool CimCfg::ImProbeTable::scanCfgSlots( QVector<CfgSlot> &vCS, QString &msg ) c
 // Indices into table
 
     QMap<int,int>   slot2CS, ID2CS;
+    QString         ftdi;
     bool            usbInTbl = false;
 
     for( int i = 0, n = vCS.size(); i < n; ++i ) {
@@ -391,7 +392,6 @@ bool CimCfg::ImProbeTable::scanCfgSlots( QVector<CfgSlot> &vCS, QString &msg ) c
 
 // Detect OneBoxes
 
-    QString ftdi;
     ftdiCheck( ftdi, usbInTbl );
 
     nBS = np_getDeviceList( BS, imSlotPhyLim );
