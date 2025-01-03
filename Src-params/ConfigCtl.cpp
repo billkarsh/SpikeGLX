@@ -858,12 +858,6 @@ QString ConfigCtl::cmdSrvGetsSaveChansNi() const
 }
 
 
-QString ConfigCtl::cmdSrvGetsGeomMap( int ip ) const
-{
-    return acceptedParams.im.prbj[ip].remoteGetGeomMap();
-}
-
-
 // Remote gets params of type:
 // {0=GETPARAMS, 1=GETPARAMSIMALL, 2=GETPARAMSIMPRB(ip), 3=GETPARAMSOBX(ip)}.
 //
@@ -2929,6 +2923,11 @@ bool ConfigCtl::valid( QString &err, QWidget *parent, int iprb )
         || !validNiChanMap( err, q )
         || !validNiSaveBits( err, q ) ) {
 
+        return false;
+    }
+
+    if( q.stream_nNI() + q.stream_nOB() + q.stream_nIM() == 0 ) {
+        err = "No recording streams configured.";
         return false;
     }
 

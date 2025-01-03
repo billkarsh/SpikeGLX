@@ -1569,7 +1569,7 @@ bool CniCfg::isDigitalDev( const QString & )
 #ifdef HAVE_NIDAQmx
 QString CniCfg::setDO( const QString &lines, quint32 bits )
 {
-    TaskHandle  taskHandle  = 0;
+    TaskHandle  taskHandle = 0;
 
     clearDmxErrors();
 

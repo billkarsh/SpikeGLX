@@ -13,6 +13,9 @@
 //
 bool CimAcqImec::_st_setHwrTriggers()
 {
+    if( p.stream_nIM() + p.stream_nOB() == 0 )
+        return true;
+
     QVector<int>    vslot;
     int             ns = T.getTypedSlots( vslot, NPPlatform_ALL );
 
@@ -55,6 +58,9 @@ bool CimAcqImec::_st_setHwrTriggers()
 //
 bool CimAcqImec::_st_setObxTriggers()
 {
+    if( p.stream_nOB() == 0 )
+        return true;
+
     QVector<int>    vslot;
     int             ns = T.getTypedSlots( vslot, NPPlatform_USB );
 
@@ -187,6 +193,9 @@ bool CimAcqImec::_st_setPXITriggers()
 
 bool CimAcqImec::_st_setTriggers()
 {
+    if( p.stream_nIM() + p.stream_nOB() == 0 )
+        return true;
+
 //@OBX Try software trigger all modules since PXIe chassis
 //@OBX backplane bridge blocks signalling across slots 6-to-7.
 #if TRIGSOFTONLY
@@ -206,6 +215,9 @@ bool CimAcqImec::_st_setTriggers()
 
 bool CimAcqImec::_st_setArm()
 {
+    if( p.stream_nIM() + p.stream_nOB() == 0 )
+        return true;
+
     for( int is = 0, ns = T.nSelSlots(); is < ns; ++is ) {
 
         int slot = T.getEnumSlot( is );
@@ -231,6 +243,9 @@ bool CimAcqImec::_st_setArm()
 #if TRIGSOFTONLY
 bool CimAcqImec::_st_softStart()
 {
+    if( p.stream_nIM() + p.stream_nOB() == 0 )
+        return true;
+
     QVector<int>    vs;
     int             ns  = T.getTypedSlots( vs, NPPlatform_ALL );
     NP_ErrorCode    err;
@@ -254,6 +269,9 @@ bool CimAcqImec::_st_softStart()
 #else
 bool CimAcqImec::_st_softStart()
 {
+    if( p.stream_nIM() + p.stream_nOB() == 0 )
+        return true;
+
     QVector<int>    v1b;
     int             n1b     = T.getTypedSlots( v1b, NPPlatform_USB );
     int             sPXI    = T.getEnumSlot( 0 );

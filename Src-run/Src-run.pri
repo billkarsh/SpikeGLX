@@ -15,6 +15,7 @@ HEADERS += \
     $$PWD/IMReader.h \
     $$PWD/NIReader.h \
     $$PWD/Run.h \
+    $$PWD/Stim.h \
     $$PWD/SvyPrb.h \
     $$PWD/Sync.h
 
@@ -36,6 +37,7 @@ SOURCES += \
     $$PWD/IMReader.cpp \
     $$PWD/NIReader.cpp \
     $$PWD/Run.cpp \
+    $$PWD/Stim.cpp \
     $$PWD/SvyPrb.cpp \
     $$PWD/Sync.cpp
 

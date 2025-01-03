@@ -11,6 +11,7 @@
 #include "Subset.h"
 #include "Sha1Verifier.h"
 #include "Par2Window.h"
+#include "Stim.h"
 
 #include <QDir>
 #include <QDirIterator>
@@ -280,21 +281,20 @@ ConfigCtl* CmdWorker::okjsip( const QString &cmd, int js, int ip )
 
 ConfigCtl* CmdWorker::okStreamToks( const QString &cmd, int &js, int &ip, const QStringList &toks )
 {
-    if( toks.size() >= 2 ) {
-
-        js = toks[0].toInt();
-        ip = toks[1].toInt();
-
-        int absjs = js;
-
-        if( js == -jsIM && cmd == "FETCH" )
-            absjs = jsIM;
-
-        return okjsip( cmd, absjs, ip );
+    if( toks.size() < 2 ) {
+        errMsg = QString("%1: Requires at least 2 params.").arg( cmd );
+        return 0;
     }
 
-    errMsg = QString("%1: Requires at least 2 params.").arg( cmd );
-    return 0;
+    js = toks[0].toInt();
+    ip = toks[1].toInt();
+
+    int absjs = js;
+
+    if( js == -jsIM && cmd == "FETCH" )
+        absjs = jsIM;
+
+    return okjsip( cmd, absjs, ip );
 }
 
 
@@ -313,66 +313,58 @@ Run* CmdWorker::okRunStarted( const QString &cmd )
 
 void CmdWorker::getGeomMap( QString &resp, const QStringList &toks )
 {
-    if( toks.size() >= 1 ) {
-
-        ConfigCtl   *C = okCfgValidated( "GETGEOMMAP" );
-        int         ip = toks[0].toInt(),
-                    np;
-
-        if( !C )
-            return;
-
-        const DAQ::Params   &p = C->acceptedParams;
-
-        np = p.stream_nIM();
-
-        if( !np )
-            errMsg = "GETGEOMMAP: imec stream not enabled.";
-        else if( ip >= 0 && ip < np ) {
-
-            QMetaObject::invokeMethod(
-                C, "cmdSrvGetsGeomMap",
-                Qt::BlockingQueuedConnection,
-                Q_RETURN_ARG(QString, resp),
-                Q_ARG(int, ip) );
-        }
-        else
-            errMsg = QString("GETGEOMMAP: imec stream-ip must be in range[0..%1].").arg( np - 1 );
-    }
-    else
+    if( toks.size() < 1 ) {
         errMsg = "GETGEOMMAP: Requires parameter ip.";
+        return;
+    }
+
+    ConfigCtl   *C = okCfgValidated( "GETGEOMMAP" );
+    int         ip = toks[0].toInt(),
+                np;
+
+    if( !C )
+        return;
+
+    const DAQ::Params   &p = C->acceptedParams;
+
+    np = p.stream_nIM();
+
+    if( !np )
+        errMsg = "GETGEOMMAP: imec stream not enabled.";
+    else if( ip < 0 || ip >= np )
+        errMsg = QString("GETGEOMMAP: imec stream-ip must be in range[0..%1].").arg( np - 1 );
+    else
+        resp = p.im.prbj[ip].remoteGetGeomMap();
 }
 
 
 void CmdWorker::getImecChanGains( QString &resp, const QStringList &toks )
 {
-    if( toks.size() >= 2 ) {
-
-        ConfigCtl   *C = okCfgValidated( "GETIMECCHANGAINS" );
-        int         ip = toks[0].toInt(),
-                    ch = toks[1].toInt(),
-                    np;
-
-        if( !C )
-            return;
-
-        const DAQ::Params   &p = C->acceptedParams;
-
-        np = p.stream_nIM();
-
-        if( !np )
-            errMsg = "GETIMECCHANGAINS: imec stream not enabled.";
-        else if( ip >= 0 && ip < np ) {
-
-            IMROTbl *R = p.im.prbj[ip].roTbl;
-
-            resp = QString("%1 %2\n").arg( R->apGain( ch ) ).arg( R->lfGain( ch ) );
-        }
-        else
-            errMsg = QString("GETIMECCHANGAINS: imec stream-ip must be in range[0..%1].").arg( np - 1 );
+    if( toks.size() < 2 ) {
+        errMsg = "GETIMECCHANGAINS: Requires params {ip, chan}.";
+        return;
     }
-    else
-        errMsg = "GETIMECCHANGAINS: Requires parameters {ip, chan}.";
+
+    ConfigCtl   *C = okCfgValidated( "GETIMECCHANGAINS" );
+    int         ip = toks[0].toInt(),
+                ch = toks[1].toInt(),
+                np;
+
+    if( !C )
+        return;
+
+    const DAQ::Params   &p = C->acceptedParams;
+
+    np = p.stream_nIM();
+
+    if( !np )
+        errMsg = "GETIMECCHANGAINS: imec stream not enabled.";
+    else if( ip < 0 || ip >= np )
+        errMsg = QString("GETIMECCHANGAINS: imec stream-ip must be in range[0..%1].").arg( np - 1 );
+    else {
+        IMROTbl *R = p.im.prbj[ip].roTbl;
+        resp = QString("%1 %2\n").arg( R->apGain( ch ) ).arg( R->lfGain( ch ) );
+    }
 }
 
 
@@ -410,79 +402,78 @@ void CmdWorker::getParamsImAll( QString &resp )
 
 void CmdWorker::getParamsImProbe( QString &resp, const QStringList &toks )
 {
-    if( toks.size() >= 1 ) {
-
-        ConfigCtl   *C = okCfgValidated( "GETPARAMSIMPRB" );
-        int         ip = toks[0].toInt(),
-                    np;
-
-        if( !C )
-            return;
-
-        const DAQ::Params   &p = C->acceptedParams;
-
-        np = p.stream_nIM();
-
-        if( !np )
-            errMsg = "GETPARAMSIMPRB: imec stream not enabled.";
-        else if( ip >= 0 && ip < np ) {
-
-            QMetaObject::invokeMethod(
-                C, "cmdSrvGetsParamStr",
-                Qt::BlockingQueuedConnection,
-                Q_RETURN_ARG(QString, resp),
-                Q_ARG(int, 2),
-                Q_ARG(int, ip) );
-        }
-        else
-            errMsg = QString("GETPARAMSIMPRB: imec stream-ip must be in range[0..%1].").arg( np - 1 );
-    }
-    else
+    if( toks.size() < 1 ) {
         errMsg = "GETPARAMSIMPRB: Requires parameter ip.";
+        return;
+    }
+
+    ConfigCtl   *C = okCfgValidated( "GETPARAMSIMPRB" );
+    int         ip = toks[0].toInt(),
+                np;
+
+    if( !C )
+        return;
+
+    const DAQ::Params   &p = C->acceptedParams;
+
+    np = p.stream_nIM();
+
+    if( !np )
+        errMsg = "GETPARAMSIMPRB: imec stream not enabled.";
+    else if( ip < 0 || ip >= np )
+        errMsg = QString("GETPARAMSIMPRB: imec stream-ip must be in range[0..%1].").arg( np - 1 );
+    else {
+        QMetaObject::invokeMethod(
+            C, "cmdSrvGetsParamStr",
+            Qt::BlockingQueuedConnection,
+            Q_RETURN_ARG(QString, resp),
+            Q_ARG(int, 2),
+            Q_ARG(int, ip) );
+    }
 }
 
 
 void CmdWorker::getParamsOneBox( QString &resp, const QStringList &toks )
 {
-    if( toks.size() >= 1 ) {
-
-        ConfigCtl   *C = okCfgValidated( "GETPARAMSOBX" );
-
-        if( !C )
-            return;
-
-        const DAQ::Params   &p   = C->acceptedParams;
-        int                 ip   = toks[0].toInt();
-
-        if( ip >= 0 ) {
-            int np = p.stream_nOB();
-            if( !np ) {
-                errMsg = "GETPARAMSOBX: Obx stream not enabled.";
-                return;
-            }
-            else if( ip >= np ) {
-                errMsg = QString("GETPARAMSOBX: Obx stream-ip must be in range[0..%1].").arg( np - 1 );
-                return;
-            }
-        }
-        else {
-            int slot = toks[1].toInt();
-            ip = p.im.obx_slot2istr( slot );
-            if( ip < 0 ) {
-                errMsg = QString("GETPARAMSOBX: Slot %1 is not s selected OneBox.").arg( slot );
-                return;
-            }
-        }
-
-        QMetaObject::invokeMethod(
-            C, "cmdSrvGetsParamStr",
-            Qt::BlockingQueuedConnection,
-            Q_RETURN_ARG(QString, resp),
-            Q_ARG(int, 3),
-            Q_ARG(int, ip) );
+    if( toks.size() < 2 ) {
+        errMsg = "GETPARAMSOBX: Requires params {ip, slot}.";
+        return;
     }
-    else
-        errMsg = "GETPARAMSOBX: Requires parameters ip, slot.";
+
+    ConfigCtl   *C = okCfgValidated( "GETPARAMSOBX" );
+
+    if( !C )
+        return;
+
+    const DAQ::Params   &p   = C->acceptedParams;
+    int                 ip   = toks[0].toInt();
+
+    if( ip >= 0 ) {
+        int np = p.stream_nOB();
+        if( !np ) {
+            errMsg = "GETPARAMSOBX: Obx stream not enabled.";
+            return;
+        }
+        else if( ip >= np ) {
+            errMsg = QString("GETPARAMSOBX: Obx stream-ip must be in range[0..%1].").arg( np - 1 );
+            return;
+        }
+    }
+    else {
+        int slot = toks[1].toInt();
+        ip = p.im.obx_slot2istr( slot );
+        if( ip < 0 ) {
+            errMsg = QString("GETPARAMSOBX: Slot %1 is not a selected OneBox.").arg( slot );
+            return;
+        }
+    }
+
+    QMetaObject::invokeMethod(
+        C, "cmdSrvGetsParamStr",
+        Qt::BlockingQueuedConnection,
+        Q_RETURN_ARG(QString, resp),
+        Q_ARG(int, 3),
+        Q_ARG(int, ip) );
 }
 
 
@@ -623,28 +614,28 @@ void CmdWorker::getStreamMaxInt( QString &resp, const QStringList &toks )
 
 void CmdWorker::getStreamNP( QString &resp, const QStringList &toks )
 {
-    if( toks.size() >= 1 ) {
-
-        ConfigCtl   *C = okCfgValidated( "GETSTREAMNP" );
-        int         js = toks[0].toInt();
-
-        if( !C )
-            return;
-
-        const DAQ::Params   &p = C->acceptedParams;
-        int                 np;
-
-        switch( js ) {
-            case jsNI: np = p.stream_nNI(); break;
-            case jsOB: np = p.stream_nOB(); break;
-            case jsIM: np = p.stream_nIM(); break;
-            default: errMsg = "GETSTREAMNP: js must be in range [0..2]."; return;
-        }
-
-        resp = QString("%1\n").arg( np );
-    }
-    else
+    if( toks.size() < 1 ) {
         errMsg = "GETSTREAMNP: Requires parameter js.";
+        return;
+    }
+
+    ConfigCtl   *C = okCfgValidated( "GETSTREAMNP" );
+    int         js = toks[0].toInt();
+
+    if( !C )
+        return;
+
+    const DAQ::Params   &p = C->acceptedParams;
+    int                 np;
+
+    switch( js ) {
+        case jsNI: np = p.stream_nNI(); break;
+        case jsOB: np = p.stream_nOB(); break;
+        case jsIM: np = p.stream_nIM(); break;
+        default: errMsg = "GETSTREAMNP: js must be in range [0..2]."; return;
+    }
+
+    resp = QString("%1\n").arg( np );
 }
 
 
@@ -773,46 +764,46 @@ void CmdWorker::isConsoleHidden( QString &resp )
 //
 void CmdWorker::mapSample( QString &resp, const QStringList &toks )
 {
-    if( toks.size() >= 5 ) {
+    if( toks.size() < 5 ) {
+        errMsg = "MAPSAMPLE: Requires at least 5 params.";
+        return;
+    }
 
-        quint64 srcC    = toks.at( 2 ).toLongLong();
-        int     dstjs   = toks.at( 0 ).toInt(),
-                dstip   = toks.at( 1 ).toInt(),
-                srcjs   = toks.at( 3 ).toInt(),
-                srcip   = toks.at( 4 ).toInt();
+    quint64 srcC    = toks.at( 2 ).toLongLong();
+    int     dstjs   = toks.at( 0 ).toInt(),
+            dstip   = toks.at( 1 ).toInt(),
+            srcjs   = toks.at( 3 ).toInt(),
+            srcip   = toks.at( 4 ).toInt();
 
-        ConfigCtl   *C;
+    ConfigCtl   *C;
 
-        if( !okjsip( "MAPSAMPLE (dst)", dstjs, dstip ) )
-            return;
+    if( !okjsip( "MAPSAMPLE (dst)", dstjs, dstip ) )
+        return;
 
-        if( !(C = okjsip( "MAPSAMPLE (src)", srcjs, srcip )) )
-            return;
+    if( !(C = okjsip( "MAPSAMPLE (src)", srcjs, srcip )) )
+        return;
 
-        if( dstjs == srcjs && dstip == srcip ) {
-            resp = toks.at( 2 ).trimmed() + "\n";
-            return;
-        }
+    if( dstjs == srcjs && dstip == srcip ) {
+        resp = toks.at( 2 ).trimmed() + "\n";
+        return;
+    }
 
-        const DAQ::Params   &p      = C->acceptedParams;
-        const Run           *run    = mainApp()->getRun();
-        const AIQ           *dstQ   = run->getQ( dstjs, dstip ),
-                            *srcQ   = run->getQ( srcjs, srcip );
+    const DAQ::Params   &p      = C->acceptedParams;
+    const Run           *run    = mainApp()->getRun();
+    const AIQ           *dstQ   = run->getQ( dstjs, dstip ),
+                        *srcQ   = run->getQ( srcjs, srcip );
 
-        if( dstQ && srcQ ) {
+    if( dstQ && srcQ ) {
 
-            SyncStream  dstS, srcS;
-            dstS.init( dstQ, dstjs, dstip, p );
-            srcS.init( srcQ, srcjs, srcip, p );
-            syncDstTAbs( srcC, &srcS, &dstS, p );
+        SyncStream  dstS, srcS;
+        dstS.init( dstQ, dstjs, dstip, p );
+        srcS.init( srcQ, srcjs, srcip, p );
+        syncDstTAbs( srcC, &srcS, &dstS, p );
 
-            resp = QString("%1\n").arg( dstS.TAbs2Ct( dstS.tAbs ) );
-        }
-        else
-            errMsg = "MAPSAMPLE: Not running.";
+        resp = QString("%1\n").arg( dstS.TAbs2Ct( dstS.tAbs ) );
     }
     else
-        errMsg = "MAPSAMPLE: Requires at least 5 params.";
+        errMsg = "MAPSAMPLE: Not running.";
 }
 
 
@@ -822,29 +813,29 @@ void CmdWorker::mapSample( QString &resp, const QStringList &toks )
 //
 void CmdWorker::opto_getAttens( QString &resp, const QStringList &toks )
 {
+    if( toks.size() < 2 ) {
+        errMsg = "OPTOGETATTENS: Requires params {ip, color}.";
+        return;
+    }
+
     Run *run = okRunStarted( "OPTOGETATTENS" );
 
     if( !run )
         return;
 
-    if( toks.size() >= 2 ) {
+    QMetaObject::invokeMethod(
+        run, "opto_getAttens",
+        Qt::BlockingQueuedConnection,
+        Q_RETURN_ARG(QString, resp),
+        Q_ARG(int, toks.at( 0 ).toInt()),
+        Q_ARG(int, toks.at( 1 ).toInt()) );
 
-        QMetaObject::invokeMethod(
-            run, "opto_getAttens",
-            Qt::BlockingQueuedConnection,
-            Q_RETURN_ARG(QString, resp),
-            Q_ARG(int, toks.at( 0 ).toInt()),
-            Q_ARG(int, toks.at( 1 ).toInt()) );
-
-        if( resp.startsWith( "O" ) || resp.startsWith( "I" ) ) {
-            errMsg = resp;
-            resp.clear();
-        }
-        else
-            resp += "\n";
+    if( resp.startsWith( "O" ) || resp.startsWith( "I" ) ) {
+        errMsg = resp;
+        resp.clear();
     }
     else
-        errMsg = "OPTOGETATTENS: Requires parameters {ip, color}.";
+        resp += "\n";
 }
 
 
@@ -865,29 +856,27 @@ bool CmdWorker::enumDir( const QString &path )
         errMsg = "ENUMDATADIR: Directory not found: " + path;
         return false;
     }
-    else {
 
-        QDirIterator    it( path );
-        QString         pth = path + "/";
+    QDirIterator    it( path );
+    QString         pth = path + "/";
 
-        while( it.hasNext() ) {
+    while( it.hasNext() ) {
 
-            it.next();
+        it.next();
 
-            QFileInfo   fi      = it.fileInfo();
-            QString     entry   = fi.fileName();
+        QFileInfo   fi      = it.fileInfo();
+        QString     entry   = fi.fileName();
 
-            if( fi.isDir() ) {
+        if( fi.isDir() ) {
 
-                if( entry == "." || entry == ".." )
-                    continue;
+            if( entry == "." || entry == ".." )
+                continue;
 
-                if( !enumDir( pth + entry ) )
-                    return false;
-            }
-            else if( !SU.send( QString("%1\n").arg( pth + entry ), true ) )
+            if( !enumDir( pth + entry ) )
                 return false;
         }
+        else if( !SU.send( QString("%1\n").arg( pth + entry ), true ) )
+            return false;
     }
 
     return true;
@@ -907,153 +896,153 @@ bool CmdWorker::enumDir( const QString &path )
 //
 void CmdWorker::fetch( const QStringList &toks )
 {
-    if( toks.size() >= 4 ) {
+    if( toks.size() < 4 ) {
+        errMsg = "FETCH: Requires at least 4 params.";
+        return;
+    }
 
-        int         js, ip;
-        ConfigCtl   *C = okStreamToks( "FETCH", js, ip, toks );
+    int         js, ip;
+    ConfigCtl   *C = okStreamToks( "FETCH", js, ip, toks );
 
-        if( !C )
-            return;
+    if( !C )
+        return;
 
-        const DAQ::Params   &p  = C->acceptedParams;
-        const AIQ*          aiQ = mainApp()->getRun()->getQ( js, ip );
+    const DAQ::Params   &p  = C->acceptedParams;
+    const AIQ*          aiQ = mainApp()->getRun()->getQ( js, ip );
 
-        if( !aiQ )
-            errMsg = "FETCH: Not running or stream not enabled.";
-        else {
+    if( !aiQ ) {
+        errMsg = "FETCH: Not running or stream not enabled.";
+        return;
+    }
 
-            // -----
-            // Chans
-            // -----
+// -----
+// Chans
+// -----
 
-            QBitArray   chanBits;
-            int         nChans  = aiQ->nChans();
-            uint        dnsmp   = 1;
+    QBitArray   chanBits;
+    int         nChans  = aiQ->nChans();
+    uint        dnsmp   = 1;
 
-            if( toks.size() < 5 || toks.at( 4 ) == "-1#" )
-                chanBits.fill( true, nChans );
-            else if( toks.at( 4 ) == "-2#" ) {
+    if( toks.size() < 5 || toks.at( 4 ) == "-1#" )
+        chanBits.fill( true, nChans );
+    else if( toks.at( 4 ) == "-2#" ) {
 
-                switch( js ) {
-                    case jsNI:  chanBits = p.ni.sns.saveBits; break;
-                    case jsOB:  chanBits = p.im.get_iStrOneBox( ip ).sns.saveBits; break;
-                    case jsIM:
-                    case -jsIM: chanBits = p.im.prbj[ip].sns.saveBits; break;
-                }
-            }
-            else {
-
-                chanBits.fill( true, nChans );
-
-                QString err =
-                    Subset::cmdStr2Bits(
-                        chanBits, chanBits, toks.at( 4 ), nChans );
-
-                if( !err.isEmpty() ) {
-                    errMsg = err;
-                    return;
-                }
-            }
-
-            // ----------
-            // Downsample
-            // ----------
-
-            if( toks.size() >= 6 )
-                dnsmp = toks.at( 5 ).toUInt();
-
-            // ---------------------------------
-            // Fetch whole timepoints from queue
-            // ---------------------------------
-
-            vec_i16 data;
-            quint64 fromCt  = toks.at( 2 ).toLongLong();
-            int     nMax    = toks.at( 3 ).toInt(),
-                    size,
-                    ret;
-
-            try {
-                data.reserve( nChans * nMax );
-            }
-            catch( const std::exception& ) {
-                errMsg = "FETCH: Low mem.";
-                return;
-            }
-
-            for( int itry = 0; itry < 3; ++itry ) {
-
-                ret = aiQ->getNSampsFromCt( data, fromCt, nMax );
-
-                if( ret < 0 ) {
-                    errMsg = "FETCH: Too late.";
-                    return;
-                }
-
-                if( ret == 0 ) {
-                    errMsg = "FETCH: Low mem.";
-                    return;
-                }
-
-                size = data.size();
-
-                if( size )
-                    break;
-
-                quint64  endCt = aiQ->endCount();
-
-                // Try to give client at least a small amount of data.
-                // 24 = 2 imec packets of samples.
-                // Bound sleeps to < 2 millisec to keep latency lower.
-
-                if( fromCt + 24 > endCt ) {
-
-                    int gap_us = 1e6*(fromCt + 24 - endCt)/aiQ->sRate();
-
-                    QThread::usleep( qBound( 250, gap_us, 2000 ) );
-                }
-            }
-
-            if( size ) {
-
-                // ----------------
-                // Requested subset
-                // ----------------
-
-                if( chanBits.count( true ) < nChans ) {
-
-                    QVector<uint>   iKeep;
-
-                    Subset::bits2Vec( iKeep, chanBits );
-                    Subset::subset( data, data, iKeep, nChans );
-                    nChans = iKeep.size();
-                }
-
-                // ----------
-                // Downsample
-                // ----------
-
-                if( dnsmp > 1 )
-                    Subset::downsample( data, data, nChans, dnsmp );
-
-                size = data.size();
-            }
-
-            // ----
-            // Send
-            // ----
-
-            SU.send(
-                QString("BINARY_DATA %1 %2 uint64(%3)\n")
-                .arg( nChans )
-                .arg( size / nChans )
-                .arg( fromCt ),
-                true );
-
-            SU.sendBinary( &data[0], size*sizeof(qint16) );
+        switch( js ) {
+            case jsNI:  chanBits = p.ni.sns.saveBits; break;
+            case jsOB:  chanBits = p.im.get_iStrOneBox( ip ).sns.saveBits; break;
+            case jsIM:
+            case -jsIM: chanBits = p.im.prbj[ip].sns.saveBits; break;
         }
     }
-    else
-        errMsg = "FETCH: Requires at least 4 params.";
+    else {
+
+        chanBits.fill( true, nChans );
+
+        QString err =
+            Subset::cmdStr2Bits(
+                chanBits, chanBits, toks.at( 4 ), nChans );
+
+        if( !err.isEmpty() ) {
+            errMsg = err;
+            return;
+        }
+    }
+
+// ----------
+// Downsample
+// ----------
+
+    if( toks.size() >= 6 )
+        dnsmp = toks.at( 5 ).toUInt();
+
+// ---------------------------------
+// Fetch whole timepoints from queue
+// ---------------------------------
+
+    vec_i16 data;
+    quint64 fromCt  = toks.at( 2 ).toLongLong();
+    int     nMax    = toks.at( 3 ).toInt(),
+            size,
+            ret;
+
+    try {
+        data.reserve( nChans * nMax );
+    }
+    catch( const std::exception& ) {
+        errMsg = "FETCH: Low mem.";
+        return;
+    }
+
+    for( int itry = 0; itry < 3; ++itry ) {
+
+        ret = aiQ->getNSampsFromCt( data, fromCt, nMax );
+
+        if( ret < 0 ) {
+            errMsg = "FETCH: Too late.";
+            return;
+        }
+
+        if( ret == 0 ) {
+            errMsg = "FETCH: Low mem.";
+            return;
+        }
+
+        size = data.size();
+
+        if( size )
+            break;
+
+        quint64  endCt = aiQ->endCount();
+
+        // Try to give client at least a small amount of data.
+        // 24 = 2 imec packets of samples.
+        // Bound sleeps to < 2 millisec to keep latency lower.
+
+        if( fromCt + 24 > endCt ) {
+
+            int gap_us = 1e6*(fromCt + 24 - endCt)/aiQ->sRate();
+
+            QThread::usleep( qBound( 250, gap_us, 2000 ) );
+        }
+    }
+
+    if( size ) {
+
+        // ----------------
+        // Requested subset
+        // ----------------
+
+        if( chanBits.count( true ) < nChans ) {
+
+            QVector<uint>   iKeep;
+
+            Subset::bits2Vec( iKeep, chanBits );
+            Subset::subset( data, data, iKeep, nChans );
+            nChans = iKeep.size();
+        }
+
+        // ----------
+        // Downsample
+        // ----------
+
+        if( dnsmp > 1 )
+            Subset::downsample( data, data, nChans, dnsmp );
+
+        size = data.size();
+    }
+
+// ----
+// Send
+// ----
+
+    SU.send(
+        QString("BINARY_DATA %1 %2 uint64(%3)\n")
+        .arg( nChans )
+        .arg( size / nChans )
+        .arg( fromCt ),
+        true );
+
+    SU.sendBinary( &data[0], size*sizeof(qint16) );
 }
 
 
@@ -1106,95 +1095,95 @@ void CmdWorker::getStreamShankMap( const QStringList &toks )
 //
 void CmdWorker::opto_emit( QStringList toks )
 {
+    if( toks.size() < 3 ) {
+        errMsg = "OPTOEMIT: Requires params {ip, color, site}.";
+        return;
+    }
+
     Run *run = okRunStarted( "OPTOEMIT" );
 
     if( !run )
         return;
 
-    if( toks.size() >= 3 ) {
-
-        QMetaObject::invokeMethod(
-            run, "opto_emit",
-            Qt::BlockingQueuedConnection,
-            Q_RETURN_ARG(QString, errMsg),
-            Q_ARG(int, toks.at( 0 ).toInt()),
-            Q_ARG(int, toks.at( 1 ).toInt()),
-            Q_ARG(int, toks.at( 2 ).toInt()) );
-    }
-    else
-        errMsg = "OPTOEMIT: Requires parameters {ip, color, site}.";
+    QMetaObject::invokeMethod(
+        run, "opto_emit",
+        Qt::BlockingQueuedConnection,
+        Q_RETURN_ARG(QString, errMsg),
+        Q_ARG(int, toks.at( 0 ).toInt()),
+        Q_ARG(int, toks.at( 1 ).toInt()),
+        Q_ARG(int, toks.at( 2 ).toInt()) );
 }
 
 
 void CmdWorker::par2Start( QStringList toks )
 {
-    if( toks.count() >= 2 ) {
-
-        // --------------------
-        // Parse command letter
-        // --------------------
-
-        Par2Worker::Op  op;
-
-        char    cmd = toks.front().trimmed().at( 0 ).toLower().toLatin1();
-        toks.pop_front();
-
-        switch( cmd ) {
-            case 'c': op = Par2Worker::Create; break;
-            case 'v': op = Par2Worker::Verify; break;
-            case 'r': op = Par2Worker::Repair; break;
-            default:
-                errMsg =
-                    "PAR2: Operation must be"
-                    " one of {\"c\", \"v\", \"r\"}";
-                return;
-        }
-
-        // ---------------
-        // Parse file name
-        // ---------------
-
-        QString file = toks.join( " " ).trimmed().replace( "/", "\\" );
-
-        mainApp()->makePathAbsolute( file );
-
-        // ------------------
-        // Create par2 worker
-        // ------------------
-
-        QThread *thread = new QThread;
-
-        par2 = new Par2Worker( file, op );
-        par2->moveToThread( thread );
-        Connect( thread, SIGNAL(started()), par2, SLOT(run()) );
-        Connect( par2, SIGNAL(report(QString)), this, SLOT(par2Report(QString)) );
-        Connect( par2, SIGNAL(error(QString)), this, SLOT(par2Error(QString)) );
-        Connect( par2, SIGNAL(finished()), par2, SLOT(deleteLater()) );
-        Connect( par2, SIGNAL(destroyed()), thread, SLOT(quit()), Qt::DirectConnection );
-
-        // ----------------
-        // Start processing
-        // ----------------
-
-        thread->start();
-
-        while( thread->isRunning() )
-            guiBreathe( false );
-
-        // -------
-        // Cleanup
-        // -------
-
-        delete thread;
-        par2 = 0;
+    if( toks.count() < 2 ) {
+        errMsg = "PAR2: Requires at least 2 parameters.";
+        return;
     }
-    else
-        errMsg = "PAR2: Requires at least 2 arguments.";
+
+// --------------------
+// Parse command letter
+// --------------------
+
+    Par2Worker::Op  op;
+
+    char    cmd = toks.front().trimmed().at( 0 ).toLower().toLatin1();
+    toks.pop_front();
+
+    switch( cmd ) {
+        case 'c': op = Par2Worker::Create; break;
+        case 'v': op = Par2Worker::Verify; break;
+        case 'r': op = Par2Worker::Repair; break;
+        default:
+            errMsg =
+                "PAR2: Operation must be"
+                " one of {\"c\", \"v\", \"r\"}";
+            return;
+    }
+
+// ---------------
+// Parse file name
+// ---------------
+
+    QString file = toks.join( " " ).trimmed().replace( "/", "\\" );
+
+    mainApp()->makePathAbsolute( file );
+
+// ------------------
+// Create par2 worker
+// ------------------
+
+    QThread *thread = new QThread;
+
+    par2 = new Par2Worker( file, op );
+    par2->moveToThread( thread );
+    Connect( thread, SIGNAL(started()), par2, SLOT(run()) );
+    Connect( par2, SIGNAL(report(QString)), this, SLOT(par2Report(QString)) );
+    Connect( par2, SIGNAL(error(QString)), this, SLOT(par2Error(QString)) );
+    Connect( par2, SIGNAL(finished()), par2, SLOT(deleteLater()) );
+    Connect( par2, SIGNAL(destroyed()), thread, SLOT(quit()), Qt::DirectConnection );
+
+// ----------------
+// Start processing
+// ----------------
+
+    thread->start();
+
+    while( thread->isRunning() )
+        guiBreathe( false );
+
+// -------
+// Cleanup
+// -------
+
+    delete thread;
+    par2 = 0;
 }
 
 
 // Expected tok parameter is Pinpoint data string:
-// [probe-id,shank-id](startpos,endpos,R,G,B,rgnname)(startpos,endpos,R,G,B,rgnname)…()
+// [probe-id,shank-id](startpos,endpos,R,G,B,rgnname)(startpos,endpos,R,G,B,rgnname)...()
 //    - probe-id: SpikeGLX logical probe id.
 //    - shank-id: [0..n-shanks].
 //    - startpos: region start in microns from tip.
@@ -1204,6 +1193,11 @@ void CmdWorker::par2Start( QStringList toks )
 //
 void CmdWorker::setAnatomyPP( const QStringList &toks )
 {
+    if( toks.size() < 1 ) {
+        errMsg = "SETANATOMYPP: Requires string parameter.";
+        return;
+    }
+
     Run *run = okRunStarted( "SETANATOMYPP" );
 
     if( !run ) {
@@ -1212,18 +1206,13 @@ void CmdWorker::setAnatomyPP( const QStringList &toks )
         return;
     }
 
-    if( toks.size() > 0 ) {
+    QString s = toks.join( " " ).trimmed();
 
-        QString s = toks.join( " " ).trimmed();
-
-        QMetaObject::invokeMethod(
-            run, "setAnatomyPP",
-            Qt::BlockingQueuedConnection,
-            Q_RETURN_ARG(QString, errMsg),
-            Q_ARG(QString, s) );
-    }
-    else
-        errMsg = "SETANATOMYPP: Requires string parameter.";
+    QMetaObject::invokeMethod(
+        run, "setAnatomyPP",
+        Qt::BlockingQueuedConnection,
+        Q_RETURN_ARG(QString, errMsg),
+        Q_ARG(QString, s) );
 }
 
 
@@ -1231,22 +1220,22 @@ void CmdWorker::setAnatomyPP( const QStringList &toks )
 //
 void CmdWorker::setAudioEnable( const QStringList &toks )
 {
+    if( toks.size() < 1 ) {
+        errMsg = "SETAUDIOENABLE: Requires parameter {0 or 1}.";
+        return;
+    }
+
     MainApp *app = okAppValidated( "SETAUDIOENABLE" );
 
     if( !app )
         return;
 
-    if( toks.size() > 0 ) {
+    bool    b = toks.front().toInt();
 
-        bool    b = toks.front().toInt();
-
-        QMetaObject::invokeMethod(
-            app->getRun(),
-            (b ? "aoStart" : "aoStop"),
-            Qt::QueuedConnection );
-    }
-    else
-        errMsg = "SETAUDIOENABLE: Requires parameter {0 or 1}.";
+    QMetaObject::invokeMethod(
+        app->getRun(),
+        (b ? "aoStart" : "aoStop"),
+        Qt::QueuedConnection );
 }
 
 
@@ -1273,8 +1262,9 @@ void CmdWorker::setAudioParams( const QString &group )
             params += QString("%1\n").arg( line );
         }
 
-        if( !params.isEmpty() ) {
-
+        if( params.isEmpty() )
+            errMsg = "SETAUDIOPARAMS: Param string is empty.";
+        else {
             QMetaObject::invokeMethod(
                 app->getAOCtl(),
                 "cmdSrvSetsAOParamStr",
@@ -1286,8 +1276,6 @@ void CmdWorker::setAudioParams( const QString &group )
             if( !errMsg.isEmpty() )
                 errMsg = "SETAUDIOPARAMS: " + errMsg;
         }
-        else
-            errMsg = "SETAUDIOPARAMS: Param string is empty.";
     }
 }
 
@@ -1298,48 +1286,24 @@ void CmdWorker::setAudioParams( const QString &group )
 //
 void CmdWorker::setDataDir( QStringList toks )
 {
-    if( toks.size() > 1 ) {
-
-        int         i = toks.first().toInt();
-        toks.pop_front();
-
-        QString     path = toks.join( " " ).trimmed().replace( "\\", "/" );
-        QFileInfo   info( path );
-
-        if( info.isDir() && info.exists() )
-            mainApp()->remoteSetsDataDir( path, i );
-        else {
-            errMsg =
-                QString("SETDATADIR: Not a directory or does not exist '%1'.")
-                .arg( path );
-        }
+    if( toks.size() < 2 ) {
+        errMsg = "SETDATADIR: Requires params {idir, path}.";
+        return;
     }
-    else
-        errMsg = "SETDATADIR: Requires parameters {idir, path}.";
-}
 
+    int i = toks.first().toInt();
+    toks.pop_front();
 
-// Expected tok params:
-// 0) channel string
-// 1) uint32 bits
-//
-void CmdWorker::setNIDO( const QStringList &toks )
-{
-    if( toks.size() >= 2 ) {
+    QString     path = toks.join( " " ).trimmed().replace( "\\", "/" );
+    QFileInfo   info( path );
 
-        MainApp *app = okAppValidated( "SETNIDO" );
-
-        if( !app )
-            return;
-
-        QMetaObject::invokeMethod(
-            app, "remoteSetsDigitalOut",
-            Qt::QueuedConnection,
-            Q_ARG(QString, toks.at( 0 )),
-            Q_ARG(quint32, toks.at( 1 ).toUInt()) );
+    if( info.isDir() && info.exists() )
+        mainApp()->remoteSetsDataDir( path, i );
+    else {
+        errMsg =
+        QString("SETDATADIR: Not a directory or does not exist '%1'.")
+        .arg( path );
     }
-    else
-        errMsg = "SETNIDO: Requires at least 2 params.";
 }
 
 
@@ -1367,15 +1331,15 @@ void CmdWorker::setMetaData()
             kvp.parseOneLine( line );
         }
 
-        if( kvp.size() ) {
-
-            QMetaObject::invokeMethod(
-                run, "rgtSetMetaData",
-                Qt::QueuedConnection,
-                Q_ARG(KeyValMap, kvp) );
-        }
-        else
+        if( !kvp.size() ) {
             errMsg = "SETMETADATA: Sent metadata is empty.";
+            return;
+        }
+
+        QMetaObject::invokeMethod(
+            run, "rgtSetMetaData",
+            Qt::QueuedConnection,
+            Q_ARG(KeyValMap, kvp) );
     }
 }
 
@@ -1384,10 +1348,12 @@ void CmdWorker::setMetaData()
 //
 void CmdWorker::setMultiDriveEnable( const QStringList &toks )
 {
-    if( toks.size() > 0 )
-        mainApp()->remoteSetsMultiDriveEnable( toks.front().toInt() );
-    else
+    if( toks.size() < 1 ) {
         errMsg = "SETMULTIDRIVEENABLE: Requires parameter {0 or 1}.";
+        return;
+    }
+
+    mainApp()->remoteSetsMultiDriveEnable( toks.front().toInt() );
 }
 
 
@@ -1400,15 +1366,85 @@ void CmdWorker::setNextFileName( const QString &name )
 
     QFileInfo   fi( name );
 
-    if( !fi.fileName().isEmpty() && !fi.isRelative() ) {
-
-        QMetaObject::invokeMethod(
-            run, "dfSetNextFileName",
-            Qt::QueuedConnection,
-            Q_ARG(QString, name) );
-    }
-    else
+    if( fi.fileName().isEmpty() || fi.isRelative() ) {
         errMsg = "SETNEXTFILENAME: Requires full path and name.";
+        return;
+    }
+
+    QMetaObject::invokeMethod(
+        run, "dfSetNextFileName",
+        Qt::QueuedConnection,
+        Q_ARG(QString, name) );
+}
+
+
+// Expected tok params:
+// 0) channel string
+// 1) uint32 bits
+//
+void CmdWorker::setNIDO( const QStringList &toks )
+{
+    if( toks.size() < 2 ) {
+        errMsg = "SETNIDO: Requires params {lines, bits}.";
+        return;
+    }
+
+    MainApp *app = okAppValidated( "SETNIDO" );
+
+    if( !app )
+        return;
+
+    errMsg = CniCfg::setDO( toks.at( 0 ), toks.at( 1 ).toUInt() );
+
+    if( !errMsg.isEmpty() )
+        errMsg = "SETNIDO: " + errMsg;
+}
+
+
+// Expected tok params:
+// 0) ip
+// 1) slot
+// 2) chn_vlt string
+//
+void CmdWorker::setOBXAO( const QStringList &toks )
+{
+    if( toks.size() < 3 ) {
+        errMsg = "SETOBXAO: Requires params {ip, slot, chn_vlt}.";
+        return;
+    }
+
+    ConfigCtl   *C = okCfgValidated( "SETOBXAO" );
+
+    if( !C )
+        return;
+
+    const DAQ::Params   &p   = C->acceptedParams;
+    int                 ip   = toks[0].toInt();
+
+    if( ip >= 0 ) {
+        int np = p.stream_nOB();
+        if( !np ) {
+            errMsg = "SETOBXAO: Obx stream not enabled.";
+            return;
+        }
+        else if( ip >= np ) {
+            errMsg = QString("SETOBXAO: Obx stream-ip must be in range[0..%1].").arg( np - 1 );
+            return;
+        }
+    }
+    else {
+        int slot = toks[1].toInt();
+        ip = p.im.obx_slot2istr( slot );
+        if( ip < 0 ) {
+            errMsg = QString("SETOBXAO: Slot %1 is not a selected OneBox.").arg( slot );
+            return;
+        }
+    }
+
+    errMsg = CStim::obx_set_AO( ip, toks[2] );
+
+    if( !errMsg.isEmpty() )
+        errMsg = "SETOBXAO: " + errMsg;
 }
 
 
@@ -1440,8 +1476,9 @@ void CmdWorker::setParams()
             params += QString("%1\n").arg( line );
         }
 
-        if( !params.isEmpty() ) {
-
+        if( params.isEmpty() )
+            errMsg = "SETPARAMS: Param string is empty.";
+        else {
             QMetaObject::invokeMethod(
                 C, "cmdSrvSetsParamStr",
                 Qt::BlockingQueuedConnection,
@@ -1453,8 +1490,6 @@ void CmdWorker::setParams()
             if( !errMsg.isEmpty() )
                 errMsg = "SETPARAMS: " + errMsg;
         }
-        else
-            errMsg = "SETPARAMS: Param string is empty.";
     }
 }
 
@@ -1487,8 +1522,9 @@ void CmdWorker::setParamsImAll()
             params += QString("%1\n").arg( line );
         }
 
-        if( !params.isEmpty() ) {
-
+        if( params.isEmpty() )
+            errMsg = "SETPARAMSIMALL: Param string is empty.";
+        else {
             QMetaObject::invokeMethod(
                 C, "cmdSrvSetsParamStr",
                 Qt::BlockingQueuedConnection,
@@ -1500,8 +1536,6 @@ void CmdWorker::setParamsImAll()
             if( !errMsg.isEmpty() )
                 errMsg = "SETPARAMSIMALL: " + errMsg;
         }
-        else
-            errMsg = "SETPARAMSIMALL: Param string is empty.";
     }
 }
 
@@ -1512,62 +1546,58 @@ void CmdWorker::setParamsImAll()
 //
 void CmdWorker::setParamsImProbe( const QStringList &toks )
 {
-    if( toks.size() >= 1 ) {
-
-        ConfigCtl   *C = okCfgValidated( "SETPARAMSIMPRB" );
-        int         ip = toks[0].toInt(),
-                    np;
-
-        if( !C )
-            return;
-
-        if( mainApp()->getRun()->dfIsSaving() ) {
-            errMsg = "SETPARAMSIMPRB: Cannot set probe params while writing.";
-            return;
-        }
-
-        const DAQ::Params   &p = C->acceptedParams;
-
-        np = p.stream_nIM();
-
-        if( !np )
-            errMsg = "SETPARAMSIMPRB: imec stream not enabled.";
-        else if( ip >= 0 && ip < np ) {
-
-            if( SU.send( "READY\n", true ) ) {
-
-                QString params, line;
-
-                while( !(line = SU.readLine()).isNull() ) {
-
-                    if( !line.length() )
-                        break; // done on blank line
-
-                    params += QString("%1\n").arg( line );
-                }
-
-                if( !params.isEmpty() ) {
-
-                    QMetaObject::invokeMethod(
-                        C, "cmdSrvSetsParamStr",
-                        Qt::BlockingQueuedConnection,
-                        Q_RETURN_ARG(QString, errMsg),
-                        Q_ARG(QString, params),
-                        Q_ARG(int, 2),
-                        Q_ARG(int, ip) );
-
-                    if( !errMsg.isEmpty() )
-                        errMsg = "SETPARAMSIMPRB: " + errMsg;
-                }
-                else
-                    errMsg = "SETPARAMSIMPRB: Param string is empty.";
-            }
-        }
-        else
-            errMsg = QString("SETPARAMSIMPRB: imec stream-ip must be in range[0..%1].").arg( np - 1 );
-    }
-    else
+    if( toks.size() < 1 ) {
         errMsg = "SETPARAMSIMPRB: Requires parameter ip.";
+        return;
+    }
+
+    ConfigCtl   *C = okCfgValidated( "SETPARAMSIMPRB" );
+    int         ip = toks[0].toInt(),
+                np;
+
+    if( !C )
+        return;
+
+    if( mainApp()->getRun()->dfIsSaving() ) {
+        errMsg = "SETPARAMSIMPRB: Cannot set probe params while writing.";
+        return;
+    }
+
+    const DAQ::Params   &p = C->acceptedParams;
+
+    np = p.stream_nIM();
+
+    if( !np )
+        errMsg = "SETPARAMSIMPRB: imec stream not enabled.";
+    else if( ip < 0 || ip >= np )
+        errMsg = QString("SETPARAMSIMPRB: imec stream-ip must be in range[0..%1].").arg( np - 1 );
+    else if( SU.send( "READY\n", true ) ) {
+
+        QString params, line;
+
+        while( !(line = SU.readLine()).isNull() ) {
+
+            if( !line.length() )
+                break; // done on blank line
+
+            params += QString("%1\n").arg( line );
+        }
+
+        if( params.isEmpty() )
+            errMsg = "SETPARAMSIMPRB: Param string is empty.";
+        else {
+            QMetaObject::invokeMethod(
+                C, "cmdSrvSetsParamStr",
+                Qt::BlockingQueuedConnection,
+                Q_RETURN_ARG(QString, errMsg),
+                Q_ARG(QString, params),
+                Q_ARG(int, 2),
+                Q_ARG(int, ip) );
+
+            if( !errMsg.isEmpty() )
+                errMsg = "SETPARAMSIMPRB: " + errMsg;
+        }
+    }
 }
 
 
@@ -1577,72 +1607,71 @@ void CmdWorker::setParamsImProbe( const QStringList &toks )
 //
 void CmdWorker::setParamsOneBox( const QStringList &toks )
 {
-    if( toks.size() >= 1 ) {
+    if( toks.size() < 2 ) {
+        errMsg = "SETPARAMSOBX: Requires params {ip, slot}.";
+        return;
+    }
 
-        ConfigCtl   *C = okCfgValidated( "SETPARAMSOBX" );
+    ConfigCtl   *C = okCfgValidated( "SETPARAMSOBX" );
 
-        if( !C )
+    if( !C )
+        return;
+
+    if( mainApp()->getRun()->isRunning() ) {
+        errMsg = "SETPARAMSOBX: Cannot set params while running.";
+        return;
+    }
+
+    const DAQ::Params   &p   = C->acceptedParams;
+    int                 ip   = toks[0].toInt();
+
+    if( ip >= 0 ) {
+        int np = p.stream_nOB();
+        if( !np ) {
+            errMsg = "SETPARAMSOBX: Obx stream not enabled.";
             return;
-
-        if( mainApp()->getRun()->isRunning() ) {
-            errMsg = "SETPARAMSOBX: Cannot set params while running.";
+        }
+        else if( ip >= np ) {
+            errMsg = QString("SETPARAMSOBX: Obx stream-ip must be in range[0..%1].").arg( np - 1 );
             return;
-        }
-
-        const DAQ::Params   &p   = C->acceptedParams;
-        int                 ip   = toks[0].toInt();
-
-        if( ip >= 0 ) {
-            int np = p.stream_nOB();
-            if( !np ) {
-                errMsg = "SETPARAMSOBX: Obx stream not enabled.";
-                return;
-            }
-            else if( ip >= np ) {
-                errMsg = QString("SETPARAMSOBX: Obx stream-ip must be in range[0..%1].").arg( np - 1 );
-                return;
-            }
-        }
-        else {
-            int slot = toks[1].toInt();
-            ip = p.im.obx_slot2istr( slot );
-            if( ip < 0 ) {
-                errMsg = QString("SETPARAMSOBX: Slot %1 is not s selected OneBox.").arg( slot );
-                return;
-            }
-        }
-
-        if( SU.send( "READY\n", true ) ) {
-
-            QString params, line;
-
-            while( !(line = SU.readLine()).isNull() ) {
-
-                if( !line.length() )
-                    break; // done on blank line
-
-                params += QString("%1\n").arg( line );
-            }
-
-            if( !params.isEmpty() ) {
-
-                QMetaObject::invokeMethod(
-                    C, "cmdSrvSetsParamStr",
-                    Qt::BlockingQueuedConnection,
-                    Q_RETURN_ARG(QString, errMsg),
-                    Q_ARG(QString, params),
-                    Q_ARG(int, 3),
-                    Q_ARG(int, ip) );
-
-                if( !errMsg.isEmpty() )
-                    errMsg = "SETPARAMSOBX: " + errMsg;
-            }
-            else
-                errMsg = "SETPARAMSOBX: Param string is empty.";
         }
     }
-    else
-        errMsg = "SETPARAMSOBX: Requires parameters ip, slot.";
+    else {
+        int slot = toks[1].toInt();
+        ip = p.im.obx_slot2istr( slot );
+        if( ip < 0 ) {
+            errMsg = QString("SETPARAMSOBX: Slot %1 is not a selected OneBox.").arg( slot );
+            return;
+        }
+    }
+
+    if( SU.send( "READY\n", true ) ) {
+
+        QString params, line;
+
+        while( !(line = SU.readLine()).isNull() ) {
+
+            if( !line.length() )
+                break; // done on blank line
+
+            params += QString("%1\n").arg( line );
+        }
+
+        if( params.isEmpty() )
+            errMsg = "SETPARAMSOBX: Param string is empty.";
+        else {
+            QMetaObject::invokeMethod(
+                C, "cmdSrvSetsParamStr",
+                Qt::BlockingQueuedConnection,
+                Q_RETURN_ARG(QString, errMsg),
+                Q_ARG(QString, params),
+                Q_ARG(int, 3),
+                Q_ARG(int, ip) );
+
+            if( !errMsg.isEmpty() )
+                errMsg = "SETPARAMSOBX: " + errMsg;
+        }
+    }
 }
 
 
@@ -1650,26 +1679,26 @@ void CmdWorker::setParamsOneBox( const QStringList &toks )
 //
 void CmdWorker::setRecordingEnabled( const QStringList &toks )
 {
+    if( toks.size() < 1 ) {
+        errMsg = "SETRECORDENAB: Requires parameter {0 or 1}.";
+        return;
+    }
+
     Run *run = okRunStarted( "SETRECORDENAB" );
 
     if( !run )
         return;
 
-    if( toks.size() > 0 ) {
-
-        bool    b = toks.front().toInt();
+    bool    b = toks.front().toInt();
 
 // Use BlockingQueuedConnection to hold off triggers until enabled
 
-        QMetaObject::invokeMethod(
-            run,
-            "dfSetRecordingEnabled",
-            Qt::BlockingQueuedConnection,
-            Q_ARG(bool, b),
-            Q_ARG(bool, true) );
-    }
-    else
-        errMsg = "SETRECORDENAB: Requires parameter {0 or 1}.";
+    QMetaObject::invokeMethod(
+        run,
+        "dfSetRecordingEnabled",
+        Qt::BlockingQueuedConnection,
+        Q_ARG(bool, b),
+        Q_ARG(bool, true) );
 }
 
 
@@ -1677,26 +1706,26 @@ void CmdWorker::setRecordingEnabled( const QStringList &toks )
 //
 void CmdWorker::setRunName( const QStringList &toks )
 {
+    if( toks.size() < 1 ) {
+        errMsg = "SETRUNNAME: Requires name parameter.";
+        return;
+    }
+
     MainApp *app = okAppValidated( "SETRUNNAME" );
 
     if( !app )
         return;
 
-    if( toks.size() > 0 ) {
+    QString s = toks.join( " " ).trimmed();
 
-        QString s = toks.join( " " ).trimmed();
+    QMetaObject::invokeMethod(
+        app, "remoteSetsRunName",
+        Qt::BlockingQueuedConnection,
+        Q_RETURN_ARG(QString, errMsg),
+        Q_ARG(QString, s) );
 
-        QMetaObject::invokeMethod(
-            app, "remoteSetsRunName",
-            Qt::BlockingQueuedConnection,
-            Q_RETURN_ARG(QString, errMsg),
-            Q_ARG(QString, s) );
-
-        if( !errMsg.isEmpty() )
-            errMsg = "SETRUNNAME: " + errMsg;
-    }
-    else
-        errMsg = "SETRUNNAME: Requires name parameter.";
+    if( !errMsg.isEmpty() )
+        errMsg = "SETRUNNAME: " + errMsg;
 }
 
 
@@ -1706,21 +1735,21 @@ void CmdWorker::setRunName( const QStringList &toks )
 //
 void CmdWorker::setTriggerOffBeep( const QStringList &toks )
 {
+    if( toks.size() < 2 ) {
+        errMsg = "SETTRIGGEROFFBEEP: Requires params {hertz, millisec}.";
+        return;
+    }
+
     Run *run = okRunStarted( "SETTRIGGEROFFBEEP" );
 
     if( !run )
         return;
 
-    if( toks.size() >= 2 ) {
-
-        QMetaObject::invokeMethod(
-            run, "dfSetTriggerOffBeep",
-            Qt::QueuedConnection,
-            Q_ARG(quint32, toks.at( 0 ).toInt()),
-            Q_ARG(quint32, toks.at( 1 ).toInt()) );
-    }
-    else
-        errMsg = "SETTRIGGEROFFBEEP: Requires params {hertz, millisec}.";
+    QMetaObject::invokeMethod(
+        run, "dfSetTriggerOffBeep",
+        Qt::QueuedConnection,
+        Q_ARG(quint32, toks.at( 0 ).toInt()),
+        Q_ARG(quint32, toks.at( 1 ).toInt()) );
 }
 
 
@@ -1730,21 +1759,21 @@ void CmdWorker::setTriggerOffBeep( const QStringList &toks )
 //
 void CmdWorker::setTriggerOnBeep( const QStringList &toks )
 {
+    if( toks.size() < 2 ) {
+        errMsg = "SETTRIGGERONBEEP: Requires params {hertz, millisec}.";
+        return;
+    }
+
     Run *run = okRunStarted( "SETTRIGGERONBEEP" );
 
     if( !run )
         return;
 
-    if( toks.size() >= 2 ) {
-
-        QMetaObject::invokeMethod(
-            run, "dfSetTriggerOnBeep",
-            Qt::QueuedConnection,
-            Q_ARG(quint32, toks.at( 0 ).toInt()),
-            Q_ARG(quint32, toks.at( 1 ).toInt()) );
-    }
-    else
-        errMsg = "SETTRIGGERONBEEP: Requires params {hertz, millisec}.";
+    QMetaObject::invokeMethod(
+        run, "dfSetTriggerOnBeep",
+        Qt::QueuedConnection,
+        Q_ARG(quint32, toks.at( 0 ).toInt()),
+        Q_ARG(quint32, toks.at( 1 ).toInt()) );
 }
 
 
@@ -1779,32 +1808,32 @@ void CmdWorker::stopRun()
 //
 void CmdWorker::triggerGT( const QStringList &toks )
 {
+    if( toks.size() < 2 ) {
+        errMsg = "TRIGGERGT: Requires params {g, t}.";
+        return;
+    }
+
     Run *run = okRunStarted( "TRIGGERGT" );
 
     if( !run )
         return;
 
-    if( toks.size() >= 2 ) {
+    int g = toks.at( 0 ).toInt(),
+        t = toks.at( 1 ).toInt();
 
-        int g = toks.at( 0 ).toInt(),
-            t = toks.at( 1 ).toInt();
-
-        if( g >= 0 ) {
-            QMetaObject::invokeMethod(
-                run, "rgtSetGate",
-                Qt::QueuedConnection,
-                Q_ARG(bool, g) );
-        }
-
-        if( g != 0 && t >= 0 ) {
-            QMetaObject::invokeMethod(
-                run, "rgtSetTrig",
-                Qt::QueuedConnection,
-                Q_ARG(bool, t) );
-        }
+    if( g >= 0 ) {
+        QMetaObject::invokeMethod(
+            run, "rgtSetGate",
+            Qt::QueuedConnection,
+            Q_ARG(bool, g) );
     }
-    else
-        errMsg = "TRIGGERGT: Requires params {g, t}.";
+
+    if( g != 0 && t >= 0 ) {
+        QMetaObject::invokeMethod(
+            run, "rgtSetTrig",
+            Qt::QueuedConnection,
+            Q_ARG(bool, t) );
+    }
 }
 
 
@@ -2012,14 +2041,16 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
         setAudioParams( toks.front().trimmed() );
     else if( cmd == "SETDATADIR" )
         setDataDir( toks );
-    else if( cmd == "SETNIDO" )
-        setNIDO( toks );
     else if( cmd == "SETMETADATA" )
         setMetaData();
     else if( cmd == "SETMULTIDRIVEENABLE" )
         setMultiDriveEnable( toks );
     else if( cmd == "SETNEXTFILENAME" )
         setNextFileName( toks.join( " " ).trimmed().replace( "\\", "/" ) );
+    else if( cmd == "SETNIDO" )
+        setNIDO( toks );
+    else if( cmd == "SETOBXAO" )
+        setOBXAO( toks );
     else if( cmd == "SETPARAMS" )
         setParams();
     else if( cmd == "SETPARAMSIMALL" )

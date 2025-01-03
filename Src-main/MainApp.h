@@ -212,7 +212,6 @@ public slots:
     QString remoteSetsRunName( const QString &name );
     QString remoteStartsRun();
     void remoteStopsRun();
-    void remoteSetsDigitalOut( const QString &lines, quint32 bits );
     void remoteShowsConsole( bool show );
 
 // Run synchronizes with app

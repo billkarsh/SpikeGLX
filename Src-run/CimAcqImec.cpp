@@ -1923,7 +1923,7 @@ CimAcqImec::~CimAcqImec()
                 np_switchmatrix_clear( slot, SM_Output_PXISYNC );
             }
             else
-                np_switchmatrix_clear( slot, SM_Output_SMA1 );
+                _aux_doneObxSlot( slot );
             np_closeBS( slot );
         }
     }
@@ -2926,6 +2926,9 @@ bool CimAcqImec::startAcq()
 {
     STOPCHECK;
 
+    if( p.stream_nIM() + p.stream_nOB() == 0 )
+        goto done;
+
     if( !p.im.prbAll.trgSource ) {
 
         if( !_st_softStart() )
@@ -2936,6 +2939,7 @@ bool CimAcqImec::startAcq()
     else
         Log() << "IMEC Waiting for external trigger";
 
+done:
     STEPSTART();
     return true;
 }

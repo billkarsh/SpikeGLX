@@ -1104,6 +1104,7 @@ bool CniAcqDmx::startTasks()
     if( taskSyncPls && DAQmxErrChkNoJump( DAQmxStartTask( taskSyncPls ) ) )
         return false;
 
+    Log() << "NIDQ Acquisition started";
     return true;
 }
 

@@ -160,6 +160,26 @@ bool CimAcqImec::_aux_initObxSlot( int slot )
 }
 
 
+void CimAcqImec::_aux_doneObxSlot( int slot )
+{
+    np_switchmatrix_clear( slot, SM_Output_SMA1 );
+
+    int                     istr = p.im.obx_slot2istr( slot );
+    const CimCfg::ObxEach   &E   = p.im.get_iStrOneBox( istr );
+    QVector<uint>           vAO;
+
+    Subset::rngStr2Vec( vAO, E.uiAOStr );
+
+    for( int ic = 0; ic < imOBX_NCHN; ++ic ) {
+
+        if( vAO.contains( ic ) ) {
+            np_DAC_setVoltage( slot, ic, 0 );
+            np_DAC_enableOutput( slot, ic, false );
+        }
+    }
+}
+
+
 bool CimAcqImec::_aux_open( const CimCfg::ImProbeTable &T )
 {
     for( int is = 0, ns = T.nSelSlots(); is < ns; ++is ) {
@@ -587,6 +607,9 @@ closeMgr:
 
 bool CimAcqImec::_aux_setSync( const CimCfg::ImProbeTable &T )
 {
+    if( p.stream_nIM() + p.stream_nOB() == 0 )
+        return true;
+
     QVector<int>    vslots;
     int             ns,
                     srcSlot = -1,

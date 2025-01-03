@@ -1425,12 +1425,6 @@ void MainApp::remoteStopsRun()
 }
 
 
-void MainApp::remoteSetsDigitalOut( const QString &lines, quint32 bits )
-{
-    CniCfg::setDO( lines, bits );
-}
-
-
 void MainApp::remoteShowsConsole( bool show )
 {
     if( show ^ consoleWindow->isVisible() )

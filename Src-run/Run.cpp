@@ -626,7 +626,7 @@ bool Run::startRun( QString &err )
         p.stream_rate( jsNI, 0 ), p.stream_nChans( jsNI, 0 ), streamSecs );
     }
 
-    if( nIM || nOB ) {
+    if( nIM || p.im.get_nOneBox() ) {
         imReader = new IMReader( p, imQ, imQf, obQ );
         ConnectUI( imReader->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
         ConnectUI( imReader->worker, SIGNAL(finished()), this, SLOT(workerStopsRun()) );
@@ -1023,7 +1023,7 @@ QString Run::setAnatomyPP( const QString &s )
     QString err;
 
 // Split header-other:
-// [probe-id,shank-id](startpos,endpos,R,G,B,rgnname)(startpos,endpos,R,G,B,rgnname)…()
+// [probe-id,shank-id](startpos,endpos,R,G,B,rgnname)(startpos,endpos,R,G,B,rgnname)...()
 
     QStringList sl = s.split(
                         QRegExp("\\s*\\]\\s*"),
