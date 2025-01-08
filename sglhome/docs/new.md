@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+January 7, 2024
+
+* CatGT 4.7 (Option -save writes correctly when no -dest folder).
+
 December 20, 2024
 
 * CatGT 4.6 (For AP->LF: -ap flag not needed).
