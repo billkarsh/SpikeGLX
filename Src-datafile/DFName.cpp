@@ -220,6 +220,15 @@ QString DFName::chopType( const QString &name )
 }
 
 
+QString DFName::forceTxtSuffix( const QString &name )
+{
+    QRegExp re("meta$");
+    re.setCaseSensitivity( Qt::CaseInsensitive );
+
+    return QString(name).replace( re, "txt" );
+}
+
+
 QString DFName::forceBinSuffix( const QString &name )
 {
     QRegExp re("meta$");

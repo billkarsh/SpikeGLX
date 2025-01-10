@@ -40,6 +40,7 @@ public:
     static QString justExtension( const QString &name );
     static QString chopExtension( const QString &name );
     static QString chopType( const QString &name );
+    static QString forceTxtSuffix( const QString &name );
     static QString forceBinSuffix( const QString &name );
     static QString forceMetaSuffix( const QString &name );
 
