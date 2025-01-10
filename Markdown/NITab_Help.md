@@ -367,20 +367,8 @@ PFI terminal on the NI breakout box for the secondary device.
 
 ### Digital Lines (XD)
 
-*Non-waveform lines are not clocked. If SpikeGLX is using that line, it
-owns that line; otherwise the line is available to external software.*
-
-*Waveform (clocked) digital lines are subject to sharing limitations
-that derive from use of clock resources as discussed below.*
-
-#### SpikeGLX Clock Source External
-
 The digital lines that are not being used in SpikeGLX should be available
 in other software on a line-by-line basis.
-
-#### SpikeGLX Clock Source Internal
-
-All digital lines are owned exclusively by SpikeGLX.
 
 --------
 
