@@ -250,7 +250,8 @@ bool CimAcqImec::_aux_setObxSyncAsOutput( int slot )
         return false;
     }
 
-    err = np_switchmatrix_set( slot, SM_Output_StatusBit, SM_Input_SyncClk, true );
+    err = np_switchmatrix_set( slot,
+            SM_Output_StatusBit, SM_Input_SyncClk, true );
 
     if( err != SUCCESS ) {
         runError(
@@ -343,7 +344,8 @@ bool CimAcqImec::_aux_setPXISyncAsOutput( int slot )
         return false;
     }
 
-    err = np_switchmatrix_set( slot, SM_Output_StatusBit, SM_Input_SyncClk, true );
+    err = np_switchmatrix_set( slot,
+            SM_Output_StatusBit, SM_Input_SyncClk, true );
 
     if( err != SUCCESS ) {
         runError(
@@ -381,7 +383,8 @@ bool CimAcqImec::_aux_setPXISyncAsInput( int slot )
 
     NP_ErrorCode    err;
 
-    err = np_switchmatrix_set( slot, SM_Output_StatusBit, SM_Input_SMASYNC, true );
+    err = np_switchmatrix_set( slot,
+            SM_Output_StatusBit, SM_Input_SMASYNC, true );
 
     if( err != SUCCESS ) {
         runError(

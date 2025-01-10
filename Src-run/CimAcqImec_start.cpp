@@ -28,7 +28,10 @@ bool CimAcqImec::_st_setHwrTriggers()
 
         slot = vslot[is];
 
-        err = np_switchmatrix_set( slot, SM_Output_AcquisitionTrigger, SM_Input_SWTrigger1, true );
+        np_switchmatrix_clear( slot, SM_Output_AcquisitionTrigger );
+
+        err = np_switchmatrix_set( slot,
+                SM_Output_AcquisitionTrigger, SM_Input_SWTrigger1, true );
 
         if( err != SUCCESS ) {
             runError(
@@ -39,12 +42,12 @@ bool CimAcqImec::_st_setHwrTriggers()
 
         // EDGE = rising
 
-//@OBX367 Revisit TRIGGER
-//        err = np_setTriggerEdge( slot, true );
+        err = np_switchmatrix_setOutputTriggerEdge( slot,
+                SM_Output_AcquisitionTrigger, triggeredge_rising );
 
         if( err != SUCCESS ) {
             runError(
-                QString("IMEC setTriggerEdge(slot %1)%2")
+                QString("IMEC setOutputTriggerEdge(slot %1)%2")
                 .arg( slot ).arg( makeErrorString( err ) ) );
             return false;
         }
@@ -73,7 +76,10 @@ bool CimAcqImec::_st_setObxTriggers()
 
         slot = vslot[is];
 
-        err = np_switchmatrix_set( slot, SM_Output_AcquisitionTrigger, SM_Input_SWTrigger1, true );
+        np_switchmatrix_clear( slot, SM_Output_AcquisitionTrigger );
+
+        err = np_switchmatrix_set( slot,
+                SM_Output_AcquisitionTrigger, SM_Input_SWTrigger1, true );
 
         if( err != SUCCESS ) {
             runError(
@@ -84,12 +90,12 @@ bool CimAcqImec::_st_setObxTriggers()
 
         // EDGE = rising
 
-//@OBX367 Revisit TRIGGER
-//        err = np_setTriggerEdge( slot, true );
+        err = np_switchmatrix_setOutputTriggerEdge( slot,
+                SM_Output_AcquisitionTrigger, triggeredge_rising );
 
         if( err != SUCCESS ) {
             runError(
-                QString("IMEC setTriggerEdge(slot %1)%2")
+                QString("IMEC setOutputTriggerEdge(slot %1)%2")
                 .arg( slot ).arg( makeErrorString( err ) ) );
             return false;
         }
@@ -120,18 +126,10 @@ bool CimAcqImec::_st_setPXITriggers()
 
 // IN = software
 
-    err = np_switchmatrix_set( slot0, SM_Output_AcquisitionTrigger, SM_Input_SWTrigger1, true );
+    np_switchmatrix_clear( slot0, SM_Output_AcquisitionTrigger );
 
-    if( err != SUCCESS ) {
-        runError(
-            QString("IMEC switchmatrix_set(slot %1)%2")
-            .arg( slot0 ).arg( makeErrorString( err ) ) );
-        return false;
-    }
-
-// OUT = PXI_TRIG<1>
-
-    err = np_switchmatrix_set( slot0, SM_Output_PXI1, SM_Input_SWTrigger1, true );
+    err = np_switchmatrix_set( slot0,
+            SM_Output_AcquisitionTrigger, SM_Input_SWTrigger1, true );
 
     if( err != SUCCESS ) {
         runError(
@@ -142,12 +140,26 @@ bool CimAcqImec::_st_setPXITriggers()
 
 // EDGE = rising
 
-//@OBX367 Revisit TRIGGER
-//    err = np_setTriggerEdge( slot0, true );
+    err = np_switchmatrix_setOutputTriggerEdge( slot0,
+            SM_Output_AcquisitionTrigger, triggeredge_rising );
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setTriggerEdge(slot %1)%2")
+            QString("IMEC setOutputTriggerEdge(slot %1)%2")
+            .arg( slot0 ).arg( makeErrorString( err ) ) );
+        return false;
+    }
+
+// OUT = PXI_TRIG<1>
+
+    np_switchmatrix_clear( slot0, SM_Output_PXI1 );
+
+    err = np_switchmatrix_set( slot0,
+            SM_Output_PXI1, SM_Input_SWTrigger1, true );
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC switchmatrix_set(slot %1)%2")
             .arg( slot0 ).arg( makeErrorString( err ) ) );
         return false;
     }
@@ -165,7 +177,10 @@ bool CimAcqImec::_st_setPXITriggers()
         if( slot == slot0 )
             continue;
 
-        err = np_switchmatrix_set( slot, SM_Output_AcquisitionTrigger, SM_Input_PXI1, true );
+        np_switchmatrix_clear( slot, SM_Output_AcquisitionTrigger );
+
+        err = np_switchmatrix_set( slot,
+                SM_Output_AcquisitionTrigger, SM_Input_PXI1, true );
 
         if( err != SUCCESS ) {
             runError(
@@ -176,12 +191,12 @@ bool CimAcqImec::_st_setPXITriggers()
 
 // EDGE = rising
 
-//@OBX367 Revisit TRIGGER
-//        err = np_setTriggerEdge( slot, true );
+        err = np_switchmatrix_setOutputTriggerEdge( slot,
+                SM_Output_AcquisitionTrigger, triggeredge_rising );
 
         if( err != SUCCESS ) {
             runError(
-                QString("IMEC setTriggerEdge(slot %1)%2")
+                QString("IMEC setOutputTriggerEdge(slot %1)%2")
                 .arg( slot ).arg( makeErrorString( err ) ) );
             return false;
         }
