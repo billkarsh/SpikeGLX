@@ -77,11 +77,11 @@ public:
     void graphSetsNiSaveBit( int chan, bool setOn );
 
     bool chanMapGetsShankOrder(
-        QString         &s,
-        const QString   type,
-        int             ip,
-        bool            rev,
-        QWidget         *parent ) const;
+        QString     &s,
+        QString     type,
+        int         ip,
+        bool        rev,
+        QWidget     *parent ) const;
 
     void setSelectiveAccess( bool availIM, bool availNI );
 

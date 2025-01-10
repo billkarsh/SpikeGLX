@@ -370,7 +370,7 @@ bool objectHasAncestor( const QObject *object, const QObject *ancestor )
 // Get contents of resource file like ":/myText.html"
 // as a QString.
 //
-void res2Str( QString &str, const QString resFile )
+void res2Str( QString &str, const QString &resFile )
 {
     QFile   f( resFile );
 

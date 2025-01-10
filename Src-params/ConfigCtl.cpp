@@ -547,11 +547,11 @@ static int FILEHasIllegals( const char *name )
 // Get standard channel string listing channels in ShankMap order.
 //
 bool ConfigCtl::chanMapGetsShankOrder(
-    QString         &s,
-    const QString   type,
-    int             ip,
-    bool            rev,
-    QWidget         *parent ) const
+    QString     &s,
+    QString     type,
+    int         ip,
+    bool        rev,
+    QWidget     *parent ) const
 {
     if( DAQ::Params::stream_isOB( type ) )
         return true;

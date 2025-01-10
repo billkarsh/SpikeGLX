@@ -775,10 +775,10 @@ static void probeAllAOChannels()
 #ifdef HAVE_NIDAQmx
 static double _sampleFreq1( const QString &dev, const QString &pfi )
 {
-    TaskHandle      taskHandle  = 0;
-    const QString   ctrStr      = QString("/%1/ctr0").arg( dev );
-    float64         sampSecs    = 2.0,
-                    freq        = 0;
+    TaskHandle  taskHandle  = 0;
+    QString     ctrStr      = QString("/%1/ctr0").arg( dev );
+    float64     sampSecs    = 2.0,
+                freq        = 0;
 
     clearDmxErrors();
 

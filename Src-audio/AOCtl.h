@@ -141,7 +141,7 @@ protected:
 
 private:
     void ctorCheckAudioSupport();
-    void str2RemoteIni( const QString &groupStr, const QString prmStr );
+    void str2RemoteIni( const QString &groupStr, const QString &prmStr );
     void liveChange();
     bool valid( QString &err, bool remote = false );
     void restoreScreenState();

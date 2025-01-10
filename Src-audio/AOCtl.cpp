@@ -681,7 +681,7 @@ void AOCtl::ctorCheckAudioSupport()
 }
 
 
-void AOCtl::str2RemoteIni( const QString &groupStr, const QString prmStr )
+void AOCtl::str2RemoteIni( const QString &groupStr, const QString &prmStr )
 {
     STDSETTINGS( settings, "aoctlremote" );
     settings.beginGroup( groupStr );

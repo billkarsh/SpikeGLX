@@ -157,7 +157,7 @@ bool objectHasAncestor( const QObject *object, const QObject *ancestor );
 /* ---------------------------------------------------------------- */
 
 // Convert resFile resource item to string
-void res2Str( QString &str, const QString resFile );
+void res2Str( QString &str, const QString &resFile );
 
 // Remove terminal slash
 QString rmvLastSlash( const QString &path );

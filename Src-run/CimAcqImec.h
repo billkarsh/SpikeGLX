@@ -34,7 +34,7 @@ struct ImSimLfDat {
                     inbuf;
     ImSimLfDat() : f(0), smpCur(0), inbuf(0) {}
     virtual ~ImSimLfDat();
-    bool init( QString &err, const QString pfName );
+    bool init( QString &err, const QString &pfName );
     void load1();
     void get_ie( struct electrodePacket* E, int ie, int nC );
     void retireN( int n );
@@ -56,7 +56,7 @@ struct ImSimApDat {
                     inbuf;
     ImSimApDat() : f(0), smpCur(0), tstamp(0), inbuf(0)  {}
     virtual ~ImSimApDat();
-    bool init( QString &err, const QString pfName );
+    bool init( QString &err, const QString &pfName );
     bool load1();
     void fetchT0( struct electrodePacket* E, int* out, ImSimLfDat &LF );
     void fetchT2( struct PacketInfo* H, int16_t* D, int is, int nAP, int smpMax, int* out );
@@ -72,7 +72,7 @@ struct ImSimDat {
 
     ImSimDat() : bufMtx(0)  {}
     virtual ~ImSimDat();
-    bool init( QString &err, const QString pfName );
+    bool init( QString &err, const QString &pfName );
     void loadToN( qint64 N );
     void fifo( int *packets, int *empty ) const;
     void fetchT0( struct electrodePacket* E, int* out );

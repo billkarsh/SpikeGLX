@@ -6,11 +6,7 @@
 
 #include <QThread>
 
-#define _USE_MATH_DEFINES
 #include <math.h>
-#ifndef M_PI
-#define M_PI    3.14159265358979323846
-#endif
 
 // SINEWAVES generates sine on all channels, else zeros.
 #define MAX10BIT        512
@@ -19,7 +15,6 @@
 #define LOOPSECS        0.003
 #define SINEWAVES
 #define PROFILE
-
 
 /* ---------------------------------------------------------------- */
 /* ImSimAcqShared ------------------------------------------------- */

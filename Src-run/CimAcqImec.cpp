@@ -50,7 +50,7 @@ ImSimLfDat::~ImSimLfDat()
 }
 
 
-bool ImSimLfDat::init( QString &err, const QString pfName )
+bool ImSimLfDat::init( QString &err, const QString &pfName )
 {
 // existence tests
 
@@ -181,7 +181,7 @@ ImSimApDat::~ImSimApDat()
 }
 
 
-bool ImSimApDat::init( QString &err, const QString pfName )
+bool ImSimApDat::init( QString &err, const QString &pfName )
 {
     KVParams    kvp;
     kvp.fromMetaFile( pfName + ".ap.meta" );
@@ -358,7 +358,7 @@ ImSimDat::~ImSimDat()
 }
 
 
-bool ImSimDat::init( QString &err, const QString pfName )
+bool ImSimDat::init( QString &err, const QString &pfName )
 {
     bufMtx = new QMutex;
 
