@@ -112,6 +112,8 @@ private:
     bool enumDir( const QString &path );
     void fetch( const QStringList &toks );
     void getStreamShankMap( const QStringList &toks );
+    void niDOSet( const QStringList &toks );
+    void obxAOSet( const QStringList &toks );
     void opto_emit( QStringList toks );
     void par2Start( QStringList toks );
     void setAnatomyPP( const QStringList &toks );
@@ -121,8 +123,6 @@ private:
     void setMetaData();
     void setMultiDriveEnable( const QStringList &toks );
     void setNextFileName( const QString &name );
-    void setNIDO( const QStringList &toks );
-    void setOBXAO( const QStringList &toks );
     void setParams();
     void setParamsImAll();
     void setParamsImProbe( const QStringList &toks );

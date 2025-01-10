@@ -1089,6 +1089,76 @@ void CmdWorker::getStreamShankMap( const QStringList &toks )
 
 
 // Expected tok params:
+// 0) channel string
+// 1) uint32 bits
+//
+void CmdWorker::niDOSet( const QStringList &toks )
+{
+    if( toks.size() < 2 ) {
+        errMsg = "NIDOSET: Requires params {lines, bits}.";
+        return;
+    }
+
+    MainApp *app = okAppValidated( "NIDOSET" );
+
+    if( !app )
+        return;
+
+    errMsg = CniCfg::setDO( toks.at( 0 ), toks.at( 1 ).toUInt() );
+
+    if( !errMsg.isEmpty() )
+        errMsg = "NIDOSET: " + errMsg;
+}
+
+
+// Expected tok params:
+// 0) ip
+// 1) slot
+// 2) chn_vlt string
+//
+void CmdWorker::obxAOSet( const QStringList &toks )
+{
+    if( toks.size() < 3 ) {
+        errMsg = "OBXAOSET: Requires params {ip, slot, chn_vlt}.";
+        return;
+    }
+
+    ConfigCtl   *C = okCfgValidated( "OBXAOSET" );
+
+    if( !C )
+        return;
+
+    const DAQ::Params   &p   = C->acceptedParams;
+    int                 ip   = toks[0].toInt();
+
+    if( ip >= 0 ) {
+        int np = p.stream_nOB();
+        if( !np ) {
+            errMsg = "OBXAOSET: Obx stream not enabled.";
+            return;
+        }
+        else if( ip >= np ) {
+            errMsg = QString("OBXAOSET: Obx stream-ip must be in range[0..%1].").arg( np - 1 );
+            return;
+        }
+    }
+    else {
+        int slot = toks[1].toInt();
+        ip = p.im.obx_slot2istr( slot );
+        if( ip < 0 ) {
+            errMsg = QString("OBXAOSET: Slot %1 is not a selected OneBox.").arg( slot );
+            return;
+        }
+    }
+
+    errMsg = CStim::obx_set_AO( ip, toks[2] );
+
+    if( !errMsg.isEmpty() )
+        errMsg = "OBXAOSET: " + errMsg;
+}
+
+
+// Expected tok params:
 // 0) ip
 // 1) color
 // 2) site
@@ -1375,76 +1445,6 @@ void CmdWorker::setNextFileName( const QString &name )
         run, "dfSetNextFileName",
         Qt::QueuedConnection,
         Q_ARG(QString, name) );
-}
-
-
-// Expected tok params:
-// 0) channel string
-// 1) uint32 bits
-//
-void CmdWorker::setNIDO( const QStringList &toks )
-{
-    if( toks.size() < 2 ) {
-        errMsg = "SETNIDO: Requires params {lines, bits}.";
-        return;
-    }
-
-    MainApp *app = okAppValidated( "SETNIDO" );
-
-    if( !app )
-        return;
-
-    errMsg = CniCfg::setDO( toks.at( 0 ), toks.at( 1 ).toUInt() );
-
-    if( !errMsg.isEmpty() )
-        errMsg = "SETNIDO: " + errMsg;
-}
-
-
-// Expected tok params:
-// 0) ip
-// 1) slot
-// 2) chn_vlt string
-//
-void CmdWorker::setOBXAO( const QStringList &toks )
-{
-    if( toks.size() < 3 ) {
-        errMsg = "SETOBXAO: Requires params {ip, slot, chn_vlt}.";
-        return;
-    }
-
-    ConfigCtl   *C = okCfgValidated( "SETOBXAO" );
-
-    if( !C )
-        return;
-
-    const DAQ::Params   &p   = C->acceptedParams;
-    int                 ip   = toks[0].toInt();
-
-    if( ip >= 0 ) {
-        int np = p.stream_nOB();
-        if( !np ) {
-            errMsg = "SETOBXAO: Obx stream not enabled.";
-            return;
-        }
-        else if( ip >= np ) {
-            errMsg = QString("SETOBXAO: Obx stream-ip must be in range[0..%1].").arg( np - 1 );
-            return;
-        }
-    }
-    else {
-        int slot = toks[1].toInt();
-        ip = p.im.obx_slot2istr( slot );
-        if( ip < 0 ) {
-            errMsg = QString("SETOBXAO: Slot %1 is not a selected OneBox.").arg( slot );
-            return;
-        }
-    }
-
-    errMsg = CStim::obx_set_AO( ip, toks[2] );
-
-    if( !errMsg.isEmpty() )
-        errMsg = "SETOBXAO: " + errMsg;
 }
 
 
@@ -2029,6 +2029,10 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
         fetch( toks );
     else if( cmd == "GETSTREAMSHANKMAP" )
         getStreamShankMap( toks );
+    else if( cmd == "NIDOSET" )
+        niDOSet( toks );
+    else if( cmd == "OBXAOSET" )
+        obxAOSet( toks );
     else if( cmd == "OPTOEMIT" )
         opto_emit( toks );
     else if( cmd == "PAR2" )
@@ -2047,10 +2051,6 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
         setMultiDriveEnable( toks );
     else if( cmd == "SETNEXTFILENAME" )
         setNextFileName( toks.join( " " ).trimmed().replace( "\\", "/" ) );
-    else if( cmd == "SETNIDO" )
-        setNIDO( toks );
-    else if( cmd == "SETOBXAO" )
-        setOBXAO( toks );
     else if( cmd == "SETPARAMS" )
         setParams();
     else if( cmd == "SETPARAMSIMALL" )
