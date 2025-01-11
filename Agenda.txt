@@ -4,8 +4,9 @@
 20241215
 --------
 + Better ShankViewer window management.
-+ Add remote set_NI_DO patterned digital output.
-+ Add remote set_OBX_AO OneBox analog output.
++ Add remote NI_DO_Set patterned digital output.
++ Add remote OBX_AO_Set OneBox analog output.
++ Add remote OBX_Wave_XXX OneBox waveplayer.
 
 20241001
 --------
