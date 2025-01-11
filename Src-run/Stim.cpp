@@ -175,7 +175,7 @@ QString WaveMeta::parseText( vec_i16 &buf, const QString &text, int testMax )
                     clin    = 1,    // cursor line
                     cpos    = 0;    // cursor pos
 
-    if( testMax >= 0 )
+    if( testMax > 0 )
         nsamp = 0;
     else
         buf.resize( nsamp );
@@ -306,6 +306,12 @@ QString WaveMeta::parseText( vec_i16 &buf, const QString &text, int testMax )
                 }
 
                 nsamp = args[1].toDouble() * t2s;
+                if( nsamp <= 0 ) {
+                    return
+                    QString("Wave text: level(v,t) time <= 0: '%1' at line %2 pos %3.")
+                    .arg( token ).arg( tlin ).arg( tpos );
+                }
+
                 if( testMax <= 0 ) {
                     qint16  *dst = &buf[offset];
                     v *= scl;
@@ -335,6 +341,12 @@ QString WaveMeta::parseText( vec_i16 &buf, const QString &text, int testMax )
                 }
 
                 nsamp = args[2].toDouble() * t2s;
+                if( nsamp <= 0 ) {
+                    return
+                    QString("Wave text: ramp(v1,v2,t) time <= 0: '%1' at line %2 pos %3.")
+                    .arg( token ).arg( tlin ).arg( tpos );
+                }
+
                 if( testMax <= 0 ) {
                     qint16  *dst = &buf[offset];
                     v1 *= scl;
@@ -361,6 +373,12 @@ QString WaveMeta::parseText( vec_i16 &buf, const QString &text, int testMax )
                 }
 
                 nsamp = args[3].toDouble() * t2s;
+                if( nsamp <= 0 ) {
+                    return
+                    QString("Wave text: sin(A,B,f,t) time <= 0: '%1' at line %2 pos %3.")
+                    .arg( token ).arg( tlin ).arg( tpos );
+                }
+
                 if( testMax <= 0 ) {
                     double  w    = 2*M_PI * args[2].toDouble() / (1000*t2s);
                     qint16  *dst = &buf[offset];
@@ -611,12 +629,6 @@ QString CStim::obx_wave_download_buf(
 #ifdef HAVE_IMEC
     OBX             X( istr );
     NP_ErrorCode    err;
-
-// Stop first
-
-    QString stop = obx_wave_start_stop( istr, false );
-    if( !stop.isEmpty() )
-        return stop;
 
 // Set frequency
 
