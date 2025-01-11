@@ -114,6 +114,9 @@ private:
     void getStreamShankMap( const QStringList &toks );
     void niDOSet( const QStringList &toks );
     void obxAOSet( const QStringList &toks );
+    void obxWaveArm( const QStringList &toks );
+    void obxWaveLoad( const QStringList &toks );
+    void obxWaveStartStop( const QStringList &toks );
     void opto_emit( QStringList toks );
     void par2Start( QStringList toks );
     void setAnatomyPP( const QStringList &toks );

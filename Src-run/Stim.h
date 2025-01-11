@@ -18,10 +18,10 @@ struct WaveMeta {
             dev_vpp;
     int     nsamp;
     bool    isbin;
-    QString readMetaFile( const QString &fmeta );
-    QString writeMetaFile( const QString &fmeta ) const;
-    QString readTextFile( QString &text, const QString &fmeta );
-    QString writeTextFile( const QString &fmeta, QString &text );
+    QString readMetaFile( const QString &wave );
+    QString writeMetaFile( const QString &wave ) const;
+    QString readTextFile( QString &text, const QString &wave );
+    QString writeTextFile( const QString &wave, QString &text );
     QString parseText( vec_i16 &buf, const QString &text, int testMax );
 };
 
@@ -34,15 +34,15 @@ public:
 
 // OBX waveplayer client
 
-    static QString obx_wave_download_file( int istr, const QString &fmeta );
+    static QString obx_wave_download_file( int istr, const QString &wave );
     static QString obx_wave_download_binFile(
         int             istr,
         const WaveMeta  &W,
-        const QString   &fmeta );
+        const QString   &wave );
     static QString obx_wave_download_txtFile(
         int             istr,
         WaveMeta        &W,
-        const QString   &fmeta );
+        const QString   &wave );
 
 // OBX waveplayer hardware
 

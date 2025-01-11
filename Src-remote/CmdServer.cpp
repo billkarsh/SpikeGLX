@@ -1160,6 +1160,148 @@ void CmdWorker::obxAOSet( const QStringList &toks )
 
 // Expected tok params:
 // 0) ip
+// 1) slot
+// 2) trig int
+// 3) loop Boolean 0/1.
+//
+void CmdWorker::obxWaveArm( const QStringList &toks )
+{
+    if( toks.size() < 4 ) {
+        errMsg = "OBXWVARM: Requires params {ip, slot, trig, loop}.";
+        return;
+    }
+
+    ConfigCtl   *C = okCfgValidated( "OBXWVARM" );
+
+    if( !C )
+        return;
+
+    const DAQ::Params   &p   = C->acceptedParams;
+    int                 ip   = toks[0].toInt();
+
+    if( ip >= 0 ) {
+        int np = p.stream_nOB();
+        if( !np ) {
+            errMsg = "OBXWVARM: Obx stream not enabled.";
+            return;
+        }
+        else if( ip >= np ) {
+            errMsg = QString("OBXWVARM: Obx stream-ip must be in range[0..%1].").arg( np - 1 );
+            return;
+        }
+    }
+    else {
+        int slot = toks[1].toInt();
+        ip = p.im.obx_slot2istr( slot );
+        if( ip < 0 ) {
+            errMsg = QString("OBXWVARM: Slot %1 is not a selected OneBox.").arg( slot );
+            return;
+        }
+    }
+
+    errMsg = CStim::obx_wave_arm( ip, toks[2].toInt(), toks[3].toInt() );
+
+    if( !errMsg.isEmpty() )
+        errMsg = "OBXWVARM: " + errMsg;
+}
+
+
+// Expected tok params:
+// 0) ip
+// 1) slot
+// 2) wave string
+//
+void CmdWorker::obxWaveLoad( const QStringList &toks )
+{
+    if( toks.size() < 3 ) {
+        errMsg = "OBXWVLOAD: Requires params {ip, slot, wavename}.";
+        return;
+    }
+
+    ConfigCtl   *C = okCfgValidated( "OBXWVLOAD" );
+
+    if( !C )
+        return;
+
+    const DAQ::Params   &p   = C->acceptedParams;
+    int                 ip   = toks[0].toInt();
+
+    if( ip >= 0 ) {
+        int np = p.stream_nOB();
+        if( !np ) {
+            errMsg = "OBXWVLOAD: Obx stream not enabled.";
+            return;
+        }
+        else if( ip >= np ) {
+            errMsg = QString("OBXWVLOAD: Obx stream-ip must be in range[0..%1].").arg( np - 1 );
+            return;
+        }
+    }
+    else {
+        int slot = toks[1].toInt();
+        ip = p.im.obx_slot2istr( slot );
+        if( ip < 0 ) {
+            errMsg = QString("OBXWVLOAD: Slot %1 is not a selected OneBox.").arg( slot );
+            return;
+        }
+    }
+
+    errMsg = CStim::obx_wave_download_file( ip, toks[2] );
+
+    if( !errMsg.isEmpty() )
+        errMsg = "OBXWVLOAD: " + errMsg;
+}
+
+
+// Expected tok params:
+// 0) ip
+// 1) slot
+// 2) start Boolean 0/1.
+//
+void CmdWorker::obxWaveStartStop( const QStringList &toks )
+{
+    if( toks.size() < 3 ) {
+        errMsg = "OBXWVSTSP: Requires params {ip, slot, start}.";
+        return;
+    }
+
+    ConfigCtl   *C = okCfgValidated( "OBXWVSTSP" );
+
+    if( !C )
+        return;
+
+    const DAQ::Params   &p   = C->acceptedParams;
+    int                 ip   = toks[0].toInt();
+
+    if( ip >= 0 ) {
+        int np = p.stream_nOB();
+        if( !np ) {
+            errMsg = "OBXWVSTSP: Obx stream not enabled.";
+            return;
+        }
+        else if( ip >= np ) {
+            errMsg = QString("OBXWVSTSP: Obx stream-ip must be in range[0..%1].").arg( np - 1 );
+            return;
+        }
+    }
+    else {
+        int slot = toks[1].toInt();
+        ip = p.im.obx_slot2istr( slot );
+        if( ip < 0 ) {
+            errMsg = QString("OBXWVSTSP: Slot %1 is not a selected OneBox.").arg( slot );
+            return;
+        }
+    }
+
+    errMsg = CStim::obx_wave_start_stop( ip, toks[2].toInt() );
+
+    if( !errMsg.isEmpty() )
+        errMsg = "OBXWVSTSP: " + errMsg;
+}
+
+
+// Expected tok params:
+// 0) ip
 // 1) color
 // 2) site
 //
@@ -2033,6 +2175,12 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
         niDOSet( toks );
     else if( cmd == "OBXAOSET" )
         obxAOSet( toks );
+    else if( cmd == "OBXWVARM" )
+        obxWaveArm( toks );
+    else if( cmd == "OBXWVLOAD" )
+        obxWaveLoad( toks );
+    else if( cmd == "OBXWVSTSP" )
+        obxWaveStartStop( toks );
     else if( cmd == "OPTOEMIT" )
         opto_emit( toks );
     else if( cmd == "PAR2" )

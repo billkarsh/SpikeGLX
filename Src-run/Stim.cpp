@@ -4,7 +4,6 @@
 #include "MainApp.h"
 #include "ConfigCtl.h"
 #include "DAQ.h"
-#include "DFName.h"
 #include "Subset.h"
 #include "IMEC/NeuropixAPI.h"
 using namespace Neuropixels;
@@ -21,9 +20,9 @@ using namespace Neuropixels;
 /* WaveMeta ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-QString WaveMeta::readMetaFile( const QString &fmeta )
+QString WaveMeta::readMetaFile( const QString &wave )
 {
-    QString path = QString("%1/_Waves/%2").arg( appPath() ).arg( fmeta );
+    QString path = QString("%1/_Waves/%2.meta").arg( appPath() ).arg( wave );
 
     if( !QFile( path ).exists() ) {
         QString err =
@@ -57,7 +56,7 @@ QString WaveMeta::readMetaFile( const QString &fmeta )
 }
 
 
-QString WaveMeta::writeMetaFile( const QString &fmeta ) const
+QString WaveMeta::writeMetaFile( const QString &wave ) const
 {
     QString path = QString("%1/_Waves").arg( appPath() );
 
@@ -68,7 +67,7 @@ QString WaveMeta::writeMetaFile( const QString &fmeta ) const
         return err;
     }
 
-    path = QString("%1/%2").arg( path ).arg( fmeta );
+    path = QString("%1/%2.meta").arg( path ).arg( wave );
 
     QSettings S( path, QSettings::IniFormat );
     S.beginGroup( "WaveMeta" );
@@ -83,13 +82,11 @@ QString WaveMeta::writeMetaFile( const QString &fmeta ) const
 }
 
 
-QString WaveMeta::readTextFile( QString &text, const QString &fmeta )
+QString WaveMeta::readTextFile( QString &text, const QString &wave )
 {
 // Open
 
-    QString path = QString("%1/_Waves/%2")
-                    .arg( appPath() )
-                    .arg( DFName::forceTxtSuffix( fmeta ) );
+    QString path = QString("%1/_Waves/%2.txt").arg( appPath() ).arg( wave );
     QFile   f( path );
 
     if( !f.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
@@ -112,13 +109,11 @@ QString WaveMeta::readTextFile( QString &text, const QString &fmeta )
 }
 
 
-QString WaveMeta::writeTextFile( const QString &fmeta, QString &text )
+QString WaveMeta::writeTextFile( const QString &wave, QString &text )
 {
 // Open
 
-    QString path = QString("%1/_Waves/%2")
-                    .arg( appPath() )
-                    .arg( DFName::forceTxtSuffix( fmeta ) );
+    QString path = QString("%1/_Waves/%2.txt").arg( appPath() ).arg( wave );
     QFile   f( path );
 
     if( !f.open( QIODevice::WriteOnly | QIODevice::Text ) ) {
@@ -481,7 +476,7 @@ static void generate_sqrtest()
     W.dev_vpp   = 5;
     W.nsamp     = NDATA;
     W.isbin     = true;
-    W.writeMetaFile( "sqrtest.meta" );
+    W.writeMetaFile( "sqrtest" );
 
     std::vector<float>  buf;
     buf.resize( NDATA );
@@ -501,7 +496,7 @@ static void generate_sqrtest()
 
 void CStim::stimteststart()
 {
-    Log()<<"writ "<< obx_wave_download_file( 0, "parsetest.meta" );
+    Log()<<"writ "<< obx_wave_download_file( 0, "parsetest" );
     Log()<<"arm  "<< obx_wave_arm( 0, -2, true );
     Log()<<"trig "<< obx_wave_start_stop( 0, true );
 }
@@ -510,10 +505,10 @@ void CStim::stimteststart()
 /* OBX waveplayer client ------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-QString CStim::obx_wave_download_file( int istr, const QString &fmeta )
+QString CStim::obx_wave_download_file( int istr, const QString &wave )
 {
     WaveMeta    W;
-    QString     err = W.readMetaFile( fmeta );
+    QString     err = W.readMetaFile( wave );
 
     if( !err.isEmpty() )
         return err;
@@ -521,36 +516,34 @@ QString CStim::obx_wave_download_file( int istr, const QString &fmeta )
     if( W.freq > OBX_WAV_FRQ_MAX ) {
         return
         QString("Wave.read: Sample frequency exceeds %1 in file '%2'.")
-        .arg( OBX_WAV_FRQ_MAX ).arg( fmeta );
+        .arg( OBX_WAV_FRQ_MAX ).arg( wave );
     }
     if( W.nsamp & 1 ) {
         return
         QString("Wave.read: Odd sample count %1 in file '%2'.")
-        .arg( W.nsamp ).arg( fmeta );
+        .arg( W.nsamp ).arg( wave );
     }
     if( W.nsamp > OBX_WAV_BUF_MAX ) {
         return
         QString("Wave.read: Sample count exceeds %1 in file '%2'.")
-        .arg( OBX_WAV_BUF_MAX ).arg( fmeta );
+        .arg( OBX_WAV_BUF_MAX ).arg( wave );
     }
 
     if( W.isbin )
-        return obx_wave_download_binFile( istr, W, fmeta );
+        return obx_wave_download_binFile( istr, W, wave );
     else
-        return obx_wave_download_txtFile( istr, W, fmeta );
+        return obx_wave_download_txtFile( istr, W, wave );
 }
 
 
 QString CStim::obx_wave_download_binFile(
     int             istr,
     const WaveMeta  &W,
-    const QString   &fmeta )
+    const QString   &wave )
 {
 // Open binary
 
-    QString path = QString("%1/_Waves/%2")
-                    .arg( appPath() )
-                    .arg( DFName::forceBinSuffix( fmeta ) );
+    QString path = QString("%1/_Waves/%2.bin").arg( appPath() ).arg( wave );
     QFile   f( path );
 
     if( !f.open( QIODevice::ReadOnly ) ) {
@@ -588,12 +581,12 @@ QString CStim::obx_wave_download_binFile(
 QString CStim::obx_wave_download_txtFile(
     int             istr,
     WaveMeta        &W,
-    const QString   &fmeta )
+    const QString   &wave )
 {
     QString text, err;
     vec_i16 buf;
 
-    err = W.readTextFile( text, fmeta );
+    err = W.readTextFile( text, wave );
     if( !err.isEmpty() ) return err;
 
     err = W.parseText( buf, text, OBX_WAV_BUF_MAX );
@@ -618,6 +611,12 @@ QString CStim::obx_wave_download_buf(
 #ifdef HAVE_IMEC
     OBX             X( istr );
     NP_ErrorCode    err;
+
+// Stop first
+
+    QString stop = obx_wave_start_stop( istr, false );
+    if( !stop.isEmpty() )
+        return stop;
 
 // Set frequency
 
