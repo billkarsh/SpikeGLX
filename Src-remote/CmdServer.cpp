@@ -850,6 +850,11 @@ void CmdWorker::consoleShow( bool show )
 
 bool CmdWorker::enumDir( const QString &path )
 {
+    if( path.isEmpty() ) {
+        errMsg = "ENUMDATADIR: Directory index out of range.";
+        return false;
+    }
+
     QDir    dir( path );
 
     if( !dir.exists() ) {
@@ -1123,6 +1128,9 @@ void CmdWorker::obxAOSet( const QStringList &toks )
         return;
     }
 
+    if( !okRunStarted( "OBXAOSET" ) )
+        return;
+
     ConfigCtl   *C = okCfgValidated( "OBXAOSET" );
 
     if( !C )
@@ -1171,6 +1179,9 @@ void CmdWorker::obxWaveArm( const QStringList &toks )
         return;
     }
 
+    if( !okRunStarted( "OBXWVARM" ) )
+        return;
+
     ConfigCtl   *C = okCfgValidated( "OBXWVARM" );
 
     if( !C )
@@ -1218,6 +1229,9 @@ void CmdWorker::obxWaveLoad( const QStringList &toks )
         return;
     }
 
+    if( !okRunStarted( "OBXWVLOAD" ) )
+        return;
+
     ConfigCtl   *C = okCfgValidated( "OBXWVLOAD" );
 
     if( !C )
@@ -1264,6 +1278,9 @@ void CmdWorker::obxWaveStartStop( const QStringList &toks )
         errMsg = "OBXWVSTSP: Requires params {ip, slot, start}.";
         return;
     }
+
+    if( !okRunStarted( "OBXWVSTSP" ) )
+        return;
 
     ConfigCtl   *C = okCfgValidated( "OBXWVSTSP" );
 
