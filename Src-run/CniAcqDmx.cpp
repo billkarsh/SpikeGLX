@@ -8,12 +8,15 @@
 
 #include <QThread>
 
+/* ---------------------------------------------------------------- */
+/* Statics -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
 //#define PERFMON
 #ifdef PERFMON
 #include <windows.h>
 #include <psapi.h>
 #endif
-
 
 #define DAQ_TIMEOUT_SEC     2.5
 
@@ -27,39 +30,35 @@
     (DAQmxFailed(dmxErrNum = (functionCall)) &&             \
     (dmxFnName = STR(functionCall)))
 
-
-/* ---------------------------------------------------------------- */
-/* Statics -------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
 static QVector<char>    dmxErrMsg;
 static const char       *dmxFnName;
 static int32            dmxErrNum;
 
-/* ---------------------------------------------------------------- */
-/* clearDmxErrors ------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-static void clearDmxErrors()
+static void ni_clearErrors()
 {
     dmxErrMsg.clear();
     dmxFnName   = "";
     dmxErrNum   = 0;
 }
 
-/* ---------------------------------------------------------------- */
-/* lastDAQErrMsg -------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
 // Capture latest dmxErrNum as a descriptive C-string.
 // Call as soon as possible after offending operation.
 //
-static void lastDAQErrMsg()
+static void ni_setExtErrMsg()
 {
     const int msgbytes = 2048;
     dmxErrMsg.resize( msgbytes );
     dmxErrMsg[0] = 0;
     DAQmxGetExtendedErrorInfo( &dmxErrMsg[0], msgbytes );
+}
+
+static void ni_destroyTask( TaskHandle &taskHandle )
+{
+    if( taskHandle ) {
+        DAQmxStopTask( taskHandle );
+        DAQmxClearTask( taskHandle );
+        taskHandle = 0;
+    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -130,19 +129,6 @@ bool AIBufScl::fetch( TaskHandle T, int32 &nFetched, int rem16 )
 
 Error_Out:
     return false;
-}
-
-/* ---------------------------------------------------------------- */
-/* destroyTask ---------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-static void destroyTask( TaskHandle &taskHandle )
-{
-    if( taskHandle ) {
-        DAQmxStopTask( taskHandle );
-        DAQmxClearTask( taskHandle );
-        taskHandle = 0;
-    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -931,7 +917,7 @@ bool CniAcqDmx::configure()
             diChanStr1, diChanStr2;
     uInt32  maxSampPerChan = uInt32(lateSecs * p.ni.srate);
 
-    clearDmxErrors();
+    ni_clearErrors();
 
     // make even
     if( maxSampPerChan & 1 )
@@ -1124,12 +1110,12 @@ void CniAcqDmx::destroyTasks()
         diClkTerm.clear();
     }
 
-    destroyTask( taskSyncPls );
-    destroyTask( taskIntCTR );
-    destroyTask( taskAI1 );
-    destroyTask( taskDI1 );
-    destroyTask( taskAI2 );
-    destroyTask( taskDI2 );
+    ni_destroyTask( taskSyncPls );
+    ni_destroyTask( taskIntCTR );
+    ni_destroyTask( taskAI1 );
+    ni_destroyTask( taskDI1 );
+    ni_destroyTask( taskAI2 );
+    ni_destroyTask( taskDI2 );
 }
 
 /* ---------------------------------------------------------------- */
@@ -1543,7 +1529,7 @@ void CniAcqDmx::demuxMerge( int nwhole )
 void CniAcqDmx::runError( const QString &err )
 {
     if( DAQmxFailed( dmxErrNum ) )
-        lastDAQErrMsg();
+        ni_setExtErrMsg();
 
     destroyTasks();
 

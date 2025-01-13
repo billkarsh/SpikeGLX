@@ -418,42 +418,40 @@ CniCfg::DeviceChanCount CniCfg::aiDevChanCount,
 // Methods
 // -------
 
-/* ---------------------------------------------------------------- */
-/* clearDmxErrors ------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
 #ifdef HAVE_NIDAQmx
-static void clearDmxErrors()
+
+static void ni_clearErrors()
 {
     dmxErrMsg.clear();
     dmxFnName   = "";
     dmxErrNum   = 0;
 }
-#endif
-
-/* ---------------------------------------------------------------- */
-/* lastDAQErrMsg -------------------------------------------------- */
-/* ---------------------------------------------------------------- */
 
 // Capture latest dmxErrNum as a descriptive C-string.
 // Call as soon as possible after offending operation.
 //
-#ifdef HAVE_NIDAQmx
-static void lastDAQErrMsg()
+static void ni_setExtErrMsg()
 {
     const int msgbytes = 2048;
     dmxErrMsg.resize( msgbytes );
     dmxErrMsg[0] = 0;
     DAQmxGetExtendedErrorInfo( &dmxErrMsg[0], msgbytes );
 }
-#endif
 
-/* ---------------------------------------------------------------- */
-/* destroyTask ---------------------------------------------------- */
-/* ---------------------------------------------------------------- */
+static QString ni_getError()
+{
+    if( DAQmxFailed( dmxErrNum ) ) {
+        ni_setExtErrMsg();
+        QString e = QString("DAQmx Error:\nFun=<%1>\n").arg( dmxFnName );
+        e += QString("ErrNum=<%1>\n").arg( dmxErrNum );
+        e += QString("ErrMsg='%1'.").arg( &dmxErrMsg[0] );
+        return e;
+    }
 
-#ifdef HAVE_NIDAQmx
-static void destroyTask( TaskHandle &taskHandle )
+    return QString();
+}
+
+static void ni_destroyTask( TaskHandle &taskHandle )
 {
     if( taskHandle ) {
         DAQmxStopTask( taskHandle );
@@ -461,6 +459,7 @@ static void destroyTask( TaskHandle &taskHandle )
         taskHandle = 0;
     }
 }
+
 #endif
 
 /* ---------------------------------------------------------------- */
@@ -483,7 +482,7 @@ static QStringList getPhysChans(
 
     buf[0] = 0;
 
-    clearDmxErrors();
+    ni_clearErrors();
 
     DAQmxErrChk( queryFunc( STR2CHR( dev ), &buf[0], buf.size() ) );
 
@@ -494,7 +493,7 @@ static QStringList getPhysChans(
 Error_Out:
     if( DAQmxFailed( dmxErrNum ) ) {
 
-        lastDAQErrMsg();
+        ni_setExtErrMsg();
 
         if( !noDaqErrPrint ) {
 
@@ -780,7 +779,7 @@ static double _sampleFreq1( const QString &dev, const QString &pfi )
     float64     sampSecs    = 2.0,
                 freq        = 0;
 
-    clearDmxErrors();
+    ni_clearErrors();
 
     DAQmxErrChk( DAQmxCreateTask( "", &taskHandle ) );
     DAQmxErrChk( DAQmxCreateCIFreqChan(
@@ -808,18 +807,9 @@ static double _sampleFreq1( const QString &dev, const QString &pfi )
 
 Error_Out:
     if( DAQmxFailed( dmxErrNum ) )
-        lastDAQErrMsg();
+        Error() << ni_getError();
 
-    destroyTask( taskHandle );
-
-    if( DAQmxFailed( dmxErrNum ) ) {
-
-        QString e = QString("DAQmx Error:\nFun=<%1>\n").arg( dmxFnName );
-        e += QString("ErrNum=<%1>\n").arg( dmxErrNum );
-        e += QString("ErrMsg='%1'.").arg( &dmxErrMsg[0] );
-
-        Error() << e;
-    }
+    ni_destroyTask( taskHandle );
 
     return freq;
 }
@@ -909,7 +899,7 @@ static bool isPFI2DI( const QString &dev, const QString &pfi )
     ok = true;
 
 exit:
-    destroyTask( task );
+    ni_destroyTask( task );
 
     return ok;
 }
@@ -1194,7 +1184,7 @@ double CniCfg::maxTimebase( const QString &dev )
         ret = DAQmxGetSampClkTimebaseRate( task, &val );
 
 done:
-        destroyTask( task );
+        ni_destroyTask( task );
     }
     else if( DAQmxFailed(
             DAQmxGetDevCOMaxTimebase( STR2CHR( dev ), &val ) ) ) {
@@ -1358,7 +1348,7 @@ int CniCfg::nWaveformLines( const QString &dev )
         ok = true;
 
 next_line:
-        destroyTask( task );
+        ni_destroyTask( task );
 
         if( ok )
             return i;
@@ -1411,7 +1401,7 @@ bool CniCfg::isCtr0ToDIPath( const QString &dev )
     ok = true;
 
 done:
-    destroyTask( task );
+    ni_destroyTask( task );
     return ok;
 }
 #else
@@ -1571,7 +1561,7 @@ QString CniCfg::setDO( const QString &lines, quint32 bits )
 {
     TaskHandle  taskHandle = 0;
 
-    clearDmxErrors();
+    ni_clearErrors();
 
     DAQmxErrChk( DAQmxCreateTask( "", &taskHandle ) );
     DAQmxErrChk( DAQmxCreateDOChan(
@@ -1587,23 +1577,14 @@ QString CniCfg::setDO( const QString &lines, quint32 bits )
                     NULL ) );
 
 Error_Out:
-    if( DAQmxFailed( dmxErrNum ) )
-        lastDAQErrMsg();
+    QString e = ni_getError();
 
-    destroyTask( taskHandle );
+    ni_destroyTask( taskHandle );
 
-    if( DAQmxFailed( dmxErrNum ) ) {
-
-        QString e = QString("DAQmx Error:\nFun=<%1>\n").arg( dmxFnName );
-        e += QString("ErrNum=<%1>\n").arg( dmxErrNum );
-        e += QString("ErrMsg='%1'.").arg( &dmxErrMsg[0] );
-
+    if( !e.isEmpty() )
         Error() << e;
 
-        return e;
-    }
-
-    return QString();
+    return e;
 }
 #else
 QString CniCfg::setDO( const QString &lines, quint32 bits )
