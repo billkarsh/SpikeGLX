@@ -1085,6 +1085,10 @@ void MainApp::file_AskQuit()
         if( yesNo != QMessageBox::Yes )
             return;
 
+        Log();
+        Log();
+        Log() << "Quitting...";
+
         processEvents();
 
         QMessageBox *M = new QMessageBox(
