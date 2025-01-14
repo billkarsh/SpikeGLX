@@ -35,7 +35,7 @@
 </ul>
 <p>For each OneBox, you can edit its:</p>
 <ul>
-<li>XA list of input analog (AI) channels.</li>
+<li>XA list of input analog (AI a.k.a. ADC) channels.</li>
 <li>XD whether to acquire digital lines.</li>
 <li>AI voltage range: +/- {2, 5, 10} volts.</li>
 <li>AO list of output analog (DAC) channels.</li>
@@ -65,6 +65,7 @@
 <p>Edit directly in the table cell by specifying a channel list, just as you do for saved channels. E.g., 0:3,7.</p>
 <p>Each OneBox can output voltages on up to 12 analog channels.</p>
 <p>Each of the 12 channels can only be an input or an output.</p>
+<p>Only channel-0 is programmable for waveplayer output. If you intend to generate stimulus waveforms, be sure to include <code>0</code> in the AO channel list.</p>
 <blockquote>
 <p><em>It is flagged as an error if the same channel is in the XA and the AO list.</em></p>
 </blockquote>

@@ -7,6 +7,11 @@
 #include "Subset.h"
 #include "IMEC/NeuropixAPI.h"
 using namespace Neuropixels;
+#ifdef HAVE_NIDAQmx
+#include "NI/NIDAQmx.h"
+#else
+typedef void*   TaskHandle;
+#endif
 
 #include <QDir>
 #include <QSettings>
@@ -15,6 +20,126 @@ using namespace Neuropixels;
 #include <QVector>
 
 #include <math.h>
+
+/* ---------------------------------------------------------------- */
+/* Globals -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+static QMap<QString,TaskHandle> gNITasks;
+
+/* ---------------------------------------------------------------- */
+/* Statics -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+#ifdef HAVE_NIDAQmx
+
+#define DAQmxErrChkNoJump(functionCall)                     \
+    (DAQmxFailed(dmxErrNum = (functionCall)) &&             \
+    (dmxFnName = STR(functionCall)))
+
+static QVector<char>    dmxErrMsg;
+static const char       *dmxFnName;
+static int32            dmxErrNum;
+
+static void ni_clearErrors()
+{
+    dmxErrMsg.clear();
+    dmxFnName   = "";
+    dmxErrNum   = 0;
+}
+
+// Capture latest dmxErrNum as a descriptive C-string.
+// Call as soon as possible after offending operation.
+//
+static void ni_setExtErrMsg()
+{
+    const int msgbytes = 2048;
+    dmxErrMsg.resize( msgbytes );
+    dmxErrMsg[0] = 0;
+    DAQmxGetExtendedErrorInfo( &dmxErrMsg[0], msgbytes );
+}
+
+static QString ni_getError()
+{
+    if( DAQmxFailed( dmxErrNum ) ) {
+        ni_setExtErrMsg();
+        QString e = QString("DAQmx Error:\nFun=<%1>\n").arg( dmxFnName );
+        e += QString("ErrNum=<%1>\n").arg( dmxErrNum );
+        e += QString("ErrMsg='%1'.").arg( &dmxErrMsg[0] );
+        return e;
+    }
+
+    return QString();
+}
+
+static void ni_destroyTask( TaskHandle &taskHandle )
+{
+    if( taskHandle ) {
+        DAQmxStopTask( taskHandle );
+        DAQmxClearTask( taskHandle );
+        taskHandle = 0;
+    }
+}
+
+static QString ni_outChan2dev( const QString &outChan )
+{
+    QStringList sl = outChan.split('/');
+    return sl[0].trimmed();
+}
+
+static TaskHandle ni_outChan2task( const QString &outChan )
+{
+    QMap<QString,TaskHandle>::iterator
+        it  = gNITasks.find( outChan.toLower() ),
+        end = gNITasks.end();
+
+    ni_clearErrors();
+
+    return (it != end ? it.value() : 0);
+}
+
+static void ni_setTask( const QString &outChan, TaskHandle T )
+{
+    gNITasks[outChan.toLower()] = T;
+}
+
+static void ni_removeTask( const QString &outChan )
+{
+    TaskHandle  T = ni_outChan2task( outChan );
+
+    if( T ) {
+        ni_destroyTask( T );
+        gNITasks.remove( outChan );
+    }
+}
+
+static void ni_set1AnalogValue( const QString &outChan, double v )
+{
+    TaskHandle  T;
+
+    if( DAQmxFailed( DAQmxCreateTask( "", &T ) ) )
+        goto done;
+    if( DAQmxFailed( DAQmxCreateAOVoltageChan(
+                        T,
+                        STR2CHR( outChan ),
+                        "",
+                        -5.0,
+                        5.0,
+                        DAQmx_Val_Volts,
+                        NULL ) ) )
+        goto done;
+     DAQmxWriteAnalogScalarF64(
+                        T,
+                        true,   // autostart
+                        0,      // timeout seconds
+                        v,
+                        NULL );
+
+done:
+    ni_destroyTask( T );
+}
+
+#endif
 
 /* ---------------------------------------------------------------- */
 /* WaveMeta ------------------------------------------------------- */
@@ -636,7 +761,7 @@ QString CStim::obx_wave_download_buf(
     if( err != SUCCESS ) {
         return
         QString("waveplayer_setSampleFrequency(slot %1, %2)%3")
-        .arg( X.slot ).arg( freq ).arg( makeErrorString( err ) );
+        .arg( X.slot ).arg( freq ).arg( obx_errorString( err ) );
     }
 
 // Load buffer
@@ -645,7 +770,7 @@ QString CStim::obx_wave_download_buf(
     if( err != SUCCESS ) {
         return
         QString("waveplayer_writeBuffer(slot %1)%2")
-        .arg( X.slot ).arg( makeErrorString( err ) );
+        .arg( X.slot ).arg( obx_errorString( err ) );
     }
 #endif
 
@@ -698,7 +823,7 @@ QString CStim::obx_wave_arm( int istr, int trig, bool loop )
     if( err != SUCCESS ) {
         return
         QString("DAC_setVoltage(slot %1, 0, 0)%2")
-        .arg( X.slot ).arg( makeErrorString( err ) );
+        .arg( X.slot ).arg( obx_errorString( err ) );
     }
 
 // Set trigger source
@@ -726,7 +851,7 @@ QString CStim::obx_wave_arm( int istr, int trig, bool loop )
     if( err != SUCCESS ) {
         return
         QString("switchmatrix_clear(slot %1)%2")
-        .arg( X.slot ).arg( makeErrorString( err ) );
+        .arg( X.slot ).arg( obx_errorString( err ) );
     }
 
     err = np_switchmatrix_set(
@@ -734,7 +859,7 @@ QString CStim::obx_wave_arm( int istr, int trig, bool loop )
     if( err != SUCCESS ) {
         return
         QString("switchmatrix_set(slot %1)%2")
-        .arg( X.slot ).arg( makeErrorString( err ) );
+        .arg( X.slot ).arg( obx_errorString( err ) );
     }
 
 // Set trigger edge
@@ -744,7 +869,7 @@ QString CStim::obx_wave_arm( int istr, int trig, bool loop )
     if( err != SUCCESS ) {
         return
         QString("np_switchmatrix_setOutputTriggerEdge(slot %1)%2")
-        .arg( X.slot ).arg( makeErrorString( err ) );
+        .arg( X.slot ).arg( obx_errorString( err ) );
     }
 
 // Arm
@@ -753,7 +878,7 @@ QString CStim::obx_wave_arm( int istr, int trig, bool loop )
     if( err != SUCCESS ) {
         return
         QString("waveplayer_arm(slot %1, %2)%3")
-        .arg( X.slot ).arg( !loop ).arg( makeErrorString( err ) );
+        .arg( X.slot ).arg( !loop ).arg( obx_errorString( err ) );
     }
 #endif
 
@@ -772,7 +897,7 @@ QString CStim::obx_wave_start_stop( int istr, bool start )
         if( err != SUCCESS ) {
             return
             QString("setSWTriggerEx(slot %1)%2")
-            .arg( X.slot ).arg( makeErrorString( err ) );
+            .arg( X.slot ).arg( obx_errorString( err ) );
         }
     }
     else {
@@ -780,7 +905,7 @@ QString CStim::obx_wave_start_stop( int istr, bool start )
         if( err != SUCCESS ) {
             return
             QString("waveplayer_arm(slot %1)%2")
-            .arg( X.slot ).arg( makeErrorString( err ) );
+            .arg( X.slot ).arg( obx_errorString( err ) );
         }
     }
 #endif
@@ -789,7 +914,7 @@ QString CStim::obx_wave_start_stop( int istr, bool start )
 }
 
 /* ---------------------------------------------------------------- */
-/* DAC ------------------------------------------------------------ */
+/* OBX DAC -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
 // In:  list: (AO-index,voltage)()...
@@ -865,7 +990,7 @@ QString CStim::obx_set_AO( int istr, const QString &chn_vlt )
             return
             QString("DAC_setVoltage(slot %1, chn %2, %3)%4")
             .arg( X.slot ).arg( chn[ip] ).arg( vlt[ip] )
-            .arg( makeErrorString( err ) );
+            .arg( obx_errorString( err ) );
         }
     }
 #endif
@@ -874,10 +999,246 @@ QString CStim::obx_set_AO( int istr, const QString &chn_vlt )
 }
 
 /* ---------------------------------------------------------------- */
+/* NI waveplayer client ------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+QString CStim::ni_wave_download_file(
+    const QString   &outChan,
+    const QString   &wave,
+    bool            loop )
+{
+    WaveMeta    W;
+    QString     err = W.readMetaFile( wave );
+
+    if( !err.isEmpty() )
+        return err;
+
+    if( W.freq > OBX_WAV_FRQ_MAX ) {
+        return
+        QString("Wave.read: Sample frequency exceeds %1 in file '%2'.")
+        .arg( OBX_WAV_FRQ_MAX ).arg( wave );
+    }
+    if( W.nsamp & 1 ) {
+        return
+        QString("Wave.read: Odd sample count %1 in file '%2'.")
+        .arg( W.nsamp ).arg( wave );
+    }
+    if( W.nsamp > OBX_WAV_BUF_MAX ) {
+        return
+        QString("Wave.read: Sample count exceeds %1 in file '%2'.")
+        .arg( OBX_WAV_BUF_MAX ).arg( wave );
+    }
+
+    if( W.isbin )
+        return ni_wave_download_binFile( outChan, W, wave, loop );
+    else
+        return ni_wave_download_txtFile( outChan, W, wave, loop );
+}
+
+
+QString CStim::ni_wave_download_binFile(
+    const QString   &outChan,
+    const WaveMeta  &W,
+    const QString   &wave,
+    bool            loop )
+{
+// Open binary
+
+    QString path = QString("%1/_Waves/%2.bin").arg( appPath() ).arg( wave );
+    QFile   f( path );
+
+    if( !f.open( QIODevice::ReadOnly ) ) {
+        return
+        QString("Waveplayer can't open wave binary file '%1'.")
+        .arg( path );
+    }
+
+// Read binary
+
+    std::vector<float>  fbuf( W.nsamp );
+    float   *pf = &fbuf[0];
+
+    if( !f.read( (char*)pf, W.nsamp*sizeof(float) ) ) {
+        return
+        QString("Waveplayer can't read wave binary file '%1'.")
+        .arg( path );
+    }
+
+// Scale binary
+
+    vec_i16 buf( W.nsamp );
+    qint16  *pi     = &buf[0];
+    double  scale   = 0x7FFF * W.wav_vpp / W.dev_vpp;
+
+    for( int i = 0; i < W.nsamp; ++i, ++pf, ++pi )
+        *pi = scale * *pf;
+
+// Download binary
+
+    return ni_wave_download_buf( outChan, W, &buf[0], loop );
+}
+
+
+QString CStim::ni_wave_download_txtFile(
+    const QString   &outChan,
+    WaveMeta        &W,
+    const QString   &wave,
+    bool            loop )
+{
+    QString text, err;
+    vec_i16 buf;
+
+    err = W.readTextFile( text, wave );
+    if( !err.isEmpty() ) return err;
+
+    err = W.parseText( buf, text, OBX_WAV_BUF_MAX );
+    if( !err.isEmpty() ) return err;
+
+    err = W.parseText( buf, text, 0 );
+    if( !err.isEmpty() ) return err;
+
+    return ni_wave_download_buf( outChan, W, &buf[0], loop );
+}
+
+/* ---------------------------------------------------------------- */
+/* NI waveplayer hardware ----------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+QString CStim::ni_wave_download_buf(
+    const QString   &outChan,
+    const WaveMeta  &W,
+    const qint16    *src,
+    bool            loop )
+{
+    ni_removeTask( outChan );
+
+#ifdef HAVE_NIDAQmx
+    TaskHandle  T;
+    int32       nWritten;
+
+    if( DAQmxErrChkNoJump( DAQmxCreateTask( "", &T ) )
+     || DAQmxErrChkNoJump( DAQmxCreateAOVoltageChan(
+                            T,
+                            STR2CHR( outChan ),
+                            "",
+                            -W.dev_vpp,
+                            W.dev_vpp,
+                            DAQmx_Val_Volts,
+                            NULL ) )
+     || DAQmxErrChkNoJump( DAQmxCfgSampClkTiming(
+                            T,
+                            "",
+                            W.freq,
+                            DAQmx_Val_Rising,
+                            (loop ? DAQmx_Val_ContSamps : DAQmx_Val_FiniteSamps),
+                            W.nsamp ) )
+     || DAQmxErrChkNoJump( DAQmxWriteBinaryI16(
+                            T,
+                            W.nsamp,
+                            false,  // autostart
+                            0,      // timeout seconds
+                            DAQmx_Val_GroupByChannel,
+                            src,
+                            &nWritten,
+                            NULL ) ) ) {
+
+        QString e = ni_getError();
+        ni_destroyTask( T );
+        return e;
+    }
+
+    ni_setTask( outChan, T );
+#endif
+
+    return QString();
+}
+
+
+// outChan:  e.g. "dev/aoX"
+// trigTerm: e.g. "/dev/pfiX"       -> hardware trigger
+//           if missing initial '/' -> software trigger
+//
+QString CStim::ni_wave_arm(
+    const QString   &outChan,
+    const QString   &trigTerm )
+{
+#ifdef HAVE_NIDAQmx
+    TaskHandle  T = ni_outChan2task( outChan );
+
+    if( !T )
+        return QString("ni_wave_arm bad outChan '%1'.").arg( outChan );
+
+    if( trigTerm.startsWith( "/" ) ) {
+
+        if( DAQmxErrChkNoJump( DAQmxCfgDigEdgeStartTrig(
+                                T,
+                                STR2CHR(trigTerm),
+                                DAQmx_Val_Rising ) )
+        ||  DAQmxErrChkNoJump( DAQmxStartTask( T ) ) ) {
+
+            return ni_getError();
+        }
+    }
+    else {
+        if( DAQmxErrChkNoJump( DAQmxDisableStartTrig( T ) )
+        ||  DAQmxErrChkNoJump( DAQmxTaskControl(
+                                T,
+                                DAQmx_Val_Task_Commit ) ) ) {
+
+            return ni_getError();
+        }
+    }
+#endif
+
+    return QString();
+}
+
+
+QString CStim::ni_wave_start_stop(
+    const QString   &outChan,
+    bool            start )
+{
+#ifdef HAVE_NIDAQmx
+    TaskHandle  T = ni_outChan2task( outChan );
+
+    if( !T )
+        return QString("ni_wave_start_stop bad outChan '%1'.").arg( outChan );
+
+    if( start ) {
+        if( DAQmxErrChkNoJump( DAQmxStartTask( T ) ) )
+            return ni_getError();
+    }
+    else {
+        if( DAQmxErrChkNoJump( DAQmxStopTask( T ) ) )
+            return ni_getError();
+    }
+#endif
+
+    return QString();
+}
+
+
+void CStim::ni_run_cleanup()
+{
+#ifdef HAVE_NIDAQmx
+    QMap<QString,TaskHandle>::iterator
+        it  = gNITasks.begin(),
+        end = gNITasks.end();
+
+    for( ; it != end; ++it ) {
+        ni_destroyTask( it.value() );
+        ni_set1AnalogValue( it.key(), 0 );
+    }
+
+    gNITasks.clear();
+#endif
+}
+
+/* ---------------------------------------------------------------- */
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-QString CStim::makeErrorString( int err )
+QString CStim::obx_errorString( int err )
 {
 #ifdef HAVE_IMEC
     char    buf[2048];

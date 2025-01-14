@@ -113,6 +113,9 @@ private:
     void fetch( const QStringList &toks );
     void getStreamShankMap( const QStringList &toks );
     void niDOSet( const QStringList &toks );
+    void niWaveArm( const QStringList &toks );
+    void niWaveLoad( const QStringList &toks );
+    void niWaveStartStop( const QStringList &toks );
     void obxAOSet( const QStringList &toks );
     void obxWaveArm( const QStringList &toks );
     void obxWaveLoad( const QStringList &toks );

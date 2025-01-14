@@ -11,7 +11,7 @@
 <body>
 <h1 id="spikeglx-onebox-quickstart">SpikeGLX OneBox Quickstart</h1>
 <p><em>&gt;&gt; Updated: December 19, 2024 &lt;&lt;</em></p>
-<p><em>&gt;&gt; AO (DAC) enabled in SpikeGLX &lt;&lt;</em></p>
+<p><em>&gt;&gt; AO (DAC) and waveplayer enabled in SpikeGLX &lt;&lt;</em></p>
 <p><strong>Topics</strong>:</p>
 <ul>
 <li><a href="#overview">Overview</a></li>
@@ -49,6 +49,9 @@
 </ol>
 <blockquote>
 <p><em>There are 12 I/O channels in total; each configurable as an input or output.</em></p>
+</blockquote>
+<blockquote>
+<p><em>The DAC unit also has an analog waveplayer.</em></p>
 </blockquote>
 <h2 id="setup">Setup</h2>
 <p>It's easy to set up; basically three steps:</p>
@@ -157,6 +160,7 @@
 <ul>
 <li>DAC channels are accessed via the breakout board or the front panel DAC SMA.</li>
 <li>DAC voltages are settable during a run using the SDK remote interface: range +/- 5V.</li>
+<li>DAC channel-0 can be programmed via SpikeGLX to output analog waveforms.</li>
 <li>DAC voltages are initialized to zero when a run starts.</li>
 </ul>
 <hr />

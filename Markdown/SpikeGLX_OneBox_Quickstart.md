@@ -2,7 +2,7 @@
 
 *>> Updated: December 19, 2024 <<*
 
-*>> AO (DAC) enabled in SpikeGLX <<*
+*>> AO (DAC) and waveplayer enabled in SpikeGLX <<*
 
 **Topics**:
 
@@ -36,6 +36,8 @@ Think of the OneBox as three **separate** function units in one tidy package:
 3. **DAC unit**: There are up to 12 analog output (DAC) channels.
 
 >*There are 12 I/O channels in total; each configurable as an input or output.*
+
+>*The DAC unit also has an analog waveplayer.*
 
 ## Setup
 
@@ -203,6 +205,7 @@ if you don't want to use the breakout board.
 
 * DAC channels are accessed via the breakout board or the front panel DAC SMA.
 * DAC voltages are settable during a run using the SDK remote interface: range +/- 5V.
+* DAC channel-0 can be programmed via SpikeGLX to output analog waveforms.
 * DAC voltages are initialized to zero when a run starts.
 
 --------

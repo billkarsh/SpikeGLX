@@ -12,6 +12,7 @@
 #include "AOCtl.h"
 #include "ColorTTLCtl.h"
 #include "SOCtl.h"
+#include "Stim.h"
 #include "Version.h"
 
 #include <QAction>
@@ -678,6 +679,8 @@ void Run::stopRun()
 #ifdef DO_SNAPSHOTS
     QTimer::singleShot( 0, mainApp(), SLOT(runSnapStopping()) );
 #endif
+
+    CStim::ni_run_cleanup();
 
     aoStopDev();
 

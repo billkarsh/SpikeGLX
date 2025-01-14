@@ -1117,6 +1117,70 @@ void CmdWorker::niDOSet( const QStringList &toks )
 
 
 // Expected tok params:
+// 0) outChan string
+// 1) trigTerm string
+//
+void CmdWorker::niWaveArm( const QStringList &toks )
+{
+    if( toks.size() < 2 ) {
+        errMsg = "NIWVARM: Requires params {outChan, trigTerm}.";
+        return;
+    }
+
+    if( !okRunStarted( "NIWVARM" ) )
+        return;
+
+    errMsg = CStim::ni_wave_arm( toks[0], toks[1] );
+
+    if( !errMsg.isEmpty() )
+        errMsg = "NIWVARM: " + errMsg;
+}
+
+
+// Expected tok params:
+// 0) outChan string
+// 1) wave string
+// 2) loop Boolean 0/1.
+//
+void CmdWorker::niWaveLoad( const QStringList &toks )
+{
+    if( toks.size() < 3 ) {
+        errMsg = "NIWVLOAD: Requires params {outChan, wavename, loop}.";
+        return;
+    }
+
+    if( !okRunStarted( "NIWVLOAD" ) )
+        return;
+
+    errMsg = CStim::ni_wave_download_file( toks[0], toks[1], toks[2].toInt() );
+
+    if( !errMsg.isEmpty() )
+        errMsg = "NIWVLOAD: " + errMsg;
+}
+
+
+// Expected tok params:
+// 0) outChan string
+// 1) start Boolean 0/1.
+//
+void CmdWorker::niWaveStartStop( const QStringList &toks )
+{
+    if( toks.size() < 2 ) {
+        errMsg = "NIWVSTSP: Requires params {outChan, start}.";
+        return;
+    }
+
+    if( !okRunStarted( "NIWVSTSP" ) )
+        return;
+
+    errMsg = CStim::ni_wave_start_stop( toks[0], toks[1].toInt() );
+
+    if( !errMsg.isEmpty() )
+        errMsg = "NIWVSTSP: " + errMsg;
+}
+
+
+// Expected tok params:
 // 0) ip
 // 1) slot
 // 2) chn_vlt string
@@ -2190,6 +2254,12 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
         getStreamShankMap( toks );
     else if( cmd == "NIDOSET" )
         niDOSet( toks );
+    else if( cmd == "NIWVARM" )
+        niWaveArm( toks );
+    else if( cmd == "NIWVLOAD" )
+        niWaveLoad( toks );
+    else if( cmd == "NIWVSTSP" )
+        niWaveStartStop( toks );
     else if( cmd == "OBXAOSET" )
         obxAOSet( toks );
     else if( cmd == "OBXWVARM" )
