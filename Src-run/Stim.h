@@ -14,15 +14,19 @@
 
 struct WaveMeta {
     double  freq,
-            wav_vpp,
-            dev_vpp;
+            wav_vmx,
+            dev_vmx;
+    QString data_type;
     int     nsamp;
-    bool    isbin;
     QString readMetaFile( const QString &wave );
     QString writeMetaFile( const QString &wave ) const;
-    QString readTextFile( QString &text, const QString &wave );
-    QString writeTextFile( const QString &wave, QString &text );
+    QString stdMetaCheck( double fmax, int bmax, const QString &wave ) const;
+    QString readTextFile( QString &text, const QString &wave ) const;
+    QString writeTextFile( const QString &wave, const QString &text ) const;
     QString parseText( vec_i16 &buf, const QString &text, int testMax );
+    QString textFile2buf( vec_i16 &buf, const QString &wave, int testMax );
+    QString i16File2buf( vec_i16 &buf, const QString &wave ) const;
+    QString f32File2buf( vec_i16 &buf, const QString &wave ) const;
 };
 
 class CStim
@@ -35,14 +39,6 @@ public:
 // OBX waveplayer client
 
     static QString obx_wave_download_file( int istr, const QString &wave );
-    static QString obx_wave_download_binFile(
-        int             istr,
-        const WaveMeta  &W,
-        const QString   &wave );
-    static QString obx_wave_download_txtFile(
-        int             istr,
-        WaveMeta        &W,
-        const QString   &wave );
 
 // OBX waveplayer hardware
 
@@ -62,16 +58,6 @@ public:
 
     static QString ni_wave_download_file(
         const QString   &outChan,
-        const QString   &wave,
-        bool            loop );
-    static QString ni_wave_download_binFile(
-        const QString   &outChan,
-        const WaveMeta  &W,
-        const QString   &wave,
-        bool            loop );
-    static QString ni_wave_download_txtFile(
-        const QString   &outChan,
-        WaveMeta        &W,
         const QString   &wave,
         bool            loop );
 

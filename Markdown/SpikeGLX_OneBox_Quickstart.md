@@ -2,7 +2,7 @@
 
 *>> Updated: December 19, 2024 <<*
 
-*>> AO (DAC) and waveplayer enabled in SpikeGLX <<*
+*>> AO (DAC) and WavePlayer enabled in SpikeGLX <<*
 
 **Topics**:
 
@@ -37,7 +37,7 @@ Think of the OneBox as three **separate** function units in one tidy package:
 
 >*There are 12 I/O channels in total; each configurable as an input or output.*
 
->*The DAC unit also has an analog waveplayer.*
+>*The DAC unit also has an analog [**WavePlayer**](WavePlan_Help.html).*
 
 ## Setup
 
@@ -442,7 +442,9 @@ Detailed instructions for the `Obx Setup` tab are [here](OBXTab_Help.html).
 > - Set your gate and trigger modes
 > - Name the run on the `Save` tab
 
-> Set DAC voltages during a run using the SDK remote interface functions.
+> Set DAC voltages during a run using the **SDK remote interface** functions.
+
+> Learn about using the **WavePlayer** features [here](WavePlan_Help.html).
 
 --------
 

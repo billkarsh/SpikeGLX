@@ -48,6 +48,7 @@ public:
         *bringFrontAct,
         *shwHidConsAct,
         *shwHidGrfsAct,
+        *wvDlgAct,
         *aoDlgAct,
         *spikeViewAct,
         *colorTTLAct,

@@ -103,7 +103,7 @@ void Main_Actions::initActions()
     ConnectUI( bringFrontAct, SIGNAL(triggered()), &app->win, SLOT(bringAllToFront()) );
 
     shwHidConsAct = new QAction( "Hide/Sho&w Console", this );
-    shwHidConsAct->setShortcut( QKeySequence( tr("Ctrl+W") ) );
+    shwHidConsAct->setShortcut( QKeySequence( tr("Ctrl+H") ) );
     shwHidConsAct->setShortcutContext( Qt::ApplicationShortcut );
     ConnectUI( shwHidConsAct, SIGNAL(triggered()), app, SLOT(window_ShowHideConsole()) );
 
@@ -113,10 +113,15 @@ void Main_Actions::initActions()
     shwHidGrfsAct->setEnabled( false );
     ConnectUI( shwHidGrfsAct, SIGNAL(triggered()), app, SLOT(window_ShowHideGraphs()) );
 
+    wvDlgAct = new QAction( "&Wave Planner...", this );
+    wvDlgAct->setShortcut( QKeySequence( tr("Ctrl+W") ) );
+    wvDlgAct->setShortcutContext( Qt::ApplicationShortcut );
+    ConnectUI( wvDlgAct, SIGNAL(triggered()), app, SLOT(window_WVDlg()) );
+
     aoDlgAct = new QAction( "&Audio...", this );
     aoDlgAct->setShortcut( QKeySequence( tr("Ctrl+A") ) );
     aoDlgAct->setShortcutContext( Qt::ApplicationShortcut );
-    ConnectUI( aoDlgAct, SIGNAL(triggered()), app, SLOT(options_AODlg()) );
+    ConnectUI( aoDlgAct, SIGNAL(triggered()), app, SLOT(window_AODlg()) );
 
     spikeViewAct = new QAction( "Spi&ke Viewer...", this );
     spikeViewAct->setShortcut( QKeySequence( tr("Ctrl+K") ) );
@@ -206,6 +211,7 @@ void Main_Actions::initMenus( QMainWindow *w )
     m->addAction( shwHidConsAct );
     m->addAction( shwHidGrfsAct );
     m->addSeparator();
+    m->addAction( wvDlgAct );
     m->addAction( aoDlgAct );
     m->addAction( spikeViewAct );
     m->addAction( colorTTLAct );

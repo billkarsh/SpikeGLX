@@ -159,16 +159,22 @@ QString WaveMeta::readMetaFile( const QString &wave )
     QSettings S( path, QSettings::IniFormat );
     S.beginGroup( "WaveMeta" );
 
-    freq    = S.value( "sample_frequency_Hz_dbl", 0 ).toDouble();
-    wav_vpp = S.value( "wave_Vpp_dbl", 0 ).toDouble();
-    dev_vpp = S.value( "device_Vpp_dbl", 0 ).toDouble();
-    nsamp   = S.value( "num_samples_int32", 0 ).toInt();
-    isbin   = S.value( "data_are_binary_bool", false ).toBool();
+    freq        = S.value( "sample_frequency_Hz_dbl", 0 ).toDouble();
+    wav_vmx     = S.value( "wave_Vmax_dbl", 0 ).toDouble();
+    dev_vmx     = S.value( "device_Vmax_dbl", 0 ).toDouble();
+    data_type   = S.value( "data_type_txt_i16_f32", "txt" ).toString().toLower();
+    nsamp       = S.value( "num_samples_i32", 0 ).toInt();
 
-    if( wav_vpp > dev_vpp ) {
+    if( data_type != "txt" && data_type != "i16" && data_type != "f32" ) {
         return
-        QString("Wave.read: Wave voltage exceeds device voltage in file '%1'.")
-        .arg( path );
+        QString("Wave.read: data type '%1' not member of {txt,i16,f32} in file '%2'.")
+        .arg( data_type ).arg( path );
+    }
+
+    if( wav_vmx > dev_vmx ) {
+        return
+        QString("Wave.read: Wave voltage '%1' exceeds device voltage in file '%2'.")
+        .arg( wav_vmx ).arg( path );
     }
 
     if( nsamp < 0 ) {
@@ -185,12 +191,7 @@ QString WaveMeta::writeMetaFile( const QString &wave ) const
 {
     QString path = QString("%1/_Waves").arg( appPath() );
 
-    if( !QDir().mkdir( path ) ) {
-        QString err =
-        QString("Wave.write: Can't create dir '%1'.").arg( path );
-        Log() << err;
-        return err;
-    }
+    QDir().mkdir( path );
 
     path = QString("%1/%2.meta").arg( path ).arg( wave );
 
@@ -198,16 +199,40 @@ QString WaveMeta::writeMetaFile( const QString &wave ) const
     S.beginGroup( "WaveMeta" );
 
     S.setValue( "sample_frequency_Hz_dbl", freq );
-    S.setValue( "wave_Vpp_dbl", wav_vpp );
-    S.setValue( "device_Vpp_dbl", dev_vpp );
-    S.setValue( "num_samples_int32", nsamp );
-    S.setValue( "data_are_binary_bool", isbin );
+    S.setValue( "wave_Vmax_dbl", wav_vmx );
+    S.setValue( "device_Vmax_dbl", dev_vmx );
+    S.setValue( "data_type_txt_i16_f32", data_type );
+    S.setValue( "num_samples_i32", nsamp );
 
     return QString();
 }
 
 
-QString WaveMeta::readTextFile( QString &text, const QString &wave )
+QString WaveMeta::stdMetaCheck( double fmax, int bmax, const QString &wave ) const
+{
+    if( freq > fmax ) {
+        return
+        QString("Wave.read: Sample frequency exceeds %1 in file '%2'.")
+        .arg( fmax ).arg( wave );
+    }
+
+    if( nsamp & 1 ) {
+        return
+        QString("Wave.read: Odd sample count %1 in file '%2'.")
+        .arg( nsamp ).arg( wave );
+    }
+
+    if( nsamp > bmax ) {
+        return
+        QString("Wave.read: Sample count exceeds %1 in file '%2'.")
+        .arg( bmax ).arg( wave );
+    }
+
+    return QString();
+}
+
+
+QString WaveMeta::readTextFile( QString &text, const QString &wave ) const
 {
 // Open
 
@@ -234,7 +259,7 @@ QString WaveMeta::readTextFile( QString &text, const QString &wave )
 }
 
 
-QString WaveMeta::writeTextFile( const QString &wave, QString &text )
+QString WaveMeta::writeTextFile( const QString &wave, const QString &text ) const
 {
 // Open
 
@@ -289,7 +314,7 @@ QString WaveMeta::parseText( vec_i16 &buf, const QString &text, int testMax )
                     reShape("(.*)\\((.*)");
     QStack<LOOP>    Lstk;
     QString         token;
-    double          scl     = 0x7FFF * wav_vpp / dev_vpp,
+    double          scl     = 0x7FFF * wav_vmx / dev_vmx,
                     t2s     = 0.001  * freq;
     int             state   = inNone,
                     offset  = 0,    // running written nsamp
@@ -578,6 +603,92 @@ QString WaveMeta::parseText( vec_i16 &buf, const QString &text, int testMax )
     return QString();
 }
 
+
+QString WaveMeta::textFile2buf( vec_i16 &buf, const QString &wave, int testMax )
+{
+    QString text, err;
+
+    err = readTextFile( text, wave );
+    if( !err.isEmpty() ) return err;
+
+    err = parseText( buf, text, testMax );
+    if( !err.isEmpty() ) return err;
+
+    return parseText( buf, text, 0 );
+}
+
+
+QString WaveMeta::i16File2buf( vec_i16 &buf, const QString &wave ) const
+{
+// Open binary
+
+    QString path = QString("%1/_Waves/%2.bin").arg( appPath() ).arg( wave );
+    QFile   f( path );
+
+    if( !f.open( QIODevice::ReadOnly ) ) {
+        return
+        QString("Waveplayer can't open wave i16 bin file '%1'.")
+        .arg( path );
+    }
+
+// Read binary
+
+    buf.resize( nsamp );
+    qint16  *pi = &buf[0];
+
+    if( !f.read( (char*)pi, nsamp*sizeof(qint16) ) ) {
+        return
+        QString("Waveplayer can't read wave i16 bin file '%1'.")
+        .arg( path );
+    }
+
+// Scale binary
+
+    double  scale = wav_vmx / dev_vmx;
+
+    for( int i = 0; i < nsamp; ++i, ++pi )
+        *pi = qBound( -32768, int(scale * *pi), 32767 );
+
+    return QString();
+}
+
+
+QString WaveMeta::f32File2buf( vec_i16 &buf, const QString &wave ) const
+{
+// Open binary
+
+    QString path = QString("%1/_Waves/%2.bin").arg( appPath() ).arg( wave );
+    QFile   f( path );
+
+    if( !f.open( QIODevice::ReadOnly ) ) {
+        return
+        QString("Waveplayer can't open wave f32 bin file '%1'.")
+        .arg( path );
+    }
+
+// Read binary
+
+    std::vector<float>  fbuf( nsamp );
+    float               *pf = &fbuf[0];
+
+    if( !f.read( (char*)pf, nsamp*sizeof(float) ) ) {
+        return
+        QString("Waveplayer can't read wave f32 bin file '%1'.")
+        .arg( path );
+    }
+
+// Scale binary
+
+    buf.resize( nsamp );
+    qint16  *pi     = &buf[0];
+    double  scale   = 0x7FFF * wav_vmx / dev_vmx;
+
+    for( int i = 0; i < nsamp; ++i, ++pf, ++pi )
+        *pi = qBound( -32768, int(scale * *pf), 32767 );
+
+    return QString();
+}
+
 /* ---------------------------------------------------------------- */
 /* OBX ------------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
@@ -615,10 +726,10 @@ static void generate_sqrtest()
 
     WaveMeta    W;
     W.freq      = NDATA;
-    W.wav_vpp   = 2;
-    W.dev_vpp   = 5;
+    W.wav_vmx   = 2;
+    W.dev_vmx   = 5;
+    W.data_type = "f32";
     W.nsamp     = NDATA;
-    W.isbin     = true;
     W.writeMetaFile( "sqrtest" );
 
     std::vector<float>  buf;
@@ -656,87 +767,22 @@ QString CStim::obx_wave_download_file( int istr, const QString &wave )
     if( !err.isEmpty() )
         return err;
 
-    if( W.freq > OBX_WAV_FRQ_MAX ) {
-        return
-        QString("Wave.read: Sample frequency exceeds %1 in file '%2'.")
-        .arg( OBX_WAV_FRQ_MAX ).arg( wave );
-    }
-    if( W.nsamp & 1 ) {
-        return
-        QString("Wave.read: Odd sample count %1 in file '%2'.")
-        .arg( W.nsamp ).arg( wave );
-    }
-    if( W.nsamp > OBX_WAV_BUF_MAX ) {
-        return
-        QString("Wave.read: Sample count exceeds %1 in file '%2'.")
-        .arg( OBX_WAV_BUF_MAX ).arg( wave );
-    }
+    err = W.stdMetaCheck( OBX_WAV_FRQ_MAX, OBX_WAV_BUF_MAX, wave );
 
-    if( W.isbin )
-        return obx_wave_download_binFile( istr, W, wave );
-    else
-        return obx_wave_download_txtFile( istr, W, wave );
-}
+    if( !err.isEmpty() )
+        return err;
 
-
-QString CStim::obx_wave_download_binFile(
-    int             istr,
-    const WaveMeta  &W,
-    const QString   &wave )
-{
-// Open binary
-
-    QString path = QString("%1/_Waves/%2.bin").arg( appPath() ).arg( wave );
-    QFile   f( path );
-
-    if( !f.open( QIODevice::ReadOnly ) ) {
-        return
-        QString("Waveplayer can't open wave binary file '%1'.")
-        .arg( path );
-    }
-
-// Read binary
-
-    std::vector<float>  fbuf( W.nsamp );
-    float   *pf = &fbuf[0];
-
-    if( !f.read( (char*)pf, W.nsamp*sizeof(float) ) ) {
-        return
-        QString("Waveplayer can't read wave binary file '%1'.")
-        .arg( path );
-    }
-
-// Scale binary
-
-    vec_i16 buf( W.nsamp );
-    qint16  *pi     = &buf[0];
-    double  scale   = 0x7FFF * W.wav_vpp / W.dev_vpp;
-
-    for( int i = 0; i < W.nsamp; ++i, ++pf, ++pi )
-        *pi = scale * *pf;
-
-// Download binary
-
-    return obx_wave_download_buf( W.freq, istr, W.nsamp, &buf[0] );
-}
-
-
-QString CStim::obx_wave_download_txtFile(
-    int             istr,
-    WaveMeta        &W,
-    const QString   &wave )
-{
-    QString text, err;
     vec_i16 buf;
 
-    err = W.readTextFile( text, wave );
-    if( !err.isEmpty() ) return err;
+    if( W.data_type == "i16" )
+        err = W.i16File2buf( buf, wave );
+    else if( W.data_type == "f32" )
+        err = W.f32File2buf( buf, wave );
+    else
+        err = W.textFile2buf( buf, wave, OBX_WAV_BUF_MAX );
 
-    err = W.parseText( buf, text, OBX_WAV_BUF_MAX );
-    if( !err.isEmpty() ) return err;
-
-    err = W.parseText( buf, text, 0 );
-    if( !err.isEmpty() ) return err;
+    if( !err.isEmpty() )
+        return err;
 
     return obx_wave_download_buf( W.freq, istr, W.nsamp, &buf[0] );
 }
@@ -1013,89 +1059,22 @@ QString CStim::ni_wave_download_file(
     if( !err.isEmpty() )
         return err;
 
-    if( W.freq > OBX_WAV_FRQ_MAX ) {
-        return
-        QString("Wave.read: Sample frequency exceeds %1 in file '%2'.")
-        .arg( OBX_WAV_FRQ_MAX ).arg( wave );
-    }
-    if( W.nsamp & 1 ) {
-        return
-        QString("Wave.read: Odd sample count %1 in file '%2'.")
-        .arg( W.nsamp ).arg( wave );
-    }
-    if( W.nsamp > OBX_WAV_BUF_MAX ) {
-        return
-        QString("Wave.read: Sample count exceeds %1 in file '%2'.")
-        .arg( OBX_WAV_BUF_MAX ).arg( wave );
-    }
+    err = W.stdMetaCheck( OBX_WAV_FRQ_MAX, OBX_WAV_BUF_MAX, wave );
 
-    if( W.isbin )
-        return ni_wave_download_binFile( outChan, W, wave, loop );
-    else
-        return ni_wave_download_txtFile( outChan, W, wave, loop );
-}
+    if( !err.isEmpty() )
+        return err;
 
-
-QString CStim::ni_wave_download_binFile(
-    const QString   &outChan,
-    const WaveMeta  &W,
-    const QString   &wave,
-    bool            loop )
-{
-// Open binary
-
-    QString path = QString("%1/_Waves/%2.bin").arg( appPath() ).arg( wave );
-    QFile   f( path );
-
-    if( !f.open( QIODevice::ReadOnly ) ) {
-        return
-        QString("Waveplayer can't open wave binary file '%1'.")
-        .arg( path );
-    }
-
-// Read binary
-
-    std::vector<float>  fbuf( W.nsamp );
-    float   *pf = &fbuf[0];
-
-    if( !f.read( (char*)pf, W.nsamp*sizeof(float) ) ) {
-        return
-        QString("Waveplayer can't read wave binary file '%1'.")
-        .arg( path );
-    }
-
-// Scale binary
-
-    vec_i16 buf( W.nsamp );
-    qint16  *pi     = &buf[0];
-    double  scale   = 0x7FFF * W.wav_vpp / W.dev_vpp;
-
-    for( int i = 0; i < W.nsamp; ++i, ++pf, ++pi )
-        *pi = scale * *pf;
-
-// Download binary
-
-    return ni_wave_download_buf( outChan, W, &buf[0], loop );
-}
-
-
-QString CStim::ni_wave_download_txtFile(
-    const QString   &outChan,
-    WaveMeta        &W,
-    const QString   &wave,
-    bool            loop )
-{
-    QString text, err;
     vec_i16 buf;
 
-    err = W.readTextFile( text, wave );
-    if( !err.isEmpty() ) return err;
+    if( W.data_type == "i16" )
+        err = W.i16File2buf( buf, wave );
+    else if( W.data_type == "f32" )
+        err = W.f32File2buf( buf, wave );
+    else
+        err = W.textFile2buf( buf, wave, OBX_WAV_BUF_MAX );
 
-    err = W.parseText( buf, text, OBX_WAV_BUF_MAX );
-    if( !err.isEmpty() ) return err;
-
-    err = W.parseText( buf, text, 0 );
-    if( !err.isEmpty() ) return err;
+    if( !err.isEmpty() )
+        return err;
 
     return ni_wave_download_buf( outChan, W, &buf[0], loop );
 }
@@ -1110,9 +1089,9 @@ QString CStim::ni_wave_download_buf(
     const qint16    *src,
     bool            loop )
 {
+#ifdef HAVE_NIDAQmx
     ni_removeTask( outChan );
 
-#ifdef HAVE_NIDAQmx
     TaskHandle  T;
     int32       nWritten;
 
@@ -1121,8 +1100,8 @@ QString CStim::ni_wave_download_buf(
                             T,
                             STR2CHR( outChan ),
                             "",
-                            -W.dev_vpp,
-                            W.dev_vpp,
+                            -W.dev_vmx,
+                            W.dev_vmx,
                             DAQmx_Val_Volts,
                             NULL ) )
      || DAQmxErrChkNoJump( DAQmxCfgSampClkTiming(

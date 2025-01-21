@@ -46,6 +46,7 @@
 **Appendix:**
 
 * [SpikeGLX_OneBox_Quickstart](SpikeGLX_OneBox_Quickstart.html)
+* [Stimulus Waveform Planner](WavePlan_Help.html)
 * [SpikeGLX FAQ](SpikeGLX_FAQ.html)
 * [Metadata Tags](Metadata_30.html)
 
@@ -61,7 +62,8 @@
 
 #### OneBox
 
-[SpikeGLX_OneBox_Quickstart](SpikeGLX_OneBox_Quickstart.html).
+* [SpikeGLX_OneBox_Quickstart](SpikeGLX_OneBox_Quickstart.html).
+* [Stimulus Waveform Planner](WavePlan_Help.html).
 
 #### Help
 
@@ -986,6 +988,9 @@ the window from the SpikeGLX icon in the Windows Task Bar
 
 * *Hide/Show Graphs*:
 Toggle visibility of the Graphs window.
+
+* [*Wave Planner...*](WavePlan_Help.html):
+Design stimulus waveforms you can play using NI or OneBox devices.
 
 * [*Audio...*](Audio_Help.html):
 Listen to spiking or waveforms (up to two channels at a time).

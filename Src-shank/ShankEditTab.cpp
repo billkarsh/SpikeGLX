@@ -582,7 +582,9 @@ void ShankEditTab::lbutReleased()
 void ShankEditTab::beep( const QString &msg )
 {
     SC->setStatus( msg );
-    ::Beep( 440, 200 );
+
+    if( !msg.isEmpty() )
+        ::Beep( 440, 200 );
 }
 
 /* ---------------------------------------------------------------- */
@@ -622,10 +624,7 @@ void ShankEditTab::loadBut()
         filename = fn;
     }
 
-    if( !msg.isEmpty() )
-        beep( msg );
-    else
-        SC->setStatus( msg );
+    beep( msg );
 }
 
 
@@ -750,11 +749,7 @@ bool ShankEditTab::saveBut()
             filename = fn;
         }
 
-        if( !msg.isEmpty() )
-            beep( msg );
-        else
-            SC->setStatus( msg );
-
+        beep( msg );
         return ok;
     }
 

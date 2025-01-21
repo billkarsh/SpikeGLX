@@ -167,7 +167,6 @@ public slots:
         {appData.dataDirDlg();}
     void options_ExploreDataDir( int idir = 0 )
         {appData.explore( sender(), idir );}
-    void options_AODlg();
 
 // Tools
     void tools_VerifySha1();
@@ -184,6 +183,8 @@ public slots:
 // Window
     void window_ShowHideConsole();
     void window_ShowHideGraphs();
+    void window_WVDlg();
+    void window_AODlg();
     void window_SpikeView();
     void window_ColorTTL();
     void window_MoreTraces();

@@ -23,6 +23,7 @@
 #include "Sha1Verifier.h"
 #include "Par2Window.h"
 #include "Version.h"
+#include "WavePlanCtl.h"
 
 #include <QDesktopServices>
 #include <QGuiApplication>
@@ -1114,13 +1115,6 @@ void MainApp::file_AskQuit()
 }
 
 
-void MainApp::options_AODlg()
-{
-    if( aoCtl->showDialog() )
-        modelessOpened( aoCtl );
-}
-
-
 void MainApp::tools_VerifySha1()
 {
 // Sha1Verifier is self-deleting object
@@ -1290,6 +1284,19 @@ void MainApp::window_ShowHideConsole()
 void MainApp::window_ShowHideGraphs()
 {
     run->grfShowHideAll();
+}
+
+
+void MainApp::window_WVDlg()
+{
+    WavePlanCtl W( 0 );
+}
+
+
+void MainApp::window_AODlg()
+{
+    if( aoCtl->showDialog() )
+        modelessOpened( aoCtl );
 }
 
 

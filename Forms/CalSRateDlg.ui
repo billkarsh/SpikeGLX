@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>420</width>
-    <height>427</height>
+    <width>449</width>
+    <height>400</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -59,7 +59,7 @@
         <item>
          <widget class="QLineEdit" name="fileLE">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -67,7 +67,7 @@
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>23</height>
+            <height>22</height>
            </size>
           </property>
          </widget>
@@ -83,7 +83,7 @@
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>23</height>
+            <height>28</height>
            </size>
           </property>
           <property name="text">

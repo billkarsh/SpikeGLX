@@ -7,20 +7,26 @@
     <x>0</x>
     <y>0</y>
     <width>379</width>
-    <height>372</height>
+    <height>339</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_3">
+  <layout class="QGridLayout" name="gridLayout_3" rowstretch="0,0">
    <property name="verticalSpacing">
-    <number>15</number>
+    <number>12</number>
    </property>
    <item row="0" column="0">
     <widget class="QGroupBox" name="specifyGB">
      <property name="enabled">
       <bool>true</bool>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
      </property>
      <property name="title">
       <string>Specify Operation</string>
@@ -114,7 +120,7 @@
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>23</height>
+            <height>22</height>
            </size>
           </property>
          </widget>
@@ -130,7 +136,7 @@
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>23</height>
+            <height>28</height>
            </size>
           </property>
           <property name="text">
@@ -171,7 +177,7 @@
             <property name="minimumSize">
              <size>
               <width>0</width>
-              <height>23</height>
+              <height>22</height>
              </size>
             </property>
             <property name="minimum">
@@ -201,7 +207,7 @@
           <item>
            <widget class="QPushButton" name="goBut">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -235,6 +241,12 @@
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="0" colspan="2">
        <widget class="QTextEdit" name="outputTE">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="focusPolicy">
          <enum>Qt::NoFocus</enum>
         </property>
@@ -276,7 +288,7 @@
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>23</height>
+          <height>28</height>
          </size>
         </property>
         <property name="text">

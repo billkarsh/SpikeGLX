@@ -24,7 +24,8 @@ HEADERS += \
     $$PWD/SimProbes.h \
     $$PWD/SimProbesCtl.h \
     $$PWD/SnsMaps.h \
-    $$PWD/Subset.h
+    $$PWD/Subset.h \
+    $$PWD/WavePlanCtl.h
 
 SOURCES += \
     $$PWD/ChanMap.cpp \
@@ -50,6 +51,7 @@ SOURCES += \
     $$PWD/SimProbes.cpp \
     $$PWD/SimProbesCtl.cpp \
     $$PWD/SnsMaps.cpp \
-    $$PWD/Subset.cpp
+    $$PWD/Subset.cpp \
+    $$PWD/WavePlanCtl.cpp
 
 

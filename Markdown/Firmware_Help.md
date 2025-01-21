@@ -2,7 +2,8 @@
 
 ### OneBoxes
 
-You do not need to manually update OneBox Firmware.
+There is a device driver for OneBox, but you do not need to manually
+update OneBox Firmware. The following pertains only to PXIe devices.
 
 ### Dual Boot Images
 

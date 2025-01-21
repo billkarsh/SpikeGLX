@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>567</width>
-    <height>426</height>
+    <height>410</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -27,10 +27,16 @@
   </property>
   <layout class="QGridLayout" name="gridLayout_2" columnstretch="2,3">
    <property name="verticalSpacing">
-    <number>15</number>
+    <number>13</number>
    </property>
    <item row="0" column="0" colspan="2">
     <widget class="QGroupBox" name="C0GB">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="title">
       <string>Green</string>
      </property>
@@ -41,6 +47,12 @@
       <bool>false</bool>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="topMargin">
+       <number>8</number>
+      </property>
+      <property name="bottomMargin">
+       <number>8</number>
+      </property>
       <item>
        <widget class="QComboBox" name="stream0CB">
         <property name="sizePolicy">
@@ -138,6 +150,12 @@
    </item>
    <item row="1" column="0" colspan="2">
     <widget class="QGroupBox" name="C1GB">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="title">
       <string>Magenta</string>
      </property>
@@ -148,6 +166,12 @@
       <bool>false</bool>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <property name="topMargin">
+       <number>8</number>
+      </property>
+      <property name="bottomMargin">
+       <number>8</number>
+      </property>
       <item>
        <widget class="QComboBox" name="stream1CB">
         <property name="sizePolicy">
@@ -242,6 +266,12 @@
    </item>
    <item row="2" column="0" colspan="2">
     <widget class="QGroupBox" name="C2GB">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="title">
       <string>Cyan</string>
      </property>
@@ -252,6 +282,12 @@
       <bool>false</bool>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <property name="topMargin">
+       <number>8</number>
+      </property>
+      <property name="bottomMargin">
+       <number>8</number>
+      </property>
       <item>
        <widget class="QComboBox" name="stream2CB">
         <property name="sizePolicy">
@@ -346,6 +382,12 @@
    </item>
    <item row="3" column="0" colspan="2">
     <widget class="QGroupBox" name="C3GB">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="title">
       <string>Orange</string>
      </property>
@@ -356,6 +398,12 @@
       <bool>false</bool>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <property name="topMargin">
+       <number>8</number>
+      </property>
+      <property name="bottomMargin">
+       <number>8</number>
+      </property>
       <item>
        <widget class="QComboBox" name="stream3CB">
         <property name="sizePolicy">
@@ -454,7 +502,7 @@
       <number>8</number>
      </property>
      <property name="verticalSpacing">
-      <number>15</number>
+      <number>12</number>
      </property>
      <item row="1" column="0">
       <widget class="QLabel" name="label_2">
