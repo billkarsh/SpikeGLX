@@ -8,6 +8,7 @@
 + Add remote NI_Wave_XXX waveplayer.
 + Add remote OBX_AO_Set OneBox analog output.
 + Add remote OBX_Wave_XXX OneBox waveplayer.
++ Add remote PauseGraphs command.
 + Add Wave Planner dialog.
 
 20241001

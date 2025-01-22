@@ -308,3 +308,10 @@ void RunToolbar::toggleFetcher()
 }
 
 
+void RunToolbar::remotePause( bool pause )
+{
+    if( pause != paused )
+        toggleFetcher();
+}
+
+

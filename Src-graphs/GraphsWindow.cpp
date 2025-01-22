@@ -250,6 +250,13 @@ void GraphsWindow::remoteSetAnatomyPP( const QString &elems, int ip, int sk )
 }
 
 
+void GraphsWindow::remotePause( bool pause )
+{
+    if( tbar )
+        tbar->remotePause( pause );
+}
+
+
 void GraphsWindow::setGateLED( bool on )
 {
     if( LED )

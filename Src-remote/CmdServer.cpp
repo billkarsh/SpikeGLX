@@ -1475,6 +1475,23 @@ void CmdWorker::par2Start( QStringList toks )
 }
 
 
+// Expected tok params:
+// 0) pause  Boolean 0/1.
+//
+void CmdWorker::pauseGraphs( QStringList toks )
+{
+    if( toks.size() < 1 ) {
+        errMsg = "PAUSEGRF: Requires params {pause}.";
+        return;
+    }
+
+    Run *run = okRunStarted( "PAUSEGRF" );
+
+    if( run )
+        run->grfRemotePause( toks.at( 0 ).toInt() );
+}
+
+
 // Expected tok parameter is Pinpoint data string:
 // [probe-id,shank-id](startpos,endpos,R,G,B,rgnname)(startpos,endpos,R,G,B,rgnname)...()
 //    - probe-id: SpikeGLX logical probe id.
@@ -2272,6 +2289,8 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
         opto_emit( toks );
     else if( cmd == "PAR2" )
         par2Start( toks );
+    else if( cmd == "PAUSEGRF" )
+        pauseGraphs( toks );
     else if( cmd == "SETANATOMYPP" )
         setAnatomyPP( toks );
     else if( cmd == "SETAUDIOENABLE" )

@@ -68,6 +68,7 @@ public slots:
     void remoteSetRecordingEnabled( bool on );
     void remoteSetRunLE( const QString &name );
     void remoteSetAnatomyPP( const QString &elems, int ip, int sk );
+    void remotePause( bool pause );
 
 // Gates/triggers
     void setGateLED( bool on );

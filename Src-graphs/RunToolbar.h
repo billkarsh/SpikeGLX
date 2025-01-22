@@ -42,6 +42,7 @@ public slots:
     void recordBut( bool checked );
     void notes();
     void toggleFetcher();
+    void remotePause( bool pause );
 };
 
 #endif  // RUNTOOLBAR_H

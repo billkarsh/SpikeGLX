@@ -201,6 +201,20 @@ void Run::grfSetStreams( std::vector<GFStream> &gfs, int igw )
 }
 
 
+void Run::grfRemotePause( bool pause )
+{
+    GraphsWindow    *gw = 0;
+
+    runMtx.lock();
+        if( !vGW.empty() )
+            gw = vGW[0].gw;
+    runMtx.unlock();
+
+    if( gw )
+        gw->remotePause( pause );
+}
+
+
 // igw = -1 for all fetchers.
 //
 bool Run::grfHardPause( bool pause, int igw )

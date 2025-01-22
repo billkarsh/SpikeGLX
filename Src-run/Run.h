@@ -70,6 +70,7 @@ public:
     bool grfIsUsrOrder( int js, int ip );
     void grfRemoteSetsRunLE( const QString &fn );
     void grfSetStreams( std::vector<GFStream> &gfs, int igw );
+    void grfRemotePause( bool pause );
     bool grfHardPause( bool pause, int igw = -1 );
     void grfWaitPaused( int igw = -1 );
     void grfSetFocusMain();

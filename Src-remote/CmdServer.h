@@ -122,6 +122,7 @@ private:
     void obxWaveStartStop( const QStringList &toks );
     void opto_emit( QStringList toks );
     void par2Start( QStringList toks );
+    void pauseGraphs( QStringList toks );
     void setAnatomyPP( const QStringList &toks );
     void setAudioEnable( const QStringList &toks );
     void setAudioParams( const QString &group );
