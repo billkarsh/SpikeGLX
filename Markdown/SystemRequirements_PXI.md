@@ -1,10 +1,10 @@
 ## System Requirements for Neuropixels
 
-**>> Updated: November 10, 2024 <<**
+**>> Updated: January, 2025 <<**
 
 What's new:
 
-* OneBox discussion.
+* NI 1090 chassis mention (2-slots, $1700US).
 * Better document organization.
 
 --------
@@ -205,6 +205,7 @@ based options were more readily available than other controller types.
 | SHC68-68-EPM shielded cable 2m         | [192061-02](https://www.ni.com/en-us/support/model.shc68-68-epm.html)     | 190.00 |
 
 * Available (but we haven't tested): [ADLink 4-slot integrated Thunderbolt 3 chassis](https://www.adlinktech.com/Products/PXI_PXIe_platform/PXIChassis/PXES-2314T?lang=en).
+* Available (but we haven't tested): [NI 1090 2-slot integrated Thunderbolt 3 chassis ~$1700US](https://www.ni.com/en-us/shop/model/pxie-1090.html?srsltid=AfmBOooAtkrHkpBzqG9WcCe0kjUhZbP_4M_zso3lJKJXQxH8iK-tv6uy).
 * You can buy the Thunderbolt 3 cable and power cord anywhere; they're not special.
 * Prices do not include service contracts.
 * All required software is free.
