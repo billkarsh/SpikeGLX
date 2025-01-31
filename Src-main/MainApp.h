@@ -85,7 +85,8 @@ private:
     QWidget             *rsWin;
     Ui::RunStartupWin   *rsUI;
     AppData             appData;
-    bool                initialized;
+    bool                initialized,
+                        quitting;
 
 public:
     Main_Actions    act;
@@ -130,6 +131,7 @@ public:
 
 public:
     bool isInitialized() const      {return initialized;}
+    bool isQuitting() const         {return quitting;}
     bool isDebugMode() const        {return appData.debug;}
     bool isLogEditable() const      {return appData.editLog;}
     bool isConsoleHidden() const;

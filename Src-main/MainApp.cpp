@@ -235,7 +235,7 @@ MainApp::MainApp( int &argc, char **argv )
         run(0), consoleWindow(0), mxWin(0), par2Win(0),
         configCtl(0), aoCtl(0), cmdSrv(new CmdSrvDlg),
         rgtSrv(new RgtSrvDlg), calSRRun(0), svyPrbRun(0),
-        rsWin(0), rsUI(0), initialized(false)
+        rsWin(0), rsUI(0), initialized(false), quitting(false)
 {
 // --------------
 // App attributes
@@ -1087,6 +1087,9 @@ bool MainApp::file_AskStopRun()
 
 void MainApp::file_AskQuit()
 {
+    if( quitting )
+        return;
+
     if( run->isRunning() ) {
 
         int yesNo = QMessageBox::question(
@@ -1122,6 +1125,7 @@ void MainApp::file_AskQuit()
         processEvents();
     }
 
+    quitting = true;
     msg.appQuiting();
     win.closeAll();
 
