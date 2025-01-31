@@ -1053,6 +1053,20 @@ static void test1()
 //=================================================================
 
 
+//=================================================================
+// Experiment to test ProbeTable ops.
+#if 0
+#include "ProbeTable.h"
+static void test1()
+{
+//    CProbeTbl::ss2ini();
+//    CProbeTbl::ini2json();
+//    CProbeTbl::parsejson();
+}
+#endif
+//=================================================================
+
+
 void MainApp::file_NewRun()
 {
 //test1();return;
