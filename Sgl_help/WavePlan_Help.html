@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link href="data:text/css;charset=utf-8,body%20%7B%0Amargin%3A%20auto%3B%0Apadding%2Dright%3A%201em%3B%0Apadding%2Dleft%3A%201em%3B%0Amax%2Dwidth%3A%2068em%3B%20%0Aborder%2Dleft%3A%201px%20solid%20black%3B%0Aborder%2Dright%3A%201px%20solid%20black%3B%0Acolor%3A%20black%3B%0Afont%2Dfamily%3A%20Verdana%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%20100%25%3B%0Aline%2Dheight%3A%20140%25%3B%0Acolor%3A%20%23333%3B%0A%7D%0Ablockquote%20%7B%0Aborder%2Dleft%3A%205px%20solid%20%23cccccc%3B%0Amargin%2Dleft%3A%2020px%3B%0Apadding%3A%200%200%200%2015px%3B%0A%7D%0Apre%20%7B%0Aborder%3A%201px%20dotted%20gray%3B%0Aborder%2Dstyle%3A%20dotted%3B%0Abackground%2Dcolor%3A%20%23f5f5f5%3B%20%0Adisplay%3A%20block%3B%0Acolor%3A%20%23f5f5f5%3B%0Apadding%2Dtop%3A%200%3B%0Apadding%2Dbottom%3A%200%3B%0A%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20monospace%3B%0Afont%2Dsize%3A%20115%25%3B%0Abackground%2Dcolor%3A%20transparent%3B%0Acolor%3A%20%231d9d1d%3B%0A%7D%0Ah1%20a%2C%20h2%20a%2C%20h3%20a%2C%20h4%20a%2C%20h5%20a%20%7B%0Atext%2Ddecoration%3A%20none%3B%0Acolor%3A%20%237a5ada%3B%0A%7D%0Ah1%2C%20h2%2C%20h3%2C%20h4%2C%20h5%20%7B%0Afont%2Dfamily%3A%20verdana%3B%0Afont%2Dweight%3A%20bold%3B%0Aborder%2Dbottom%3A%20none%3B%20%0Acolor%3A%20%237a5ada%3B%20%7D%0Ah1%20%7B%0Afont%2Dsize%3A%20130%25%3B%0A%7D%0Ah2%20%7B%0Afont%2Dsize%3A%20110%25%3B%0A%7D%0Ah3%20%7B%0Afont%2Dsize%3A%2095%25%3B%0A%7D%0Ah4%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah5%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah1%2Etitle%20%7B%0Afont%2Dsize%3A%20200%25%3B%0Afont%2Dweight%3A%20bold%3B%0Apadding%2Dtop%3A%200%2E2em%3B%0Apadding%2Dbottom%3A%200%2E2em%3B%0Atext%2Dalign%3A%20left%3B%0Aborder%3A%20none%3B%0A%7D%0Adt%20code%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Add%20p%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0A%23footer%20%7B%0Apadding%2Dtop%3A%201em%3B%0Afont%2Dsize%3A%2070%25%3B%0Acolor%3A%20gray%3B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Atable%20%7B%0Amargin%2Dbottom%3A%202em%3B%0Aborder%2Dbottom%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dright%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dspacing%3A%200%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Apadding%3A%20%2E2em%201em%3B%0Abackground%2Dcolor%3A%20%23eee%3B%0Aborder%2Dtop%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dleft%3A%201px%20solid%20%23ddd%3B%0A%7D%0Atable%20td%20%7B%0Apadding%3A%20%2E2em%201em%3B%0Aborder%2Dtop%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dleft%3A%201px%20solid%20%23ddd%3B%0Avertical%2Dalign%3A%20top%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<h2 id="wave-planner-and-waveplayer">Wave Planner and WavePlayer</h2>
+<h3 id="overview">Overview</h3>
+<p>SpikeGLX contains easy to use tools for stimulus waveform output.</p>
+<ul>
+<li><p>Use the SpikeGLX 'Wave Planner' dialog under the 'Windows' menu, to create 'wave' files that you can then load, trigger and control using our remote scripting API.</p></li>
+<li><p>Wave files can be executed using either OneBox, or NI devices with waveform capable analog output features.</p></li>
+</ul>
+<h3 id="waves">Waves</h3>
+<p>A 'wave' is a pair of descriptor files:</p>
+<ol style="list-style-type: decimal">
+<li>A <strong>mywave.meta</strong> file is in human readable 'ini' format, just like a SpikeGLX run.meta file. It's a handful of plain text 'keyword=value' pairs. Here's an example:</li>
+</ol>
+<pre><code>[WaveMeta]
+sample_frequency_Hz_dbl=10000
+wave_Vpp_dbl=2
+device_Vpp_dbl=5.0
+data_type_txt_i16_f32=txt
+num_samples_i32=0</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>The corresponding data file can have three formats, selected by the <strong>data_type_txt_i16_f32</strong> meta item:</li>
+</ol>
+<ol style="list-style-type: lower-alpha">
+<li>'txt' data type: file <strong>mywave.txt</strong> contains a plain text script that generates the samples.</li>
+<li>'i16' data type: file <strong>mywave.bin</strong> contains the numerical samples as 16-bit signed integers.</li>
+<li>'f32' data type: file <strong>mywave.bin</strong> contains the numerical samples as floats.</li>
+</ol>
+<p><strong>IMPORTANT</strong>:</p>
+<ul>
+<li><p>All wave descriptors should live in the <code>_Waves</code> subfolder within the SpikeGLX application folder.</p></li>
+<li><p>API functions that take a wave name should be given just the wave base-name itself, stripped of any path or file extension. For example, if your metafile full path was 'C:/SpikeGLX_stuff/SpikeGLX/_Waves/mysinwave.meta', then you should refer to this simply as 'mysinwave'.</p></li>
+</ul>
+<h3 id="binary-wave-files">Binary Wave Files</h3>
+<p>The binary formats are provided to allow maximum flexibility to generate samples using your own external tools. Valid binary data follow these rules:</p>
+<ul>
+<li>num_samples_i32 should be set to the accurate count of samples in the *.bin file.</li>
+<li>num_samples_i32 should be an even number.</li>
+<li>num_samples_i32 should not exceed 16777214.</li>
+<li>i16 data should be in the range [-32768,32767]. Upon loading, your values will be multiplied by (wave_Vpp_dbl / device_Vpp_dbl).</li>
+<li>f32 data should be in the range [-1.0,1.0]. Upon loading, your values will be multiplied by (32767 * wave_Vpp_dbl / device_Vpp_dbl).</li>
+</ul>
+<blockquote>
+<p>The scaled values are forced to range [-32768,32767].</p>
+</blockquote>
+<blockquote>
+<p>Although you must generate the <em>.bin file and its samples yourself, you can use the SpikeGLX Wave Planner dialog to edit the frequency and voltage scales in the </em>.meta file.</p>
+</blockquote>
+<h3 id="text-wave-syntax">Text Wave Syntax</h3>
+<p>Use the Wave Planner 'Data' text box to write your generator script.</p>
+<p>Our wave mini-language uses four commands that can be strung together in any combination:</p>
+<ul>
+<li><p>level( V, t_ms ) : Generate samples of amplitude V (float) in range [-1.0,1.0] for time span t_ms (float) milliseconds.</p></li>
+<li><p>ramp( V1, V2, t_ms ) : Generate samples with linearly ramping amplitude from V1 to V2 (floats) each in range [-1.0,1.0] for time span t_ms (float) milliseconds.</p></li>
+<li><p>sin( A, B, f_Hz, t_ms ) : Generate a sine wave with amplitude A (float), baseline B (float), where (A + B) is in range [-1.0,1.0]. The sine wave has frequency f_Hz (float) and total time span t_ms (float) milliseconds.</p></li>
+<li><p>do N { } : Repeat whatever is included in curly braces N (integer) times. Nesting of do-loops is permitted.</p></li>
+</ul>
+<blockquote>
+<p>White-space (returns, spaces, tabs) are completely ignored. Use space freely to make a script readable.</p>
+</blockquote>
+<blockquote>
+<p>At load-time your script is compiled into scaled samples; scale factor: (32767 * wave_Vpp_dbl / device_Vpp_dbl).</p>
+</blockquote>
+<p><strong>Example</strong></p>
+<pre><code>do 10 {
+    level(     0,   50 )
+    ramp( 0,   0.5, 10 )
+    level(     0.5, 100 )
+    ramp( 0.5, 0,   10 )
+}</code></pre>
+<p><em>fin</em></p>
+</body>
+</html>

@@ -40,7 +40,7 @@
 <p>As of SpikeGLX version 20230425, you can set up a filtered probe AP-band stream that runs in parallel with the raw stream. You can set the bandpass edges for this stream, and the stream automatically gets global <code>demux</code> CAR. These data, when present, are used to improve signal-to-background in both audio output and Shank Viewers (for {spike, AP pk-pk} calculations). There is a checkbox to disable this feature just in case you are running out of RAM or CPU, but we don't think this will be necessary unless you are running 12 probes or more at the same time.</p>
 <hr />
 <h2 id="probe-database">Probe Database</h2>
-<p>SpikeGLX maintains a database of probe settings in the _Calibration folder. The settings are keyed to the probe's serial number. There is one entry per probe, hence, the software remembers last thing you did with that probe. The entries are each time-stamped. Individual entries are discarded after three years of disuse.</p>
+<p>SpikeGLX maintains a database of probe settings in the _Calibration folder. The settings are keyed to the probe's serial number. There is one entry per probe, hence, the software remembers the last thing you did with that probe. The entries are each time-stamped. Individual entries are discarded after three years of disuse.</p>
 <p>When you click <code>Detect</code> we look for each selected probe in the database. If found, the stored settings are used. If no entry is found, the probe gets default settings.</p>
 <p>You can always see and edit those settings using the <code>Each probe</code> table on the <code>IM Setup</code> tab.</p>
 <p>Upon clicking <code>Verify</code> or <code>Run</code> the table values are transferred to the database for future runs.</p>

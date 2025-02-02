@@ -67,6 +67,8 @@
 </ul>
 <p><strong>Appendix:</strong></p>
 <ul>
+<li><a href="SpikeGLX_OneBox_Quickstart.html">SpikeGLX_OneBox_Quickstart</a></li>
+<li><a href="WavePlan_Help.html">Stimulus Waveform Planner</a></li>
 <li><a href="SpikeGLX_FAQ.html">SpikeGLX FAQ</a></li>
 <li><a href="Metadata_30.html">Metadata Tags</a></li>
 </ul>
@@ -76,7 +78,10 @@
 <h4 id="pxie">PXIe</h4>
 <p><a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_PXI.md">System requirements for PXI</a>.</p>
 <h4 id="onebox">OneBox</h4>
-<p><a href="SpikeGLX_OneBox_Quickstart.html" class="uri">SpikeGLX_OneBox_Quickstart.html</a>.</p>
+<ul>
+<li><a href="SpikeGLX_OneBox_Quickstart.html">SpikeGLX_OneBox_Quickstart</a>.</li>
+<li><a href="WavePlan_Help.html">Stimulus Waveform Planner</a>.</li>
+</ul>
 <h4 id="help">Help</h4>
 <ul>
 <li><a href="https://billkarsh.github.io/SpikeGLX/#help">Help Docs</a></li>
@@ -175,6 +180,7 @@
 <p>By the way, the <code>_Calibration</code> subfolder also contains supplementary SpikeGLX data:</p>
 <ul>
 <li>The results of imec headstage sample rate calibration.</li>
+<li>The results of imec OneBox sample rate calibration.</li>
 <li>The results of NI device sample rate calibration.</li>
 <li>Your settings choices for each probe.</li>
 <li>Your settings choices for each OneBox.</li>
@@ -212,6 +218,15 @@
 <p>The mod operation is just the remainder when dividing j by N. For example, 7 mod 3 = 1.</p>
 </blockquote>
 <h4 id="display-settings">Display Settings</h4>
+<p>Make sure SpikeGLX is taking advantage of your add-on graphics card instead of the built-in graphics. Doing this will boost acquisition performance and improve the aesthetics:</p>
+<ol style="list-style-type: decimal">
+<li>Type &quot;Graphics settings&quot; into the search box of the Windows Taskbar.</li>
+<li>Select <code>Desktop app</code> and below that click <code>Browse</code>.</li>
+<li>Navigate to and select SpikeGLX.exe.</li>
+<li>SpikeGLX now appears below the <code>Browse</code> button; click on it.</li>
+<li>Click <code>Options</code>; select the <code>High performance</code> option and <code>Save</code>.</li>
+<li>Restart SpikeGLX.</li>
+</ol>
 <p>Depending upon your monitor size and resolution, you might find that the text in menus, buttons and lists is either fuzzy or too small to read. If that's the case, try altering the following Windows setting:</p>
 <ol style="list-style-type: decimal">
 <li>Right-click on your Windows desktop and select 'Display settings.'</li>
@@ -544,6 +559,7 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <li><p><em>Bring All to Front</em>: Bring SpikeGLX and its windows to the foreground.</p></li>
 <li><p><em>Hide/Show Console</em>: Toggle visibility of the main Console window. Note that you can reshow the window from the SpikeGLX icon in the Windows Task Bar (its System Tray at the far right).</p></li>
 <li><p><em>Hide/Show Graphs</em>: Toggle visibility of the Graphs window.</p></li>
+<li><p><a href="WavePlan_Help.html"><em>Wave Planner...</em></a>: Design stimulus waveforms you can play using NI or OneBox devices.</p></li>
 <li><p><a href="Audio_Help.html"><em>Audio...</em></a>: Listen to spiking or waveforms (up to two channels at a time).</p></li>
 <li><p><a href="SpikeView_Help.html"><em>Spike Viewer...</em></a>: Display spike activity (up to four channels at a time).</p></li>
 <li><p><a href="ColorTTL_Help.html"><em>Color TTL Events...</em></a>: Watch up to 4 auxiliary (TTL) channels for pulses. Apply color stripes to the graphs when pulses occur.</p></li>
@@ -584,7 +600,7 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <p><strong>Hardware -&gt; Memory -&gt; Visualization -&gt; Files</strong></p>
 <pre><code>   Devices tab: Select which streams/hardware to acquire.
         IM tab: Configure imec neural probe streams.
-       Obx tab: Configure imec OneBox (ADC) streams.
+       Obx tab: Configure imec OneBox ADC streams, and DAC output.
         NI tab: Configure NI ADC streams.
       Sync tab: Cross-connect streams for precision alignment.
      Gates tab: Together with...

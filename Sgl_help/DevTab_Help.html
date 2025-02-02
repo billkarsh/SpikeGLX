@@ -59,7 +59,7 @@
 <p>The message box shows how many streams are checked for each slot.</p>
 <ul>
 <li>Probes are identified by their <strong>(slot,port,dock)</strong>.</li>
-<li>OneBoxes are identified by <strong>(slot,&quot;ADC&quot;)</strong>.</li>
+<li>OneBoxes are identified by <strong>(slot,&quot;XIO&quot;)</strong>.</li>
 </ul>
 <h3 id="enable-probe-shortcuts">Enable Probe Shortcuts</h3>
 <p>There are some one-click shortcuts for making multiple boxes match the one you are clicking:</p>
@@ -85,17 +85,20 @@
 <p>Devices are checked slot by slot, port by port. If there is any fault, the checking is halted and that issue is reported in the message box, along with the final status &quot;<strong>FAIL</strong>.&quot;</p>
 <p>If all is well, the final text is &quot;<strong>OK</strong>.&quot;</p>
 <h3 id="logical-index-numbers">Logical Index Numbers</h3>
+<p>These numbers are input recording stream identifiers.</p>
 <p>After you specify which physical slots, ports and docks are enabled and click <code>Detect</code>, the table will assign each probe a <code>logical ID</code> number in a simple manner, slot by slot, then port by port, then dock by dock.</p>
 <p>For example, if you enabled (slot,port,dock): (2,2,2), (2,3,1), (4,1,1), (4,1,2), they would get logical probe #s: (2,2,2)=0, (2,3,1)=1, (4,1,1)=2, (4,1,2)=3.</p>
-<p>Likewise, slot by slot, the table assigns each OneBox a zero-based logical ID number, independently of the probes.</p>
+<p>Likewise, slot by slot, the table assigns each OneBox (that is being used for ADC input) a zero-based logical ID number, independently of the probes. Said another way, if a OneBox has been given any combination of analog or digital input channels {XA, XD} it will get a logical ID (input stream index). If you only configured the output AO (DAC) channels, that OneBox will not get a logical ID because it is not an input recorder.</p>
 <blockquote>
-<p><strong>SpikeGLX uses the zero-based logical ID's of probes and OneBoxes EVERYWHERE:</strong></p>
+<p>Note: *In the SDK remote interface for talking to OneBoxes, functions relating to recording operations take (js,ip) indices, where js is the stream-type (js=1 for OneBox) and ip is the logical ID. Functions relating to the output (DAC) features refer to a OneBox by its slot number.</p>
+</blockquote>
+<blockquote>
+<p><strong>SpikeGLX uses the zero-based logical stream ID's of probes and OneBoxes in numerous places:</strong></p>
 <ul>
-<li>Lines of tables.</li>
 <li>Setting up Sync.</li>
 <li>Setting up triggers.</li>
 <li>Names of files, e.g., &quot;imec3&quot;, &quot;obx2&quot;.</li>
-<li>Remote {MATLAB,C++} API commands to address active streams.</li>
+<li>Remote {MATLAB,C++} API commands to address recording streams.</li>
 </ul>
 </blockquote>
 <hr />

@@ -1,6 +1,10 @@
 # What's New On The Site?
 
-January 7, 2024
+February 1, 2025
+
+* SpikeGLX 20241215-phase30 (Waveplayer, imec v3.70.3).
+
+January 7, 2025
 
 * CatGT 4.7 (Option -save writes correctly when no -dest folder).
 
