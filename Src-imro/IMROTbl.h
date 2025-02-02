@@ -168,6 +168,7 @@ public:
     virtual void eaChansOrder( QVector<int> &v ) const = 0;
     virtual int refid( int ch ) const = 0;
     virtual int refTypeAndFields( int &shank, int &bank, int ch ) const = 0;
+    QString chan0Ref() const;
     virtual int apGain( int ch ) const = 0;
     virtual int lfGain( int ch ) const = 0;
     virtual int apFlt( int ch ) const = 0;

@@ -211,6 +211,7 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imAiRangeMax"]     = E.roTbl->maxVolts();
     kvp["imMaxInt"]         = E.roTbl->maxInt();
     kvp["imChan0lfGain"]    = E.roTbl->lfGain( 0 );
+    kvp["imChan0Ref"]       = E.roTbl->chan0Ref();
     kvp["imTipLength"]      = E.roTbl->tipLength();
     kvp["imColsPerShank"]   = E.roTbl->nCol_hwr();
     kvp["imRowsPerShank"]   = E.roTbl->nRow();

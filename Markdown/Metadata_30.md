@@ -641,6 +641,14 @@ The LF-band gain applied to channel 0. If you used the graphical imro editor
 to create your imro file then all channels will have this LF gain.
 
 ```
+imChan0Ref=ext
+```
+
+The type of referencing applied to channel 0. If you used the graphical
+imro editor to create your imro file then all channels will have this type
+of referencing.
+
+```
 imColsPerShank=2
 ```
 

@@ -205,6 +205,7 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imAiRangeMax"]     = E.roTbl->maxVolts();
     kvp["imMaxInt"]         = E.roTbl->maxInt();
     kvp["imChan0apGain"]    = E.roTbl->apGain( 0 );
+    kvp["imChan0Ref"]       = E.roTbl->chan0Ref();
     kvp["imAnyChanFullBand"]= E.roTbl->anyChanFullBand();
     kvp["imTipLength"]      = E.roTbl->tipLength();
     kvp["imColsPerShank"]   = E.roTbl->nCol_hwr();

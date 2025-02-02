@@ -699,6 +699,29 @@ int IMROTbl::maxBank( int ch, int shank ) const
 }
 
 
+QString IMROTbl::chan0Ref() const
+{
+    int shank, bank, type = refTypeAndFields( shank, bank, 0 );
+
+    switch( type ) {
+        case EXT_REF: return "ext";
+        case TIP_REF:
+        {
+            QString tipj = QString("tip%1").arg( shank );
+            for( int ic = 1, nc = nShank(); ic < nc; ++ic ) {
+                type = refTypeAndFields( shank, bank, ic );
+                if( type != TIP_REF || shank != ic )
+                    return tipj;
+            }
+            return "join_tips";
+        }
+        case INT_REF: return QString("shank%1_bank%2").arg( shank ).arg( bank );
+        case GND_REF: return "gnd";
+        default:      return "???";
+    }
+}
+
+
 bool IMROTbl::anyChanFullBand() const
 {
     if( !nLF() )
