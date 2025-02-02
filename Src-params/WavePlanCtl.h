@@ -37,6 +37,7 @@ private slots:
     void closeBut();
 
 private:
+    QString makeWaves();
     void info( const QString &msg );
     void beep( const QString &msg );
 };

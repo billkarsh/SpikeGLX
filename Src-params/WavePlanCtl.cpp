@@ -109,7 +109,7 @@ void WavePlanCtl::loadBut()
 
 // file
 
-    QString wavedir = QString("%1/_Waves").arg( appPath() );
+    QString wavedir = makeWaves();
 
     QString fn = QFileDialog::getOpenFileName(
                     wvDlg,
@@ -269,8 +269,7 @@ void WavePlanCtl::saveBut()
 // file
 
     QString fnold   = wvUI->waveLbl->text(),
-            wavedir = QString("%1/_Waves").arg( appPath() );
-
+            wavedir = makeWaves();
 
     QString fn = QFileDialog::getSaveFileName(
                     wvDlg,
@@ -332,6 +331,14 @@ void WavePlanCtl::closeBut()
 /* ---------------------------------------------------------------- */
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+QString WavePlanCtl::makeWaves()
+{
+    QString path = QString("%1/_Waves").arg( appPath() );
+    QDir().mkdir( path );
+    return path;
+}
+
 
 void WavePlanCtl::info( const QString &msg )
 {
