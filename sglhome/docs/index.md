@@ -292,7 +292,7 @@ Descriptions of metafile items for each phase:
 
 1) For general How-To questions please consult the help documents and videos
 on this site, or pose your question to the
-[Neuropixels slack channel](https://join.slack.com/t/neuropixelsgroup/shared_invite/zt-2c8u0k21u-CC4wSkb8~U_Fkrf3HHf_kw)
+[Neuropixels slack channel](https://join.slack.com/t/neuropixelsgroup/shared_invite/zt-2zbcrd3dw-nr_Z6iYA8nSEERpLRqAwTA)
 so everyone can learn together. *If there is any problem with the slack
 channel invitation, email the [administrator](mailto:colonellj@hhmi.org).*
 
