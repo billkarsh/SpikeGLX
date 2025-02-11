@@ -91,7 +91,9 @@ you can see that for yourself by repeating this measurement to see how it
 changes over time. It's probably a good idea to turn on power and let the
 devices approach a stable operating temperature before calibrating. We
 can't tell you how long that should be either. Our typical practice is
-30 minutes of warm up and 30 minutes of measurement time.
+30 minutes of warm up and 40 minutes of measurement time. Note that a
+single calibration run can be done for as many devices at a time as you
+like.
 
 A calibration run will save data files to the current run directory
 specified on the `Save tab`. The files will automatically be named
@@ -100,6 +102,27 @@ specified on the `Save tab`. The files will automatically be named
 When the run finishes SpikeGLX will analyze the measured sample rates of
 all the selected devices and report the results in a dialog where you can
 adopt or reject them.
+
+### Evaluating the Results
+
+- Standard errors on measurements spanning 20 minutes or longer should
+be less than ~0.01 Hz. If larger, there is some instability to fix
+before trusting the measurement.
+
+- If you are measuring a given clock for the first time, the difference
+from the manufacturer's uncalibrated rate should be less than ~2 Hz.
+
+- If you are remeasuring a calibrated clock, the new and old rate should
+be within ~0.1 Hz of each other. Otherwise, one of the calibrations may
+have failed.
+
+If you don't trust the results, do not click 'Apply.' Rather, try to find
+the problem, and then repeat the measurement. Good places to look for
+issues are the reported error and warning messages in the `Log` window.
+Also, try running with the `Metrics` window (Ctrl+M) open to look for
+warning signs. Note that imec error flags, which signify possibly dropped
+samples, are visible in the Metrics window and are always recorded in
+probe metadata files.
 
 --------
 
@@ -117,12 +140,6 @@ Tabulated device calibration values are stored in the files:
 
 You can manually edit these if needed, say, if you've swapped equipment
 and already know correct rates from previous measurements.
-
-To give you a sense of how much measured values differ from the nominal
-rates, here's what we typically get:
-
-* IM: 30000.083871
-* NI: 25000.127240.
 
 
 _fin_

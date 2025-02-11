@@ -170,7 +170,7 @@
          <enum>Qt::WheelFocus</enum>
         </property>
         <property name="minimum">
-         <number>10</number>
+         <number>20</number>
         </property>
         <property name="maximum">
          <number>240</number>

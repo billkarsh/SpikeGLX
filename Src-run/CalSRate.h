@@ -19,10 +19,16 @@ struct CalSRStream {
             av,
             se;
     QString err;
-    int     ip;
+    int     js,
+            ip;
 
-    CalSRStream() : srate(0), av(0), se(0), ip(0)           {}
-    CalSRStream( int ip ) : srate(0), av(0), se(0), ip(ip)  {}
+    CalSRStream()
+        :   srate(0), av(0), se(0), js(0), ip(0)    {}
+    CalSRStream( int js, int ip )
+        :   srate(0), av(0), se(0), js(js), ip(ip)  {}
+    QString result() const;
+private:
+    QString remark() const;
 };
 
 
@@ -144,6 +150,12 @@ public:
     void initRun();
     void initTimer();
     int elapsedMS();
+
+    static void fmtResults(
+        QString                         &msg,
+        const std::vector<CalSRStream>  vIM,
+        const std::vector<CalSRStream>  vOB,
+        const std::vector<CalSRStream>  vNI );
 
 public slots:
     void finish();

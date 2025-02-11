@@ -300,7 +300,7 @@ void Config_devtab::imWrite( const QString &s )
 
     te->append( s );
     te->moveCursor( QTextCursor::End );
-    te->moveCursor( QTextCursor::StartOfLine );
+    te->moveCursor( QTextCursor::StartOfLine ); // H-scrollbar to zero
 }
 
 
@@ -741,7 +741,7 @@ void Config_devtab::niWrite( const QString &s )
 
     te->append( s );
     te->moveCursor( QTextCursor::End );
-    te->moveCursor( QTextCursor::StartOfLine );
+    te->moveCursor( QTextCursor::StartOfLine ); // H-scrollbar to zero
 }
 
 

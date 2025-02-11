@@ -391,7 +391,7 @@ void Params::loadSettings( bool remote )
     settings.value( "syncNiChan", 0 ).toInt();
 
     sync.calMins =
-    settings.value( "syncCalMins", 20 ).toInt();
+    settings.value( "syncCalMins", 40 ).toInt();
 
     sync.isCalRun = false;
 

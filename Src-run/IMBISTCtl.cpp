@@ -151,7 +151,7 @@ void IMBISTCtl::write( const QString &s )
 
     te->append( s );
     te->moveCursor( QTextCursor::End );
-    te->moveCursor( QTextCursor::StartOfLine );
+    te->moveCursor( QTextCursor::StartOfLine ); // H-scrollbar to zero
     guiBreathe();
 }
 

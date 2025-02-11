@@ -74,90 +74,12 @@ void CalSRateCtl::finished()
         thd = 0;
     }
 
+    QString msg;
+    CalSRRun::fmtResults( msg, vIM, vOB, vNI );
+    msg += "\nNote: Apply pertains to all numeric measurements.";
+
     calUI->outTE->clear();
-
-    write( "These are the old rates and the new measurement results:" );
-    write( "(A text message indicates an unsuccessful measurement)\n" );
-
-    for( int is = 0, ns = vIM.size(); is < ns; ++is ) {
-
-        const CalSRStream   &S = vIM[is];
-
-        if( !S.err.isEmpty() ) {
-            write( QString(
-            "    IM%1  %2  :  %3" )
-            .arg( S.ip )
-            .arg( S.srate, 0, 'f', 6 )
-            .arg( S.err ) );
-        }
-        else if( S.av == 0 ) {
-            write( QString(
-            "    IM%1  %2  :  canceled" )
-            .arg( S.ip )
-            .arg( S.srate, 0, 'f', 6 ) );
-        }
-        else {
-            write( QString(
-            "    IM%1  %2  :  %3 +/- %4" )
-            .arg( S.ip )
-            .arg( S.srate, 0, 'f', 6 )
-            .arg( S.av, 0, 'f', 6 )
-            .arg( S.se, 0, 'f', 6 ) );
-        }
-    }
-
-    for( int is = 0, ns = vOB.size(); is < ns; ++is ) {
-
-        const CalSRStream   &S = vOB[is];
-
-        if( !S.err.isEmpty() ) {
-            write( QString(
-            "    OB%1  %2  :  %3" )
-            .arg( S.ip )
-            .arg( S.srate, 0, 'f', 6 )
-            .arg( S.err ) );
-        }
-        else if( S.av == 0 ) {
-            write( QString(
-            "    OB%1  %2  :  canceled" )
-            .arg( S.ip )
-            .arg( S.srate, 0, 'f', 6 ) );
-        }
-        else {
-            write( QString(
-            "    OB%1  %2  :  %3 +/- %4" )
-            .arg( S.ip )
-            .arg( S.srate, 0, 'f', 6 )
-            .arg( S.av, 0, 'f', 6 )
-            .arg( S.se, 0, 'f', 6 ) );
-        }
-    }
-
-    if( vNI.size() ) {
-
-        CalSRStream &S = vNI[0];
-
-        if( !S.err.isEmpty() ) {
-            write( QString(
-            "    NI  %1  :  %2" )
-            .arg( S.srate, 0, 'f', 6 )
-            .arg( S.err ) );
-        }
-        else if( S.av == 0 ) {
-            write( QString(
-            "    NI  %1  :  canceled" )
-            .arg( S.srate, 0, 'f', 6 ) );
-        }
-        else {
-            write( QString(
-            "    NI  %1  :  %2 +/- %3" )
-            .arg( S.srate, 0, 'f', 6 )
-            .arg( S.av, 0, 'f', 6 )
-            .arg( S.se, 0, 'f', 6 ) );
-        }
-    }
-
-    write( "\nUnsuccessful measurements will not be applied." );
+    write( msg );
 
     calUI->specifyGB->setEnabled( true );
     calUI->cancelBut->setEnabled( false );
@@ -453,7 +375,7 @@ void CalSRateCtl::write( const QString &s )
 
     te->append( s );
     te->moveCursor( QTextCursor::End );
-    te->moveCursor( QTextCursor::StartOfLine );
+    te->moveCursor( QTextCursor::StartOfLine ); // H-scrollbar to zero
 }
 
 
@@ -482,10 +404,10 @@ void CalSRateCtl::setJobsOne( QString &f )
     int ip, fType = DFName::typeAndIP( ip, f, 0 );
 
     switch( fType ) {
-        case 0:  vIM.push_back( CalSRStream( ip ) ); break;
+        case 0:  vIM.push_back( CalSRStream( jsIM, ip ) ); break;
 //      case 1:  // dialog filter excludes
-        case 2:  vOB.push_back( CalSRStream( ip ) ); break;
-        default: vNI.push_back( CalSRStream( -1 ) );
+        case 2:  vOB.push_back( CalSRStream( jsOB, ip ) ); break;
+        default: vNI.push_back( CalSRStream( jsNI, -1 ) );
     }
 }
 
@@ -501,17 +423,17 @@ void CalSRateCtl::setJobsAll( QString &f )
     if( it != kvp.end() ) {
 
         for( int ip = 0, np = it.value().toInt(); ip < np; ++ip )
-            vIM.push_back( CalSRStream( ip ) );
-
-        if( kvp["typeNiEnabled"].toInt() > 0 )
-            vNI.push_back( CalSRStream( -1 ) );
+            vIM.push_back( CalSRStream( jsIM, ip ) );
 
         it = kvp.find( "typeObEnabled" );
 
         if( it != kvp.end() && it.value().toInt() > 0 ) {
             for( int ip = 0, np = it.value().toInt(); ip < np; ++ip )
-                vOB.push_back( CalSRStream( ip ) );
+                vOB.push_back( CalSRStream( jsOB, ip ) );
         }
+
+        if( kvp["typeNiEnabled"].toInt() > 0 )
+            vNI.push_back( CalSRStream( jsNI, -1 ) );
     }
     else {
 
@@ -520,10 +442,10 @@ void CalSRateCtl::setJobsAll( QString &f )
         QString sTypes =  kvp["typeEnabled"].toString();
 
         if( sTypes.contains( "imec" ) )
-            vIM.push_back( CalSRStream( 0 ) );
+            vIM.push_back( CalSRStream( jsIM, 0 ) );
 
         if( sTypes.contains( "nidq" ) )
-            vNI.push_back( CalSRStream( -1 ) );
+            vNI.push_back( CalSRStream( jsNI, -1 ) );
     }
 }
 

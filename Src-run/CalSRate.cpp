@@ -18,6 +18,64 @@
 
 
 /* ---------------------------------------------------------------- */
+/* CalSRStream ---------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+QString CalSRStream::result() const
+{
+    QString rslt,
+            strm;
+
+    switch( js ) {
+        case jsIM: strm = QString("IM%1").arg( ip ); break;
+        case jsOB: strm = QString("OB%1").arg( ip ); break;
+        default:   strm = "NI";
+    }
+
+    rslt = QString("    %1  %2  :  ")
+            .arg( strm )
+            .arg( srate, 0, 'f', 6 );
+
+    if( !err.isEmpty() )
+        rslt += err;
+    else if( av == 0 )
+        rslt += "canceled";
+    else {
+        rslt += QString("%1 +/- %2" )
+                .arg( av, 0, 'f', 6 )
+                .arg( se, 0, 'f', 6 );
+        rslt += remark();
+    }
+
+    return rslt + "\n";
+}
+
+
+QString CalSRStream::remark() const
+{
+    QString rmk,
+            rate = QString("%1").arg( srate );
+
+    if( rate.contains( "." ) ) {
+        if( fabs( srate - av ) > 0.1 )
+            rmk += "|new-old| > 0.1 Hz";
+    }
+    else if( fabs( srate - av ) > 2.0 )
+        rmk += "|new-old| > 2.0 Hz";
+
+    if( se > 0.01 ) {
+        if( !rmk.isEmpty() )
+            rmk += ", ";
+        rmk += "stderr > 0.01 Hz";
+    }
+
+    if( !rmk.isEmpty() )
+        rmk = "  :  " + rmk;
+
+    return rmk;
+}
+
+/* ---------------------------------------------------------------- */
 /* CalSRWorker ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -774,6 +832,25 @@ int CalSRRun::elapsedMS()
 }
 
 
+void CalSRRun::fmtResults(
+    QString                         &msg,
+    const std::vector<CalSRStream>  vIM,
+    const std::vector<CalSRStream>  vOB,
+    const std::vector<CalSRStream>  vNI )
+{
+    msg = "Stream  old rate  :  meas rate +/- stderr  :  remarks\n\n";
+
+    for( int is = 0, ns = vIM.size(); is < ns; ++is )
+        msg += vIM[is].result();
+
+    for( int is = 0, ns = vOB.size(); is < ns; ++is )
+        msg += vOB[is].result();
+
+    if( vNI.size() )
+        msg += vNI[0].result();
+}
+
+
 // - Analyze data files.
 //
 void CalSRRun::finish()
@@ -785,13 +862,13 @@ void CalSRRun::finish()
     runTag = DFRunTag( app->dataDir(), p.sns.runName );
 
     for( int ip = 0, np = p.stream_nIM(); ip < np; ++ip )
-        vIM.push_back( CalSRStream( ip ) );
+        vIM.push_back( CalSRStream( jsIM, ip ) );
 
     for( int ip = 0, np = p.stream_nOB(); ip < np; ++ip )
-        vOB.push_back( CalSRStream( ip ) );
+        vOB.push_back( CalSRStream( jsOB, ip ) );
 
     if( p.stream_nNI() )
-        vNI.push_back( CalSRStream( -1 ) );
+        vNI.push_back( CalSRStream( jsNI, -1 ) );
 
     createPrgDlg();
 
@@ -823,124 +900,10 @@ void CalSRRun::finish_cleanup()
     MainApp             *app = mainApp();
     ConfigCtl           *cfg = app->cfgCtl();
     const DAQ::Params   &p   = cfg->acceptedParams;
-    int                 ns;
+    QString             msg;
 
-    QString msg =
-        "These are the old rates and the new measurement results:\n"
-        "(A text message indicates an unsuccessful measurement)\n\n";
-
-// ----
-// Imec
-// ----
-
-    if( (ns = vIM.size()) ) {
-
-        for( int is = 0; is < ns; ++is ) {
-
-            const CalSRStream   &S    = vIM[is];
-            double              srate = p.stream_rate( jsIM, S.ip );
-
-            if( !S.err.isEmpty() ) {
-                msg += QString(
-                "    IM%1  %2  :  %3\n" )
-                .arg( S.ip )
-                .arg( srate, 0, 'f', 6 )
-                .arg( S.err );
-            }
-            else if( S.av == 0 ) {
-                msg += QString(
-                "    IM%1  %2  :  canceled\n" )
-                .arg( S.ip )
-                .arg( srate, 0, 'f', 6 );
-            }
-            else {
-                msg += QString(
-                "    IM%1  %2  :  %3 +/- %4\n" )
-                .arg( S.ip )
-                .arg( srate, 0, 'f', 6 )
-                .arg( S.av, 0, 'f', 6 )
-                .arg( S.se, 0, 'f', 6 );
-            }
-        }
-    }
-    else
-        msg += "    IM-all  :  <disabled>\n";
-
-// ---
-// Obx
-// ---
-
-    if( (ns = vOB.size()) ) {
-
-        for( int is = 0; is < ns; ++is ) {
-
-            const CalSRStream   &S    = vOB[is];
-            double              srate = p.stream_rate( jsOB, S.ip );
-
-            if( !S.err.isEmpty() ) {
-                msg += QString(
-                "    OB%1  %2  :  %3\n" )
-                .arg( S.ip )
-                .arg( srate, 0, 'f', 6 )
-                .arg( S.err );
-            }
-            else if( S.av == 0 ) {
-                msg += QString(
-                "    OB%1  %2  :  canceled\n" )
-                .arg( S.ip )
-                .arg( srate, 0, 'f', 6 );
-            }
-            else {
-                msg += QString(
-                "    OB%1  %2  :  %3 +/- %4\n" )
-                .arg( S.ip )
-                .arg( srate, 0, 'f', 6 )
-                .arg( S.av, 0, 'f', 6 )
-                .arg( S.se, 0, 'f', 6 );
-            }
-        }
-    }
-    else
-        msg += "    OB-all  :  <disabled>\n";
-
-// ----
-// Nidq
-// ----
-
-    double  srate = p.stream_rate( jsNI, 0 );
-
-    if( vNI.size() ) {
-
-        CalSRStream &S = vNI[0];
-
-        if( !S.err.isEmpty() ) {
-            msg += QString(
-            "    NI  %1  :  %2\n" )
-            .arg( srate, 0, 'f', 6 )
-            .arg( S.err );
-        }
-        else if( S.av == 0 ) {
-            msg += QString(
-            "    NI  %1  :  canceled\n" )
-            .arg( srate, 0, 'f', 6 );
-        }
-        else {
-            msg += QString(
-            "    NI  %1  :  %2 +/- %3\n" )
-            .arg( srate, 0, 'f', 6 )
-            .arg( S.av, 0, 'f', 6 )
-            .arg( S.se, 0, 'f', 6 );
-        }
-    }
-    else {
-        msg += QString(
-        "    NI  %1  :  <disabled>\n" )
-        .arg( srate, 0, 'f', 6 );
-    }
-
-    msg +=
-        "\nUnsuccessful measurements will not be applied.\n"
-        "Do you wish to apply the successful measurements?";
+    fmtResults( msg, vIM, vOB, vNI );
+    msg += "\nDo you wish to apply all numeric measurements?";
 
     int yesNo = QMessageBox::question(
         0,
