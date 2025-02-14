@@ -46,12 +46,14 @@ void CProbeTbl::ss2ini()
 
 // Parse lines = probes = group|0 + {vals}|1:k
 
-    // Quote values containing ',' for json parser,
-    // or containing INI special characters '?{}|&~![()^'
+    // Quote values containing:
+    // ','           : json parser
+    // ';'           : INI inline quote
+    // '?{}|&~![()^' : other INI special characters.
     // Ref: https://www.php.net/parse_ini_file
     // Section: Value Interpolation
 
-    QRegExp needQuote( ".*[,\\?\\{\\}\\|\\&\\~\\!\\[\\(\\)\\^].*" );
+    QRegExp needQuote( ".*[,;\\?\\{\\}\\|\\&\\~\\!\\[\\(\\)\\^].*" );
 
     for(;;) {
         // get line
