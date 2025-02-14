@@ -1060,7 +1060,10 @@ static void test1()
 static void test1()
 {
 //    CProbeTbl::ss2ini();
+//    CProbeTbl::extini();
 //    CProbeTbl::ini2json();
+//    CProbeTbl::sortini();
+//    CProbeTbl::json2ini();
 //    CProbeTbl::parsejson();
 }
 #endif

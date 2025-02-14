@@ -11,7 +11,10 @@ class CProbeTbl
 {
 public:
     static void ss2ini();
+    static void extini();
+    static void sortini();
     static void ini2json();
+    static void json2ini();
     static void parsejson();
 
 private:
