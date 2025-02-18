@@ -25,6 +25,7 @@ struct IMROTbl_T1300 : public IMROTbl_T0base
     virtual int nElec() const           {return imType1300Elec;}
     virtual int nBanks() const          {return imType1300Banks;}
     virtual int nRefs() const           {return imType1300Refids;}
+    virtual int nOptoSites() const      {return 14;}
 };
 
 #endif  // IMROTBL_T1300_H

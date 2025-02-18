@@ -147,7 +147,7 @@ warn:
 
 bool CimAcqImec::_1t_calibrateGain( const CimCfg::ImProbeDat &P )
 {
-    if( P.type == 1200 )
+    if( !p.im.prbj[P.ip].roTbl->needGainCal() )
         return true;
 
     if( p.im.prbAll.calPolicy == 2 ) {
@@ -205,7 +205,7 @@ warn:
 
 bool CimAcqImec::_1t_calibrateOpto( const CimCfg::ImProbeDat &P )
 {
-    if( P.type != 1300 )
+    if( !p.im.prbj[P.ip].roTbl->nOptoSites() )
         return true;
 
     if( p.im.prbAll.calPolicy == 2 ) {

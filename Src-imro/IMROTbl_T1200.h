@@ -28,6 +28,7 @@ struct IMROTbl_T1200 : public IMROTbl_T0base
     virtual int nLF() const             {return imType1200Chan;}
     virtual int nBanks() const          {return imType1200Banks;}
     virtual int nRefs() const           {return imType1200Refids;}
+    virtual bool needGainCal() const    {return false;}
 
     virtual bool chIsRef( int ) const   {return false;}
 

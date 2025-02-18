@@ -128,9 +128,11 @@ public:
     virtual int nSvyBanks() const       {return nBanks();}
     virtual int nChanPerBank() const    {return nAP();}
     virtual int nRefs() const = 0;
+    virtual int nOptoSites() const      {return 0;}
     virtual int maxInt() const = 0;
     virtual double maxVolts() const = 0;
     virtual bool needADCCal() const = 0;
+    virtual bool needGainCal() const    {return true;}
 
     // {0=NP1000, 1=NP2000, 2=NP2010, 3=NP1110}-like
     virtual int chanMapping() const     {return 0;}

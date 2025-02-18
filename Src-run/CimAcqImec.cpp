@@ -2160,16 +2160,17 @@ QString CimAcqImec::opto_getAttens( int ip, int color )
 {
     double                      atten;
     QString                     msg;
-    const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
+    const CimCfg::ImProbeDat    &P      = T.get_iProbe( ip );
+    int                         nSite   = p.im.prbj[ip].roTbl->nOptoSites();
     NP_ErrorCode                err;
 
-    if( P.type != 1300 ) {
+    if( !nSite ) {
         msg =
         QString("OPTOGETATTENS: Probe (ip %1) is not an optical probe.").arg( ip );
     }
     else {
 
-        for( int site = 0; site < 14; ++site ) {
+        for( int site = 0; site < nSite; ++site ) {
 
             err = np_getEmissionSiteAttenuation(
                     P.slot, P.port, P.dock, wavelength_t(color), site, &atten );
@@ -2192,10 +2193,11 @@ QString CimAcqImec::opto_getAttens( int ip, int color )
 QString CimAcqImec::opto_emit( int ip, int color, int site )
 {
     QString                     msg;
-    const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
+    const CimCfg::ImProbeDat    &P      = T.get_iProbe( ip );
+    int                         nSite   = p.im.prbj[ip].roTbl->nOptoSites();
     NP_ErrorCode                err;
 
-    if( P.type != 1300 ) {
+    if( !nSite ) {
         msg =
         QString("OPTOEMIT: Probe (ip %1) is not an optical probe.").arg( ip );
     }
