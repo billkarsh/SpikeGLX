@@ -236,11 +236,12 @@ purpose device programming language for NI hardware).
 2. It must be an M-series (62XX), S-series (61XX), X-series (63XX),
 or digital IO (653X) device.
 
->Note: As of version 20190305 SpikeGLX can read up to 32 digital lines
-per device (previously limited to 8). Also, be aware that only a device's
-'waveform' digital lines can be programmed for high sample rate input.
-You'll have to look at the device spec sheet to see the count of
-waveform lines. Digital device support is added as of version 20190413.
+>Note: SpikeGLX can read up to 32 digital lines per device. However only
+a device's **'waveform' digital lines** can be programmed for high sample
+rate input. You'll have to look at the device spec sheet to see the count
+of waveform lines. When you click `Detect` on the `Devices` tab of the
+Configuration dialog, the NI box reports the number of available lines,
+e.g., 'DI[8].'
 
 We have direct experience with these:
 

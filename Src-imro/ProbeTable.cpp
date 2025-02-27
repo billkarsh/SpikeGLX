@@ -3,17 +3,15 @@
 #include "Util.h"
 #include "IMROTbl.h"
 
-#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QJsonParseError>
 #include <QSettings>
 
-#define FTAB   "C:/Users/labadmin/Desktop/ProbeTable/2024_11_22_Probe_feature_table_tab.txt"
-#define FINI   "C:/Users/labadmin/Desktop/ProbeTable/Probe_features.ini"
-#define FSRT   "C:/Users/labadmin/Desktop/ProbeTable/Probe_features_srt.ini"
-#define FJ2I   "C:/Users/labadmin/Desktop/ProbeTable/Probe_features_j2i.ini"
-#define FJSN   "C:/Users/labadmin/Desktop/ProbeTable/Probe_features.json"
+#define FTAB   "C:/Users/labadmin/Desktop/ProbeTable/2025_02_20_Probe_feature_table_tab.txt"
+#define FINI   "C:/Users/labadmin/Desktop/ProbeTable/probe_features.ini"
+#define FSRT   "C:/Users/labadmin/Desktop/ProbeTable/probe_features_srt.ini"
+#define FJ2I   "C:/Users/labadmin/Desktop/ProbeTable/probe_features_j2i.ini"
+#define FJSN   "C:/Users/labadmin/Desktop/ProbeTable/probe_features.json"
 
 /* ---------------------------------------------------------------- */
 /* CProbeTbl ------------------------------------------------------ */
