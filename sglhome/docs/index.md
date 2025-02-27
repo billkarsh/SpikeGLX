@@ -80,7 +80,7 @@ Latest release highlights:
 >Important: Please read the `README` file for instructions regarding imec
 firmware versions.
 
-* [Release 20241215-phase30](App/Release_v20241215-phase30.zip)...[Readme](Readme/Readme_v20241215-phase30.txt) : Waveplayer, imec v3.70.3
+* [Release 20250201-phase30](App/Release_v20250201-phase30.zip)...[Readme](Readme/Readme_v20250201-phase30.txt) : Replace 20241215, Waveplayer, imec v3.70.3
 
 **Xilinx Kintex versions not covered by 3.0**:
 
@@ -93,9 +93,9 @@ versions there as long as you run one at a time:
 
 ```
 SpikeGLX\
-    Release_v20241215-phase30.zip
+    Release_v20250201-phase30.zip
     Release_v20200520-phase3B2.zip
-    Release_v20241215-phase30\
+    Release_v20250201-phase30\
     Release_v20200520-phase3B2\
     Drivers\
         Enclustra_Windows_10&11\
