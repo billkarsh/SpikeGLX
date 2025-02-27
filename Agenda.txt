@@ -4,6 +4,7 @@
 20250201
 --------
 + Calibration results more informative.
++ Fix run-stop crash if using OneBox.
 
 20241215
 --------

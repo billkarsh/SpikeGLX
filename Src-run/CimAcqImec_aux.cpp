@@ -164,7 +164,10 @@ void CimAcqImec::_aux_doneObxSlot( int slot )
 {
     np_switchmatrix_clear( slot, SM_Output_SMA1 );
 
-    int                     istr = p.im.obx_slot2istr( slot );
+    int istr = p.im.obx_slot2istr( slot );
+    if( istr < 0 )
+        return;
+
     const CimCfg::ObxEach   &E   = p.im.get_iStrOneBox( istr );
     QVector<uint>           vAO;
 
