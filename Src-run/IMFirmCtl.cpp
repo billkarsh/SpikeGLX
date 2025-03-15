@@ -79,7 +79,7 @@ void IMFirmCtl::bsBrowse()
 {
     QString fn = QFileDialog::getOpenFileName(
                     dlg,
-                    "Load NP2_BS_FPGA file",
+                    "Load BS FPGA file",
                     appPath(),
                     QString("Bin files (*.bin)") );
 
@@ -92,7 +92,7 @@ void IMFirmCtl::bscBrowse()
 {
     QString fn = QFileDialog::getOpenFileName(
                     dlg,
-                    "Load NP2_QBSC_FPGA file",
+                    "Load QBSC FPGA file",
                     appPath(),
                     QString("Bin files (*.bin)") );
 
@@ -155,10 +155,10 @@ void IMFirmCtl::update()
 
         QFileInfo   fi( sbs );
 
-        if( !fi.fileName().startsWith( "BS_FPGA_" ) ) {
+        if( !fi.fileName().contains( "BS_" ) ) {
             QMessageBox::critical( dlg,
                 "Not BS File",
-                "File name should start with 'BS_FPGA_'." );
+                "File name should contain 'BS_ and _FPGA_'." );
             goto exit;
         }
 
@@ -178,10 +178,10 @@ void IMFirmCtl::update()
 
         QFileInfo   fi( sbsc );
 
-        if( !fi.fileName().startsWith( "QBSC_FPGA_" ) ) {
+        if( !fi.fileName().contains( "QBSC_" ) ) {
             QMessageBox::critical( dlg,
                 "Not BSC File",
-                "File name should start with 'QBSC_FPGA_'." );
+                "File name should contain 'QBSC_ and _FPGA_'." );
             goto exit;
         }
 
