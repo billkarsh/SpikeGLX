@@ -1064,6 +1064,7 @@ static void test1()
     CProbeTbl::ini2json();
     CProbeTbl::sortini();
     CProbeTbl::json2ini();
+    CProbeTbl::sortjson2ini();
     CProbeTbl::parsejson();
 }
 #endif

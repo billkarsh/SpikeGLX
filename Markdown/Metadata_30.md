@@ -973,7 +973,7 @@ channels.
 The reference ID values are {0=ext, 1=tip, [2..4]=on-shnk-ref}.
 The on-shnk ref electrodes are {192,576,960}.
 
-**Type {21,2003,2004} (NP 2.0, single multiplexed shank)**:
+**Type {21,2003} (NP 2.0, single multiplexed shank)**:
 
 * Channel ID,
 * Bank mask (logical OR of {1=bnk-0, 2=bnk-1, 4=bnk-2, 8=bnk-3}),
@@ -983,10 +983,10 @@ The on-shnk ref electrodes are {192,576,960}.
 Type-21 reference ID values are {0=ext, 1=tip, [2..5]=on-shnk-ref}.
 The on-shnk ref electrodes are {127,507,887,1251}.
 
-Type-2003,2004 reference ID values are {0=ext, 1=gnd, 2=tip}. On-shank
+Type-2003 reference ID values are {0=ext, 1=gnd, 2=tip}. On-shank
 reference electrodes are removed from commercial 2B probes.
 
-**Type {24,2013,2014} (NP 2.0, 4-shank)**:
+**Type {24,2013} (NP 2.0, 4-shank)**:
 
 * Channel ID,
 * Shank ID (with tips pointing down, shank-0 is left-most),
@@ -997,10 +997,10 @@ reference electrodes are removed from commercial 2B probes.
 Type-24 reference ID values are {0=ext, [1..4]=tip[0..3], [5..8]=on-shnk-0, [9..12]=on-shnk-1, [13..16]=on-shnk-2, [17..20]=on-shnk-3}.
 The on-shnk ref electrodes of any shank are {127,511,895,1279}.
 
-Type-2013,2014 reference ID values are {0=ext, 1=gnd, [2..5]=tip[0..3]}. On-shank
+Type-2013 reference ID values are {0=ext, 1=gnd, [2..5]=tip[0..3]}. On-shank
 reference electrodes are removed from commercial 2B probes.
 
-**Type {2020,2021} (Quad-probe)**:
+**Type {2020} (Quad-probe)**:
 
 * Channel ID,
 * Shank ID (with tips pointing down, shank-0 is left-most),

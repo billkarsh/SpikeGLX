@@ -15,6 +15,7 @@ public:
     static void sortini();
     static void ini2json();
     static void json2ini();
+    static void sortjson2ini();
     static void parsejson();
 
 private:

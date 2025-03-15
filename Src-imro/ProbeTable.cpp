@@ -7,11 +7,12 @@
 #include <QJsonObject>
 #include <QSettings>
 
-#define FTAB   "C:/Users/labadmin/Desktop/ProbeTable/2025_02_20_Probe_feature_table_tab.txt"
-#define FINI   "C:/Users/labadmin/Desktop/ProbeTable/probe_features.ini"
-#define FSRT   "C:/Users/labadmin/Desktop/ProbeTable/probe_features_srt.ini"
-#define FJ2I   "C:/Users/labadmin/Desktop/ProbeTable/probe_features_j2i.ini"
-#define FJSN   "C:/Users/labadmin/Desktop/ProbeTable/probe_features.json"
+#define FTAB    "C:/Users/labadmin/Desktop/ProbeTable/2025_02_20_Probe_feature_table_tab.txt"
+#define FINI    "C:/Users/labadmin/Desktop/ProbeTable/probe_features.ini"
+#define FSRT    "C:/Users/labadmin/Desktop/ProbeTable/probe_features_srt.ini"
+#define FJ2I    "C:/Users/labadmin/Desktop/ProbeTable/probe_features_j2i.ini"
+#define FJSN    "C:/Users/labadmin/Desktop/ProbeTable/probe_features.json"
+#define VERS    "1.1"
 
 /* ---------------------------------------------------------------- */
 /* CProbeTbl ------------------------------------------------------ */
@@ -107,16 +108,25 @@ void CProbeTbl::extini()
         else if( grp.contains( "NP302" ) )
             val = "imro_np3020";
         else if( S.value( "has_ap_bandpass" ).toString().toUpper() == "N" ) {
+            bool proto = S.value( "on_shank_ref_chan" ).toInt() == 127;
             if( S.value( "num_shanks" ) == 4 )
-                val = "imro_np2010";
+                val = (proto? "imro_np2010" : "imro_np2013");
             else
-                val = "imro_np2000";
+                val = (proto? "imro_np2000" : "imro_np2003");
         }
         else
             val = "imro_np1000";
         S.setValue( "imro_table_format_type", val );
         S.endGroup();
     }
+
+// Insert z_meta group
+
+    S.beginGroup( "z_meta" );
+    {
+        S.setValue( "table_version", VERS );
+    }
+    S.endGroup();
 
 // Insert z_mux_tables group
 
@@ -154,7 +164,7 @@ void CProbeTbl::extini()
             "(%d %d %d %d %d %d)" );
         S.setValue(
             "imro_np1000_val_def",
-            "type:0"
+            "type:{0,1020,1030,1100,1120,1121,1122,1123,1200,1300}"
             " num_channels:num_readout_channels"
             " channel:[0,num_readout_channels-1]"
             " bank:[0,banks_per_shank-1]"
@@ -219,7 +229,7 @@ void CProbeTbl::extini()
             "(%d %d %d %d)" );
         S.setValue(
             "imro_np2003_val_def",
-            "type:21"
+            "type:2003"
             " num_channels:num_readout_channels"
             " channel:[0,num_readout_channels-1]"
             " bank_mask:(bit0,bnk0)(bit1,bnk1)(bit2,bnk2)"
@@ -268,7 +278,7 @@ void CProbeTbl::extini()
             "(%d %d %d %d %d)" );
         S.setValue(
             "imro_np2013_val_def",
-            "type:24"
+            "type:2013"
             " num_channels:num_readout_channels"
             " channel:[0,num_readout_channels-1]"
             " shank:[0,num_shanks-1]"
@@ -345,11 +355,11 @@ void CProbeTbl::extini()
 }
 
 
-void CProbeTbl::sortini()
+static void _sortini( const QString &dst, const QString &src )
 {
     QMap<QString,QMap<QString,int>> D;
 
-    QFile   fi( FINI );
+    QFile   fi( src );
     fi.open( QIODevice::ReadOnly | QIODevice::Text );
 
     QMap<QString,int>   M;
@@ -373,7 +383,7 @@ void CProbeTbl::sortini()
         }
     }
 
-    QFile   fo( FSRT );
+    QFile   fo( dst );
     fo.open( QIODevice::WriteOnly | QIODevice::Text );
     QTextStream ts( &fo );
 
@@ -389,6 +399,12 @@ void CProbeTbl::sortini()
         if( itd + 1 != endd )
             ts << "\n";
     }
+}
+
+
+void CProbeTbl::sortini()
+{
+    _sortini( FSRT, FINI );
 }
 
 
@@ -475,6 +491,20 @@ void CProbeTbl::json2ini()
         S.setValue( key, tbl.value( key ).toString() );
     S.endGroup();
 
+// meta
+
+    vtbl = doc.object().value( "z_meta" );
+    if( !vtbl.isObject() ) {
+        Error() << "Expected 'z_meta' at root level.";
+        return;
+    }
+
+    tbl = vtbl.toObject();
+    S.beginGroup( "z_meta" );
+    foreach( const QString &key, tbl.keys() )
+        S.setValue( key, tbl.value( key ).toString() );
+    S.endGroup();
+
 // mux table
 
     vtbl = doc.object().value( "z_mux_tables" );
@@ -488,6 +518,12 @@ void CProbeTbl::json2ini()
     foreach( const QString &key, tbl.keys() )
         S.setValue( key, tbl.value( key ).toString() );
     S.endGroup();
+}
+
+
+void CProbeTbl::sortjson2ini()
+{
+    _sortini( FJ2I, FJ2I );
 }
 
 
