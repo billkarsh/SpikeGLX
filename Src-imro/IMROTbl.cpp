@@ -701,6 +701,7 @@ int IMROTbl::maxBank( int ch, int shank ) const
 
 QString IMROTbl::chan0Ref() const
 {
+#ifdef HAVE_IMEC
     int shank, bank, type = refTypeAndFields( shank, bank, 0 );
 
     switch( type ) {
@@ -719,6 +720,9 @@ QString IMROTbl::chan0Ref() const
         case GND_REF: return "gnd";
         default:      return "???";
     }
+#else
+    return QString();
+#endif
 }
 
 
