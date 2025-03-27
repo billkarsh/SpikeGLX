@@ -64,6 +64,7 @@ public:
     double tZero() const                {return tzero;}
 
     void enqueueZero( double t0, double tLim );
+    void enqueueZeroIM( int nCts, int nStat, quint16 status );
 
     void enqueue( const qint16 *src, int nCts );
 

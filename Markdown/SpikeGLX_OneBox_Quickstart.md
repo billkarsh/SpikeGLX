@@ -148,10 +148,10 @@ you wish in the SY channels of each of the recorded data streams.
 
 ### Status lights
 
-Briefly:
+Briefly, (soft blinking or steady):
 
 * Off: not powered
-* Red: not connected
+* Red: not connected, or idle
 * Green: connected
 * Blue: acquiring, normal
 * Purple: acquiring, buffer overflow

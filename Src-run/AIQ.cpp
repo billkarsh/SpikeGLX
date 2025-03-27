@@ -201,8 +201,15 @@ AIQ::AIQ( double srate, int nchans, double capacitySecs )
 //
 void AIQ::enqueueZero( double t0, double tLim )
 {
-    int nCts = (tLim - t0) * srate;
+    enqueueZeroIM( (tLim - t0) * srate, 0, 0 );
+}
 
+
+// Fill with nCts zero samples.
+// If nStat > 0, set that many status words in each sample to status.
+//
+void AIQ::enqueueZeroIM( int nCts, int nStat, quint16 status )
+{
     QMutexLocker    ml( &QMtx );
 
     endCt += nCts;
@@ -212,6 +219,15 @@ void AIQ::enqueueZero( double t0, double tLim )
         bufhead = 0;
         buflen  = bufmax;
         memset( &buf[0], 0, BYTES(bufmax) );
+
+        // status words
+        if( nStat > 0 ) {
+            qint16  *dst = &buf[nchans-nStat];
+            for( int it = 0; it < bufmax; ++it, dst += nchans ) {
+                for( int is = 0; is < nStat; ++is )
+                    dst[is] = status;
+            }
+        }
     }
     else {
         // All new data fit, with some room for old data.
@@ -222,8 +238,28 @@ void AIQ::enqueueZero( double t0, double tLim )
 
         memset( &buf[SAMPS(oldtail)], 0, BYTES(ncpy1) );
 
-        if( nCts -= ncpy1 )
+        // status words
+        if( nStat > 0 ) {
+            qint16  *dst = &buf[SAMPS(oldtail)-nStat];
+            for( int it = 0; it < ncpy1; ++it, dst += nchans ) {
+                for( int is = 0; is < nStat; ++is )
+                    dst[is] = status;
+            }
+        }
+
+        if( nCts -= ncpy1 ) {
+
             memset( &buf[0], 0, BYTES(nCts) );
+
+            // status words
+            if( nStat > 0 ) {
+                qint16  *dst = &buf[nchans-nStat];
+                for( int it = 0; it < nCts; ++it, dst += nchans ) {
+                    for( int is = 0; is < nStat; ++is )
+                        dst[is] = status;
+                }
+            }
+        }
 
         bufhead = newhead;
         buflen  = newlen;

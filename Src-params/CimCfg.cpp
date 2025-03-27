@@ -53,8 +53,11 @@ bool CimCfg::ImProbeDat::setProbeType()
 
 int CimCfg::ImProbeDat::nHSDocks() const
 {
-    if( type == 21 || type == 2003 ||
-        type == 24 || type == 2013 || type == 2020 ) {
+    if( hspn == "NPM_HS_01" ||      // precommercial 2.0
+        hspn == "NPM_HS_30" ||      // precommercial 2.0
+        hspn == "NPM_HS_31" ||      //    commercial 2.0
+        hspn == "NPM_HS_32" ||      // quadbase
+        hspn == "NPNXT_HS_03" ) {   // NXT alpha
 
         return 2;
     }
@@ -1123,7 +1126,7 @@ void CimCfg::ImProbeTable::toggleAll(
 
 // Create string: (slot,N):  (s,n)  (s,n)  ...
 //
-QString CimCfg::ImProbeTable::whosChecked( QTableWidget *T ) const
+QString CimCfg::ImProbeTable::whosChecked( QTableWidget *T, bool b_hssn ) const
 {
 // Gather counts
 
@@ -1133,13 +1136,18 @@ QString CimCfg::ImProbeTable::whosChecked( QTableWidget *T ) const
 
     for( int i = 0, np = T->rowCount(); i < np; ++i ) {
 
-        QTableWidgetItem    *ti;
+        // ----
+        // hssn
+        // ----
+
+        if( b_hssn && get_kTblEntry( i ).hspn.isEmpty() )
+            continue;
 
         // ----
         // Enab
         // ----
 
-        ti = T->item( i, TBL_ENAB );
+        QTableWidgetItem    *ti = T->item( i, TBL_ENAB );
 
         if( ti->checkState() == Qt::Checked ) {
 
@@ -1778,12 +1786,12 @@ void CimCfg::closeAllBS( bool report )
 #define DBG 0
 
 bool CimCfg::detect(
-    QStringList     &slVers,
-    QStringList     &slBIST,
-    QVector<int>    &vHSpsv,
-    QVector<int>    &vHS20,
-    ImProbeTable    &T,
-    bool            doBIST )
+    QStringList             &slVers,
+    QStringList             &slBIST,
+    QVector<int>            &vHSpsv,
+    QVector<int>            &vHS20,
+    ImProbeTable            &T,
+    bool                    doBIST )
 {
 // @@@ FIX closeAllBS is preferred but disrupts OneBox mapping
 //    closeAllBS( false );
@@ -1849,12 +1857,25 @@ Log()<<"End detect_Slots ]";
 guiBreathe();
 #endif
 
+    QMap<int,QString>   qbMap;
+
+#if DBG
+Log()<<"[ Start detect_Headstages";
+guiBreathe();
+#endif
+    if( ok )
+        ok = detect_Headstages( slVers, qbMap, vHSpsv, vHS20, T );
+#if DBG
+Log()<<"End detect_Headstages ]";
+guiBreathe();
+#endif
+
 #if DBG
 Log()<<"[ Start detect_Probes";
 guiBreathe();
 #endif
     if( ok )
-        ok = detect_Probes( slVers, slBIST, vHSpsv, vHS20, T, doBIST );
+        ok = detect_Probes( slVers, slBIST, qbMap, vHSpsv, T, doBIST );
 #if DBG
 Log()<<"End detect_Probes ]";
 guiBreathe();
@@ -1891,8 +1912,8 @@ guiBreathe();
 
 
 void CimCfg::detect_API(
-    QStringList     &slVers,
-    ImProbeTable    &T )
+    QStringList             &slVers,
+    ImProbeTable            &T )
 {
 #ifdef HAVE_IMEC
     char vers[64];
@@ -1913,8 +1934,8 @@ guiBreathe();
 
 
 bool CimCfg::detect_Slots(
-    QStringList     &slVers,
-    ImProbeTable    &T )
+    QStringList             &slVers,
+    ImProbeTable            &T )
 {
 #ifdef HAVE_IMEC
     QStringList     bs_bsc;
@@ -2160,9 +2181,9 @@ guiBreathe();
 
 
 void CimCfg::detect_simSlot(
-    QStringList     &slVers,
-    ImProbeTable    &T,
-    int             slot )
+    QStringList             &slVers,
+    ImProbeTable            &T,
+    int                     slot )
 {
     ImSlotVers  V;
 
@@ -2192,34 +2213,69 @@ void CimCfg::detect_simSlot(
 }
 
 
-bool CimCfg::detect_Probes(
-    QStringList     &slVers,
-    QStringList     &slBIST,
-    QVector<int>    &vHSpsv,
-    QVector<int>    &vHS20,
-    ImProbeTable    &T,
-    bool            doBIST )
+// Map slot to string, where, string contains 1 to 4 entries
+// of form "p:j " where p is port={1,2,3,4} and j=plug-type,
+// where 1=plug-type 1,3 and 2=plug-type 2,4.
+//
+// Return true if plug-type 2,4.
+//
+static bool qbAdd(
+    QMap<int,QString>   &M,
+    int                 slot,
+    int                 port,
+    const QString       &prod )
+{
+    QString e;
+    bool    is24 = false;
+
+    if( prod == "NPM_HS_32" )
+        e = QString("%1:1").arg( port );
+    else if( prod == "NPM_HSTC_ext" ) {
+        e = QString("%1:2").arg( port );
+        is24 = true;
+    }
+    else
+        return false;
+
+    if( M.end() != M.find( slot ) ) {
+        if( !M[slot].contains( e ) )
+            M[slot] += e;
+    }
+    else
+        M[slot] = e;
+
+    return is24;
+}
+
+
+bool CimCfg::detect_Headstages(
+    QStringList             &slVers,
+    QMap<int,QString>       &qbMap,
+    QVector<int>            &vHSpsv,
+    QVector<int>            &vHS20,
+    ImProbeTable            &T )
 {
 #ifdef HAVE_IMEC
     NP_ErrorCode    err;
     HardwareID      hID;
 #else
-    Q_UNUSED( slVers )
-    Q_UNUSED( slBIST )
+    Q_UNUSED( qbMap )
     Q_UNUSED( vHSpsv )
     Q_UNUSED( vHS20 )
-    Q_UNUSED( doBIST )
 #endif
+
+// -------------------
+// Identify headstages
+// -------------------
 
     for( int ip = 0, np = T.nSelProbes(); ip < np; ++ip ) {
 
         ImProbeDat  &P = T.mod_iProbe( ip );
 #ifdef HAVE_IMEC
-        bool        isHSpsv = false,
-                    isHS;
+        bool        isHS;
 #endif
 #if DBG
-Log()<<"start probe "<<ip;
+Log()<<"headstage: start probe "<<ip;
 guiBreathe();
 #endif
 
@@ -2227,13 +2283,8 @@ guiBreathe();
         // Simulated?
         // ----------
 
-        if( T.simprb.isSimProbe( P.slot, P.port, P.dock ) ) {
-
-            if( !detect_simProbe( slVers, T, P ) )
-                return false;
-
+        if( T.simprb.isSimProbe( P.slot, P.port, P.dock ) )
             continue;
-        }
 
         // ----
         // isHS
@@ -2254,8 +2305,6 @@ guiBreathe();
             slVers.append("");
             slVers.append(QString("No headstage at (slot %1, port %2)").arg( P.slot ).arg( P.port ));
             slVers.append("Only check boxes for hardware you intend to run.");
-            if( !(P.port & 1) )
-                slVers.append("For Quad-probes (NP2020) only check ports (1 or 3).");
             return false;
         }
 #endif
@@ -2296,8 +2345,6 @@ guiBreathe();
 
         if( prod == "NPNH_HS_30" || prod == "NPNH_HS_31" ) {
 
-            isHSpsv = true;
-
             if( vHSpsv.isEmpty() )
                 vHSpsv.push_back( ip );
             else {
@@ -2310,27 +2357,37 @@ guiBreathe();
         }
 
         // ---------------------------
-        // Test for Quad port (2 or 4)
+        // Record Quad-probe plug-type
         // ---------------------------
 
-        else if( prod == "NPM_HSTC_ext" ) {
-            slVers.append("");
-            slVers.append("For Quad-probes (NP2020) only check ports (1 or 3).");
-            return false;
-        }
+        else if( qbAdd( qbMap, P.slot, P.port, prod ) )
+            continue;
 
         P.hspn = prod;
 #else
         P.hspn = "sim";
 #endif
 #if DBG
-Log()<<"  np_getHeadstageHardwareID done";
+Log()<<"  headstage: np_getHeadstageHardwareID done";
 guiBreathe();
 #endif
 
         slVers.append(
             QString("HS(slot %1, port %2) part number %3")
             .arg( P.slot ).arg( P.port ).arg( P.hspn ) );
+
+
+        // -----------
+        // Wrong dock?
+        // -----------
+
+        if( P.dock > 1 && P.nHSDocks() == 1 ) {
+            slVers.append(
+                QString("SpikeGLX nHSDocks(slot %1, port %2, dock %3)"
+                " error 'Only select dock 1 with this head stage'.")
+                .arg( P.slot ).arg( P.port ).arg( P.dock ) );
+            return false;
+        }
 
         // ----
         // HSSN
@@ -2354,8 +2411,13 @@ guiBreathe();
         // --------------------------
 
         bool    noEEPROM;
+#ifdef HAVE_NXT
+        QString smaj(hID.version_Major), smin(hID.version_Minor);
+        noEEPROM = (smaj == "" || smaj == "0" || smaj == "1") &&
+                   (smin == "" || smin == "0");
+#else
         noEEPROM = (hID.version_Major == 0 || hID.version_Major == 1) && !hID.version_Minor;
-
+#endif
         if( !P.hssn && noEEPROM ) {
 
             if( vHS20.isEmpty() )
@@ -2373,7 +2435,7 @@ guiBreathe();
         P.hshw = "0.0";
 #endif
 #if DBG
-Log()<<"  vHS20 check done";
+Log()<<"  headstage: vHS20 check done";
 guiBreathe();
 #endif
 
@@ -2385,11 +2447,153 @@ guiBreathe();
         // HSFW
         // ----
 
-        P.hsfw = "0.0.0";
+#ifdef HAVE_NXT
+        if( P.hspn.contains( "NXT" ) ) {
+
+            firmware_Info   info;
+
+            err = np_hs_getFirmwareInfo( P.slot, P.port, &info );
+
+            if( err != SUCCESS ) {
+                slVers.append(
+                    QString("IMEC hs_getFirmwareInfo(slot %1 port %2)%3")
+                    .arg( P.slot ).arg( P.port ).arg( makeErrorString( err ) ) );
+                return false;
+            }
+
+            P.hsfw = QString("%1.%2.%3")
+                        .arg( info.major ).arg( info.minor ).arg( info.build );
+        }
+        else
+#endif
+            P.hsfw = "0.0.0";
 
         slVers.append(
             QString("HS(slot %1, port %2) firmware version %3")
             .arg( P.slot ).arg( P.port ).arg( P.hsfw ) );
+    }
+
+// ------------------------
+// QB probes plugged right?
+// ------------------------
+
+#ifdef HAVE_IMEC
+    if( qbMap.size() ) {
+
+        QMap<int,QString>::const_iterator
+            it  = qbMap.begin(),
+            end = qbMap.end();
+
+        for( ; it != end; ++it ) {
+
+            QString v = it.value();
+
+            if( ( v.contains( "1:1" ) && !v.contains( "2:2" )) ||
+                (!v.contains( "1:1" ) &&  v.contains( "2:2" )) ) {
+                slVers.append(
+                    QString("Quadbase error: Both plugs required(slot %1, ports (1,2))")
+                    .arg( it.key() ) );
+                return false;
+            }
+
+            if( v.contains( "1:2" ) || v.contains( "2:1" ) ) {
+                slVers.append(
+                    QString("Quadbase error: Plugs reversed(slot %1, ports (1,2))")
+                    .arg( it.key() ) );
+                return false;
+            }
+
+            if( ( v.contains( "3:1" ) && !v.contains( "4:2" )) ||
+                (!v.contains( "3:1" ) &&  v.contains( "4:2" )) ) {
+                slVers.append(
+                    QString("Quadbase error: Both plugs required(slot %1, ports (3,4))")
+                    .arg( it.key() ) );
+                return false;
+            }
+
+            if( v.contains( "3:2" ) || v.contains( "4:1" ) ) {
+                slVers.append(
+                    QString("Quadbase error: Plugs reversed(slot %1, ports (3,4))")
+                    .arg( it.key() ) );
+                return false;
+            }
+        }
+    }
+#endif
+
+    return true;
+}
+
+
+bool CimCfg::detect_Probes(
+    QStringList             &slVers,
+    QStringList             &slBIST,
+    const QMap<int,QString> &qbMap,
+    const QVector<int>      &vHSpsv,
+    ImProbeTable            &T,
+    bool                    doBIST )
+{
+#ifdef HAVE_IMEC
+    NP_ErrorCode    err;
+    HardwareID      hID;
+#else
+    Q_UNUSED( slVers )
+    Q_UNUSED( slBIST )
+    Q_UNUSED( qbMap )
+    Q_UNUSED( vHSpsv )
+    Q_UNUSED( doBIST )
+#endif
+
+// ------------------------
+// Identify flex and probes
+// ------------------------
+
+    for( int ip = 0, np = T.nSelProbes(); ip < np; ++ip ) {
+
+        ImProbeDat  &P = T.mod_iProbe( ip );
+#ifdef HAVE_IMEC
+        bool        isHSpsv = vHSpsv.contains( ip );
+#endif
+#if DBG
+Log()<<"probe: start probe "<<ip;
+guiBreathe();
+#endif
+
+        // ----------
+        // Simulated?
+        // ----------
+
+        if( T.simprb.isSimProbe( P.slot, P.port, P.dock ) ) {
+
+            if( !detect_simProbe( slVers, T, P ) )
+                return false;
+
+            continue;
+        }
+
+        // ------------
+        // QB type 2,4?
+        // ------------
+
+        if( P.hspn.isEmpty() )
+            continue;
+
+        // ----------------------------------
+        // Can't mix QB and other in PXI slot
+        // ----------------------------------
+
+#ifdef HAVE_IMEC
+        if( T.isSlotPXIType( P.slot ) && qbMap.contains( P.slot ) ) {
+
+            if( P.hspn != "sim" && P.hspn != "NPM_HS_32" ) {
+                slVers.append(
+                    QString("Quadbase error: Mixed types(slot %1, port %2, dock %3)")
+                    .arg( P.slot ).arg( P.port ).arg( P.dock ) );
+                slVers.append("Can't mix quadbase(NP2020) and other types in PXI slot.");
+                return false;
+            }
+        }
+#endif
 
         // ----
         // FXPN
@@ -2421,7 +2625,7 @@ guiBreathe();
         P.fxpn = "sim";
 #endif
 #if DBG
-Log()<<"  np_getFlexHardwareID done";
+Log()<<"  probe: np_getFlexHardwareID done";
 guiBreathe();
 #endif
 
@@ -2485,10 +2689,10 @@ guiBreathe();
         else
             P.pn = "NP1200";
 #else
-        P.pn = "sim";
+        P.pn = "NP1000";
 #endif
 #if DBG
-Log()<<"  np_getProbeHardwareID done";
+Log()<<"  probe: np_getProbeHardwareID done";
 guiBreathe();
 #endif
 
@@ -2507,6 +2711,17 @@ guiBreathe();
         // Type
         // ----
 
+#ifdef HAVE_NXT
+        if( !P.setProbeType() || (P.type != 3010 && P.type != 3020) ) {
+            slVers.append(
+                QString("SpikeGLX setProbeType(slot %1, port %2, dock %3)"
+                " error 'Probe part number %4 unsupported in NXT version'.")
+                .arg( P.slot ).arg( P.port ).arg( P.dock )
+                .arg( P.pn ) );
+            slVers.append("Use standard SpikeGLX for this probe.");
+            return false;
+        }
+#else
         if( !P.setProbeType() ) {
             slVers.append(
                 QString("SpikeGLX setProbeType(slot %1, port %2, dock %3)"
@@ -2516,22 +2731,11 @@ guiBreathe();
             slVers.append("Try updating to a newer SpikeGLX/API version.");
             return false;
         }
+#endif
 #if DBG
-Log()<<"  setProbeType done";
+Log()<<"  probe: setProbeType done";
 guiBreathe();
 #endif
-
-        // -----------
-        // Wrong dock?
-        // -----------
-
-        if( P.dock > 1 && P.nHSDocks() == 1 ) {
-            slVers.append(
-                QString("SpikeGLX nHSDocks(slot %1, port %2, dock %3)"
-                " error 'Only select dock 1 with this head stage'.")
-                .arg( P.slot ).arg( P.port ).arg( P.dock ) );
-            return false;
-        }
 
         // ---
         // CAL
@@ -2543,7 +2747,7 @@ guiBreathe();
         P.cal = 1;
 #endif
 #if DBG
-Log()<<"  calibPath done";
+Log()<<"  probe: calibPath done";
 guiBreathe();
 #endif
 
@@ -2552,7 +2756,7 @@ guiBreathe();
         // ------------------------
 
 #if DBG
-Log()<<"BIST checks "<<doBIST;
+Log()<<"probe: BIST checks "<<doBIST;
 guiBreathe();
 #endif
 #ifdef HAVE_IMEC
@@ -2573,7 +2777,7 @@ guiBreathe();
             }
         }
 #if DBG
-Log()<<"  np_bistSR done";
+Log()<<"  probe: np_bistSR done";
 guiBreathe();
 #endif
 #endif
@@ -2591,7 +2795,7 @@ guiBreathe();
                 .arg( P.slot ).arg( P.port ).arg( P.dock ) );
         }
 #if DBG
-Log()<<"  np_bistPSB done";
+Log()<<"  probe: np_bistPSB done";
 guiBreathe();
 #endif
 #endif
@@ -2602,9 +2806,9 @@ guiBreathe();
 
 
 bool CimCfg::detect_simProbe(
-    QStringList     &slVers,
-    ImProbeTable    &T,
-    ImProbeDat      &P )
+    QStringList             &slVers,
+    ImProbeTable            &T,
+    ImProbeDat              &P )
 {
     QString name = T.simprb.file( P.slot, P.port, P.dock );
     QFile   f( name + ".ap.bin" );

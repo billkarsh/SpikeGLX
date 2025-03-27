@@ -129,16 +129,16 @@ QString MetricsWindow::getErrFlags( int ip, int shank )
     if( err.flags.contains( stream ) ) {
 
         const MXErrFlags    &F = err.flags[stream];
-        return QString("%1 %2 %3 %4 %5 %6")
+        return QString("%1 %2 %3 %4 %5 %6 %7")
                 .arg( F.errCOUNT || F.errSERDES ||
                         F.errLOCK || F.errPOP ||
-                        F.errSYNC )
+                        F.errSYNC || F.errMISS )
                 .arg( F.errCOUNT ).arg( F.errSERDES )
                 .arg( F.errLOCK ).arg( F.errPOP )
-                .arg( F.errSYNC );
+                .arg( F.errSYNC ).arg( F.errMISS );
     }
     else
-        return "0 0 0 0 0 0";
+        return "0 0 0 0 0 0 0";
 }
 
 /* ---------------------------------------------------------------- */
@@ -237,7 +237,8 @@ void MetricsWindow::updateMx()
 
             MXErrFlags  F   = it.value();
             quint32     sum = F.errCOUNT + F.errSERDES
-                                + F.errLOCK + F.errPOP + F.errSYNC;
+                                + F.errLOCK + F.errPOP
+                                + F.errSYNC + F.errMISS;
 
             if( sum )
                 te->setTextColor( Qt::darkRed );
@@ -245,10 +246,11 @@ void MetricsWindow::updateMx()
                 te->setTextColor( Qt::darkGreen );
 
             te->append(
-                QString("  %1 COUNT %2 SERDES %3 LOCK %4 POP %5 SYNC %6")
+                QString("  %1 COUNT %2 SERDES %3 LOCK %4 POP %5 SYNC %6 MISS %7")
                 .arg( it.key() )
                 .arg( F.errCOUNT ).arg( F.errSERDES )
-                .arg( F.errLOCK ).arg( F.errPOP ).arg( F.errSYNC ) );
+                .arg( F.errLOCK ).arg( F.errPOP )
+                .arg( F.errSYNC ).arg( F.errMISS ) );
         }
 
         te->setTextColor( defColor );

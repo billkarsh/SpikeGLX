@@ -137,6 +137,7 @@ bool GateBase::baseStartReaders()
                 }
             }
 
+#ifdef HAVE_IMEC
             for( int ip = 0; ip < nOB; ++ip ) {
 
                 if( !im->worker->getAIQ( jsOB, ip )->endCount() ) {
@@ -150,6 +151,7 @@ bool GateBase::baseStartReaders()
                     err += QString("OB%1").arg( ip );
                 }
             }
+#endif
         }
 
         if( ni && !ni->worker->getAIQ()->endCount() ) {

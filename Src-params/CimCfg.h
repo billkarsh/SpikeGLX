@@ -285,7 +285,7 @@ public:
             QTableWidget    *T,
             int             row,
             int             subset ) const;
-        QString whosChecked( QTableWidget *T ) const;
+        QString whosChecked( QTableWidget *T, bool b_hssn ) const;
     };
 
     // -------------------------------
@@ -503,33 +503,39 @@ public:
 
     static void closeAllBS( bool report = true );
     static bool detect(
-        QStringList     &slVers,
-        QStringList     &slBIST,
-        QVector<int>    &vHSpsv,
-        QVector<int>    &vHS20,
-        ImProbeTable    &T,
-        bool            doBIST );
+        QStringList             &slVers,
+        QStringList             &slBIST,
+        QVector<int>            &vHSpsv,
+        QVector<int>            &vHS20,
+        ImProbeTable            &T,
+        bool                    doBIST );
     static void detect_API(
-        QStringList     &slVers,
-        ImProbeTable    &T );
+        QStringList             &slVers,
+        ImProbeTable            &T );
     static bool detect_Slots(
-        QStringList     &slVers,
-        ImProbeTable    &T );
+        QStringList             &slVers,
+        ImProbeTable            &T );
     static void detect_simSlot(
-        QStringList     &slVers,
-        ImProbeTable    &T,
-        int             slot );
+        QStringList             &slVers,
+        ImProbeTable            &T,
+        int                     slot );
+    static bool detect_Headstages(
+        QStringList             &slVers,
+        QMap<int,QString>       &qbMap,
+        QVector<int>            &vHSpsv,
+        QVector<int>            &vHS20,
+        ImProbeTable            &T );
     static bool detect_Probes(
-        QStringList     &slVers,
-        QStringList     &slBIST,
-        QVector<int>    &vHSpsv,
-        QVector<int>    &vHS20,
-        ImProbeTable    &T,
-        bool            doBIST );
+        QStringList             &slVers,
+        QStringList             &slBIST,
+        const QMap<int,QString> &qbMap,
+        const QVector<int>      &vHSpsv,
+        ImProbeTable            &T,
+        bool                    doBIST );
     static bool detect_simProbe(
-        QStringList     &slVers,
-        ImProbeTable    &T,
-        ImProbeDat      &P );
+        QStringList             &slVers,
+        ImProbeTable            &T,
+        ImProbeDat              &P );
     static void detect_OneBoxes( ImProbeTable &T );
     static bool testFixCalPath( quint64 sn );
     static bool ftdiCheck( QString &msg, bool usbInTbl );

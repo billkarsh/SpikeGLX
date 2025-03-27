@@ -1,6 +1,12 @@
 // RELEASE NOTES
 // ==========================
 
+20250225
+--------
++ Report missed samples in metrics, metadata.
++ Insert zeros to restore length.
++ Report inserts: "run.missed_samples.{imec,obx}N.txt"
+
 20250201
 --------
 + Calibration results more informative.

@@ -90,7 +90,7 @@ void Config_devtab::setNoDialogAccess( bool clearNi )
 
     if( cfg->prbTab.nTblEntries() ) {
 
-        imWrite( cfg->prbTab.whosChecked( devTabUI->imPrbTbl ) );
+        imWrite( cfg->prbTab.whosChecked( devTabUI->imPrbTbl, false ) );
         imWrite( "\nFor probes:" );
         imWrite( "Alt-click toggles same docks this slot" );
         imWrite( "Ctrl-click toggles all docks this slot" );
@@ -375,7 +375,8 @@ void Config_devtab::imWriteCurrent()
     }
 
     imWrite(
-        QString("\nOK  %1").arg( T.whosChecked( devTabUI->imPrbTbl ) ) );
+        QString("\nOK  %1")
+        .arg( T.whosChecked( devTabUI->imPrbTbl, true ) ) );
 }
 
 
@@ -452,7 +453,8 @@ bool Config_devtab::imDetect()
     if( availIM ) {
 
         imWrite(
-            QString("\nOK  %1").arg( T.whosChecked( devTabUI->imPrbTbl ) ) );
+            QString("\nOK  %1")
+            .arg( T.whosChecked( devTabUI->imPrbTbl, true ) ) );
 
         cfg->updateCalWarning();
     }

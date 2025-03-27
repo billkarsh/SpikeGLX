@@ -22,12 +22,7 @@
 // Experiment switches
 //#define CALLBACK_X
 //#define TESTDUPSAMPS
-//#define DUPREMOVER
-//#define READ60
 //#define TSTAMPCHECKS
-//#define TSTAMPSAWTOOTH
-//#define COUNTERSAWTOOTH
-//#define TRYFILESTREAMS
 //#define LATENCYFILE
 //#define PROFILE
 //#define TUNE            0
@@ -484,8 +479,10 @@ ImAcqShared::ImAcqShared()
     :   awake(0), asleep(0), ip_CAR(-1), stop(false)
 {
 // Experiment to histogram successive timestamp differences.
+#ifdef TSTAMPCHECKS
     tStampBins.assign( 34, 0 );
     tStampEvtByPrb.assign( 32, 0 );
+#endif
 }
 
 
@@ -687,6 +684,12 @@ void ImAcqQFlt::enqueue( qint16 *D, int ntpts ) const
     Qf->enqueue( D, ntpts );
 }
 
+
+void ImAcqQFlt::enqueueZero( int ntpts ) const
+{
+    Qf->enqueueZeroIM( ntpts, 0, 0 );
+}
+
 /* ---------------------------------------------------------------- */
 /* ImAcqStream ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -698,11 +701,11 @@ ImAcqStream::ImAcqStream(
     int                         js,
     int                         ip )
     :   tLastErrFlagsReport(0), tLastFifoReport(0), peakDT(0),
-        sumTot(0), totPts(0ULL), Q(Q), QFlt(0), lastTStamp(0),
+        sumTot(0), totPts(0ULL), Q(Q), QFlt(0),
         errCOUNT{0,0,0,0}, errSERDES{0,0,0,0}, errLOCK{0,0,0,0},
-        errPOP{0,0,0,0}, errSYNC{0,0,0,0},
-        fifoAve(0), fifoDqb(0), fifoN(0),
-        sumN(0), js(js), ip(ip), simType(false)
+        errPOP{0,0,0,0}, errSYNC{0,0,0,0}, errMISS{0,0,0,0},
+        tStampLastFetch(0), fifoAve(0), fifoDqb(0), fifoN(0),
+        sumN(0), js(js), ip(ip), statusLastFetch(0), simType(false)
 #ifdef PAUSEWHOLESLOT
         , zeroFill(false)
 #endif
@@ -710,8 +713,8 @@ ImAcqStream::ImAcqStream(
 // @@@ FIX Experiment to report large fetch cycle times.
     tLastFetch      = 0;
 
-// Experiment to detect gaps in timestamps across fetches.
-    tStampLastFetch = 0;
+    vtStampMiss.resize( MAXE * TPNTPERFETCH );
+    vstatusMiss.resize( MAXE * TPNTPERFETCH );
 
 #ifdef PROFILE
     sumLag  = 0;
@@ -803,7 +806,7 @@ void ImAcqStream::sendErrMetrics() const
     for( int is = 0; is < sMax; ++is ) {
 
         if( errCOUNT[is] + errSERDES[is] + errLOCK[is] +
-            errPOP[is] + errSYNC[is] ) {
+            errPOP[is] + errSYNC[is] + errMISS[is] ) {
 
             QMetaObject::invokeMethod(
                 mainApp()->metrics(),
@@ -814,14 +817,101 @@ void ImAcqStream::sendErrMetrics() const
                 Q_ARG(quint32, errSERDES[is]),
                 Q_ARG(quint32, errLOCK[is]),
                 Q_ARG(quint32, errPOP[is]),
-                Q_ARG(quint32, errSYNC[is]) );
+                Q_ARG(quint32, errSYNC[is]),
+                Q_ARG(quint32, errMISS[is]) );
         }
     }
 }
 
 
-void ImAcqStream::checkErrFlags_EPack( const electrodePacket* E, int nE ) const
+void ImAcqStream::fileMissReport() const
 {
+    if( !mtStampMiss.size() )
+        return;
+
+    MainApp     *app    = mainApp();
+    QString     fname   =
+        QString("%1/%2.missed_samples.%3%4.txt")
+        .arg( app->dataDir( 0 ) )
+        .arg( app->cfgCtl()->acceptedParams.sns.runName )
+        .arg( js == jsOB ? "obx" : "imec" )
+        .arg( ip );
+    QFile       f( fname );
+    QTextStream ts( &f );
+    f.open( QIODevice::WriteOnly | QIODevice::Text );
+
+    QMap<quint64,int>::const_iterator
+        it  = mtStampMiss.begin(),
+        end = mtStampMiss.end();
+
+    for( ; it != end; ++it )
+        ts << QString("%1,%2\n").arg( it.key() ).arg( it.value() );
+}
+
+
+#define STATBRIDGE( A, B )  \
+    ((1<<11) | ((A|B) & ~(1<<6)) | (A&B) & (1<<6))
+
+void ImAcqStream::checkErrs_EPack( electrodePacket* E, int nE )
+{
+// -----------------------
+// Assess timestamp deltas
+// -----------------------
+
+// Cross-fetch
+
+    quint32 tsfirst = E[0].timestamp[0];
+    int     nmiss   = 0;
+    quint16 stfirst = E[0].Status[0];
+
+    vtStampMiss[0] = 0;
+
+    if( !tStampLastFetch || tStampLastFetch > tsfirst )
+        ;   // init or rollover
+    else if( tsfirst - tStampLastFetch > 4 ) {
+        vtStampMiss[0] = 3 * (tsfirst - tStampLastFetch) / 10;
+        vstatusMiss[0] = STATBRIDGE( statusLastFetch, stfirst );
+        nmiss         += vtStampMiss[0];
+#ifdef TSTAMPCHECKS
+        Log() <<
+        QString("~~ CROSS-FETCH GAP IM %1  val %2")
+        .arg( ip ).arg( tsfirst - tStampLastFetch );
+#endif
+    }
+
+    tStampLastFetch = E[nE-1].timestamp[TPNTPERFETCH-1];
+    statusLastFetch = E[nE-1].Status[TPNTPERFETCH-1];
+
+// Intra-fetch
+
+    for( int it = 1, nT = nE * TPNTPERFETCH; it < nT; ++it ) {
+
+        int     ie = it / TPNTPERFETCH,
+                is = it - ie * TPNTPERFETCH;
+        quint32 tsnext = E[ie].timestamp[is];
+        quint16 stnext = E[ie].Status[is];
+
+        vtStampMiss[it] = 0;
+
+        if( tsfirst > tsnext )
+            ;   // init or rollover
+        else if( tsnext - tsfirst > 4 ) {
+            vtStampMiss[it] = 3 * (tsnext - tsfirst) / 10;
+            vstatusMiss[it] = STATBRIDGE( stfirst, stnext );
+            nmiss          += vtStampMiss[it];
+        }
+
+        tsfirst = tsnext;
+        stfirst = stnext;
+    }
+
+    if( nmiss )
+        errMISS[0] += nmiss;
+
+// ------------------
+// Assess error flags
+// ------------------
+
     for( int ie = 0; ie < nE; ++ie ) {
 
         const quint16   *errs = E[ie].Status;
@@ -848,8 +938,71 @@ void ImAcqStream::checkErrFlags_EPack( const electrodePacket* E, int nE ) const
 }
 
 
-void ImAcqStream::checkErrFlags_PInfo( const PacketInfo* H, int nT, int shank ) const
+void ImAcqStream::checkErrs_PInfo( PacketInfo* H, int nT, int shank )
 {
+// -----------------------
+// Assess timestamp deltas
+// -----------------------
+
+    if( !shank ) {
+
+        // Cross-fetch
+
+        quint32 tsfirst = H[0].Timestamp;
+        int     nmiss   = 0;
+
+        vtStampMiss[0] = 0;
+
+        if( !tStampLastFetch || tStampLastFetch > tsfirst )
+            ;   // init or rollover
+        else if( tsfirst - tStampLastFetch > 4 ) {
+            vtStampMiss[0] = 3 * (tsfirst - tStampLastFetch) / 10;
+            vstatusMiss[0] = STATBRIDGE( statusLastFetch, H[0].Status );
+            nmiss         += vtStampMiss[0];
+#ifdef TSTAMPCHECKS
+            Log() <<
+            QString("~~ CROSS-FETCH GAP %1 %2  val %3")
+            .arg(js==jsIM?"IM":"OB")
+            .arg( ip ).arg( tsfirst - tStampLastFetch );
+#endif
+        }
+
+        tStampLastFetch = H[nT-1].Timestamp;
+        statusLastFetch = H[nT-1].Status;
+
+        // Intra-fetch
+
+        for( int it = 1; it < nT; ++it ) {
+
+            quint32 tsnext = H[it].Timestamp;
+
+            vtStampMiss[it] = 0;
+
+            if( tsfirst > tsnext )
+                ;   // init or rollover
+            else if( tsnext - tsfirst > 4 ) {
+                vtStampMiss[it] = 3 * (tsnext - tsfirst) / 10;
+                vstatusMiss[it] = STATBRIDGE( H[it-1].Status, H[it].Status );
+                nmiss          += vtStampMiss[it];
+            }
+
+            tsfirst = tsnext;
+        }
+
+        if( nmiss )
+            errMISS[0] += nmiss;
+    }
+    else {
+        for( int it = 0; it < nT; ++it ) {
+            if( vtStampMiss[it] )
+                errMISS[shank] = errMISS[0];
+        }
+    }
+
+// ------------------
+// Assess error flags
+// ------------------
+
     for( int it = 0; it < nT; ++it ) {
 
         const quint16   err = H[it].Status;
@@ -960,7 +1113,7 @@ void ImAcqWorker::run()
 // - i16Buf[]:   max sized over stream nCH; reused each iID.
 // - D[]:        max sized over {fetchType, MAXE}; reused each iID.
 //
-    std::vector<std::vector<float> >    lfLast;
+    std::vector<std::vector<qint16> >   lfLast;
     vec_i16                             i16Buf;
 
     const int   nID     = streams.size();
@@ -989,7 +1142,7 @@ void ImAcqWorker::run()
         // acq voltage chans (D)
 
         switch( S.fetchType ) {
-            case 0: ++nT0; lfLast[iID].assign( S.nLF, 0.0F ); break;
+            case 0: ++nT0; lfLast[iID].assign( S.nLF, 0 ); break;
             case 4: nSY = 4;
             case 2: ++nT2; T2Chans = qMax( T2Chans, S.nAP ); break;
             case 9: ++nT2; T2Chans = qMax( T2Chans, OBX_N_ACQ ); break;
@@ -1025,7 +1178,7 @@ void ImAcqWorker::run()
 
         for( int iID = 0; iID < nID; ++iID ) {
 
-            const ImAcqStream   &S = streams[iID];
+            ImAcqStream &S = streams[iID];
 
             if( !S.totPts )
                 S.Q->setTZero( loopT );
@@ -1070,34 +1223,6 @@ void ImAcqWorker::run()
 
         if( loopT - lastCheckT >= 5.0 ) {
 
-// ---------------------------------------------------------
-// Experiment to try file streaming.
-#ifdef TRYFILESTREAMS
-{
-    static double       tOn = 0;
-    const ImAcqStream   &S  = streams[0];
-
-    if( !tOn ) {
-        double  dT = getTime() - S.Q->tZero();
-        if( dT > 10.0 && dT < 20.0 ) {
-            QString filename = QString("%1/imstream_ip%2.bin")
-                                .arg( mainApp()->dataDir() )
-                                .arg( S.ip );
-            np_setFileStream( S.slot, STR2CHR(filename)  );
-            np_enableFileStream( S.slot, true );
-            tOn = getTime();
-            Log()<<"streaming on";
-        }
-    }
-    else if( getTime() - tOn > 20.0 ) {
-        np_enableFileStream( S.slot, false );
-        tOn = 0;
-        Log()<<"streaming off";
-    }
-}
-#endif
-// ---------------------------------------------------------
-
             for( int iID = 0; iID < nID; ++iID ) {
 
                 const ImAcqStream   &S = streams[iID];
@@ -1115,14 +1240,14 @@ void ImAcqWorker::run()
     }
 
 exit:
+    for( int iID = 0; iID < nID; ++iID )
+        streams[iID].fileMissReport();
+
     emit finished();
 }
 
 
-bool ImAcqWorker::doProbe_T0(
-    float               *lfLast,
-    vec_i16             &dst1D,
-    const ImAcqStream   &S )
+bool ImAcqWorker::doProbe_T0( qint16 *lfLast, vec_i16 &dst1D, ImAcqStream &S )
 {
 #ifdef PROFILE
     double  prbT0 = getTime();
@@ -1130,7 +1255,8 @@ bool ImAcqWorker::doProbe_T0(
 
     electrodePacket*    E   = reinterpret_cast<electrodePacket*>(&D[0]);
     qint16*             dst = &dst1D[0];
-    int                 nE;
+    int                 nQ  = 0,
+                        nE;
 
 // -----
 // Fetch
@@ -1163,25 +1289,6 @@ bool ImAcqWorker::doProbe_T0(
 // Scale
 // -----
 
-//------------------------------------------------------------------
-// Experiment to detect gaps in timestamps across fetches.
-#ifdef TSTAMPCHECKS
-{
-quint32 firstVal = E[0].timestamp[0];
-if( S.tStampLastFetch
-    && (firstVal < S.tStampLastFetch
-    ||  firstVal > S.tStampLastFetch + 4) ) {
-
-    Log() <<
-        QString("~~ TSTAMP GAP IM %1  val %2")
-        .arg( S.ip )
-        .arg( qint32(firstVal - S.tStampLastFetch) );
-}
-S.tStampLastFetch = E[nE-1].timestamp[11];
-}
-#endif
-//------------------------------------------------------------------
-
 #ifdef PROFILE
     double  dtScl = getTime();
 #endif
@@ -1197,53 +1304,61 @@ S.tStampLastFetch = E[nE-1].timestamp[11];
 
         for( int it = 0; it < TPNTPERFETCH; ++it ) {
 
+            // ------
+            // Misses
+            // ------
+
+            int z = S.vtStampMiss[ie * TPNTPERFETCH + it];
+
+            if( z ) {
+
+                if( nQ ) {
+                    S.Q->enqueue( &dst1D[0], nQ );
+                    if( S.QFlt )
+                        S.QFlt->enqueue( &dst1D[0], nQ );
+                    S.totPts += nQ;
+                    dst = &dst1D[0];
+                    nQ  = 0;
+                }
+
+                if( S.mtStampMiss.size() < 30000 )
+                    S.mtStampMiss[S.totPts] = z;
+
+                S.Q->enqueueZeroIM( z, 1,
+                    S.vstatusMiss[ie * TPNTPERFETCH + it] );
+                if( S.QFlt )
+                    S.QFlt->enqueueZero( z );
+                S.totPts += z;
+            }
+
             // ----------
             // ap - as is
             // ----------
 
             memcpy( dst, E[ie].apData[it], S.nAP * sizeof(qint16) );
-
-            shr.tStampHist_EPack( E, S.ip, ie, it );
-
-//------------------------------------------------------------------
-// Experiment to visualize timestamps as sawtooth in channel 16.
-#ifdef TSTAMPSAWTOOTH
-dst[16] = E[ie].timestamp[it] % 8000 - 4000;
-#endif
-//------------------------------------------------------------------
-
-//------------------------------------------------------------------
-// Experiment to visualize counter as sawtooth in channel 16.
-#ifdef COUNTERSAWTOOTH
-static uint count[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-count[S.ip] += 3;
-dst[16] = count[S.ip] % 8000 - 4000;
-#endif
-//------------------------------------------------------------------
-
             dst += S.nAP;
 
             // -----------------
             // lf - interpolated
             // -----------------
 
-#if 1
-// Standard linear interpolation
             float slope = float(it)/TPNTPERFETCH;
 
             for( int ic = 0, nc = S.nLF; ic < nc; ++ic )
                 *dst++ = lfLast[ic] + slope*(srcLF[ic]-lfLast[ic]);
-#else
-// Raw data for diagnostics
-            for( int ic = 0, nc = S.nLF; ic < nc; ++ic )
-                *dst++ = srcLF[ic];
-#endif
 
             // ----
             // sync
             // ----
 
             *dst++ = srcSY[it];
+            ++nQ;
+
+            // ------------
+            // tStamp check
+            // ------------
+
+            shr.tStampHist_EPack( E, S.ip, ie, it );
 
         }   // it
 
@@ -1251,8 +1366,7 @@ dst[16] = count[S.ip] % 8000 - 4000;
         // update saved lf
         // ---------------
 
-        for( int ic = 0, nc = S.nLF; ic < nc; ++ic )
-            lfLast[ic] = srcLF[ic];
+        memcpy( &lfLast[0], &srcLF[0], S.nLF*sizeof(qint16) );
     }   // ie
 
 #ifdef PROFILE
@@ -1272,15 +1386,12 @@ dst[16] = count[S.ip] % 8000 - 4000;
     }
 #endif
 
-    nE *= TPNTPERFETCH;
-
-    S.Q->enqueue( &dst1D[0], nE );
-
+    S.Q->enqueue( &dst1D[0], nQ );
     if( S.QFlt )
-        S.QFlt->enqueue( &dst1D[0], nE );
+        S.QFlt->enqueue( &dst1D[0], nQ );
+    S.totPts += nQ;
 
     S.tPostEnq = getTime();
-    S.totPts  += nE;
 
 #ifdef PROFILE
     S.sumLag += mainApp()->getRun()->getStreamTime() -
@@ -1292,9 +1403,7 @@ dst[16] = count[S.ip] % 8000 - 4000;
 }
 
 
-bool ImAcqWorker::doProbe_T2(
-    vec_i16             &dst1D,
-    const ImAcqStream   &S )
+bool ImAcqWorker::doProbe_T2( vec_i16 &dst1D, ImAcqStream &S )
 {
 #ifdef PROFILE
     double  prbT0 = getTime();
@@ -1303,6 +1412,7 @@ bool ImAcqWorker::doProbe_T2(
     qint16  *src = reinterpret_cast<qint16*>(&D[0]),
             *dst = &dst1D[0];
     int     vNT[4], // each sub fetch
+            nQ   = 0,
             nT;     // total timepoints
 
 // -----
@@ -1406,30 +1516,38 @@ next_j:;
 // Scale
 // -----
 
-//------------------------------------------------------------------
-// Experiment to detect gaps in timestamps across fetches.
-#ifdef TSTAMPCHECKS
-{
-quint32 firstVal = H[0].Timestamp;
-if( S.tStampLastFetch
-    && (firstVal < S.tStampLastFetch
-    ||  firstVal > S.tStampLastFetch + 4) ) {
-
-    Log() <<
-        QString("~~ TSTAMP GAP IM %1  val %2")
-        .arg( S.ip )
-        .arg( qint32(firstVal - S.tStampLastFetch) );
-}
-S.tStampLastFetch = H[nT-1].Timestamp;
-}
-#endif
-//------------------------------------------------------------------
-
 #ifdef PROFILE
     double  dtScl = getTime();
 #endif
 
     for( int it = 0; it < nT; ++it ) {
+
+        // ------
+        // Misses
+        // ------
+
+        int z = S.vtStampMiss[it];
+
+        if( z ) {
+
+            if( nQ ) {
+                S.Q->enqueue( &dst1D[0], nQ );
+                if( S.QFlt )
+                    S.QFlt->enqueue( &dst1D[0], nQ );
+                S.totPts += nQ;
+                dst = &dst1D[0];
+                nQ  = 0;
+            }
+
+            if( S.mtStampMiss.size() < 30000 )
+                S.mtStampMiss[S.totPts] = z;
+
+            S.Q->enqueueZeroIM( z, (S.fetchType == 2 ? 1 : 4),
+                S.vstatusMiss[it] );
+            if( S.QFlt )
+                S.QFlt->enqueueZero( z );
+            S.totPts += z;
+        }
 
         // ----------
         // ap - as is
@@ -1454,22 +1572,6 @@ S.tStampLastFetch = H[nT-1].Timestamp;
             dst[k] = -src[k];
 #endif
 
-//------------------------------------------------------------------
-// Experiment to visualize timestamps as sawtooth in channel 16.
-#ifdef TSTAMPSAWTOOTH
-dst[16] = H[it].Timestamp % 8000 - 4000;
-#endif
-//------------------------------------------------------------------
-
-//------------------------------------------------------------------
-// Experiment to visualize counter as sawtooth in channel 16.
-#ifdef COUNTERSAWTOOTH
-static uint count[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-count[S.ip] += 3;
-dst[16] = count[S.ip] % 8000 - 4000;
-#endif
-//------------------------------------------------------------------
-
         dst += S.nAP;
 
         // ----
@@ -1486,8 +1588,10 @@ dst[16] = count[S.ip] % 8000 - 4000;
             }
         }
 
+        ++nQ;
+
         // ------------
-        // TStamp check
+        // tStamp check
         // ------------
 
         shr.tStampHist_PInfo( &H[0], S.ip, it );
@@ -1511,13 +1615,12 @@ dst[16] = count[S.ip] % 8000 - 4000;
     }
 #endif
 
-    S.Q->enqueue( &dst1D[0], nT );
-
+    S.Q->enqueue( &dst1D[0], nQ );
     if( S.QFlt )
-        S.QFlt->enqueue( &dst1D[0], nT );
+        S.QFlt->enqueue( &dst1D[0], nQ );
+    S.totPts += nQ;
 
     S.tPostEnq = getTime();
-    S.totPts  += nT;
 
 #ifdef PROFILE
     S.sumLag += mainApp()->getRun()->getStreamTime() -
@@ -1529,9 +1632,7 @@ dst[16] = count[S.ip] % 8000 - 4000;
 }
 
 
-bool ImAcqWorker::do_obx(
-    vec_i16             &dst1D,
-    const ImAcqStream   &S )
+bool ImAcqWorker::do_obx( vec_i16 &dst1D, ImAcqStream &S )
 {
 #ifdef PROFILE
     double  prbT0 = getTime();
@@ -1539,7 +1640,8 @@ bool ImAcqWorker::do_obx(
 
     qint16  *src = reinterpret_cast<qint16*>(&D[0]),
             *dst = &dst1D[0];
-    int     nT;
+    int     nQ   = 0,
+            nT;
 
 // -----
 // Fetch
@@ -1610,30 +1712,33 @@ next_j:;
 // Scale
 // -----
 
-//------------------------------------------------------------------
-// Experiment to detect gaps in timestamps across fetches.
-#ifdef TSTAMPCHECKS
-{
-quint32 firstVal = H[0].Timestamp;
-if( S.tStampLastFetch
-    && (firstVal < S.tStampLastFetch
-    ||  firstVal > S.tStampLastFetch + 4) ) {
-
-    Log() <<
-        QString("~~ TSTAMP GAP OB %1  val %2")
-        .arg( S.ip )
-        .arg( qint32(firstVal - S.tStampLastFetch) );
-}
-S.tStampLastFetch = H[nT-1].Timestamp;
-}
-#endif
-//------------------------------------------------------------------
-
 #ifdef PROFILE
     double  dtScl = getTime();
 #endif
 
     for( int it = 0; it < nT; ++it ) {
+
+        // ------
+        // Misses
+        // ------
+
+        int z = S.vtStampMiss[it];
+
+        if( z ) {
+
+            if( nQ ) {
+                S.Q->enqueue( &dst1D[0], nQ );
+                S.totPts += nQ;
+                dst = &dst1D[0];
+                nQ  = 0;
+            }
+
+            if( S.mtStampMiss.size() < 30000 )
+                S.mtStampMiss[S.totPts] = z;
+
+            S.Q->enqueueZeroIM( z, 1, S.vstatusMiss[it] );
+            S.totPts += z;
+        }
 
         // ---------
         // XA subset
@@ -1641,22 +1746,6 @@ S.tStampLastFetch = H[nT-1].Timestamp;
 
         for( int ic = 0; ic < S.nXA; ++ic )
             *dst++ = src[S.vXA[ic]];
-
-//------------------------------------------------------------------
-// Experiment to visualize timestamps as sawtooth in channel 1.
-#ifdef TSTAMPSAWTOOTH
-dst[1] = H[it].Timestamp % 8000 - 4000;
-#endif
-//------------------------------------------------------------------
-
-//------------------------------------------------------------------
-// Experiment to visualize counter as sawtooth in channel 1.
-#ifdef COUNTERSAWTOOTH
-static uint count[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-count[S.ip] += 3;
-dst[1] = count[S.ip] % 8000 - 4000;
-#endif
-//------------------------------------------------------------------
 
         // ---------
         // XD packed
@@ -1679,9 +1768,10 @@ dst[1] = count[S.ip] % 8000 - 4000;
         // ----
 
         *dst++ = H[it].Status;
+        ++nQ;
 
         // ------------
-        // TStamp check
+        // tStamp check
         // ------------
 
         shr.tStampHist_PInfo( &H[0], S.ip, it );
@@ -1705,9 +1795,10 @@ dst[1] = count[S.ip] % 8000 - 4000;
     }
 #endif
 
-    S.Q->enqueue( &dst1D[0], nT );
+    S.Q->enqueue( &dst1D[0], nQ );
+    S.totPts += nQ;
+
     S.tPostEnq = getTime();
-    S.totPts  += nT;
 
 #ifdef PROFILE
     S.sumLag += mainApp()->getRun()->getStreamTime() -
@@ -1980,7 +2071,7 @@ void CimAcqImec::run()
     {
         double  srate = (p.im.get_nProbes() ?
                             p.im.prbj[0].srate :
-                            p.im.obxj[0].srate);
+                            p.im.get_iSelOneBox( 0 ).srate);
 
         Log() <<
             QString("Require loop ms < [[ %1 ]] n > [[ %2 ]] MAXE %3")
@@ -2263,7 +2354,7 @@ bool CimAcqImec::pauseAllAck() const
 /* fetchE --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool CimAcqImec::fetchE_T0( int &nE, electrodePacket* E, const ImAcqStream &S )
+bool CimAcqImec::fetchE_T0( int &nE, electrodePacket* E, ImAcqStream &S )
 {
     nE = 0;
 
@@ -2396,20 +2487,20 @@ if( S.ip == 0 ) {
 // Check error flags
 // -----------------
 
-    S.checkErrFlags_EPack( E, nE );
+    S.checkErrs_EPack( E, nE );
 
     return true;
 }
 
 
 bool CimAcqImec::fetchD_T2(
-    int                 &nT,
-    PacketInfo*         H,
-    qint16*             D,
-    const ImAcqStream   &S,
-    int                 nC,
-    int                 smpMax,
-    streamsource_t      shank )
+    int             &nT,
+    PacketInfo*     H,
+    qint16*         D,
+    ImAcqStream     &S,
+    int             nC,
+    int             smpMax,
+    streamsource_t  shank )
 {
     nT = 0;
 
@@ -2421,10 +2512,8 @@ bool CimAcqImec::fetchD_T2(
     if( pausedSlot() == S.slot ) {
 
 ackPause:
-        if( !pauseAck( S.port, S.dock ) ) {
-            S.lastTStamp = 0;
+        if( !pauseAck( S.port, S.dock ) )
             S.zeroFill = true;
-        }
 
         return true;
     }
@@ -2452,61 +2541,6 @@ ackPause:
     int             out;
     NP_ErrorCode    err = SUCCESS;
 
-#ifdef DUPREMOVER
-// @@@ FIX v2.0 readPackets reports duplicates
-// Duplicate removal...
-//
-    err = np_readPackets(
-            S.slot, S.port, S.dock, shank,
-            H, D, nC, smpMax, &out );
-
-    if( err == SUCCESS /*&& S.dock == 2*/ && out > 0 ) {
-
-        int nKeep = 0, isrc = 1;
-
-        // keep 1st item?
-
-        if( !S.totPts || H[0].Timestamp > S.lastTStamp + 2 || H[0].Timestamp < 5 ) {
-
-            S.lastTStamp    = H[0].Timestamp;
-            nKeep           = 1;
-        }
-
-        // keep item isrc if advances the timestamp
-
-        do {
-
-            if( H[isrc].Timestamp > S.lastTStamp + 2 || H[isrc].Timestamp < 5 ) {
-
-                memcpy( D + nKeep*S.nAP, D + isrc*S.nAP, 2*S.nAP );
-                H[nKeep]     = H[isrc];
-                S.lastTStamp = H[isrc].Timestamp;
-                ++nKeep;
-            }
-
-        } while( ++isrc < out );
-
-        out = nKeep;
-    }
-#elif defined(READ60)
-// @@@ FIX Experiment to read/return exactly 60 packets.
-//
-for( int k = 0; k < 60; ++k ) {
-
-    do {
-        err = np_readPacket(
-                S.slot, S.port, S.dock, shank,
-                H + k, D + k*S.nAP, S.nAP, &out );
-    } while( !out );
-
-//    if( out != S.nAP ) Log()<<"out "<<out;
-
-//    memset( D, 0, 60*384*2 );
-    out = 60;
-}
-#else
-// True method...
-//
     if( !S.simType ) {
         err = np_readPackets(
                 S.slot, S.port, S.dock, shank,
@@ -2514,7 +2548,6 @@ for( int k = 0; k < 60; ++k ) {
     }
     else
         simDat[ip2simdat[S.ip]].fetchT2( H, D, shank, nC, smpMax, &out );
-#endif
 
 // @@@ FIX Experiment to report fetched packet count vs time.
 #ifdef LATENCYFILE
@@ -2582,13 +2615,13 @@ if( S.ip == 0 && shank == SourceAP ) {
 // Check error flags
 // -----------------
 
-    S.checkErrFlags_PInfo( H, nT, shank );
+    S.checkErrs_PInfo( H, nT, shank );
 
     return true;
 }
 
 
-bool CimAcqImec::fetch_obx( int &nT, PacketInfo* H, qint16* D, const ImAcqStream &S )
+bool CimAcqImec::fetch_obx( int &nT, PacketInfo* H, qint16* D, ImAcqStream &S )
 {
     nT = 0;
 
@@ -2600,10 +2633,8 @@ bool CimAcqImec::fetch_obx( int &nT, PacketInfo* H, qint16* D, const ImAcqStream
     if( pausedSlot() == S.slot ) {
 
 ackPause:
-        if( !pauseAck( S.port, S.dock ) ) {
-            S.lastTStamp = 0;
+        if( !pauseAck( S.port, S.dock ) )
             S.zeroFill = true;
-        }
 
         return true;
     }
@@ -2699,7 +2730,7 @@ if( S.ip == 0 ) {
 // Check error flags
 // -----------------
 
-    S.checkErrFlags_PInfo( H, nT, 0 );
+    S.checkErrs_PInfo( H, nT, 0 );
 
     return true;
 }

@@ -32,7 +32,7 @@ struct ImSimLfDat {
                     nG,
                     nC,
                     inbuf;
-    ImSimLfDat() : f(0), smpCur(0), inbuf(0) {}
+    ImSimLfDat() : f(0), smpCur(0), inbuf(0)    {}
     virtual ~ImSimLfDat();
     bool init( QString &err, const QString &pfName );
     void load1();
@@ -54,7 +54,7 @@ struct ImSimApDat {
                     nG,
                     nC,
                     inbuf;
-    ImSimApDat() : f(0), smpCur(0), tstamp(0), inbuf(0)  {}
+    ImSimApDat() : f(0), smpCur(0), tstamp(0), inbuf(0) {}
     virtual ~ImSimApDat();
     bool init( QString &err, const QString &pfName );
     bool load1();
@@ -276,6 +276,7 @@ struct ImAcqQFlt {
     virtual ~ImAcqQFlt();
     void mapChanged( const DAQ::Params &p, int ip );
     void enqueue( qint16 *D, int ntpts ) const;
+    void enqueueZero( int ntpts ) const;
 };
 
 
@@ -293,16 +294,18 @@ struct ImAcqStream {
                     sumScl,
                     sumEnq;
     mutable quint64 totPts;
-// Experiment to detect gaps in timestamps across fetches.
     AIQ             *Q;
     ImAcqQFlt       *QFlt;
     QVector<uint>   vXA;
-    mutable quint32 lastTStamp,
-                    errCOUNT[4],
+    QMap<quint64,int>       mtStampMiss;
+    std::vector<qint16>     vtStampMiss;
+    std::vector<quint16>    vstatusMiss;
+    mutable quint32 errCOUNT[4],
                     errSERDES[4],
                     errLOCK[4],
                     errPOP[4],
                     errSYNC[4],
+                    errMISS[4],
                     tStampLastFetch;
     mutable int     fifoAve,
                     fifoDqb,
@@ -319,6 +322,7 @@ struct ImAcqStream {
                     port,
                     dock,
                     fetchType;  // {0=1.0, 2=2.0, 4=2020, 9=obx}
+    quint16         statusLastFetch;
     bool            simType;
 #ifdef PAUSEWHOLESLOT
     mutable bool    zeroFill;
@@ -334,8 +338,9 @@ struct ImAcqStream {
 
     QString metricsName( int shank = -1 ) const;
     void sendErrMetrics() const;
-    void checkErrFlags_EPack( const electrodePacket* E, int nE ) const;
-    void checkErrFlags_PInfo( const PacketInfo* H, int nT, int shank ) const;
+    void fileMissReport() const;
+    void checkErrs_EPack( electrodePacket* E, int nE );
+    void checkErrs_PInfo( PacketInfo* H, int nT, int shank );
     bool checkFifo( int *packets, CimAcqImec *acq ) const;
 };
 
@@ -370,16 +375,9 @@ public slots:
     void run();
 
 private:
-    bool doProbe_T0(
-        float               *lfLast,
-        vec_i16             &dst1D,
-        const ImAcqStream   &S );
-    bool doProbe_T2(
-        vec_i16             &dst1D,
-        const ImAcqStream   &S );
-    bool do_obx(
-        vec_i16             &dst1D,
-        const ImAcqStream   &S );
+    bool doProbe_T0( qint16 *lfLast, vec_i16 &dst1D, ImAcqStream &S );
+    bool doProbe_T2( vec_i16 &dst1D, ImAcqStream &S );
+    bool do_obx( vec_i16 &dst1D, ImAcqStream &S );
     bool workerYield();
     void profile( const ImAcqStream &S );
 };
@@ -445,16 +443,16 @@ private:
     bool pauseAllAck() const;
 #endif
 
-    bool fetchE_T0( int &nE, electrodePacket* E, const ImAcqStream &S );
+    bool fetchE_T0( int &nE, electrodePacket* E, ImAcqStream &S );
     bool fetchD_T2(
-        int                 &nT,
-        PacketInfo*         H,
-        qint16*             D,
-        const ImAcqStream   &S,
-        int                 nC,
-        int                 smpMax,
-        streamsource_t      shank = SourceAP );
-    bool fetch_obx( int &nT, PacketInfo* H, qint16* D, const ImAcqStream &S );
+        int             &nT,
+        PacketInfo*     H,
+        qint16*         D,
+        ImAcqStream     &S,
+        int             nC,
+        int             smpMax,
+        streamsource_t  shank = SourceAP );
+    bool fetch_obx( int &nT, PacketInfo* H, qint16* D, ImAcqStream &S );
     int fifoPct( int *packets, int *dqb, const ImAcqStream &S ) const;
 
 // --------

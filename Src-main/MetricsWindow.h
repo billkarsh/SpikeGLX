@@ -24,18 +24,20 @@ private:
                 errSERDES,
                 errLOCK,
                 errPOP,
-                errSYNC;
+                errSYNC,
+                errMISS;
         MXErrFlags()
         :   errCOUNT(0), errSERDES(0), errLOCK(0),
-            errPOP(0), errSYNC(0)       {}
+            errPOP(0), errSYNC(0), errMISS(0)           {}
         MXErrFlags(
             quint32 count,
             quint32 serdes,
             quint32 lock,
             quint32 pop,
-            quint32 sync )
+            quint32 sync,
+            quint32 miss )
         :   errCOUNT(count), errSERDES(serdes), errLOCK(lock),
-            errPOP(pop), errSYNC(sync)  {}
+            errPOP(pop), errSYNC(sync), errMISS(miss)   {}
     };
 
     struct MXErrRec {
@@ -48,10 +50,11 @@ private:
             quint32         serdes,
             quint32         lock,
             quint32         pop,
-            quint32         sync )
+            quint32         sync,
+            quint32         miss )
             {
                 QMutexLocker    ml( &erfMtx );
-                flags[stream]=MXErrFlags( count, serdes, lock, pop, sync );
+                flags[stream]=MXErrFlags( count, serdes, lock, pop, sync, miss );
             }
     };
 
@@ -125,8 +128,9 @@ public slots:
         quint32         serdes,
         quint32         lock,
         quint32         pop,
-        quint32         sync )
-        {err.setFlags( stream, count, serdes, lock, pop, sync );}
+        quint32         sync,
+        quint32         miss )
+        {err.setFlags( stream, count, serdes, lock, pop, sync, miss );}
 
     void prfUpdateFifo( const QString &stream, int maxFifo )
         {prf.setFifo( stream, maxFifo );}

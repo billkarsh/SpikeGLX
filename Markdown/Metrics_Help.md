@@ -17,12 +17,7 @@ hence, imec05 denotes the flags for probe steam 5. Note that quad-base
 probes (part number NP2020) record flags for each shank, hence, quad03-2
 denotes that stream 3 is a quad-probe and the flags are from shank 2.
 
-The flags are labeled {COUNT, SERDES, LOCK, POP, SYNC}.
-
-Any instances of these errors implies that samples have been dropped. It is
-not possible to tell how many samples are dropped from these counts. All
-you can tell is that some of the data being transmitted from the device are
-corrupt or missing.
+The flags are labeled {COUNT, SERDES, LOCK, POP, SYNC, MISS}.
 
 These flags correspond to bits of the status/SYNC word that is visible as
 the last channel in the graphs and in your recorded data (quad-probes have
@@ -37,9 +32,25 @@ bit 4: LOCK error
 bit 5: POP error
 bit 6: Synchronization waveform
 bit 7: SYNC error (unrelated to sync waveform)
+bit 11: MISS missed sample
 ```
 
->It may be possible to see which region of recorded data experienced these
+The MISS field counts the total number of samples that the hardware has
+missed due to any of the other error types. SpikeGLX inserts zeros into
+the stream to replace missed samples, and each of those samples has the
+MISS bit set in the status word.
+
+The inserts are recorded in a file at the top level of your data directory.
+The name of the file will be "runname.missed_samples.imecj.txt" for probe-j
+or "runname.missed_samples.obxj.txt" for OneBox ADC stream-j. There is an
+entry in the file for each inserted run of zeros. The entries have the form:
+<sample,nzeros>, that is, the first value is the sample number at which the
+zeros are inserted (measured from the start of the acquisition run) and the
+second value is the number of inserted zeros. Each inserted sample is all
+zeros except for the status word(s) which set bit 11 and extend the flags
+from the neighbor status words.
+
+>It is possible to see which region of recorded data experienced these
 errors if you see blips on those bits.
 
 --------
