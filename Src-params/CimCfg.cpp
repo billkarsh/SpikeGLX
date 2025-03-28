@@ -9,6 +9,9 @@
 #include "SignalBlocker.h"
 #include "Version.h"
 
+#ifdef HAVE_NXT
+#include "IMEC/NeuropixAPI_NXT.h"
+#endif
 #ifdef HAVE_IMEC
 #include "IMEC/NeuropixAPI.h"
 using namespace Neuropixels;

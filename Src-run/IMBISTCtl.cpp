@@ -396,7 +396,13 @@ bool IMBISTCtl::EEPROMCheck()
 // --------------------------
 
     bool noEEPROM;
+#ifdef HAVE_NXT
+    QString smaj(hID.version_Major), smin(hID.version_Minor);
+    noEEPROM = (smaj == "" || smaj == "0" || smaj == "1") &&
+               (smin == "" || smin == "0");
+#else
     noEEPROM = (hID.version_Major == 0 || hID.version_Major == 1) && !hID.version_Minor;
+#endif
 
     if( !hID.SerialNumber && noEEPROM )
         testEEPROM = false;

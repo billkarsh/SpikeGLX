@@ -1,6 +1,10 @@
 
 #ifdef HAVE_IMEC
 
+#ifdef HAVE_NXT
+#include "IMEC/NeuropixAPI_dbg.h"
+#endif
+
 #include "CimAcqImec.h"
 #include "Util.h"
 
@@ -157,11 +161,28 @@ bool ImCfgWorker::_mt_openProbe( const CimCfg::ImProbeDat &P )
         return false;
     }
 
-#if 0
-// 09/05/19 Advised by Jan as required for NP 2.0.
-// 06/17/20 Advised by Jan as no longer needed for NP 3.0.
+#ifdef HAVE_NXT
+    err = np_writeI2Cflex( P.slot, P.port, P.dock, 0xE0, 0x00, 0x48 );
 
-    err = np_writeI2Cflex( P.slot, P.port, P.dock, 0xE0, 0x03, 0x08 );
+    if( err != SUCCESS ) {
+        shr.seterror(
+            QString("IMEC writeI2Cflex(slot %1, port %2, dock %3)%4")
+            .arg( P.slot ).arg( P.port ).arg( P.dock )
+            .arg( acq->makeErrorString( err ) ) );
+        return false;
+    }
+
+    err = np_writeI2Cflex( P.slot, P.port, P.dock, 0xE0, 0x07, 0x40 );
+
+    if( err != SUCCESS ) {
+        shr.seterror(
+            QString("IMEC writeI2Cflex(slot %1, port %2, dock %3)%4")
+            .arg( P.slot ).arg( P.port ).arg( P.dock )
+            .arg( acq->makeErrorString( err ) ) );
+        return false;
+    }
+
+    err = np_writeI2Cflex( P.slot, P.port, P.dock, 0xE0, 0x05, 0x0C );
 
     if( err != SUCCESS ) {
         shr.seterror(

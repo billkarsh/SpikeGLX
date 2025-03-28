@@ -26,6 +26,10 @@ HEADERS += \
     $$PWD/IMROTbl_T21base.h \
     $$PWD/IMROTbl_T24.h \
     $$PWD/IMROTbl_T24base.h \
+    $$PWD/IMROTbl_T3010.h \
+    $$PWD/IMROTbl_T3010base.h \
+    $$PWD/IMROTbl_T3020.h \
+    $$PWD/IMROTbl_T3020base.h \
     $$PWD/IMROTbl_T3A.h \
     $$PWD/ProbeTable.h
 
@@ -52,6 +56,8 @@ SOURCES += \
     $$PWD/IMROTbl_T21base.cpp \
     $$PWD/IMROTbl_T24.cpp \
     $$PWD/IMROTbl_T24base.cpp \
+    $$PWD/IMROTbl_T3010base.cpp \
+    $$PWD/IMROTbl_T3020base.cpp \
     $$PWD/IMROTbl_T3A.cpp \
     $$PWD/ProbeTable.cpp
 

@@ -16,6 +16,8 @@
 #include "IMROTbl_T2003.h"
 #include "IMROTbl_T2013.h"
 #include "IMROTbl_T2020.h"
+#include "IMROTbl_T3010.h"
+#include "IMROTbl_T3020.h"
 #include "IMROTbl_T3A.h"
 #include "GeomMap.h"
 #include "ShankMap.h"
@@ -825,6 +827,7 @@ int IMROTbl::selectRefs( int slot, int port, int dock ) const
 // Disconnect the 4 shank switches
 // -------------------------------
 
+#ifndef HAVE_NXT
     if( nShank() == 4 ) {
 
         for( int ic = 0; ic < 4; ++ic ) {
@@ -836,6 +839,7 @@ int IMROTbl::selectRefs( int slot, int port, int dock ) const
                 return err;
         }
     }
+#endif
 
 // ---------------------------------------
 // Connect all according to table ref data
@@ -1231,6 +1235,20 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
                 type = 1200;
                 supp = true;
                 break;
+            case 3010:  // NXT single shank (Ph 1B)
+            case 3011:  // NXT single shank (Ph 1B) with cap
+#ifdef HAVE_NXT
+                type = 3010;
+                supp = true;
+#endif
+                break;
+            case 3020:  // NXT multishank (Ph 1B)
+            case 3021:  // NXT multishank (Ph 1B) with cap
+#ifdef HAVE_NXT
+                type = 3020;
+                supp = true;
+#endif
+                break;
         }
     }
 
@@ -1315,6 +1333,12 @@ IMROTbl* IMROTbl::alloc( const QString &pn )
             case 2020:  // Neuropixels 2.0 quad base (Ph 2C)
             case 2021:  // Neuropixels 2.0 quad base (Ph 2C) with cap
                 return new IMROTbl_T2020( pn );
+            case 3010:  // NXT single shank (Ph 1B)
+            case 3011:  // NXT single shank (Ph 1B) with cap
+                return new IMROTbl_T3010( pn );
+            case 3020:  // NXT multishank (Ph 1B)
+            case 3021:  // NXT multishank (Ph 1B) with cap
+                return new IMROTbl_T3020( pn );
             default:
                 return 0;
         }
