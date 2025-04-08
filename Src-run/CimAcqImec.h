@@ -263,7 +263,7 @@ struct ImAcqShared {
 
 
 struct ImAcqQFlt {
-    mutable AIQ     *Qf;
+    AIQ             *Qf;
     Biquad          *hipass,
                     *lopass;
     CAR             car;
@@ -282,50 +282,50 @@ struct ImAcqQFlt {
 
 struct ImAcqStream {
 // @@@ FIX Experiment to report large fetch cycle times.
-    mutable double  tLastFetch,
-                    tLastErrFlagsReport,
-                    tLastFifoReport,
-                    tPreEnq,
-                    tPostEnq,
-                    peakDT,
-                    sumTot,
-                    sumLag,
-                    sumGet,
-                    sumScl,
-                    sumEnq;
-    mutable quint64 totPts;
-    AIQ             *Q;
-    ImAcqQFlt       *QFlt;
-    QVector<uint>   vXA;
+    double      tLastFetch,
+                tLastErrFlagsReport,
+                tLastFifoReport,
+                tPreEnq,
+                tPostEnq,
+                peakDT,
+                sumTot,
+                sumLag,
+                sumGet,
+                sumScl,
+                sumEnq;
+    quint64     totPts;
+    AIQ         *Q;
+    ImAcqQFlt   *QFlt;
+    QVector<uint>           vXA;
     QMap<quint64,int>       mtStampMiss;
-    std::vector<qint16>     vtStampMiss;
+    std::vector<quint32>    vtStampMiss;
     std::vector<quint16>    vstatusMiss;
-    mutable quint32 errCOUNT[4],
-                    errSERDES[4],
-                    errLOCK[4],
-                    errPOP[4],
-                    errSYNC[4],
-                    errMISS[4],
-                    tStampLastFetch;
-    mutable int     fifoAve,
-                    fifoDqb,
-                    fifoN,
-                    sumN;
-    int             js,
-                    ip,
-                    nAP,
-                    nLF,
-                    nXA,
-                    nXD,
-                    nCH,
-                    slot,
-                    port,
-                    dock,
-                    fetchType;  // {0=1.0, 2=2.0, 4=2020, 9=obx}
-    quint16         statusLastFetch;
-    bool            simType;
+    quint32     tStampLastFetch,
+                errCOUNT[4],
+                errSERDES[4],
+                errLOCK[4],
+                errPOP[4],
+                errSYNC[4],
+                errMISS[4];
+    int         fifoAve,
+                fifoDqb,
+                fifoN,
+                sumN;
+    int         js,
+                ip,
+                nAP,
+                nLF,
+                nXA,
+                nXD,
+                nCH,
+                slot,
+                port,
+                dock,
+                fetchType;  // {0=1.0, 2=2.0, 4=2020, 9=obx}
+    quint16     statusLastFetch;
+    bool        simType;
 #ifdef PAUSEWHOLESLOT
-    mutable bool    zeroFill;
+    bool        zeroFill;
 #endif
 
     ImAcqStream(
@@ -341,7 +341,7 @@ struct ImAcqStream {
     void fileMissReport() const;
     void checkErrs_EPack( electrodePacket* E, int nE );
     void checkErrs_PInfo( PacketInfo* H, int nT, int shank );
-    bool checkFifo( int *packets, CimAcqImec *acq ) const;
+    bool checkFifo( int *packets, CimAcqImec *acq );
 };
 
 
@@ -415,7 +415,6 @@ private:
     std::vector<ImAcqThread*>   acqThd;
     std::vector<int>            ip2simdat;
     ImSimPrbThread              *simThd;
-    npcallbackhandle_t          hSampler;
 #ifdef PAUSEWHOLESLOT
     QSet<int>                   pausStreamsReported;
     int                         pausStreamsRequired,
@@ -454,12 +453,6 @@ private:
         streamsource_t  shank = SourceAP );
     bool fetch_obx( int &nT, PacketInfo* H, qint16* D, ImAcqStream &S );
     int fifoPct( int *packets, int *dqb, const ImAcqStream &S ) const;
-
-// --------
-// Callback
-// --------
-
-    static void NP_CALLBACK sampler( const np_packet_t& packet, const void* user );
 
 // ----------------
 // Config and start

@@ -20,7 +20,6 @@
 #define MAXE            24
 
 // Experiment switches
-//#define CALLBACK_X
 //#define TESTDUPSAMPS
 //#define TSTAMPCHECKS
 //#define LATENCYFILE
@@ -866,7 +865,7 @@ void ImAcqStream::checkErrs_EPack( electrodePacket* E, int nE )
 
     vtStampMiss[0] = 0;
 
-    if( !tStampLastFetch || tStampLastFetch > tsfirst )
+    if( !tStampLastFetch || tStampLastFetch >= tsfirst )
         ;   // init or rollover
     else if( tsfirst - tStampLastFetch > 4 ) {
         vtStampMiss[0] = 3 * (tsfirst - tStampLastFetch) / 10;
@@ -893,7 +892,7 @@ void ImAcqStream::checkErrs_EPack( electrodePacket* E, int nE )
 
         vtStampMiss[it] = 0;
 
-        if( tsfirst > tsnext )
+        if( tsfirst >= tsnext )
             ;   // init or rollover
         else if( tsnext - tsfirst > 4 ) {
             vtStampMiss[it] = 3 * (tsnext - tsfirst) / 10;
@@ -953,7 +952,7 @@ void ImAcqStream::checkErrs_PInfo( PacketInfo* H, int nT, int shank )
 
         vtStampMiss[0] = 0;
 
-        if( !tStampLastFetch || tStampLastFetch > tsfirst )
+        if( !tStampLastFetch || tStampLastFetch >= tsfirst )
             ;   // init or rollover
         else if( tsfirst - tStampLastFetch > 4 ) {
             vtStampMiss[0] = 3 * (tsfirst - tStampLastFetch) / 10;
@@ -978,7 +977,7 @@ void ImAcqStream::checkErrs_PInfo( PacketInfo* H, int nT, int shank )
 
             vtStampMiss[it] = 0;
 
-            if( tsfirst > tsnext )
+            if( tsfirst >= tsnext )
                 ;   // init or rollover
             else if( tsnext - tsfirst > 4 ) {
                 vtStampMiss[it] = 3 * (tsnext - tsfirst) / 10;
@@ -1027,7 +1026,7 @@ void ImAcqStream::checkErrs_PInfo( PacketInfo* H, int nT, int shank )
 }
 
 
-bool ImAcqStream::checkFifo( int *packets, CimAcqImec *acq ) const
+bool ImAcqStream::checkFifo( int *packets, CimAcqImec *acq )
 {
     double  tFifo = getTime();
     int     dqd;
@@ -1225,7 +1224,7 @@ void ImAcqWorker::run()
 
             for( int iID = 0; iID < nID; ++iID ) {
 
-                const ImAcqStream   &S = streams[iID];
+                ImAcqStream &S = streams[iID];
 
 #ifdef PROFILE
                 profile( S );
@@ -1819,8 +1818,8 @@ bool ImAcqWorker::workerYield()
 
     for( int iID = 0; iID < nID; ++iID ) {
 
-        const ImAcqStream   &S = streams[iID];
-        int                 packets;
+        ImAcqStream &S = streams[iID];
+        int         packets;
 
         if( !S.checkFifo( &packets, acq ) )
             return false;
@@ -1954,8 +1953,7 @@ ImAcqThread::~ImAcqThread()
 /* ---------------------------------------------------------------- */
 
 CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
-    :   CimAcq(owner, p), T(mainApp()->cfgCtl()->prbTab), simThd(0),
-        hSampler(0)
+    :   CimAcq(owner, p), T(mainApp()->cfgCtl()->prbTab), simThd(0)
 #ifdef PAUSEWHOLESLOT
         , pausStreamsRequired(0), pausSlot(-1)
 #endif
@@ -1968,13 +1966,6 @@ CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
 
 CimAcqImec::~CimAcqImec()
 {
-#ifdef CALLBACK_X
-    if( hSampler ) {
-        np_destroyHandle( &hSampler );
-        hSampler = 0;
-    }
-#endif
-
     for( int iThd = 0, nThd = cfgThd.size(); iThd < nThd; ++iThd ) {
         ImCfgThread *T = cfgThd[iThd];
         if( T ) {
@@ -2487,7 +2478,8 @@ if( S.ip == 0 ) {
 // Check error flags
 // -----------------
 
-    S.checkErrs_EPack( E, nE );
+    if( nE )
+        S.checkErrs_EPack( E, nE );
 
     return true;
 }
@@ -2615,7 +2607,8 @@ if( S.ip == 0 && shank == SourceAP ) {
 // Check error flags
 // -----------------
 
-    S.checkErrs_PInfo( H, nT, shank );
+    if( nT )
+        S.checkErrs_PInfo( H, nT, shank );
 
     return true;
 }
@@ -2730,7 +2723,8 @@ if( S.ip == 0 ) {
 // Check error flags
 // -----------------
 
-    S.checkErrs_PInfo( H, nT, 0 );
+    if( nT )
+        S.checkErrs_PInfo( H, nT, 0 );
 
     return true;
 }
@@ -2819,24 +2813,6 @@ int CimAcqImec::fifoPct( int *packets, int *dqb, const ImAcqStream &S ) const
 
     return pct;
 }
-
-/* ---------------------------------------------------------------- */
-/* Callback ------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-#ifdef CALLBACK_X
-void NP_CALLBACK CimAcqImec::sampler( const np_packet_t& packet, const void* user )
-{
-    static double t0 = getTime();
-    if( getTime() - t0 > 1 ) {
-        qint16  buf[ MAXE * TPNTPERFETCH ];
-        int     nT = 0;
-        np_unpackData( &packet, buf, MAXE * TPNTPERFETCH, &nT );
-        Log()<<nT;
-        t0 = getTime();
-    }
-}
-#endif
 
 /* ---------------------------------------------------------------- */
 /* configure ------------------------------------------------------ */
@@ -2934,21 +2910,6 @@ void CimAcqImec::createAcqWorkerThreads()
 
     if( streams.size() )
         acqThd.push_back( new ImAcqThread( this, acqShr, streams ) );
-
-#ifdef CALLBACK_X
-    for( int ip = 0, np = p.stream_nIM(); ip < np; ++ip ) {
-        const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
-        NP_ErrorCode                err;
-        err = np_createProbePacketCallback( P.slot, P.port, P.dock,
-                SourceAP, &hSampler, sampler, 0 );
-        if( err != SUCCESS ) {
-            Warning() <<
-                QString("IMEC createProbePacketCallback(slot %1, port %2, dock %3)%4")
-                .arg( P.slot ).arg( P.port ).arg( P.dock )
-                .arg( makeErrorString( err ) );
-        }
-    }
-#endif
 }
 
 /* ---------------------------------------------------------------- */
