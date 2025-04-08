@@ -16,10 +16,11 @@ working copy).
 
 ### Power Cycling
 
-Power cycling does not mean restart. Rather, we mean `shut down` the
-computer and make sure the chassis power is switched `fully off`,
-wait a few seconds, then power them on again. A full shutdown is
-required to complete a BS update.
+Power cycling the chassis means to switch it `fully off`, wait ~30
+seconds, then power it on again. A full shutdown is required to complete
+a BS update. If your chassis is connected by Thunderbolt you can power
+cycle it without power cycling the PC. Otherwise, you will need to shut
+down the PC in order to shut down the chassis.
 
 ### Typical Update Procedure
 
@@ -33,11 +34,11 @@ is included in your SpikeGLX release.
 
 4. Check the Console (Log) window for any error messages.
 
-5. If you updated the BS you need to power cycle everything for the
-change to take effect. If you updated only the BSC you need to quit
-and restart SpikeGLX for the change to take effect.
+5. If you updated the BS you need to power cycle the chassis for the
+change to take effect. After any update you need to quit and restart
+SpikeGLX for the change to take effect in the computer.
 
-6. After cycling power, you'll be able to see which versions are installed
+6. After restarting, you'll be able to see which versions are installed
 when you click `Detect` in the `Configure Acquisition` dialog.
 
 ### Corruption
@@ -60,15 +61,15 @@ switch from green to black (off).
 To get the BS working again you have to update the firmware. To update the
 firmware, you need a green light on the front panel of the module.
 
-1. First, try power cycling everything. This won't fix the firmware but it
-will often recover enough function to allow the Update operation to access
-the module.
+1. First, try power cycling the chassis and restarting SpikeGLX. This won't
+fix the firmware but it will often recover enough function to allow the
+Update operation to access the module.
 
 2. After the restart, the first thing you should do is use the Update
 dialog to select the replacement firmware file(s) and click the Update
 button. Do not press `Detect` or try to run before fixing the firmware.
 
->**Important:**: When the firmware is in a bad state, do not use the
+>**Important**: When the firmware is in a bad state, do not use the
 `Detect` button. Doing so will only lock up the BS again and require
 another power cycle.
 
@@ -78,7 +79,7 @@ If that didn't get the update started, power cycle again while depressing
 the tiny button labeled `ISP` on the front of the module. This tells the
 module to boot the golden image, which should then allow using the Update
 dialog as in step (2) above. However, when you use the `ISP` switch like
-this, the safest thing to do is to **update both the BS and BSC**.
+this, you must **update both the BS and BSC**.
 
 
 _fin_

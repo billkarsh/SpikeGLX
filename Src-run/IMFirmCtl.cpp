@@ -256,7 +256,7 @@ void IMFirmCtl::update()
         "Completed",
         QString("Updating is done. %1")
         .arg( !sbs.isEmpty() ?
-            "You must power cycle hardware and PC." :
+            "You must power cycle chassis and restart SpikeGLX." :
             "You must quit and restart SpikeGLX." ) );
 
 // -----

@@ -2496,6 +2496,7 @@ guiBreathe();
                 slVers.append(
                     QString("Quadbase error: Both plugs required(slot %1, ports (1,2))")
                     .arg( it.key() ) );
+                slVers.append("Always plug in both connectors {(1,2) or (3,4)} AND check the corresponding boxes.");
                 return false;
             }
 
@@ -2511,6 +2512,7 @@ guiBreathe();
                 slVers.append(
                     QString("Quadbase error: Both plugs required(slot %1, ports (3,4))")
                     .arg( it.key() ) );
+                slVers.append("Always plug in both connectors {(1,2) or (3,4)} AND check the corresponding boxes.");
                 return false;
             }
 

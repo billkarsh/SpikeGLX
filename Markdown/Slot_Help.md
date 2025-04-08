@@ -101,6 +101,11 @@ Plug probes into one or more of these locations and then check the
 * If you check a box but there isn't a probe there, you'll get an error.
 * If you plug in a probe but don't check the box, it won't run.
 
+>*Quadbase headstages (for NP2020 and NP2021 probes) need to be plugged
+into two ports at the same time. You can use ports (1,2) or (3,4). Be sure
+to plug in both connectors and you must check both corresponding enable
+checkboxes.*
+
 --------
 
 ## Configure Slots Dialog

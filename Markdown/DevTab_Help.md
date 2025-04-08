@@ -78,6 +78,11 @@ The message box shows how many streams are checked for each slot.
 * Probes are identified by their **(slot,port,dock)**.
 * OneBoxes are identified by **(slot,"XIO")**.
 
+>*Quadbase headstages (for NP2020 and NP2021 probes) need to be plugged
+into two ports at the same time. You can use ports (1,2) or (3,4). Be sure
+to plug in both connectors and you must check both corresponding enable
+checkboxes.*
+
 ### Enable Probe Shortcuts
 
 There are some one-click shortcuts for making multiple boxes match the

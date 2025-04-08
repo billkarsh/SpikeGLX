@@ -155,7 +155,7 @@
    <item row="1" column="0">
     <widget class="QGroupBox" name="bsGrp">
      <property name="title">
-      <string>Load BS firmware (power cycle all hardware after)</string>
+      <string>Load BS firmware (power cycle chassis, restart SpikeGLX after)</string>
      </property>
      <property name="checkable">
       <bool>true</bool>
