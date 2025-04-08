@@ -358,7 +358,8 @@ QTextStream ts( &f );
     int                 nb = 0;
 
     double  srate   = df->samplingRateHz();
-    qint64  nRem    = df->sampCount(),
+    qint64  nCts    = df->sampCount(),
+            nRem    = nCts,
             xpos    = 0,
             lastX   = 0;
     int     nC      = df->numChans(),
@@ -433,7 +434,7 @@ ts << c << "\n";
                                     goto binned;
                             }
 
-                            vB.push_back( Bin( c ) );
+                            vB.push_back( Bin( c, nCts, srate ) );
                             ++nb;
                         }
 
@@ -547,7 +548,8 @@ QTextStream ts( &f );
     int                 nb = 0;
 
     double  srate   = df->samplingRateHz();
-    qint64  nRem    = df->sampCount(),
+    qint64  nCts    = df->sampCount(),
+            nRem    = nCts,
             xpos    = 0,
             lastX   = 0;
     int     nC      = df->numChans(),
@@ -622,7 +624,7 @@ ts << c << "\n";
                                     goto binned;
                             }
 
-                            vB.push_back( Bin( c ) );
+                            vB.push_back( Bin( c, nCts, srate ) );
                             ++nb;
                         }
 

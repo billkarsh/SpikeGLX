@@ -46,9 +46,24 @@ private:
         // We expect count variation of order +/- 1.
         // True glitches that split a counting window cause
         // large variation: +/- 1000 or more. We set nominal
-        // width to +/- 20 to accommodate modest clock drift.
-        Bin() : bmin(0), bmax(0), n(0)                  {}
-        Bin( qint64 c ) : bmin(c-20), bmax(c+20), n(1)  {C.push_back(c);}
+        // width to +/- 20/hr to accommodate modest clock drift.
+        //
+        // Derivation:
+        // Tolerable variation (as measured) for 30KHz probe over 1 hour
+        // is ~0.05Hz = ~200 samples, which is 20 samples per bin. But we
+        // should be more strict at lower sample rates, so we scale 20
+        // samples linearly w.r.t sample rate: 20*srate/30000. Further,
+        // the error grows linearly with time, but should be no smaller
+        // than 20. Therefore, we use: 20 (up to 1 hr) + 20/hr thereafter.
+        //
+        Bin() : bmin(0), bmax(0), n(0)  {}
+        Bin( qint64 c, quint64 nCts, double srate ) : n(1)
+        {
+            int mrg = (20*srate/30000.0)*(1.0 + (nCts/srate/3600.0 - 1.0));
+            bmin = c - mrg;
+            bmax = c + mrg;
+            C.push_back( c );
+        }
         bool isIn( qint64 c )
         {
             if( c >= bmin && c <= bmax ) {

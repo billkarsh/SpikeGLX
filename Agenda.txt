@@ -3,6 +3,7 @@
 
 20250225
 --------
++ Improve rate calibration outlier detection.
 + Report missed samples in metrics, metadata.
 + Insert zeros to restore length.
 + Report inserts: "run.missed_samples.{imec,obx}N.txt"
