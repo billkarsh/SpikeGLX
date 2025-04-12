@@ -71,6 +71,13 @@
 <li>You can run a mixture of OneBoxes and PXIe basestations (a.k.a. &quot;modules&quot;) in the same SpikeGLX run.</li>
 <li>CatGT and TPrime work with OneBox data files.</li>
 </ul>
+<blockquote>
+<p>Notes:</p>
+<ol style="list-style-type: decimal">
+<li><p>Follow the guidelines called &quot;Screen Saver and Power Settings&quot; in the SpikeGLX UserManual <a href="UserManual.html#screen-saver-and-power-settings">here</a>. Especially, set <code>USB settings/USB selective suspend setting: Disable</code>.</p></li>
+<li><p>If you have either of these two issues: (A) Your OneBox ADC stream sample rate is very different from the 30300 Hz expected rate, or, (B) You're getting messages about not getting samples from the ADC stream or the probes plugged into the OneBox, then you should try other ports on this or another PC.</p></li>
+</ol>
+</blockquote>
 <hr />
 <h1 id="hardware-tour">Hardware Tour</h1>
 <h2 id="back-panel">Back Panel</h2>
@@ -253,7 +260,7 @@
 <h1 id="data-streams-files-formats">Data Streams, Files, Formats</h1>
 <p>Please read the User Manual, but at least read these sections:</p>
 <ul>
-<li><a href="UserManual.html#data-stream">Data Steam</a></li>
+<li><a href="UserManual.html#data-stream">Data Stream</a></li>
 <li><a href="UserManual.html#supported-streams">Supported Streams</a></li>
 <li><a href="UserManual.html#channel-naming-and-ordering">Channel Naming and Ordering</a></li>
 <li><a href="UserManual.html#output-file-format-and-tools">Output File Format and Tools</a></li>

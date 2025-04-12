@@ -64,6 +64,18 @@ any model of headstage/probe.
 in the same SpikeGLX run.
 - CatGT and TPrime work with OneBox data files.
 
+>Notes:
+>
+>(1) Follow the guidelines called "Screen Saver and Power Settings" in the
+SpikeGLX UserManual [here](UserManual.html#screen-saver-and-power-settings).
+Especially, set `USB settings/USB selective suspend setting: Disable`.
+>
+>(2) If you have either of these two issues: (A) Your OneBox ADC stream
+sample rate is very different from the 30300 Hz expected rate, or, (B)
+You're getting messages about not getting samples from the ADC stream or the
+probes plugged into the OneBox, then you should try other ports on this or
+another PC.
+
 --------
 
 # Hardware Tour
@@ -315,7 +327,7 @@ Full details on the `Configure Slots` dialog are [here](Slot_Help.html).
 
 Please read the User Manual, but at least read these sections:
 
-* [Data Steam](UserManual.html#data-stream)
+* [Data Stream](UserManual.html#data-stream)
 * [Supported Streams](UserManual.html#supported-streams)
 * [Channel Naming and Ordering](UserManual.html#channel-naming-and-ordering)
 * [Output File Format and Tools](UserManual.html#output-file-format-and-tools)
