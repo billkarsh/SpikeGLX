@@ -2233,7 +2233,7 @@ static bool qbAdd(
 
     if( prod == "NPM_HS_32" )
         e = QString("%1:1").arg( port );
-    else if( prod == "NPM_HSTC_ext" ) {
+    else if( prod.contains( "ext" ) ) {
         e = QString("%1:2").arg( port );
         is24 = true;
     }
@@ -2274,7 +2274,7 @@ bool CimCfg::detect_Headstages(
     for( int ip = 0, np = T.nSelProbes(); ip < np; ++ip ) {
 
         ImProbeDat  &P = T.mod_iProbe( ip );
-#ifdef HAVE_IMEC
+#ifdef XX_HAVE_IMEC
         bool        isHS;
 #endif
 #if DBG
@@ -2293,7 +2293,7 @@ guiBreathe();
         // isHS
         // ----
 
-#ifdef HAVE_IMEC
+#ifdef XX_HAVE_IMEC
         err = np_detectHeadStage( P.slot, P.port, &isHS );
 
         if( err != SUCCESS ) {
@@ -2326,8 +2326,10 @@ guiBreathe();
                 .arg( makeErrorString( err ) ) );
             if( err == NO_LINK ) {
                 slVers.append("");
-                slVers.append("Error 44 DOES NOT mean the headstage is bad. Rather, there is a poor connection somewhere");
-                slVers.append("on the path from the port to the probe flex. Top things to try:");
+                slVers.append("Only check boxes for hardware you intend to run. If you indeed plugged");
+                slVers.append("something in here, error 44 DOES NOT mean the headstage is bad. Rather,");
+                slVers.append("there is a poor connection somewhere on the path from the port to the probe flex.");
+                slVers.append("Top things to try:");
                 slVers.append(" 1. Reconnect flex to headstage firmly and squarely; try several times.");
                 slVers.append(" 2. Try different pairing of probe/headstage for better mechanical fit.");
                 slVers.append(" 3. Try different 5-meter cable.");

@@ -320,7 +320,7 @@ bool IMBISTCtl::probeType()
 // Test for Quad port (2 or 4)
 // ---------------------------
 
-    else if( prod == "NPM_HSTC_ext" ) {
+    else if( prod.contains( "ext" ) ) {
         write("For Quad-probes (NP2020) only test ports (1 or 3).");
         return false;
     }
