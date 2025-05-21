@@ -124,9 +124,11 @@ bool IMRO_ROI::operator<( const IMRO_ROI &rhs ) const
 IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
 {
 // Old codes ---------------------------------
-    if( pn.startsWith( "PRB_1_4" ) ) {
+    if( pn.startsWith( "PRB_1_4" ) ||
+        pn.startsWith( "PRB_1_2" ) ) {
         // PRB_1_4_0480_1 (Silicon cap)
         // PRB_1_4_0480_1_C (Metal cap)
+        // PRB_1_2_480_2
         _ncolhwr    = 2;
         _ncolvis    = 4;
         col2vis_ev  = {1,3};
@@ -455,6 +457,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 break;
             case 3020:  // NXT multishank (Ph 1B)
             case 3021:  // NXT multishank (Ph 1B) with cap
+            case 3022:  // NXT multishank (Pre A) with cap
                 _ncolhwr    = 2;
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};
@@ -1123,10 +1126,30 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
 
     type = -1;
 
+#ifdef HAVE_NXT
+
+    switch( pn.mid( 2 ).toInt() ) {
+        case 3010:  // NXT single shank (Ph 1B)
+        case 3011:  // NXT single shank (Ph 1B) with cap
+            type = 3010;
+            supp = true;
+            break;
+        case 3020:  // NXT multishank (Ph 1B)
+        case 3021:  // NXT multishank (Ph 1B) with cap
+        case 3022:  // NXT multishank (Pre A) with cap
+            type = 3020;
+            supp = true;
+            break;
+    }
+
+#else
+
 // Old codes ---------------------------------
-    if( pn.startsWith( "PRB_1_4" ) ) {
+    if( pn.startsWith( "PRB_1_4" ) ||
+        pn.startsWith( "PRB_1_2" ) ) {
         // PRB_1_4_0480_1 (Silicon cap)
         // PRB_1_4_0480_1_C (Metal cap)
+        // PRB_1_2_480_2
         type = 0;
         supp = true;
     }
@@ -1235,22 +1258,9 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
                 type = 1200;
                 supp = true;
                 break;
-            case 3010:  // NXT single shank (Ph 1B)
-            case 3011:  // NXT single shank (Ph 1B) with cap
-#ifdef HAVE_NXT
-                type = 3010;
-                supp = true;
-#endif
-                break;
-            case 3020:  // NXT multishank (Ph 1B)
-            case 3021:  // NXT multishank (Ph 1B) with cap
-#ifdef HAVE_NXT
-                type = 3020;
-                supp = true;
-#endif
-                break;
         }
     }
+#endif
 
     return supp;
 }
@@ -1259,9 +1269,11 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
 IMROTbl* IMROTbl::alloc( const QString &pn )
 {
 // Old codes ---------------------------------
-    if( pn.startsWith( "PRB_1_4" ) ) {
+    if( pn.startsWith( "PRB_1_4" ) ||
+        pn.startsWith( "PRB_1_2" ) ) {
         // PRB_1_4_0480_1 (Silicon cap)
         // PRB_1_4_0480_1_C (Metal cap)
+        // PRB_1_2_480_2
         return new IMROTbl_T0( pn );
     }
     else if( pn.startsWith( "PRB2_1" ) ) {
@@ -1338,6 +1350,7 @@ IMROTbl* IMROTbl::alloc( const QString &pn )
                 return new IMROTbl_T3010( pn );
             case 3020:  // NXT multishank (Ph 1B)
             case 3021:  // NXT multishank (Ph 1B) with cap
+            case 3022:  // NXT multishank (Pre A) with cap
                 return new IMROTbl_T3020( pn );
             default:
                 return 0;

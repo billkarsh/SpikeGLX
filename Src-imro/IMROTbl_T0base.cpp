@@ -29,16 +29,32 @@ QString IMRODesc_T0base::toString( int chn ) const
 //
 // Note: The chn field is discarded.
 //
-IMRODesc_T0base IMRODesc_T0base::fromString( const QString &s )
+bool IMRODesc_T0base::fromString( QString *msg, const QString &s )
 {
     const QStringList   sl = s.split(
                                 QRegExp("\\s+"),
                                 QString::SkipEmptyParts );
+    bool                ok;
 
-    return IMRODesc_T0base(
-            sl.at( 1 ).toInt(), sl.at( 2 ).toInt(),
-            sl.at( 3 ).toInt(), sl.at( 4 ).toInt(),
-            sl.at( 5 ).toInt() );
+    if( sl.size() != 6 )
+        goto fail;
+
+    bank    = sl.at( 1 ).toInt( &ok ); if( !ok ) goto fail;
+    refid   = sl.at( 2 ).toInt( &ok ); if( !ok ) goto fail;
+    apgn    = sl.at( 3 ).toInt( &ok ); if( !ok ) goto fail;
+    lfgn    = sl.at( 4 ).toInt( &ok ); if( !ok ) goto fail;
+    apflt   = sl.at( 5 ).toInt( &ok ); if( !ok ) goto fail;
+
+    return true;
+
+fail:
+    if( msg ) {
+        *msg =
+        QString("Bad IMRO element format (%1), expected (chn bank refid apgn lfgn apflt)")
+        .arg( s );
+    }
+
+    return false;
 }
 
 /* ---------------------------------------------------------------- */
@@ -148,8 +164,13 @@ bool IMROTbl_T0base::fromString( QString *msg, const QString &s )
     e.clear();
     e.reserve( n - 1 );
 
-    for( int i = 1; i < n; ++i )
-        e.push_back( IMRODesc_T0base::fromString( sl[i] ) );
+    for( int i = 1; i < n; ++i ) {
+        IMRODesc_T0base D;
+        if( D.fromString( msg, sl[i] ) )
+            e.push_back( D );
+        else
+            return false;
+    }
 
     if( e.size() != nAP() ) {
         if( msg ) {

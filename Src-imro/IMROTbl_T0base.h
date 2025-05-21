@@ -27,7 +27,7 @@ struct IMRODesc_T0base
         {return bank==rhs.bank   && apgn==rhs.apgn && lfgn==rhs.lfgn
             &&  refid==rhs.refid && apflt==rhs.apflt;}
     QString toString( int chn ) const;
-    static IMRODesc_T0base fromString( const QString &s );
+    bool fromString( QString *msg, const QString &s );
 };
 
 

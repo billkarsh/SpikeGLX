@@ -32,7 +32,7 @@ struct IMRODesc_T3020base
                 bank==rhs.bank && refid==rhs.refid;
         }
     QString toString( int chn ) const;
-    static IMRODesc_T3020base fromString( const QString &s );
+    bool fromString( QString *msg, const QString &s );
 };
 
 

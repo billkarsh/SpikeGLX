@@ -28,7 +28,7 @@ struct IMRODesc_T21base
     bool operator==( const IMRODesc_T21base &rhs ) const
         {return mbank==rhs.mbank && refid==rhs.refid;}
     QString toString( int chn ) const;
-    static IMRODesc_T21base fromString( const QString &s );
+    bool fromString( QString *msg, const QString &s );
 };
 
 

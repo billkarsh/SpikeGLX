@@ -30,15 +30,30 @@ QString IMRODesc_T2020::toString( int chn ) const
 //
 // Note: The chn field is discarded and elec is recalculated by caller.
 //
-IMRODesc_T2020 IMRODesc_T2020::fromString( const QString &s )
+bool IMRODesc_T2020::fromString( QString *msg, const QString &s )
 {
     const QStringList   sl = s.split(
                                 QRegExp("\\s+"),
                                 QString::SkipEmptyParts );
+    bool                ok;
 
-    return IMRODesc_T2020(
-            sl.at( 1 ).toInt(), sl.at( 2 ).toInt(),
-            sl.at( 3 ).toInt() );
+    if( sl.size() != 5 )
+        goto fail;
+
+    shnk    = sl.at( 1 ).toInt( &ok ); if( !ok ) goto fail;
+    bank    = sl.at( 2 ).toInt( &ok ); if( !ok ) goto fail;
+    refid   = sl.at( 3 ).toInt( &ok ); if( !ok ) goto fail;
+
+    return true;
+
+fail:
+    if( msg ) {
+        *msg =
+        QString("Bad IMRO element format (%1), expected (chn shnk bank refid elec)")
+        .arg( s );
+    }
+
+    return false;
 }
 
 /* ---------------------------------------------------------------- */
@@ -179,8 +194,13 @@ bool IMROTbl_T2020::fromString( QString *msg, const QString &s )
     e.clear();
     e.reserve( n - 1 );
 
-    for( int i = 1; i < n; ++i )
-        e.push_back( IMRODesc_T2020::fromString( sl[i] ) );
+    for( int i = 1; i < n; ++i ) {
+        IMRODesc_T2020  D;
+        if( D.fromString( msg, sl[i] ) )
+            e.push_back( D );
+        else
+            return false;
+    }
 
     if( e.size() != nAP() ) {
         if( msg ) {

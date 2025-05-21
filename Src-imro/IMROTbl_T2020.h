@@ -28,7 +28,7 @@ struct IMRODesc_T2020
     bool operator==( const IMRODesc_T2020 &rhs ) const
         {return shnk==rhs.shnk && bank==rhs.bank && refid==rhs.refid;}
     QString toString( int chn ) const;
-    static IMRODesc_T2020 fromString( const QString &s );
+    bool fromString( QString *msg, const QString &s );
 };
 
 

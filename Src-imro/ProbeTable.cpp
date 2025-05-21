@@ -12,7 +12,7 @@
 #define FSRT    "C:/Users/labadmin/Desktop/ProbeTable/probe_features_srt.ini"
 #define FJ2I    "C:/Users/labadmin/Desktop/ProbeTable/probe_features_j2i.ini"
 #define FJSN    "C:/Users/labadmin/Desktop/ProbeTable/probe_features.json"
-#define VERS    "1.1"
+#define VERS    "1.2"
 
 /* ---------------------------------------------------------------- */
 /* CProbeTbl ------------------------------------------------------ */
@@ -93,6 +93,22 @@ void CProbeTbl::ss2ini()
 void CProbeTbl::extini()
 {
     QSettings   S( FINI, QSettings::IniFormat );
+
+// Duplicate group: [PRB_1_4_0480_1] -> [PRB_1_2_480_2]
+
+    QMap<QString,QVariant>  P;
+
+    S.beginGroup( "PRB_1_4_0480_1" );
+        foreach( const QString &key, S.childKeys() )
+            P[key] = S.value( key );
+    S.endGroup();
+
+    S.beginGroup( "PRB_1_2_480_2" );
+        QMap<QString,QVariant>::const_iterator
+            it = P.begin(), end = P.end();
+        for( ; it != end; ++it )
+            S.setValue( it.key(), it.value() );
+    S.endGroup();
 
 // Insert imro type column
 
@@ -382,6 +398,7 @@ static void _sortini( const QString &dst, const QString &src )
             G = QString();
         }
     }
+    fi.close();
 
     QFile   fo( dst );
     fo.open( QIODevice::WriteOnly | QIODevice::Text );
@@ -404,7 +421,7 @@ static void _sortini( const QString &dst, const QString &src )
 
 void CProbeTbl::sortini()
 {
-    _sortini( FSRT, FINI );
+    _sortini( FINI, FINI );
 }
 
 

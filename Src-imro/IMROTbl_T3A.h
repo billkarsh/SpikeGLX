@@ -24,7 +24,7 @@ struct IMRODesc_T3A
         {return bank==rhs.bank && refid==rhs.refid
             &&  apgn==rhs.apgn &&  lfgn==rhs.lfgn;}
     QString toString( int chn ) const;
-    static IMRODesc_T3A fromString( const QString &s );
+    bool fromString( QString *msg, const QString &s );
 };
 
 

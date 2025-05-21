@@ -45,15 +45,31 @@ QString IMRODesc_T3020base::toString( int chn ) const
 //
 // Note: elec is recalculated by caller.
 //
-IMRODesc_T3020base IMRODesc_T3020base::fromString( const QString &s )
+bool IMRODesc_T3020base::fromString( QString *msg, const QString &s )
 {
     const QStringList   sl = s.split(
                                 QRegExp("\\s+"),
                                 QString::SkipEmptyParts );
+    bool                ok;
 
-    return IMRODesc_T3020base(
-            sl.at( 0 ).toInt(), sl.at( 1 ).toInt(),
-            sl.at( 2 ).toInt(), sl.at( 3 ).toInt() );
+    if( sl.size() != 5 )
+        goto fail;
+
+    chan    = sl.at( 0 ).toInt( &ok ); if( !ok ) goto fail;
+    shnk    = sl.at( 1 ).toInt( &ok ); if( !ok ) goto fail;
+    bank    = sl.at( 2 ).toInt( &ok ); if( !ok ) goto fail;
+    refid   = sl.at( 3 ).toInt( &ok ); if( !ok ) goto fail;
+
+    return true;
+
+fail:
+    if( msg ) {
+        *msg =
+        QString("Bad IMRO element format (%1), expected (chn shnk bank refid elec)")
+        .arg( s );
+    }
+
+    return false;
 }
 
 /* ---------------------------------------------------------------- */
@@ -251,7 +267,11 @@ bool IMROTbl_T3020base::fromString( QString *msg, const QString &s )
 
     for( int i = 1; i < n; ++i ) {
 
-        e.push_back( IMRODesc_T3020base::fromString( sl[i] ) );
+        IMRODesc_T3020base  D;
+        if( D.fromString( msg, sl[i] ) )
+            e.push_back( D );
+        else
+            return false;
 
         const IMRODesc_T3020base    &E = e[i-1];
         if( blockMap[E.shnk][E.chan/48] == 99 ) {

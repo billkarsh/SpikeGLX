@@ -1,6 +1,11 @@
 // RELEASE NOTES
 // ==========================
 
+20250325
+--------
++ Support NP1.0 probe PRB_1_2_480_2.
++ Improve IMRO file error reporting.
+
 20250225
 --------
 + Improve rate calibration outlier detection.

@@ -1061,8 +1061,8 @@ static void test1()
 {
     CProbeTbl::ss2ini();
     CProbeTbl::extini();
-    CProbeTbl::ini2json();
     CProbeTbl::sortini();
+    CProbeTbl::ini2json();
     CProbeTbl::json2ini();
     CProbeTbl::sortjson2ini();
     CProbeTbl::parsejson();
