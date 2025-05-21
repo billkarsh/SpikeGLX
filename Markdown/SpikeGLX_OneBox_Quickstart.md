@@ -1,6 +1,6 @@
 # SpikeGLX OneBox Quickstart
 
-*>> Updated: December 19, 2024 <<*
+*>> Updated: April 10, 2025 <<*
 
 *>> AO (DAC) and WavePlayer enabled in SpikeGLX <<*
 
@@ -19,6 +19,7 @@
         + [ADC connector](#adc-connector)
         + [Voltage levels](#voltage-levels)
 * [Driver Installation](#driver-installation)
+* [SpikeGLX_NISIM](#spikeglx_nisim)
 * [Assign a Slot](#assign-a-slot)
 * [Data Streams, Files, Formats](#data-streams-files-formats)
 * [Sample Rate, Calibration](#sample-rate-calibration)
@@ -213,6 +214,17 @@ if you don't want to use the breakout board.
 * ADC channels are accessed via the breakout board or the front panel ADC SMA.
 * ADC voltage is selectable using the Obx tab in SpikeGLX: +/- {2.5, 5, 10} V.
 
+>*Notes:*
+>
+>1. *The ADC inputs have pull-up resistors. The voltage will appear to be
+between 1.7 and 2 V on an unconnected channel. However, connected channels
+will read accurately.*
+>
+>2. *The ADC channels are multiplexed, so there may be a small crosstalk voltage
+visible on any unconnected channel. That's not an issue if you are not using that
+channel, but you can make that disappear by either connecting an input to that
+channel or by putting a 50-ohm terminator on it.*
+
 **DAC outputs**
 
 * DAC channels are accessed via the breakout board or the front panel DAC SMA.
@@ -270,6 +282,17 @@ select your folder >> Next.
 
 >Note: Once a driver is installed, the Device Manager entry like Fig 1. will
 vanish. That's normal.
+
+--------
+
+# SpikeGLX_NISIM
+
+Release downloads come with two executables:
+
+- **SpikeGLX.exe**: Runs {imec probes, OneBox, NI, FileViewer}, but you need
+to install NI drivers to run it.
+- **SpikeGLX_NISIM.exe**: Runs {imec probes, OneBox, FileViewer} but not NI
+hardware. Does not need NI drivers.
 
 --------
 

@@ -617,7 +617,7 @@ bool ExportCtl::validateSettings()
     }
 
 // ---------------
-// user intensions
+// user intentions
 // ---------------
 
     if( E.fmtR == ExportParams::csv ) {

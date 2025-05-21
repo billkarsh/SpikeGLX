@@ -76,8 +76,8 @@ before an overflow (data loss) occurs.
 ## Acquisition: Worker Thread Activity
 
 ```
-GOOD: Lower than   75% active.
-BAD:  Greater than 90% active.
+GOOD: Lower than   75% active. // if NP1.0 or NP2.0
+BAD:  Greater than 90% active. // if NP1.0 or NP2.0
 ```
 
 This is akin to CPU activity level you may be familiar with in the Windows
@@ -95,6 +95,10 @@ their task and be able to snooze often. If the system is struggling and
 work is piling up the workers will have to go into overtime to catch up.
 If SpikeGLX can not catch up, the run may be stopped due to a FIFO
 overflow or other exceeded limit.
+
+> Note: High channel count probes, like quad-base NP202X or NXT NP30XX,
+need more worker activity to keep up. Values greater than 75% are
+considered normal for these probes.
 
 > Note: If you check the `Low latency` box on the `IM Setup` tab of the
 `Configure` dialog, the data fetching workers run at full speed without

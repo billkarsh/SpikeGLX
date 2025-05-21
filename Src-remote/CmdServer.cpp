@@ -1112,7 +1112,7 @@ void CmdWorker::niDOSet( const QStringList &toks )
     errMsg = CniCfg::setDO( toks.at( 0 ), toks.at( 1 ).toUInt() );
 
     if( !errMsg.isEmpty() )
-        errMsg = "NIDOSET: " + errMsg;
+        errMsg = "NIDOSET: Look at Log window (debug mode) for details.";
 }
 
 

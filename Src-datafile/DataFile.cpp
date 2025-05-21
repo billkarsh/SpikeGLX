@@ -658,6 +658,10 @@ bool DataFile::writeAndInvalSamps( vec_i16 &samps )
 // Write
 // -----
 
+// The depth of the writer queue has been empirically set at 4000
+// queue blocks, for spinning disks. Since writing generally uses
+// a 0.10 second activity period, the queue size is ~400 seconds.
+
     if( wrAsync ) {
 
         if( !dfw )

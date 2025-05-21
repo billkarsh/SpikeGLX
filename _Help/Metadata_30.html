@@ -432,12 +432,12 @@ bit 11: MISS missed sample</code></pre>
 <p>The GeomMap replaces the ShankMap for imec probes (as of SpikeGLX 20230202). It describes how electrodes are arranged on the probe. The first () entry is a header. Here, (NP1000,1,0,70) indicates probe part-number NP1000. This standard NP 1.0 probe has 1 shank, the spacing between shanks is 0 microns and the per_shank_width is 70 microns. Each following electrode entry has four values (s:x:z:u):</p>
 <ol style="list-style-type: decimal">
 <li><p>zero-based shank # (with tips pointing down, shank-0 is left-most),</p></li>
-<li><p>x-coordinate (um) of <strong>elecrode center</strong>,</p></li>
-<li><p>z-coordinate (um) of <strong>elecrode center</strong>,</p></li>
+<li><p>x-coordinate (um) of <strong>electrode center</strong>,</p></li>
+<li><p>z-coordinate (um) of <strong>electrode center</strong>,</p></li>
 <li><p>0/1 &quot;used,&quot; or, (u-flag), indicating if the electrode should be drawn in the FileViewer and ShankViewer windows, and if it should be included in spatial average &lt;S&gt; calculations.</p></li>
 </ol>
 <blockquote>
-<p><strong>(X,Z) Coordinates</strong>: Looking face-on at a probe with tip pointing downward, X is measured along the width of the probe, from left to right. The X-origin is the left edge of the shank. Z is measured along the shank of the probe, from tip, upward, toward the probe base. The Z-origin is the center of the bottom-most elecrode row (closest to the tip). Note that for a multi-shank probe, each shank has its own (X,Z) origin and coordinate system. That is, the (X,Z) location of an electrode is given relative to its own shank (with tips pointing down, shank-0 is left-most).</p>
+<p><strong>(X,Z) Coordinates</strong>: Looking face-on at a probe with tip pointing downward, X is measured along the width of the probe, from left to right. The X-origin is the left edge of the shank. Z is measured along the shank of the probe, from tip, upward, toward the probe base. The Z-origin is the center of the bottom-most electrode row (closest to the tip). Note that for a multi-shank probe, each shank has its own (X,Z) origin and coordinate system. That is, the (X,Z) location of an electrode is given relative to its own shank (with tips pointing down, shank-0 is left-most).</p>
 </blockquote>
 <blockquote>
 <p>Note: There are electrode entries only for saved channels.</p>

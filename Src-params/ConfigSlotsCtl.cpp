@@ -250,6 +250,8 @@ void ConfigSlotsCtl::removeBut()
         T->setCurrentCell( row, TBL_SLOT );
     else if( nr )
         T->setCurrentCell( nr - 1, TBL_SLOT );
+
+    selectionChanged();
 }
 
 

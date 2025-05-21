@@ -356,8 +356,8 @@ configuration (below).
 | 6         | 1            | 8          |
 | 6         | 2            | 16         |
 | 8         | 1            | 8          |
-| 8         | 2            | 20^\*^     |
-| 12        | 2            | 32^\*^     |
+| 8         | 2            | 20\*       |
+| 12        | 2            | 32\*       |
 
 > *\* Note: For 20 probes or more the CPU will be working very hard to keep
 up. In the 20-probe case, that CPU was running in its turbo mode at over

@@ -10,7 +10,7 @@
 </head>
 <body>
 <h1 id="spikeglx-onebox-quickstart">SpikeGLX OneBox Quickstart</h1>
-<p><em>&gt;&gt; Updated: December 19, 2024 &lt;&lt;</em></p>
+<p><em>&gt;&gt; Updated: April 10, 2025 &lt;&lt;</em></p>
 <p><em>&gt;&gt; AO (DAC) and WavePlayer enabled in SpikeGLX &lt;&lt;</em></p>
 <p><strong>Topics</strong>:</p>
 <ul>
@@ -33,6 +33,7 @@
 </ul></li>
 </ul></li>
 <li><a href="#driver-installation">Driver Installation</a></li>
+<li><a href="#spikeglx_nisim">SpikeGLX_NISIM</a></li>
 <li><a href="#assign-a-slot">Assign a Slot</a></li>
 <li><a href="#data-streams-files-formats">Data Streams, Files, Formats</a></li>
 <li><a href="#sample-rate-calibration">Sample Rate, Calibration</a></li>
@@ -163,6 +164,13 @@
 <li>ADC channels are accessed via the breakout board or the front panel ADC SMA.</li>
 <li>ADC voltage is selectable using the Obx tab in SpikeGLX: +/- {2.5, 5, 10} V.</li>
 </ul>
+<blockquote>
+<p><em>Notes:</em></p>
+<ol style="list-style-type: decimal">
+<li><p><em>The ADC inputs have pull-up resistors. The voltage will appear to be between 1.7 and 2 V on an unconnected channel. However, connected channels will read accurately.</em></p></li>
+<li><p><em>The ADC channels are multiplexed, so there may be a small crosstalk voltage visible on any unconnected channel. That's not an issue if you are not using that channel, but you can make that disappear by either connecting an input to that channel or by putting a 50-ohm terminator on it.</em></p></li>
+</ol>
+</blockquote>
 <p><strong>DAC outputs</strong></p>
 <ul>
 <li>DAC channels are accessed via the breakout board or the front panel DAC SMA.</li>
@@ -214,6 +222,13 @@
 <blockquote>
 <p>Note: Once a driver is installed, the Device Manager entry like Fig 1. will vanish. That's normal.</p>
 </blockquote>
+<hr />
+<h1 id="spikeglx_nisim">SpikeGLX_NISIM</h1>
+<p>Release downloads come with two executables:</p>
+<ul>
+<li><strong>SpikeGLX.exe</strong>: Runs {imec probes, OneBox, NI, FileViewer}, but you need to install NI drivers to run it.</li>
+<li><strong>SpikeGLX_NISIM.exe</strong>: Runs {imec probes, OneBox, FileViewer} but not NI hardware. Does not need NI drivers.</li>
+</ul>
 <hr />
 <h1 id="assign-a-slot">Assign a Slot</h1>
 <p>Some motivating background. In the beginning you bought a PXI basestation module which you installed into a <strong>slot</strong> of your PXI chassis. Each module had four <strong>ports</strong> for plugging in headstages. The imec software references the headstages in your system according to their <strong>(slot,port)</strong> address.</p>

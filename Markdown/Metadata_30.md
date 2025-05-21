@@ -1084,9 +1084,9 @@ four values (s:x:z:u):
 
 1. zero-based shank # (with tips pointing down, shank-0 is left-most),
 
-2. x-coordinate (um) of **elecrode center**,
+2. x-coordinate (um) of **electrode center**,
 
-3. z-coordinate (um) of **elecrode center**,
+3. z-coordinate (um) of **electrode center**,
 
 4. 0/1 "used," or, (u-flag), indicating if the electrode should be drawn
 in the FileViewer and ShankViewer windows, and if it should be included in
@@ -1096,7 +1096,7 @@ spatial average \<S\> calculations.
 downward, X is measured along the width of the probe, from left to right.
 The X-origin is the left edge of the shank. Z is measured along the shank
 of the probe, from tip, upward, toward the probe base. The Z-origin is the
-center of the bottom-most elecrode row (closest to the tip). Note that for
+center of the bottom-most electrode row (closest to the tip). Note that for
 a multi-shank probe, each shank has its own (X,Z) origin and coordinate
 system. That is, the (X,Z) location of an electrode is given relative to
 its own shank (with tips pointing down, shank-0 is left-most).
