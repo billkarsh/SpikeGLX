@@ -280,6 +280,38 @@ struct ImAcqQFlt {
 };
 
 
+struct qbfifo {
+    int delta_is,
+        delta_was,
+        nave,
+        each[4];
+    qbfifo() : delta_is(0)  {reset();}
+    void reset()
+    {
+        delta_was=delta_is;
+        delta_is=0; nave=0;
+        each[0]=0; each[1]=0;
+        each[2]=0; each[3]=0;
+    }
+    void ave()
+    {
+        if( nave > 0 ) {
+            int emin;
+            delta_is /= nave;
+            emin = qMin( each[0], each[1] );
+            emin = qMin( each[2], emin );
+            emin = qMin( each[3], emin );
+            for( int i = 0; i < 4; ++i )
+                each[i] = (each[i] - emin) / nave;
+        }
+    }
+    bool is_changed()
+    {
+        return delta_is != delta_was;
+    }
+};
+
+
 struct ImAcqStream {
 // @@@ FIX Experiment to report large fetch cycle times.
     double      tLastFetch,
@@ -300,6 +332,7 @@ struct ImAcqStream {
     QMap<quint64,int>       mtStampMiss;
     std::vector<quint32>    vtStampMiss;
     std::vector<quint16>    vstatusMiss;
+    qbfifo      sqb;
     quint32     tStampLastFetch,
                 errCOUNT[4],
                 errSERDES[4],
@@ -308,7 +341,6 @@ struct ImAcqStream {
                 errSYNC[4],
                 errMISS[4];
     int         fifoAve,
-                fifoDqb,
                 fifoN,
                 sumN;
     int         js,
@@ -379,7 +411,7 @@ private:
     bool doProbe_T2( vec_i16 &dst1D, ImAcqStream &S );
     bool do_obx( vec_i16 &dst1D, ImAcqStream &S );
     bool workerYield();
-    void profile( const ImAcqStream &S );
+    void profile( ImAcqStream &S );
 };
 
 
@@ -452,7 +484,7 @@ private:
         int             smpMax,
         streamsource_t  shank = SourceAP );
     bool fetch_obx( int &nT, PacketInfo* H, qint16* D, ImAcqStream &S );
-    int fifoPct( int *packets, int *dqb, const ImAcqStream &S ) const;
+    int fifoPct( int *packets, ImAcqStream &S ) const;
 
 // ----------------
 // Config and start
