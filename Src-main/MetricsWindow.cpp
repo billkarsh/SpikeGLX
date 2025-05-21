@@ -74,7 +74,7 @@ MetricsWindow::~MetricsWindow()
 /* Public --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void MetricsWindow::runInit( bool lowLatency )
+void MetricsWindow::runInit()
 {
     err.init();
     prf.init();
@@ -87,8 +87,7 @@ void MetricsWindow::runInit( bool lowLatency )
     mxUI->mxTE->clear();
     mxUI->erTE->clear();
 
-    this->lowLatency    = lowLatency;
-    isRun               = true;
+    isRun = true;
 
     if( isVisible() )
         mxTimer.start();
@@ -344,13 +343,11 @@ void MetricsWindow::updateMx()
 
         for( it = prf.awakePct.begin(); it != end; ++it ) {
 
-            if( it.value() > maxPct )
+            if( it.value() > maxPct && !isActiveOK( it.key() ) )
                 maxPct = it.value();
         }
 
-        if( lowLatency )
-            te->setTextColor( Qt::darkGreen );
-        else if( maxPct >= 90 ) {
+        if( maxPct >= 90 ) {
             te->setTextColor( Qt::darkRed );
             ledstate = qMax( ledstate, 2 );
         }
@@ -378,7 +375,7 @@ void MetricsWindow::updateMx()
 
             int pct = it.value();
 
-            if( lowLatency )
+            if( isActiveOK( it.key() ) )
                 te->setTextColor( Qt::darkGreen );
             else if( pct >= 90 )
                 te->setTextColor( Qt::darkRed );
@@ -611,6 +608,19 @@ void MetricsWindow::closeEvent( QCloseEvent *e )
 /* ---------------------------------------------------------------- */
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+bool MetricsWindow::isActiveOK( const QString &stream ) const
+{
+    const DAQ::Params   &P = mainApp()->cfgCtl()->acceptedParams;
+
+    if( P.im.prbAll.lowLatency )
+        return true;
+
+    int ip, js = P.stream2jsip( ip, stream );
+
+    return js == jsIM && P.stream_nChans( js, ip ) > 384;
+}
+
 
 // Note:
 // restoreScreenState() must be called after initializing

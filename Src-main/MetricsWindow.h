@@ -103,8 +103,7 @@ private:
     int                 defWeight,
                         erLines,
                         erMaxLines;
-    bool                lowLatency,
-                        isRun;
+    bool                isRun;
 
 public:
     MetricsWindow( QWidget *parent = 0 );
@@ -112,7 +111,7 @@ public:
 
     void showDialog();
 
-    void runInit( bool lowLatency );
+    void runInit();
     void runStart();
     void runEnd();
 
@@ -164,6 +163,7 @@ protected:
     virtual void closeEvent( QCloseEvent *e );
 
 private:
+    bool isActiveOK( const QString &stream ) const;
     void restoreScreenState();
     void saveScreenState() const;
 };

@@ -1815,8 +1815,9 @@ bool ImAcqWorker::workerYield()
 {
 // Get maximum outstanding packets for this worker thread
 
-    int maxQPkts    = 0,
-        nID         = streams.size();
+    int     maxQPkts    = 0,
+            nID         = streams.size();
+    bool    hichn       = false;
 
     for( int iID = 0; iID < nID; ++iID ) {
 
@@ -1832,10 +1833,11 @@ bool ImAcqWorker::workerYield()
             packets /= TPNTPERFETCH;
             if( pkt - packets * TPNTPERFETCH >= TPNTPERFETCH/2 )
                 ++packets;
-// Demo exagerating the workload of a high channel count probe
-//
-//            if( S.nAP > 384 )
-//                packets *= S.nAP / 384;
+
+            if( S.nAP > 384 ) {
+                packets *= S.nAP / 384;
+                hichn    = true;
+            }
         }
 
         if( packets > maxQPkts )
@@ -1843,12 +1845,30 @@ bool ImAcqWorker::workerYield()
     }
 
 // Yield time if fewer than the average fetched packet count.
+// For high channel count probes, sleep less often.
 
     double  t = getTime();
 
     if( !acq->p.im.prbAll.lowLatency && maxQPkts < AVEE ) {
-        QThread::usleep( 250 );
-        yieldSum += getTime() - t;
+
+        double  udev    = uniformDev();
+        bool    sleep   = false;
+
+        if( acq->p.im.prbAll.qf_on ) {
+            if( hichn )
+                sleep = udev <= 0.05;
+            else
+                sleep = udev <= 0.40;
+        }
+        else if( hichn )
+            sleep = udev <= 0.40;
+        else
+            sleep = true;
+
+        if( sleep ) {
+            QThread::usleep( 250 );
+            yieldSum += getTime() - t;
+        }
     }
 
     if( t - tLastYieldReport >= 5.0 ) {
