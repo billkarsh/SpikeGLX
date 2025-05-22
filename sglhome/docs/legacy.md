@@ -76,6 +76,7 @@ can be used after updating their firmware, which can be done via SpikeGLX.
 
 **3B1**:
 
+* [Release 20190724-phase3B1](../App/Release_v20190724-phase3B1.zip)...[Readme](../Readme/Readme_v20190724-phase3B1.txt) : Minor bug fixes, imec v5.1
 * [Release 20190413-phase3B1](../App/Release_v20190413-phase3B1.zip)...[Readme](../Readme/Readme_v20190413-phase3B1.txt) : Flexible bank selection, Imec v5.1
 * [Release 20190327-phase3B1](../App/Release_v20190327-phase3B1.zip)...[Readme](../Readme/Readme_v20190327-phase3B1.txt) : Fix names with dots, Imec v5.1
 * [Release 20190305-phase3B1](../App/Release_v20190305-phase3B1.zip)...[Readme](../Readme/Readme_v20190305-phase3B1.txt) : 32 NI channels, Imec v5.1
@@ -86,6 +87,7 @@ can be used after updating their firmware, which can be done via SpikeGLX.
 
 **3A**:
 
+* [Release 20190724-phase3A](../App/Release_v20190724-phase3A.zip)...[Readme](../Readme/Readme_v20190724-phase3A.txt) : Minor bug fixes, imec v4.3
 * [Release 20190413-phase3A](../App/Release_v20190413-phase3A.zip)...[Readme](../Readme/Readme_v20190413-phase3A.txt) : Flexible bank selection, Imec v4.3
 * [Release 20190327-phase3A](../App/Release_v20190327-phase3A.zip)...[Readme](../Readme/Readme_v20190327-phase3A.txt) : Fix names with dots, Imec v4.3
 * [Release 20190305-phase3A](../App/Release_v20190305-phase3A.zip)...[Readme](../Readme/Readme_v20190305-phase3A.txt) : 32 NI channels, Imec v4.3

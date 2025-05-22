@@ -77,17 +77,18 @@ Latest release highlights:
 - Supports the (now separate) MATLAB and C++ remote SDKs.
 - Has many GUI enhancements and better help.
 
->Important: Please read the `README` file for instructions regarding imec
-firmware versions.
+>Important: Please read the `README` file.
 
 * [Release 20250201-phase30](App/Release_v20250201-phase30.zip)...[Readme](Readme/Readme_v20250201-phase30.txt) : Replace 20241215, Waveplayer, imec v3.70.3
 
-**Xilinx Kintex versions not covered by 3.0**:
+>*Release downloads come with two executables*:
+>
+>- **SpikeGLX.exe**: *Runs {imec probes, OneBox, NI, FileViewer}, but you need
+to install NI drivers to run it*.
+>- **SpikeGLX_NISIM.exe**: *Runs {imec probes, OneBox, FileViewer} but not NI
+>hardware. Does not need NI drivers*.
 
-* [Release 20190724-phase3B1](App/Release_v20190724-phase3B1.zip)...[Readme](Readme/Readme_v20190724-phase3B1.txt) : Minor bug fixes, imec v5.1
-* [Release 20190724-phase3A](App/Release_v20190724-phase3A.zip)...[Readme](Readme/Readme_v20190724-phase3A.txt) : Minor bug fixes, imec v4.3
-
->Suggested organization: Create folder 'SpikeGLX' on your desktop or `C:\`
+> Suggested organization: Create folder 'SpikeGLX' on your desktop or `C:\`
 then download/unzip associated stuff into it. It's fine to have several
 versions there as long as you run one at a time:
 

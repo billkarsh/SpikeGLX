@@ -19,15 +19,15 @@
 <li>This tool updates only the normal images.</li>
 </ul>
 <h3 id="power-cycling">Power Cycling</h3>
-<p>Power cycling does not mean restart. Rather, we mean <code>shut down</code> the computer and make sure the chassis power is switched <code>fully off</code>, wait a few seconds, then power them on again. A full shutdown is required to complete a BS update.</p>
+<p>Power cycling the chassis means to switch it <code>fully off</code>, wait ~30 seconds, then power it on again. A full shutdown is required to complete a BS update. If your chassis is connected by Thunderbolt you can power cycle it without power cycling the PC. Otherwise, you will need to shut down the PC in order to shut down the chassis.</p>
 <h3 id="typical-update-procedure">Typical Update Procedure</h3>
 <ol style="list-style-type: decimal">
 <li><p>Select which slot you want to update.</p></li>
 <li><p>Check the box and select the file(s) for a BS and/or a BSC update. The files for this version of SpikeGLX are in the folder named <code>Firmware</code> that is included in your SpikeGLX release.</p></li>
 <li><p>Click <code>Update</code>.</p></li>
 <li><p>Check the Console (Log) window for any error messages.</p></li>
-<li><p>If you updated the BS you need to power cycle everything for the change to take effect. If you updated only the BSC you need to quit and restart SpikeGLX for the change to take effect.</p></li>
-<li><p>After cycling power, you'll be able to see which versions are installed when you click <code>Detect</code> in the <code>Configure Acquisition</code> dialog.</p></li>
+<li><p>If you updated the BS you need to power cycle the chassis for the change to take effect. After any update you need to quit and restart SpikeGLX for the change to take effect in the computer.</p></li>
+<li><p>After restarting, you'll be able to see which versions are installed when you click <code>Detect</code> in the <code>Configure Acquisition</code> dialog.</p></li>
 </ol>
 <h3 id="corruption">Corruption</h3>
 <p>If anything goes wrong during an update procedure, the normal image may be corrupted. Symptoms include:</p>
@@ -40,14 +40,14 @@
 <h3 id="recovery">Recovery</h3>
 <p>To get the BS working again you have to update the firmware. To update the firmware, you need a green light on the front panel of the module.</p>
 <ol style="list-style-type: decimal">
-<li><p>First, try power cycling everything. This won't fix the firmware but it will often recover enough function to allow the Update operation to access the module.</p></li>
+<li><p>First, try power cycling the chassis and restarting SpikeGLX. This won't fix the firmware but it will often recover enough function to allow the Update operation to access the module.</p></li>
 <li><p>After the restart, the first thing you should do is use the Update dialog to select the replacement firmware file(s) and click the Update button. Do not press <code>Detect</code> or try to run before fixing the firmware.</p></li>
 </ol>
 <blockquote>
-<p><strong>Important:</strong>: When the firmware is in a bad state, do not use the <code>Detect</code> button. Doing so will only lock up the BS again and require another power cycle.</p>
+<p><strong>Important</strong>: When the firmware is in a bad state, do not use the <code>Detect</code> button. Doing so will only lock up the BS again and require another power cycle.</p>
 </blockquote>
 <h3 id="secret-button">Secret Button</h3>
-<p>If that didn't get the update started, power cycle again while depressing the tiny button labeled <code>ISP</code> on the front of the module. This tells the module to boot the golden image, which should then allow using the Update dialog as in step (2) above. However, when you use the <code>ISP</code> switch like this, the safest thing to do is to <strong>update both the BS and BSC</strong>.</p>
+<p>If that didn't get the update started, power cycle again while depressing the tiny button labeled <code>ISP</code> on the front of the module. This tells the module to boot the golden image, which should then allow using the Update dialog as in step (2) above. However, when you use the <code>ISP</code> switch like this, you must <strong>update both the BS and BSC</strong>.</p>
 <p><em>fin</em></p>
 </body>
 </html>

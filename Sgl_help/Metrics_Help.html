@@ -18,8 +18,7 @@
 <pre><code>GOOD: No entries in this section.
 BAD:  Any entries in this section.</code></pre>
 <p>For each imec stream we monitor the cumulative count of several error flags, hence, imec05 denotes the flags for probe steam 5. Note that quad-base probes (part number NP2020) record flags for each shank, hence, quad03-2 denotes that stream 3 is a quad-probe and the flags are from shank 2.</p>
-<p>The flags are labeled {COUNT, SERDES, LOCK, POP, SYNC}.</p>
-<p>Any instances of these errors implies that samples have been dropped. It is not possible to tell how many samples are dropped from these counts. All you can tell is that some of the data being transmitted from the device are corrupt or missing.</p>
+<p>The flags are labeled {COUNT, SERDES, LOCK, POP, SYNC, MISS}.</p>
 <p>These flags correspond to bits of the status/SYNC word that is visible as the last channel in the graphs and in your recorded data (quad-probes have 4 separate status words):</p>
 <pre><code>bit 0: Acquisition start trigger received
 bit 1: not used
@@ -28,9 +27,12 @@ bit 3: SERDES error
 bit 4: LOCK error
 bit 5: POP error
 bit 6: Synchronization waveform
-bit 7: SYNC error (unrelated to sync waveform)</code></pre>
+bit 7: SYNC error (unrelated to sync waveform)
+bit 11: MISS missed sample</code></pre>
+<p>The MISS field counts the total number of samples that the hardware has missed due to any of the other error types. SpikeGLX inserts zeros into the stream to replace missed samples, and each of those samples has the MISS bit set in the status word.</p>
+<p>The inserts are recorded in a file at the top level of your data directory. The name of the file will be &quot;runname.missed_samples.imecj.txt&quot; for probe-j or &quot;runname.missed_samples.obxj.txt&quot; for OneBox ADC stream-j. There is an entry in the file for each inserted run of zeros. The entries have the form: <sample,nzeros>, that is, the first value is the sample number at which the zeros are inserted (measured from the start of the acquisition run) and the second value is the number of inserted zeros. Each inserted sample is all zeros except for the status word(s) which set bit 11 and extend the flags from the neighbor status words.</p>
 <blockquote>
-<p>It may be possible to see which region of recorded data experienced these errors if you see blips on those bits.</p>
+<p>It is possible to see which region of recorded data experienced these errors if you see blips on those bits.</p>
 </blockquote>
 <hr />
 <h2 id="acquisition-fifo-filling">Acquisition: FIFO Filling</h2>
@@ -40,10 +42,13 @@ BAD:  Greater than 20% full.</code></pre>
 <p>If the level rises to 95% full for any stream SpikeGLX will stop the run before an overflow (data loss) occurs.</p>
 <hr />
 <h2 id="acquisition-worker-thread-activity">Acquisition: Worker Thread Activity</h2>
-<pre><code>GOOD: Lower than   75% active.
-BAD:  Greater than 90% active.</code></pre>
+<pre><code>GOOD: Lower than   75% active. // if NP1.0 or NP2.0
+BAD:  Greater than 90% active. // if NP1.0 or NP2.0</code></pre>
 <p>This is akin to CPU activity level you may be familiar with in the Windows Task Manager. SpikeGLX runs one or more worker threads (sub-processes). Each worker is responsible for acquiring data from between one and three probes/OneBoxes, and it marshals those data into the history streams where you can graph it, record it, and so on. The workers check for fresh data to process about 500 times per second to keep the latency low. When there isn't much to do, a worker sleeps and allows other threads more time to do their jobs. This metric shows the percentage of time that a stream, really, its worker, is awake and processing data.</p>
 <p>If the system is running very comfortably the workers will easily handle their task and be able to snooze often. If the system is struggling and work is piling up the workers will have to go into overtime to catch up. If SpikeGLX can not catch up, the run may be stopped due to a FIFO overflow or other exceeded limit.</p>
+<blockquote>
+<p>Note: High channel count probes, like quad-base NP202X or NXT NP30XX, need more worker activity to keep up. Values greater than 75% are considered normal for these probes.</p>
+</blockquote>
 <blockquote>
 <p>Note: If you check the <code>Low latency</code> box on the <code>IM Setup</code> tab of the <code>Configure</code> dialog, the data fetching workers run at full speed without yielding. The activity will be reported as a normal 100%.</p>
 </blockquote>

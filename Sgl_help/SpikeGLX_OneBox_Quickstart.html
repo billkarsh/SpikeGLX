@@ -10,7 +10,7 @@
 </head>
 <body>
 <h1 id="spikeglx-onebox-quickstart">SpikeGLX OneBox Quickstart</h1>
-<p><em>&gt;&gt; Updated: December 19, 2024 &lt;&lt;</em></p>
+<p><em>&gt;&gt; Updated: April 10, 2025 &lt;&lt;</em></p>
 <p><em>&gt;&gt; AO (DAC) and WavePlayer enabled in SpikeGLX &lt;&lt;</em></p>
 <p><strong>Topics</strong>:</p>
 <ul>
@@ -33,6 +33,7 @@
 </ul></li>
 </ul></li>
 <li><a href="#driver-installation">Driver Installation</a></li>
+<li><a href="#spikeglx_nisim">SpikeGLX_NISIM</a></li>
 <li><a href="#assign-a-slot">Assign a Slot</a></li>
 <li><a href="#data-streams-files-formats">Data Streams, Files, Formats</a></li>
 <li><a href="#sample-rate-calibration">Sample Rate, Calibration</a></li>
@@ -71,6 +72,21 @@
 <li>You can run a mixture of OneBoxes and PXIe basestations (a.k.a. &quot;modules&quot;) in the same SpikeGLX run.</li>
 <li>CatGT and TPrime work with OneBox data files.</li>
 </ul>
+<blockquote>
+<p>Notes:</p>
+<ol style="list-style-type: decimal">
+<li><p>Follow the guidelines called &quot;Screen Saver and Power Settings&quot; in the SpikeGLX UserManual <a href="UserManual.html#screen-saver-and-power-settings">here</a>. Especially, set <code>USB settings/USB selective suspend setting: Disable</code>.</p></li>
+<li><p>If you have any issues:</p></li>
+</ol>
+<ul>
+<li>Your OneBox ADC stream sample rate is very different from the 30300 Hz expected rate,</li>
+<li>You can't detect probes,</li>
+<li>You're getting messages that the Gate configuration timed out,</li>
+<li>You're not getting samples at run start,</li>
+<li>You're getting pop errors or missing samples.</li>
+</ul>
+<p>Then you should try other ports on this or another PC.</p>
+</blockquote>
 <hr />
 <h1 id="hardware-tour">Hardware Tour</h1>
 <h2 id="back-panel">Back Panel</h2>
@@ -120,10 +136,10 @@
 <li>ADC connector: access to analog input channel-0.</li>
 </ul>
 <h3 id="status-lights">Status lights</h3>
-<p>Briefly:</p>
+<p>Briefly, (soft blinking or steady):</p>
 <ul>
 <li>Off: not powered</li>
-<li>Red: not connected</li>
+<li>Red: not connected, or idle</li>
 <li>Green: connected</li>
 <li>Blue: acquiring, normal</li>
 <li>Purple: acquiring, buffer overflow</li>
@@ -156,6 +172,13 @@
 <li>ADC channels are accessed via the breakout board or the front panel ADC SMA.</li>
 <li>ADC voltage is selectable using the Obx tab in SpikeGLX: +/- {2.5, 5, 10} V.</li>
 </ul>
+<blockquote>
+<p><em>Notes:</em></p>
+<ol style="list-style-type: decimal">
+<li><p><em>The ADC inputs have pull-up resistors. The voltage will appear to be between 1.7 and 2 V on an unconnected channel. However, connected channels will read accurately.</em></p></li>
+<li><p><em>The ADC channels are multiplexed, so there may be a small crosstalk voltage visible on any unconnected channel. That's not an issue if you are not using that channel, but you can make that disappear by either connecting an input to that channel or by putting a 50-ohm terminator on it.</em></p></li>
+</ol>
+</blockquote>
 <p><strong>DAC outputs</strong></p>
 <ul>
 <li>DAC channels are accessed via the breakout board or the front panel DAC SMA.</li>
@@ -208,6 +231,13 @@
 <p>Note: Once a driver is installed, the Device Manager entry like Fig 1. will vanish. That's normal.</p>
 </blockquote>
 <hr />
+<h1 id="spikeglx_nisim">SpikeGLX_NISIM</h1>
+<p>Release downloads come with two executables:</p>
+<ul>
+<li><strong>SpikeGLX.exe</strong>: Runs {imec probes, OneBox, NI, FileViewer}, but you need to install NI drivers to run it.</li>
+<li><strong>SpikeGLX_NISIM.exe</strong>: Runs {imec probes, OneBox, FileViewer} but not NI hardware. Does not need NI drivers.</li>
+</ul>
+<hr />
 <h1 id="assign-a-slot">Assign a Slot</h1>
 <p>Some motivating background. In the beginning you bought a PXI basestation module which you installed into a <strong>slot</strong> of your PXI chassis. Each module had four <strong>ports</strong> for plugging in headstages. The imec software references the headstages in your system according to their <strong>(slot,port)</strong> address.</p>
 <p>Now come OneBoxes, which are basestations in a new package, although these have two instead of four ports. As we said, you can do a run with some probes plugged into PXI modules and some in OneBoxes. In order to unify things, we ask you to assign a slot number to each OneBox. This way, you are running a set of headstages of given <strong>(slot,port)</strong> regardless of where you plugged them in.</p>
@@ -253,7 +283,7 @@
 <h1 id="data-streams-files-formats">Data Streams, Files, Formats</h1>
 <p>Please read the User Manual, but at least read these sections:</p>
 <ul>
-<li><a href="UserManual.html#data-stream">Data Steam</a></li>
+<li><a href="UserManual.html#data-stream">Data Stream</a></li>
 <li><a href="UserManual.html#supported-streams">Supported Streams</a></li>
 <li><a href="UserManual.html#channel-naming-and-ordering">Channel Naming and Ordering</a></li>
 <li><a href="UserManual.html#output-file-format-and-tools">Output File Format and Tools</a></li>
