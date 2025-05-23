@@ -9,6 +9,7 @@
 #include "DataFile.h"
 #include "SignalBlocker.h"
 
+#include <QFileDialog>
 #include <QSettings>
 
 
@@ -133,6 +134,7 @@ void FVShankViewTab::init( const ShankMap *map )
     ConnectUI( fvTabUI->chanBut, SIGNAL(clicked()), this, SLOT(chanBut()) );
     ConnectUI( fvTabUI->shanksChk, SIGNAL(clicked(bool)), this, SLOT(shanksCheck(bool)) );
     ConnectUI( fvTabUI->tracesChk, SIGNAL(clicked(bool)), this, SLOT(tracesCheck(bool)) );
+    ConnectUI( fvTabUI->expBut, SIGNAL(clicked()), this, SLOT(expBut()) );
     ConnectUI( fvTabUI->helpBut, SIGNAL(clicked()), this, SLOT(helpBut()) );
 
     mapChanged( map );
@@ -168,8 +170,10 @@ QString FVShankViewTab::getLbl( int s, int r )
 void FVShankViewTab::mapChanged( const ShankMap *map )
 {
     if( !fvTabUI->howCB->currentIndex() ) {
-        heat.updateMap( map );
-        SC->view()->setShankMap( map );
+        SC->drawMtx.lock();
+            heat.updateMap( map );
+            SC->view()->setShankMap( map );
+        SC->drawMtx.unlock();
     }
 }
 
@@ -330,8 +334,10 @@ void FVShankViewTab::howChanged( int i )
             makeWorldMap();
 
         SC->view()->setSel( -1 );
-        SC->view()->setShankMap( MW );
-        color();
+        SC->drawMtx.lock();
+            SC->view()->setShankMap( MW );
+            color();
+        SC->drawMtx.unlock();
         emit dynamic_cast<FVShankCtl*>(SC)->selChanged( sel );
     }
     else {
@@ -348,9 +354,12 @@ void FVShankViewTab::updtBut()
     FileViewerWindow *f = dynamic_cast<FileViewerWindow*>(SC->parent());
 
     if( f ) {
-        svySums[set.what] =
-            f->svyAllBanks( set.what, set.thresh, set.inarow );
-        color();
+        SC->drawMtx.lock();
+            svySums[set.what] =
+                f->svyAllBanks( set.what, set.thresh, set.inarow );
+            color();
+        SC->drawMtx.unlock();
+        SC->setStatus( "Updated" );
     }
 }
 
@@ -358,18 +367,23 @@ void FVShankViewTab::updtBut()
 void FVShankViewTab::whatChanged( int i )
 {
     SC->drawMtx.lock();
+
         set.what = i;
         SignalBlocker   b0(fvTabUI->rngSB);
         fvTabUI->TSB->setEnabled( !i );
         fvTabUI->inarowSB->setEnabled( !i );
         fvTabUI->rngSB->setValue( set.rng[i] );
-    SC->drawMtx.unlock();
-    SC->saveSettings();
+        SC->saveSettings();
 
-    if( fvTabUI->howCB->currentIndex() )
-        color();
-    else
-        emit dynamic_cast<FVShankCtl*>(SC)->feedMe( false );
+        if( fvTabUI->howCB->currentIndex() ) {
+            color();
+            SC->drawMtx.unlock();
+            return;
+        }
+
+    SC->drawMtx.unlock();
+
+    emit dynamic_cast<FVShankCtl*>(SC)->feedMe( false );
 }
 
 
@@ -424,6 +438,51 @@ void FVShankViewTab::tracesCheck( bool on )
     set.colorTraces = on;
     SC->saveSettings();
     emit SC->gimmeTraces();
+}
+
+
+void FVShankViewTab::expBut()
+{
+    const double    *pSvy   = svySums[set.what];
+    int             how     = fvTabUI->howCB->currentIndex();
+
+// Something to export?
+
+    if( how && !pSvy ) {
+        SC->setStatus( "Click Update!" );
+        ::Beep( 440, 200 );
+        return;
+    }
+
+// Select file
+
+    QString fn = QFileDialog::getSaveFileName(
+                    SC,
+                    "Save exported heatmap",
+                    "",
+                    "Text files (*.txt)" );
+
+    if( !fn.length() )
+        return;
+
+// Open file
+
+    QFile   f( fn );
+
+    if( f.open( QIODevice::WriteOnly | QIODevice::Text ) ) {
+
+        // Write file
+        SC->drawMtx.lock();
+            const double *src = (how ? pSvy : heat.sums() );
+            dynamic_cast<FVShankCtl*>(SC)->exportHeat( &f, src );
+        SC->drawMtx.unlock();
+        SC->setStatus( "Export done" );
+    }
+    else {
+        QFileInfo   fi( fn );
+        SC->setStatus( QString("Error opening '%1'").arg( fi.fileName() ) );
+        return;
+    }
 }
 
 

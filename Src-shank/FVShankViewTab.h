@@ -111,6 +111,7 @@ private slots:
     void chanBut();
     void shanksCheck( bool on );
     void tracesCheck( bool on );
+    void expBut();
     void helpBut();
 
 private:

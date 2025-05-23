@@ -71,11 +71,16 @@ in the same SpikeGLX run.
 SpikeGLX UserManual [here](UserManual.html#screen-saver-and-power-settings).
 Especially, set `USB settings/USB selective suspend setting: Disable`.
 >
->(2) If you have either of these two issues: (A) Your OneBox ADC stream
-sample rate is very different from the 30300 Hz expected rate, or, (B)
-You're getting messages about not getting samples from the ADC stream or the
-probes plugged into the OneBox, then you should try other ports on this or
-another PC.
+>(2) If you have any issues:
+>
+>- Your OneBox ADC stream sample rate is very different from the 30300 Hz
+expected rate,
+>- You can't detect probes,
+>- You're getting messages that the Gate configuration timed out,
+>- You're not getting samples at run start,
+>- You're getting pop errors or missing samples.
+>
+>Then you should try other ports on this or another PC.
 
 --------
 

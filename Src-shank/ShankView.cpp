@@ -103,14 +103,14 @@ void ShankView::setImro( const IMROTbl *R )
 {
     QMutexLocker    ml( &dataMtx );
 
-    col2vis_ev = R->col2vis_ev;
-    col2vis_od = R->col2vis_od;
+    col2vis_ev = R->col2vis_ev();
+    col2vis_od = R->col2vis_od();
 
     int nC = R->nCol_vis();
     vis_evn.assign( nC, 0 );
     vis_odd.assign( nC, 0 );
 
-    nC = R->col2vis_ev.size();
+    nC = col2vis_ev.size();
     for( int ic = 0; ic < nC; ++ic ) {
         vis_evn[col2vis_ev[ic]] = 1;
         vis_odd[col2vis_od[ic]] = 1;

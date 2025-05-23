@@ -82,11 +82,9 @@ typedef const std::vector<IMRO_ROI>&    tconstImroROIs;
 //
 struct IMROTbl
 {
-    friend class ShankView;
-
 protected:
-    std::vector<int>    col2vis_ev,
-                        col2vis_od;
+    std::vector<int>    _col2vis_ev,
+                        _col2vis_od;
     float               _shankpitch,    // microns for phys dims
                         _shankwid,
                         _tiplength,
@@ -119,6 +117,8 @@ public:
             float x0OddRow() const      {return _x0_od;}
             int nCol_hwr() const        {return _ncolhwr;}
             int nCol_vis() const        {return _ncolvis;}
+    std::vector<int> col2vis_ev() const {return _col2vis_ev;}
+    std::vector<int> col2vis_od() const {return _col2vis_od;}
             int nRow() const            {return nElecPerShank()/_ncolhwr;}
     virtual int nChan() const = 0;
     virtual int nAP() const = 0;

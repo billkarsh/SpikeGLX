@@ -4,6 +4,8 @@
 #include "ShankCtlBase.h"
 #include "FVShankViewTab.h"
 
+class QFile;
+
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -27,6 +29,8 @@ public:
     void putInit()                          {svTab->putInit();}
     void putSamps( const vec_i16 &_data )   {svTab->putSamps( _data );}
     void putDone()                          {svTab->putDone();}
+
+    virtual void exportHeat( QFile *f, const double *val ) = 0;
 
 signals:
     void selChanged( int ig );

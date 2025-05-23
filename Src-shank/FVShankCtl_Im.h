@@ -17,6 +17,7 @@ public:
     virtual void setAnatomyPP( const QString &elems, int sk );
     virtual void colorTraces( MGraphX *theX, std::vector<MGraphY> &vY );
     virtual QString getLbl( int s, int r );
+    virtual void exportHeat( QFile *f, const double *val );
 
 protected:
     QString settingsName() const;

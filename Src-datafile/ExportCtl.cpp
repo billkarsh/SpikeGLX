@@ -208,6 +208,9 @@ void ExportCtl::browseBut()
             types.join( ";;" ),
             &types[E.fmtR] );
 
+    if( !f.length() )
+        return;
+
 // sync file-type and format-radio
 
     QString suff = DFName::justExtension( f );

@@ -33,17 +33,17 @@ IMROTbl_T1221::IMROTbl_T1221( const QString &pn )
     _ncolhwr    = S.value( "n_physical_columns", 2 ).toInt();
     _ncolvis    = S.value( "n_GUI_columns", 4 ).toInt();
 
-    col2vis_ev.clear();
+    _col2vis_ev.clear();
     s  = S.value( "occupied_GUI_columns_on_even_rows", "1 3" ).toString();
     sl = s.split( QRegExp("\\s+"), QString::SkipEmptyParts );
     for( int i = 0, n = sl.size(); i < n; ++i )
-        col2vis_ev.push_back( sl.at( i ).toInt() );
+        _col2vis_ev.push_back( sl.at( i ).toInt() );
 
-    col2vis_od.clear();
+    _col2vis_od.clear();
     s  = S.value( "occupied_GUI_columns_on_odd_rows", "0 2" ).toString();
     sl = s.split( QRegExp("\\s+"), QString::SkipEmptyParts );
     for( int i = 0, n = sl.size(); i < n; ++i )
-        col2vis_od.push_back( sl.at( i ).toInt() );
+        _col2vis_od.push_back( sl.at( i ).toInt() );
 
     _x0_ev   = S.value( "offset_to_first_site_center_on_even_rows_um_float", 56.5f ).toFloat();
     _x0_od   = S.value( "offset_to_first_site_center_on_odd_rows_um_float", 36.5f ).toFloat();
