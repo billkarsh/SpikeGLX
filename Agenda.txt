@@ -6,6 +6,7 @@
 + Support NP1.0 probe PRB_1_2_480_2.
 + Improve IMRO file error reporting.
 + Fix immediate gate start sensitivity.
++ Add settle time control to survey mode.
 + Add Export (heatmap) button to ShankView.
 
 20250225

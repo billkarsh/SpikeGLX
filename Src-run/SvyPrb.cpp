@@ -151,9 +151,11 @@ void SvyPrbRun::initRun()
 }
 
 
-int SvyPrbRun::msPerBnk()
+int SvyPrbRun::msPerBnk( bool first )
 {
-    return 1000 * oldParams.im.prbAll.svySecPerBnk;
+    return 1000 *
+            (oldParams.im.prbAll.svySecPerBnk +
+            (first ? oldParams.im.prbAll.svySettleSec : 0));
 }
 
 

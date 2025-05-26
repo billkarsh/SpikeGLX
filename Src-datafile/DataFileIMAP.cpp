@@ -61,6 +61,18 @@ void DataFileIMAP::locFltRadii( int &rin, int &rout, int iflt ) const
 }
 
 
+int DataFileIMAP::svySettleSecs() const
+{
+    KVParams::const_iterator    it;
+    int                         secs = 0;
+
+    if( (it = kvp.find( "imSvySettleSec" )) != kvp.end() )
+        secs = it.value().toInt();
+
+    return qMax( secs, 2 );
+}
+
+
 ShankMap* DataFileIMAP::shankMap_svy( int shank, int bank )
 {
     ShankMap    *shankMap = new ShankMap;
@@ -194,6 +206,7 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imLowLatency"]     = p.im.prbAll.lowLatency;
     kvp["imTrgSource"]      = p.im.prbAll.trgSource;
     kvp["imTrgRising"]      = p.im.prbAll.trgRising;
+    kvp["imSvySettleSec"]   = p.im.prbAll.svySettleSec;
     kvp["imSvySecPerBnk"]   = p.im.prbAll.svySecPerBnk;
     kvp["imIsSvyRun"]       = p.im.prbAll.isSvyRun;
     kvp["imroFile"]         = E.imroFile;

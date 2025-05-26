@@ -82,6 +82,9 @@ void Config_imtab::toGUI( const DAQ::Params &p )
     imTabUI->trgSrcCB->setEnabled( false );
     imTabUI->trgEdgeCB->setEnabled( false );
 
+    imTabUI->svySettleSB->setValue( p.im.prbAll.svySettleSec );
+    imTabUI->svySettleSB->setEnabled( false );
+
     imTabUI->svySecsSB->setValue( p.im.prbAll.svySecPerBnk );
     imTabUI->svySecsSB->setEnabled( false );
 
@@ -132,6 +135,7 @@ void Config_imtab::fromGUI( DAQ::Params &q )
     q.im.prbAll.lowLatency      = imTabUI->lowLatChk->isChecked();
     q.im.prbAll.trgSource       = imTabUI->trgSrcCB->currentIndex();
     q.im.prbAll.trgRising       = imTabUI->trgEdgeCB->currentIndex();
+    q.im.prbAll.svySettleSec    = imTabUI->svySettleSB->value();
     q.im.prbAll.svySecPerBnk    = imTabUI->svySecsSB->value();
     q.im.prbAll.isSvyRun        = imTabUI->svyChk->isChecked();
     q.im.prbAll.qf_on           = imTabUI->qfGB->isChecked();
@@ -330,6 +334,7 @@ void Config_imtab::svyChkClicked( bool scroll )
         enab    = false;
     }
 
+    imTabUI->svySettleSB->setEnabled( enab );
     imTabUI->svySecsSB->setEnabled( enab );
     selectionChanged();
 

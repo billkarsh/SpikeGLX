@@ -864,12 +864,12 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
     const double    *sums;
     const IMROTbl   *R = df->imro();
     const ShankMap  *m = df->shankMap_svy( 0, 0 );
-                    // f0 = file pos, where to read, start 2 seconds in
+                    // f0 = file pos, where to read, at least 2 seconds in
                     // fL = limit for this bank (transition start, or EOF)
                     // fr = read length = 0.5 seconds
                     // fd = delta, step to next read = 1.5 seconds
                     // fn = number of reads per bank (4 max)
-    qint64          f0 = int(2.0*df->samplingRateHz()),
+    qint64          f0 = int(df->svySettleSecs()*df->samplingRateHz()),
                     fL = (SVY.nmaps > 1 ? SVY.e[0].t1 : qint64(df->sampCount()));
     int             fr = int(0.5*df->samplingRateHz()),
                     fd = 3 * fr,
@@ -918,7 +918,7 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
             // new bank
 
             const SvySBTT   &M = SVY.e[im - 1];
-            f0  = M.t2;
+            f0  = M.t2 + (what == 2 ? int(2.0*df->samplingRateHz()) : 0);
             fL  = (im < SVY.nmaps - 1 ? SVY.e[im].t1 : qint64(df->sampCount()));
             fn  = 0;
             ib  = M.b;

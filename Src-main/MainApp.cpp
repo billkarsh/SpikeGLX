@@ -1602,7 +1602,7 @@ void MainApp::rsStarted()
     }
     else if( svyPrbRun ) {
         QTimer::singleShot(
-            svyPrbRun->msPerBnk(), this, SLOT(runUpdateSvyTimer()) );
+            svyPrbRun->msPerBnk( true ), this, SLOT(runUpdateSvyTimer()) );
     }
 }
 

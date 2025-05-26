@@ -37,10 +37,17 @@ the `Run` button in the configuration dialog.
 
 ### Survey all probe banks
 
-To do a run that is automatically customized for whole-probe surveys,
-check the box in this item group and select the number of seconds to
-record in each bank. The entire surface of each selected probe will be
-sampled: shank-0:[bank-0..bank-max], shank-1:[bank-0..bank-max], etc.
+To do a run that is automatically customized for whole-probe surveys:
+
+- Check the box in this item group.
+- Select the number of seconds to allow probes to settle when run starts;
+(this is added to the recording time of the first bank).
+- Select the number of seconds to record in each bank.
+
+The entire surface of each selected probe will be sampled:
+shank-0:[bank-0..bank-max], shank-1:[bank-0..bank-max], etc.
+
+>*NXT probes use a block pattern covering them with fewest steps.*
 
 Although the survey controls the selected sites (looping over shanks and
 banks), it adopts the reference, gain, and highpass filter settings set

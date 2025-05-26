@@ -142,27 +142,7 @@
          <property name="verticalSpacing">
           <number>6</number>
          </property>
-         <item row="0" column="1">
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>    Secs per bank</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="3">
-          <spacer name="horizontalSpacer_4">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>100</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item row="0" column="2">
+         <item row="0" column="4">
           <widget class="QSpinBox" name="svySecsSB">
            <property name="sizePolicy">
             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -177,7 +157,7 @@
             <number>1000</number>
            </property>
            <property name="value">
-            <number>40</number>
+            <number>35</number>
            </property>
           </widget>
          </item>
@@ -194,6 +174,49 @@
            </property>
            <property name="text">
             <string>Use next run for probe survey</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="5">
+          <spacer name="horizontalSpacer_4">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>100</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="0" column="3">
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>  Secs per bank</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLabel" name="label_6">
+           <property name="text">
+            <string>  Run-start settle secs</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QSpinBox" name="svySettleSB">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximum">
+            <number>1000</number>
+           </property>
+           <property name="value">
+            <number>2</number>
            </property>
           </widget>
          </item>
@@ -639,6 +662,7 @@
   <tabstop>trgSrcCB</tabstop>
   <tabstop>trgEdgeCB</tabstop>
   <tabstop>svyChk</tabstop>
+  <tabstop>svySettleSB</tabstop>
   <tabstop>svySecsSB</tabstop>
   <tabstop>qfGB</tabstop>
   <tabstop>qfSecsCB</tabstop>

@@ -298,6 +298,7 @@ public:
                 qf_hiCutStr;
         int     calPolicy,  // {0=required,1=avail,2=never}
                 trgSource,  // {0=software,1=SMA}
+                svySettleSec,
                 svySecPerBnk;
         bool    lowLatency,
                 trgRising,
@@ -307,9 +308,9 @@ public:
 
         PrbAll()
         :   qf_secsStr( ".5" ), qf_loCutStr( "300" ), qf_hiCutStr( "9000" ),
-            calPolicy(0), trgSource(0), svySecPerBnk(35), lowLatency(false),
-            trgRising(true), bistAtDetect(true), isSvyRun(false),
-            qf_on(true) {}
+            calPolicy(0), trgSource(0), svySettleSec(2), svySecPerBnk(35),
+            lowLatency(false), trgRising(true), bistAtDetect(true),
+            isSvyRun(false), qf_on(true)    {}
 
         void loadSettings( QSettings &S );
         void saveSettings( QSettings &S ) const;

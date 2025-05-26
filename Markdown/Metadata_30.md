@@ -1110,6 +1110,8 @@ its own shank (with tips pointing down, shank-0 is left-most).
 The list of survey transitions:
 (shank, bank, start-time(samples), end-time(samples)).
 
+The end-times indicate when the amplifiers have settled (more or less).
+
 --------
 
 ## Obx

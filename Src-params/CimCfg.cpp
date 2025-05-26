@@ -1198,6 +1198,7 @@ void CimCfg::PrbAll::loadSettings( QSettings &S )
     qf_hiCutStr     = S.value( "imQfHiCut", "9000" ).toString();
     calPolicy       = S.value( "imCalPolicy", 0 ).toInt();
     trgSource       = S.value( "imTrgSource", 0 ).toInt();
+    svySettleSec    = S.value( "imSvySettleSec", 2 ).toInt();
     svySecPerBnk    = S.value( "imSvySecPerBnk", 35 ).toInt();
     lowLatency      = S.value( "imLowLatency", false ).toBool();
     trgRising       = S.value( "imTrgRising", true ).toBool();
@@ -1214,6 +1215,7 @@ void CimCfg::PrbAll::saveSettings( QSettings &S ) const
     S.setValue( "imQfHiCut", qf_hiCutStr );
     S.setValue( "imCalPolicy", calPolicy );
     S.setValue( "imTrgSource", trgSource );
+    S.setValue( "imSvySettleSec", svySettleSec );
     S.setValue( "imSvySecPerBnk", svySecPerBnk );
     S.setValue( "imLowLatency", lowLatency );
     S.setValue( "imTrgRising", trgRising );

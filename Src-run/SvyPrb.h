@@ -50,7 +50,7 @@ public:
     SvyPrbRun() : QObject(0), irunbank(0), nrunbank(0) {}
 
     void initRun();
-    int msPerBnk();
+    int msPerBnk( bool first = false );
     bool nextBank();
 
 public slots:
