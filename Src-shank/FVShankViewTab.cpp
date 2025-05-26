@@ -209,7 +209,7 @@ void FVShankViewTab::putInit()
         return;
 
     SC->drawMtx.lock();
-        heat.accumReset( true );
+        heat.accumReset( true, set.what );
     SC->drawMtx.unlock();
 }
 
@@ -249,7 +249,7 @@ void FVShankViewTab::putDone()
         if( set.what == 0 )
             heat.normSpikes();
         else if( !heat.normPkPk( set.what ) )
-            SC->setStatus( "Set LFP time span > 48 ms" );
+            SC->setStatus( "Set LFP time span > 2 seconds" );
         color();
     SC->drawMtx.unlock();
 }

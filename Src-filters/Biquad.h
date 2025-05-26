@@ -77,21 +77,6 @@ public:
 };
 
 /* ---------------------------------------------------------------- */
-/* Macros --------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-// IMPORTANT!!
-// -----------
-// The Biquad maintains state data from its previous application.
-// When applied to contiguous data streams there's no problem. If
-// applied for the first time, or after a gap in the data, there
-// will be a significant transient oscillation that dies down to
-// below-noise levels in (conservatively) 120 timepoints.
-
-
-#define BIQUAD_TRANS_WIDE  120
-
-/* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -113,6 +98,12 @@ enum BiquadType {
 //
 // Fc is a normalized cutoff frequency. E.g., for sample rate 20kHz
 // and desired cutoff 300Hz, set Fc = 300/20000.
+//
+// The Biquad maintains state data from its previous application.
+// When applied to contiguous data streams there's no problem. If
+// applied for the first time, or after a gap in the data, there
+// will be a significant transient oscillation that dies down to
+// below-noise levels in ~1/Fc timepoints.
 //
 // The bandpass option doesn't allow separate low/high edge specs.,
 // so instead, run highpass followed by lowpass. This is tested and
@@ -141,6 +132,7 @@ public:
     int  getType()  {return type;}
     void setQ( double Q );
     void setFc( double Fc );
+    int  getTransWide();
     void setPeakGain( double peakGainDB );
     void setBiquad(
         int     type,

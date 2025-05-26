@@ -866,13 +866,13 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
     const ShankMap  *m = df->shankMap_svy( 0, 0 );
                     // f0 = file pos, where to read, at least 2 seconds in
                     // fL = limit for this bank (transition start, or EOF)
-                    // fr = read length = 0.5 seconds
-                    // fd = delta, step to next read = 1.5 seconds
+                    // fr = read length = 0.5 seconds AP, 3.0 seconds LF
+                    // fd = delta, step to next read
                     // fn = number of reads per bank (4 max)
     qint64          f0 = int(df->svySettleSecs()*df->samplingRateHz()),
                     fL = (SVY.nmaps > 1 ? SVY.e[0].t1 : qint64(df->sampCount()));
-    int             fr = int(0.5*df->samplingRateHz()),
-                    fd = 3 * fr,
+    int             fr = int((what == 2 ? 3.0 : 0.5)*df->samplingRateHz()),
+                    fd = fr + (what == 2 ? fr/2 : 2*fr),
                     fn = 0,
                     is = 0,
                     ib = 0,
@@ -942,7 +942,7 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
             DS.read( idata, f0, fr );
             ++fn;
 
-            heat.accumReset( true );
+            heat.accumReset( true, what );
 
             switch( what ) {
                 case 0:
@@ -3286,7 +3286,7 @@ void FileViewerWindow::updateGraphs()
     bool    sAveLocal   = false;
 
     if( tbGetBandSel() )
-        xflt = qMin( qint64(BIQUAD_TRANS_WIDE), pos );
+        xflt = qMin( qint64(hipass->getTransWide()), pos );
     else
         xflt = 0;
 

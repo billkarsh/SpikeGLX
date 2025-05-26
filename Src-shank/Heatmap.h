@@ -50,11 +50,11 @@ public:
 
     void updateMap( const ShankMap *S );
 
-    void resetFilter();
+    void resetFilter( int what );
     void apFilter( vec_i16 &odata, const vec_i16 &idata, quint64 headCt );
     void lfFilter( vec_i16 &odata, const vec_i16 &idata );
 
-    void accumReset( bool resetFlt );
+    void accumReset( bool resetFlt, int what );
     void accumSpikes( const vec_i16 &data, int thresh, int inarow );
     void accumPkPk( const vec_i16 &data );
     void normSpikes();

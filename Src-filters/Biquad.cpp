@@ -24,6 +24,7 @@
 #include <math.h>
 #include <string.h>
 
+
 /* ---------------------------------------------------------------- */
 /* Threading helpers ---------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -142,6 +143,12 @@ void Biquad::setFc( double Fc )
 {
     this->Fc = Fc;
     calcBiquad();
+}
+
+
+int Biquad::getTransWide()
+{
+    return int(1.0 / Fc);
 }
 
 

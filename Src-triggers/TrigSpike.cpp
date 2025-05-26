@@ -163,7 +163,8 @@ TrigSpike::HiPassFnctr::~HiPassFnctr()
 
 void TrigSpike::HiPassFnctr::reset()
 {
-    nzero = BIQUAD_TRANS_WIDE;
+    if( flt )
+        nzero = flt->getTransWide();
 }
 
 

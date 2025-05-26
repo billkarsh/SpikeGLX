@@ -187,7 +187,7 @@ void SVShankViewTab::putSamps( const vec_i16 &_data, quint64 headCt )
 
         if( done ) {
             color();
-            resetAccum();
+            resetAccum( false );
         }
     SC->drawMtx.unlock();
 }
@@ -195,7 +195,7 @@ void SVShankViewTab::putSamps( const vec_i16 &_data, quint64 headCt )
 
 void SVShankViewTab::winClosed()
 {
-    heat.resetFilter();
+    heat.resetFilter( set.what );
 }
 
 /* ---------------------------------------------------------------- */
@@ -233,7 +233,7 @@ void SVShankViewTab::whatChanged( int i )
         svTabUI->TSB->setEnabled( !i );
         svTabUI->inarowSB->setEnabled( !i );
         svTabUI->rngSB->setValue( set.rng[i] );
-        resetAccum();
+        resetAccum( true );
         SC->scroll()->theV->colorPads( heat.sums(), 1e99 );
         SC->update();
     SC->drawMtx.unlock();
@@ -245,7 +245,7 @@ void SVShankViewTab::threshChanged( int t )
 {
     SC->drawMtx.lock();
         set.thresh = -t;
-        resetAccum();
+        resetAccum( false );
     SC->drawMtx.unlock();
     SC->saveSettings();
 }
@@ -255,7 +255,7 @@ void SVShankViewTab::inarowChanged( int s )
 {
     SC->drawMtx.lock();
         set.inarow = s;
-        resetAccum();
+        resetAccum( false );
     SC->drawMtx.unlock();
     SC->saveSettings();
 }
@@ -321,13 +321,13 @@ void SVShankViewTab::setReqdChunks( double s )
 #define SEC_PER_FETCH   0.1
 
     chunksReqd = qMax( 1, int(s / SEC_PER_FETCH) );
-    resetAccum();
+    resetAccum( false );
 }
 
 
-void SVShankViewTab::resetAccum()
+void SVShankViewTab::resetAccum( bool resetFlt )
 {
-    heat.accumReset( false );
+    heat.accumReset( resetFlt, set.what );
     chunksDone = 0;
 }
 

@@ -89,7 +89,7 @@ private slots:
 
 private:
     void setReqdChunks( double s );
-    void resetAccum();
+    void resetAccum( bool resetFlt );
     void color();
 };
 

@@ -64,13 +64,13 @@ void Heatmap::setStream( const DAQ::Params &p, int js, int ip )
         Qf = mainApp()->getRun()->getQ( -jsIM, ip );
 
     aphipass = new Biquad( bq_type_highpass, 300/srate );
-    lfhipass = new Biquad( bq_type_highpass, 0.2/srate );
+    lfhipass = new Biquad( bq_type_highpass, 0.5/srate );
     lflopass = new Biquad( bq_type_lowpass,  300/srate );
 
     car.setChans( nAP, nAP );
 
     zeroData();
-    resetFilter();
+    resetFilter( 0 );
 
     offline = false;
 }
@@ -100,13 +100,13 @@ void Heatmap::setStream( const DataFile *df )
     }
 
     aphipass = new Biquad( bq_type_highpass, 300/srate );
-    lfhipass = new Biquad( bq_type_highpass, 0.2/srate );
+    lfhipass = new Biquad( bq_type_highpass, 0.5/srate );
     lflopass = new Biquad( bq_type_lowpass,  300/srate );
 
     car.setChans( nAP, nAP );
 
     zeroData();
-    resetFilter();
+    resetFilter( 0 );
 
     offline = true;
 }
@@ -118,9 +118,14 @@ void Heatmap::updateMap( const ShankMap *S )
 }
 
 
-void Heatmap::resetFilter()
+void Heatmap::resetFilter( int what )
 {
-    nzero = BIQUAD_TRANS_WIDE;
+    if( what == 2 ) {
+        if( lfhipass )
+            nzero = lfhipass->getTransWide();
+    }
+    else if( aphipass )
+        nzero = aphipass->getTransWide();
 }
 
 
@@ -193,12 +198,12 @@ void Heatmap::lfFilter( vec_i16 &odata, const vec_i16 &idata )
 }
 
 
-void Heatmap::accumReset( bool resetFlt )
+void Heatmap::accumReset( bool resetFlt, int what )
 {
     zeroData();
 
     if( resetFlt )
-        resetFilter();
+        resetFilter( what );
 }
 
 
@@ -301,7 +306,7 @@ bool Heatmap::normPkPk( int what )
             dst[i] = (vmx[i] - vmn[i]) * i2v / niGain;
     }
 
-    return (what == 2 ? nSmp > BIQUAD_TRANS_WIDE : true);
+    return (what == 2 ? nSmp > lfhipass->getTransWide() : true);
 }
 
 /* ---------------------------------------------------------------- */
