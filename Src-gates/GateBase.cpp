@@ -179,6 +179,16 @@ samples_loop_again:;
         // and we might introduce long startup latency.
     }
 
+// ------------------------------------------------------
+// Allow 10ms so immediate gateT falls within each stream
+// ------------------------------------------------------
+
+    {
+        double  tAcq0 = getTime();
+        while( getTime() - tAcq0 < 0.01 )
+            ;
+    }
+
 // ---------
 // Adjust t0
 // ---------
