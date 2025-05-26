@@ -231,14 +231,16 @@ bool TrigImmed::alignFiles( std::vector<quint64> &iqNextCt, QString &err )
         for( int iq = 0; iq <= iqMax; ++iq ) {
             int where = vS[iq].Q->mapTime2Ct( iqNextCt[iq], gateT );
             if( where < 0 ) {
-                err = QString("stream %1 started writing late; samples lost"
-                      " (disk busy or large files overwritten)"
-                      " <T2Ct %2 T0 %3 endCt %4 srate %5>")
-                      .arg( iq )
-                      .arg( gateT )
-                      .arg( vS[iq].Q->tZero() )
-                      .arg( vS[iq].Q->endCount() )
-                      .arg( vS[iq].Q->sRate() );
+                err =
+                    QString("Stream (js,ip)=(%1,%2) started writing late;"
+                    " samples lost (disk busy or large files overwritten)"
+                    " <T2Ct %3 T0 %4 endCt %5 srate %6>")
+                    .arg( vS[iq].js )
+                    .arg( vS[iq].ip )
+                    .arg( gateT )
+                    .arg( vS[iq].Q->tZero() )
+                    .arg( vS[iq].Q->endCount() )
+                    .arg( vS[iq].Q->sRate() );
             }
             if( where != 0 ) {
                 iqNextCt.clear();
