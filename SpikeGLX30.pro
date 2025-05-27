@@ -23,7 +23,12 @@ contains(DEFINES, HAVE_NIDAQmx) {
     }
 }
 else {
-    TARGET = SpikeGLX_NISIM
+    contains(DEFINES, HAVE_NXT) {
+        TARGET = SpikeGLX_NXT_NISIM
+    }
+    else {
+        TARGET = SpikeGLX_NISIM
+    }
 }
 
 CONFIG(debug, debug|release) {

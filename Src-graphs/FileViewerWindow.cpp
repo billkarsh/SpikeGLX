@@ -3285,8 +3285,12 @@ void FileViewerWindow::updateGraphs()
             binMax;
     bool    sAveLocal   = false;
 
+// Add a few data points prior to window for 300 Hz filter transient.
+// This is too few for 0.5 hipass but adding too much creates its own
+// artifacts and slows scrolling.
+
     if( tbGetBandSel() )
-        xflt = qMin( qint64(hipass->getTransWide()), pos );
+        xflt = qMin( qint64(100), pos );
     else
         xflt = 0;
 
