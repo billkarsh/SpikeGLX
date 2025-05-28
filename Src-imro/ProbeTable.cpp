@@ -12,7 +12,7 @@
 #define FSRT    "C:/Users/labadmin/Desktop/ProbeTable/probe_features_srt.ini"
 #define FJ2I    "C:/Users/labadmin/Desktop/ProbeTable/probe_features_j2i.ini"
 #define FJSN    "C:/Users/labadmin/Desktop/ProbeTable/probe_features.json"
-#define VERS    "1.2"
+#define VERS    "1.3"
 
 /* ---------------------------------------------------------------- */
 /* CProbeTbl ------------------------------------------------------ */
@@ -94,7 +94,7 @@ void CProbeTbl::extini()
 {
     QSettings   S( FINI, QSettings::IniFormat );
 
-// Duplicate group: [PRB_1_4_0480_1] -> [PRB_1_2_480_2]
+// Duplicate group: [PRB_1_4_0480_1] -> [PRB_1_2_0480_2]
 
     QMap<QString,QVariant>  P;
 
@@ -103,7 +103,7 @@ void CProbeTbl::extini()
             P[key] = S.value( key );
     S.endGroup();
 
-    S.beginGroup( "PRB_1_2_480_2" );
+    S.beginGroup( "PRB_1_2_0480_2" );
         QMap<QString,QVariant>::const_iterator
             it = P.begin(), end = P.end();
         for( ; it != end; ++it )

@@ -128,7 +128,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
         pn.startsWith( "PRB_1_2" ) ) {
         // PRB_1_4_0480_1 (Silicon cap)
         // PRB_1_4_0480_1_C (Metal cap)
-        // PRB_1_2_480_2
+        // PRB_1_2_0480_2
         _ncolhwr    = 2;
         _ncolvis    = 4;
         _col2vis_ev = {1,3};
@@ -1149,7 +1149,7 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
         pn.startsWith( "PRB_1_2" ) ) {
         // PRB_1_4_0480_1 (Silicon cap)
         // PRB_1_4_0480_1_C (Metal cap)
-        // PRB_1_2_480_2
+        // PRB_1_2_0480_2
         type = 0;
         supp = true;
     }
@@ -1273,7 +1273,7 @@ IMROTbl* IMROTbl::alloc( const QString &pn )
         pn.startsWith( "PRB_1_2" ) ) {
         // PRB_1_4_0480_1 (Silicon cap)
         // PRB_1_4_0480_1_C (Metal cap)
-        // PRB_1_2_480_2
+        // PRB_1_2_0480_2
         return new IMROTbl_T0( pn );
     }
     else if( pn.startsWith( "PRB2_1" ) ) {
