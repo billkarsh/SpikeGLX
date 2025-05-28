@@ -79,7 +79,7 @@ Latest release highlights:
 
 >Important: Please read the `README` file.
 
-* [Release 20250201-phase30](App/Release_v20250201-phase30.zip)...[Readme](Readme/Readme_v20250201-phase30.txt) : Replace 20241215, Waveplayer, imec v3.70.3
+* [Release 20250325-phase30](App/Release_v20250325-phase30.zip)...[Readme](Readme/Readme_v20250325-phase30.txt) : Missing samples, better survey, imec v3.70.3
 
 >*Release downloads come with two executables*:
 >
@@ -94,9 +94,9 @@ versions there as long as you run one at a time:
 
 ```
 SpikeGLX\
-    Release_v20250201-phase30.zip
+    Release_v20250325-phase30.zip
     Release_v20200520-phase3B2.zip
-    Release_v20250201-phase30\
+    Release_v20250325-phase30\
     Release_v20200520-phase3B2\
     Drivers\
         Enclustra_Windows_10&11\

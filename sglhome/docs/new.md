@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+May 27, 2025
+
+* SpikeGLX 20250325-phase30 (Missing samples, better survey, imec v3.70.3).
+
 February 26, 2025
 
 * SpikeGLX 20250201-phase30 (Replace 20241215, Waveplayer, imec v3.70.3).

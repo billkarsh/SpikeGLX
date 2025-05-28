@@ -48,6 +48,7 @@ can be used after updating their firmware, which can be done via SpikeGLX.
 
 **30**:
 
+* [Release 20250201-phase30](../App/Release_v20250201-phase30.zip)...[Readme](../Readme/Readme_v20250201-phase30.txt) : Replace 20241215, Waveplayer, imec v3.70.3
 * [Release 20241001-phase30](../App/Release_v20241001-phase30.zip)...[Readme](../Readme/Readme_v20241001-phase30.txt) : Click and play, new probes, imec v3.70.3
 * [Release 20240620-phase30](../App/Release_v20240620-phase30.zip)...[Readme](../Readme/Readme_v20240620-phase30.txt) : OneBox, Quad-probes, imec v3.70.2
 * [Release 20240129-phase30](../App/Release_v20240129-phase30.zip)...[Readme](../Readme/Readme_v20240129-phase30.txt) : New IMRO editor, imec v3.62.1
