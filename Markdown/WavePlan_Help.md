@@ -56,6 +56,15 @@ itself, stripped of any path or file extension. For example, if your metafile
 full path was 'C:/SpikeGLX_stuff/SpikeGLX/_Waves/mysinwave.meta', then you
 should refer to this simply as 'mysinwave'.
 
+**NOTE: Target device**:
+
+The metadata and binary data that describe a wave are device independent.
+However, the dialog contains a field called `Target device`. At present,
+the choices are {NI, OneBox}. The purpose is to constrain the `Device
+V` selections for maximum voltage. That is NI is flexible allowing
++/- {2, 5, 10}V output, while OneBox is limited to +/- 5V. The `Target
+device` merely controls the "sanity checking" of the voltage ranges.
+
 --------
 
 ### Binary Wave Files
@@ -110,7 +119,7 @@ freely to make a script readable.
 **Example**
 
 ```
-do 10 {
+do 5 {
     level(     0,   50 )
     ramp( 0,   0.5, 10 )
     level(     0.5, 100 )
@@ -130,7 +139,7 @@ MATLAB script 'wp_soft_start':
 ```
 function wp_soft_start
 
-    % handle to SpikeGLX
+    % Handle to SpikeGLX
     hSGL = SpikeGL( '127.0.0.1' );
 
     % For demo purposes we assume the OneBox is not recording...
@@ -187,7 +196,7 @@ MATLAB script 'wp_trig_start':
 ```
 function wp_trig_start
 
-    % handle to SpikeGLX
+    % Handle to SpikeGLX
     hSGL = SpikeGL( '127.0.0.1' );
 
     % OneBox assumed to be recording stream ip=0...
@@ -211,6 +220,10 @@ function wp_trig_start
 
     % Start playback now, output is always at AO-0
     NI_DO_Set( hSGL, digOutTerm, digBits );
+
+    % Reset trigger after 50 ms
+    pause( 0.05 );
+    NI_DO_Set( hSGL, digOutTerm, 0 );
 
     % This section demonstrates a method to capture your
     % wave plan in action. The best pause parameters will

@@ -110,6 +110,12 @@ yielding. The activity will be reported as a normal 100%.
 Excel, MATLAB or other resource hogging bursts of activity. Try to run
 as few applications as possible to prevent overtaxing the CPUs.
 
+* **Filtered IM Streams**: This feature is accessed on the `IM Setup` tab.
+Although these streams dramatically improve signal to background for audio
+output and the ShankViewers, they are very compute intensive, especially
+for high channel count probes like the NP2020 Quad-base and NP3XXX NXT
+probes.
+
 * **Audio**: Listening to audio channels is a huge burden on the system.
 It's usually fine unless you are recording to disk, which is one of
 the next biggest stressors. To ensure successful recording, try not to

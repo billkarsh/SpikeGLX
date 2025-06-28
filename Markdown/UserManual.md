@@ -15,6 +15,8 @@
         + [Multidrive Run Splitting](#multidrive-run-splitting)
         + [Display Settings](#display-settings)
         + [Screen Saver and Power Settings](#screen-saver-and-power-settings)
+        + [Power Mode Slider](#power-mode-slider)
+        + [Power Notes](#power-notes)
         + [Graphics Problems](#graphics-problems)
     + [Data Stream](#data-stream)
     + [Supported Streams](#supported-streams)
@@ -307,6 +309,11 @@ prolonged data acquisition runs (running on batteries is discouraged):
 
 Screen saver settings group:
 
+> **NEW**: As of version 20250525 The SpikeGLX download folder contains
+a script named `DAQ_power_settings.bat.` Double-click on it to run it.
+It makes the changes listed below, even in versions of the OS that hide
+the settings.
+
 * Screen saver: (None).
 
 > Note 1: The screen saver settings are a control panel and you can get there
@@ -320,7 +327,13 @@ may have to log in again after the screen blanks.
 
 Power plan settings:
 
-> Keep drilling down until you find the following advanced power plan options:
+> Keep drilling down until you find the following advanced power plan
+options. If you don't see some of the following settings they are hidden
+on your machine. In any case, you can use the double-clickable
+`DAQ_power_settings.bat` script in your SpikeGLX download to set them
+automatically.
+
+Set the following values:
 
 * Put the computer to sleep: Never.
 * Hard disk/Turn off hard disk after: Never.
@@ -335,6 +348,28 @@ Power plan settings:
 
 > Tip: For some settings, 'Never' might not appear as a choice. Try typing
 either 'never' or '0' directly into the box.
+
+#### Power Mode Slider
+
+First, a reminder to acquire data plugged into AC power. In some versions
+of Windows 10, for some laptops, there is a user control that impacts the
+performance of your machine. Look in the System Tray area of the Windows
+Task Bar for the battery icon. Open that window. If you see a slider called
+`Power mode`, then (while on AC power) slide it all the way to the right
+before doing acquisition runs.
+
+#### Power Notes
+
+Be aware that the Lenovo `Vantage` applications include a setting for
+`Airplane Power Mode` which, if enabled, cause the machine to run at
+half speed, even when plugged in. This is not what you want for data
+acquisition. Other laptops may have similar energy saving modes that
+you should probably disable when you need maximum performance.
+
+Do not do acquisition runs immediatly after a reboot! Whenever you reboot
+the computer, allow at least 2 minutes (5 is better) for the OS to complete
+the launching and initialization of services and apps. The computer can be
+very busy during startup, which can destabilize the run.
 
 #### Graphics Problems
 

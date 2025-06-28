@@ -27,7 +27,8 @@ probe are handled:
 This mode runs the probe (and Obx ADC) sample fetching loop faster,
 which reduces the time to get fresh data. However, this drives the
 CPU 50%+ harder and reduces the maximum number of probes you can safely
-run concurrently.
+run concurrently. Pay attention to the Metrics Window and Task Manager
+Performance readouts to make sure your runs are stable under load.
 
 ### Acquisition Start Signal
 
@@ -88,8 +89,10 @@ edges for this stream, and the stream automatically gets global `demux` CAR.
 These data, when present, are used to improve signal-to-background in both
 audio output and Shank Viewers (for {spike, AP pk-pk} calculations). There
 is a checkbox to disable this feature just in case you are running out of
-RAM or CPU, but we don't think this will be necessary unless you are running
-12 probes or more at the same time.
+RAM or CPU, but we don't think this will be necessary unless you are
+concurrently running as many as (12) 384-channel, or, (3) 1536-channel
+probes. It's a good idea to look at the Metrics Window for any signs of
+instability.
 
 --------
 

@@ -1,11 +1,10 @@
 ## System Requirements for Neuropixels
 
-**>> Updated: January, 2025 <<**
+**>> Updated: June, 2025 <<**
 
 What's new:
 
-* NI 1090 chassis mention (2-slots, $1700US).
-* Better document organization.
+* Expanded acquisition computer specs.
 
 --------
 
@@ -25,8 +24,15 @@ What's new:
 * [Computing Overview](#computing-overview)
     * [Two Steps, Two Computers](#two-steps-two-computers)
     * [Online Computer](#online-computer)
-        * [Requirements](#requirements)
+        * [Windows OS](#windows-os)
+        * [Intel vs AMD](#intel-vs-amd)
+        * [WorkStation vs Laptop](#workStation-vs-laptop)
         * [RAM](#ram)
+        * [Acquisition CPU](#acquisition-cpu)
+        * [Acquisition GPU](#acquisition-gpu)
+        * [Drive](#drive)
+        * [Slots and Ports](#slots-and-ports)
+        * [Settings and Behavior](#settings-and-behavior)
         * [Thunderbolt](#thunderbolt)
         * [Test Performance](#test-performance)
     * [Spike Sorting Computer](#spike-sorting-computer)
@@ -78,6 +84,11 @@ options for your recording system:
 * More expandable.
 * Higher bandwidth, higher capacity.
 * Only way to run very large probe counts.
+* Only way to run future NXT (NP3) 1536-channel probes.
+
+> *1536-channel quad-base probes (NP2020) are coming 2025 and CAN run in
+either PXI or OneBox. However, 1536-channel NXT probes are a super compact
+model that is not expected before 2027 and requires PXI.*
 
 ### OneBox Overview
 
@@ -319,61 +330,62 @@ simply make sure the computer meets the combined requirements for both*.
 
 ## Online Computer
 
-### Requirements
+### Windows OS
 
-**General:**
+* **64-bit Windows {10, 11}**.
 
-* 64-bit Windows {10, 11}
-* Minimum 2.5 GHz CPU
-* Minimum 32 GB RAM
-* Graphics Card: [PassMark G3D score](https://www.videocardbenchmark.net/high_end_gpus.html) > 6000.
-* Dedicated data drive (SSD or NVMe, 500+ MB/s)
-* PCIe x8 slot for PXIe controller (or Thunderbolt port).
-* USB 3.0 port for OneBox.
+* The enclustra drivers needed for PXI are Windows only.
+* SpikeGLX is Windows only.
 
-Notes:
+### Intel vs AMD
 
-* Specifically for PXI-based setups: Imec believes that AMD CPUs are not
-compatible with the required enclustra drivers. We have not tested this
-ourselves, but we are aware that one or two users have had success with
-AMD systems. We need more data about this. If you have an AMD system,
-please try it and report whether it works for you on the slack channel.
-Until thorough testing shows that AMD systems work reliably in this
-application, we will continue to recommend using only intel systems.
+* **We encourage buying Intel systems**:
+
+* Intel can run PXI or OneBox.
+* AMD can run OneBox.
+
+For PXI acquisition, Imec believes that AMD CPUs are not compatible with
+the required enclustra drivers. We have not tested this ourselves, but we
+are aware that one or two users have had success with AMD systems. We need
+more data about this. If you have an AMD system, please try it and report
+whether it works for you on the slack channel. Until thorough testing shows
+that AMD systems work reliably in this application, we will continue to
+recommend using only intel systems.
+
 *OneBox does not use enclustra drivers, so should work with AMD CPUs,
 but we have not specifically tested that yet. Reports from users via
 slack would be very helpful here.*
-* CPU frequency is not as important as the number of cores and the RAM
-configuration (below).
-* High-end GPU cards require workstations with 400W power supplies.
-* The data drive should be distinct from the system drive.
 
-**To run N probes:**
+### Workstation vs Laptop
 
-| CPU Cores | RAM Channels | Max Probes |
-| --------- | ------------ | ---------- |
-| 4         | 1            | 4          |
-| 6         | 1            | 8          |
-| 6         | 2            | 16         |
-| 8         | 1            | 8          |
-| 8         | 2            | 20\*       |
-| 12        | 2            | 32\*       |
+#### Thunderbolt support
 
-> *\* Note: For 20 probes or more the CPU will be working very hard to keep
-up. In the 20-probe case, that CPU was running in its turbo mode at over
-4 GHz. Note too, that in the 32-probe case, the 12-core CPU had a base
-frequency of 3.5 GHz, and was running in turbo mode at over 4 GHz. To be
-on the safe side, if you are doing very large numbers of probes, we would
-suggest that you increase the core count in our table by at least 50% and
-get a 3.5 GHz base frequency model with turbo capability.*
+If for any reason you want or need to use a Thunderbolt PXI chassis controller,
+then prefer a laptop because they have better developed and better integrated
+Thunderbolt support. Definitely do not buy any computer hoping to add
+Thunderbolt to it later as an afterthought.
+
+#### Performance
+
+It depends how many total probes and channels you need in your experiment.
+It is easier to configure a workstation for more powerful CPUs and more storage.
+Workstations are optimized for performance. Laptops are optimized for mobility
+and energy efficiency which are not really aligned with high bandwidth data
+acquisition. Nevertheless, a properly configured laptop can handle the job
+if you will run only modest numbers of probes. To put a number on it, **if you
+are planning to run more than (8) 384-channel probes or more than (2) quad-base
+1536-channel probes, you probably should get a workstation**.
 
 ### RAM
 
-SpikeGLX needs only 7 GB of total RAM to run 32 probes plus 8 NI channels.
-Rather than memory size, what matters most are more CPU cores and *faster
-memory access*. It makes a huge difference how the RAM DIMMS (memory sticks)
-are populated into the slots on the motherboard, that is, how many RAM
-channels are operational (see table above).
+* **Minimum 32 GB RAM**
+* **Populate all RAM slots**:
+
+SpikeGLX needs only 7 GB of total RAM to run (32) 384-channel probes plus
+8 NI channels. Rather than memory size, what matters most are more CPU cores
+and *faster memory access*. It makes a huge difference how the RAM DIMMS
+(memory sticks) are populated into the slots on the motherboard, that is,
+how many RAM channels are operational (see performance table below).
 
 Computers can be designed with {single, dual, quad, octa}-channel memory.
 For example, a dual-channel setup has twice the bandwidth (speed) of a
@@ -395,31 +407,162 @@ the Windows Task Manager/Performance tab.
 
 Check out ["Guide to RAM Memory Channels as Fast As Possible."](https://www.youtube.com/watch?v=-D8fhsXqq4o)
 
+### Acquisition CPU
+
+#### For 384-channel probes
+
+* **Minimum 2.5 GHz CPU**
+
+**To run N 384-channel probes:**
+
+| Max Probes | CPU Cores | RAM Channels |
+| ---------- | --------- | ------------ |
+| 4          | 4         | 1            |
+| 8          | 6         | 1            |
+| 16         | 6         | 2            |
+| 20\*       | 8         | 2            |
+| 32\*       | 12        | 2            |
+
+> *\* Note: For 20 probes or more the CPU will be working very hard to keep
+up. In the 20-probe case, that CPU was running in its turbo mode at over
+4 GHz. Note too, that in the 32-probe case, the 12-core CPU had a base
+frequency of 3.5 GHz, and was running in turbo mode at over 4 GHz. To be
+on the safe side, if you are doing very large numbers of probes, we would
+suggest that you increase the core count in our table by at least 50% and
+make sure the turbo frequency is greater than 4 GHz.*
+
+#### For 1536-channel probes
+
+* **Minimum 3.0 GHz CPU**
+
+**To run N 1536-channel probes:**
+
+| Max Probes | CPU Cores |
+| ---------- | --------- |
+| 2          | 4         |
+| 4\*        | 6 (8 preferred) |
+| 8          | 20 (*to be tested*) |
+
+> *\* Note: 6 cores (workstation or laptop) is marginally adequate for
+(4) 1536-channel probes, meaning that any other activity on the machine could
+easily cause the run to quit. We are more comfortable recommending 8 cores
+to run 4 probes.*
+
+### Acquisition GPU
+
+* **Graphics Card: [PassMark G3D score](https://www.videocardbenchmark.net/high_end_gpus.html) > 3000**.
+
+> Note: Your computer power supply should be rated at greater than 2.5 X
+the GPU power requirement. Power supplies are pretty affordable; **get the
+largest power supply offered when configuring a workstation**.
+
+Built-in (integrated) graphics controllers steal compute power from the
+CPU. Rather, we want a separate graphics card doing as much drawing work
+as possible. Make sure the OS's graphics settings run SpikeGLX with the
+graphics card ("high performance mode").
+
+### Drive
+
+* **We highly recommend at least two drives: {OS, data}**.
+* **Both should be SSD, NOT spinning disk**.
+* **Interface can be SATA III or NVMe**.
+* **The data drive MUST have adequate sustained write speed (below)**.
+
+The data drive is a critical component. If the drive can't store data as
+fast as the data acquisition rate the run will fail. There is really only
+one performance spec that is relevant to our application: **minimum
+sustained write rate**. This is the rate at which data are written after
+the high speed buffers are full. Moreover, we don't just care about the
+average sustained write rate. Rather, we want the drive to reliably
+maintain high throughput all the time, so we want to see a high minimum
+rate, and steady performance, meaning a narrow distribution for measured
+sustained rate. Manufacturers and system vendors keep these specs secret
+for the most part because good sustained performance is quite difficult
+and it is not cheap. Usually what system vendors report is sequential
+write rate, which is really how fast you can write to the high speed buffer
+in front of the drive, and this has no utility whatever for our needs.
+
+To determine the rate spec you require, start with the highest number of
+channels (C) you want to stream to the drive:
+
+```
+Min rate Rmin = C (chan/sample) x 2 (byte/chan) x sample_per_s / 1024*1024 (byte/MB)
+
+Prudent rate R ~ 2 * Rmin
+```
+
+For example, the minimum rate Rmin for (4) 384-channel probes @ 30 kHz is
+Rmin = 4x384x2x30000/1024/1024 = 88 MB/s; and the rate we should spec is
+about twice that. R ~ 150 MB/s. You can scale this example for your
+channel count.
+
+But it will be either very hard or impossible to configure a system from
+most companies with a known rate. Companies like the freedom to change suppliers
+to deliver on time and keep prices low. So they swap in poor performers
+and refuse to commit to a stated performance level. So this is what you do:
+
+* Configure a system with two drives that are user changeable.
+* See if you can configure the drive you actually want, likely not.
+* Measure the performance you actually get with SpikeGLX Metrics window.
+* If you need a better data drive, buy it later.
+
+> If you buy just an SSD, not a system, you'll have an easier time
+getting the specs for the thing you're buying. And note that a really
+good performer can be had for $200 US.
+
+[**Tom's Hardware**](https://www.tomshardware.com/) is a reliable source of
+testing data, including sustained write rates.
+
+### Slots and Ports
+
+For PXI, either:
+
+* **PCIe x8 slot for PXIe copper cable controller**.
+* **Thunderbolt port**.
+
+For OneBox:
+
+* **USB 3.0 port or higher for OneBox**.
+
+### Settings and Behavior
+
+Most computers are going to do fine running (4) 384-channel probes. On the
+other hand running high channel count quad-base or NXT probes is demanding
+and those labs should pay attention to each aspect of system configuration.
+
+All users should be mindful about things that can disrupt data flow and
+cause a run to shut down. Note that SpikeGLX monitors its own performance
+and if it isn't able to maintain data integrity it will stop the run.
+
+* Follow our UserManual power settings to prevent subsystems from sleeping.
+* Don't launch resource hungry programs like MATLAB, while a run is going.
+* Minimize running other apps during data acquisition.
+* Minimize presence of background apps that do installs or housekeeping at
+unexpected times.
+
 ### Thunderbolt
 
-HHMI and the open ephys group independently tested laptops and workstations
+HHMI and the Open Ephys group independently tested laptops and workstations
 with Thunderbolt 3.0 and 4.0. The successful setups all came preconfigured
 for Thunderbolt from the factory. To add Thunderbolt after the fact, you'll
 need to get a card specifically matched to your motherboard. Merely matching
 the manufacturer does not guarantee success.
 
-You should have reliable connectivity if you power up the chassis first,
-and then start the PC, which is the usual start-up sequence for any other
-PXIe controller. Hot-plugging can work if you are lucky but it is not
-reliable. If you unplug and replug the Thunderbolt cable without doing
-the orderly power cycle, the enclustra drivers may fail to load or fail
-to start; you won't be able to connect to the imec base-stations. If this
-happens, fix it by going into the Windows Device Manager. Select each
+Whether you power up the chassis first, or start the PC first and then
+the chassis (hot-plug), you may find that the enclustra drivers fail to load
+or fail to start; you won't be able to connect to the imec base-stations.
+If this happens, fix it by going into the Windows Device Manager. Select each
 enclustra device in the list, and choose `Uninstall device` under the
-`Actions` menu. Finish by choosing `Scan for hardware changes` under the
-`Actions` menu. If that doesn't work, try a complete power cycle, again,
-starting the chassis first, then the PC.
+`Actions` menu (or right-click on it). Finish by choosing `Scan for
+hardware changes` under the `Actions` menu. If that doesn't work,
+try a complete power cycle, again, starting the chassis first, then the PC.
 
 ### Test Performance
 
 In SpikeGLX select menu item `Window\Run Metrics` to display a window
 of performance measurements that provide some insight on whether the system
-is running comfortably or struggling to keep up.
+is running comfortably or struggling to keep up. The help for that window
+explains how to interpret the info.
 
 You can also use the `Windows Task Manager` to monitor performance. In
 particular, the average CPU utilization percentage should remain below
@@ -432,6 +575,8 @@ particular, the average CPU utilization percentage should remain below
 You'll want to make sure your computer meets the requirements for all of the
 offline analysis software you plan to use. Here we discuss our recommendations
 for running Kilosort, the most commonly used spike sorting application.
+
+> Also check out Kilosort's latest requirements discussion [here](https://kilosort.readthedocs.io/en/latest/hardware.html).
 
 ### CPU
 
@@ -476,9 +621,13 @@ These ratings can be obtained on [this Nvidia page.](https://developer.nvidia.co
 * The GPU card should have at least 8 GB of onboard RAM if your unit counts
 are in the hundreds. For unit counts in the thousands get 12 GB of GPU RAM.
 Note that you can adjust Kilosort's RAM usage via its `ops.NT` (batch size)
-parameter if you are running out of GPU RAM. In Kilosot 4, you can also set
+parameter if you are running out of GPU RAM. In Kilosort 4, you can also set
 the 'clear_cache' parameter to 'true' (which tells it to do more garbage
 collection).
+
+> Note: Your computer power supply should be rated at greater than 2.5 X
+the GPU power requirement. Power supplies are pretty affordable; **get the
+largest power supply offered when configuring a workstation**.
 
 
 _fin_
