@@ -601,6 +601,7 @@ bool Run::startRun( QString &err )
 
     DAQ::Params &p = app->cfgCtl()->acceptedParams;
 
+    setHighPriority( true );
     setPreciseTiming( true );
 
 // ------
@@ -761,6 +762,7 @@ void Run::stopRun()
     grfUpdateWindowTitles();
 
     setPreciseTiming( false );
+    setHighPriority( false );
 
     QString s = "Acquisition stopped.";
 

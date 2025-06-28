@@ -547,26 +547,30 @@ bool isWindows7OrLater()
 #endif
 
 /* ---------------------------------------------------------------- */
-/* setRTPriority -------------------------------------------------- */
+/* setHighPriority ------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
 #ifdef Q_OS_WIN
 
-void setRTPriority()
+void setHighPriority( bool on )
 {
-    Log() << "Setting realtime process priority.";
+    Log() << QString("Setting %1 process priority.")
+                .arg( on ? "high" : "normal" );
 
-    if( !SetPriorityClass( GetCurrentProcess(), REALTIME_PRIORITY_CLASS ) )
+    if( !SetPriorityClass( GetCurrentProcess(),
+        (on ? HIGH_PRIORITY_CLASS : NORMAL_PRIORITY_CLASS) ) ) {
+
         Warning() << "SetPriorityClass() failed: " << int(GetLastError());
+    }
 }
 
 #elif defined(Q_OS_LINUX)
 
-void setRTPriority()
+void setHighPriority( bool on )
 {
     if( geteuid() == 0 ) {
 
-        Log() << "Running as root, setting realtime process priority";
+        Log() << "Running as root, setting high process priority";
 
 #if 0
 // This function prevents swapping out app memory pages...
@@ -580,7 +584,16 @@ void setRTPriority()
 
         struct sched_param  p;
 
-        p.sched_priority = sched_get_priority_max( SCHED_RR );
+        if( on ) {
+            p.sched_priority = sched_get_priority_min( SCHED_RR ) +
+                                0.80 *
+                                (sched_get_priority_max( SCHED_RR )
+                                - sched_get_priority_min( SCHED_RR ));
+        }
+        else {
+            p.sched_priority = (sched_get_priority_min( SCHED_RR )
+                                + sched_get_priority_max( SCHED_RR )) / 2;
+        }
 
         if( sched_setscheduler( 0, SCHED_RR, &p ) ) {
             int e = errno;
@@ -588,14 +601,15 @@ void setRTPriority()
         }
     }
     else
-        Warning() << "Not running as root, cannot set realtime priority";
+        Warning() << "Not running as root, cannot set high priority";
 }
 
 #else /* !Q_OS_WIN && !Q_OS_LINUX */
 
-void setRTPriority()
+void setHighPriority( bool on )
 {
-    Warning() << "Cannot set realtime process priority on this platform.";
+    Q_UNUSED( on )
+    Warning() << "Cannot set high process priority on this platform.";
 }
 
 #endif

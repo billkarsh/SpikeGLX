@@ -1084,7 +1084,9 @@ bool ImAcqStream::checkFifo( int *packets, CimAcqImec *acq )
 
             if( sqb.delta_is >= 10 ) {
                 acq->runError(
-                QString("IMEC Quad-base %1 shanks desynchronized; stopping run.")
+                QString(
+                "IMEC Quad-base %1 shanks desynchronized; stopping run.\n"
+                "Try disabling Filtered IM Streams (IM Setup Tab).")
                 .arg( stream ) );
                 return false;
             }
@@ -1960,8 +1962,8 @@ ImAcqThread::ImAcqThread(
 // Demo how to boost priority for: worker handling
 // single high channel count probe.
 //
-//    if( streams.size() == 1 && streams[0].nAP > 384 )
-//        thread->setPriority( QThread::HighPriority );
+    if( streams.size() == 1 && streams[0].nAP > 384 )
+        thread->setPriority( QThread::HighestPriority );
 }
 
 

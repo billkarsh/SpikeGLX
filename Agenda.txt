@@ -5,6 +5,7 @@
 --------
 + Probe PRB_1_2_480_2 -> PRB_1_2_0480_2.
 + Auto-show Metrics window if error flag.
++ Boost SpikeGLX priority during acquisition.
 
 20250325
 --------

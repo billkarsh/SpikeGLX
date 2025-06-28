@@ -295,8 +295,8 @@ void setOpenGLVSyncMode( bool onoff );
 // Is Windows 7 or later
 bool isWindows7OrLater();
 
-// Set application process to realtime priority
-void setRTPriority();
+// Set application process to high priority
+void setHighPriority( bool on );
 
 // Set higher precision system timing on/off
 void setPreciseTiming( bool on );

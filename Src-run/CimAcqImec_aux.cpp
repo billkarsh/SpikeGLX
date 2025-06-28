@@ -589,7 +589,16 @@ bool CimAcqImec::_aux_setPXITrigBus( const QVector<int> &vslots, int srcSlot )
             status = viMapTrigger( rsrc, VI_TRIG_TTL7, VI_TRIG_TTL7, VI_NULL );
             if( status < VI_SUCCESS ) {
                 Error() <<
-                QString("VISA: (%1) Failed to map bus line 7.").arg( status );
+                QString(
+                "VISA: (%1) Failed to map bus line 7.\n"
+                "Follow these steps:\n"
+                "1. In NI-MAX select your chassis in the left-hand list.\n"
+                "2. Select the 'Triggers' tab at bottom of right-hand window.\n"
+                "3. For PXI-Trig7 uncheck all boxes under Reservations.\n"
+                "4. For PXI-Trig7 select 'Dynamic' under Backplane Routing.\n"
+                "5. Click Save button in the upper-left.\n"
+                "6. Close NI-MAX.\n"
+                "7. Try running again.").arg( status );
                 goto closeRsrc;
             }
         }
