@@ -431,7 +431,7 @@ Check out ["Guide to RAM Memory Channels as Fast As Possible."](https://www.yout
 #### For 384-channel probes
 
 * **CPU clock speed >= 2.5 GHz**
-* **[Passmark Single-thread](https://www.cpubenchmark.net/single-thread/) score >= 2500**
+* **[PassMark Single-thread](https://www.cpubenchmark.net/single-thread/) score >= 2500**
 
 **To run N 384-channel probes:**
 
@@ -451,12 +451,12 @@ on the safe side, if you are doing very large numbers of probes, we would
 suggest that you increase the core count in our table by at least 50% and
 make sure the turbo frequency is greater than 4 GHz. For 32 probes, you
 will be safe with a
-[Passmark Multi-thread](https://www.cpubenchmark.net/multithread/) score >= 50000.*
+[PassMark Multi-thread](https://www.cpubenchmark.net/multithread/) score >= 50000.*
 
 #### For 1536-channel probes
 
 * **CPU clock speed >= 3.0 GHz**
-* **[Passmark Single-thread](https://www.cpubenchmark.net/single-thread/) score >= 3000**
+* **[PassMark Single-thread](https://www.cpubenchmark.net/single-thread/) score >= 3000**
 
 **To run N 1536-channel probes:**
 
@@ -470,7 +470,7 @@ will be safe with a
 (4) 1536-channel probes, meaning that any other activity on the machine could
 easily cause the run to quit. We are more comfortable recommending 8 cores
 to run 4 probes. For 8 probes, you will be safe with a
-[Passmark Multi-thread](https://www.cpubenchmark.net/multithread/) score >= 50000.*
+[PassMark Multi-thread](https://www.cpubenchmark.net/multithread/) score >= 50000.*
 
 ### Acquisition GPU
 
