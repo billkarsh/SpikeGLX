@@ -431,7 +431,7 @@ Check out ["Guide to RAM Memory Channels as Fast As Possible."](https://www.yout
 #### For 384-channel probes
 
 * **CPU clock speed >= 2.5 GHz**
-* **[Single-thread](https://www.cpubenchmark.net/single-thread/) Passmark score >= 2500**
+* **[Passmark Single-thread](https://www.cpubenchmark.net/single-thread/) score >= 2500**
 
 **To run N 384-channel probes:**
 
@@ -450,13 +450,13 @@ frequency of 3.5 GHz, and was running in turbo mode at over 4 GHz. To be
 on the safe side, if you are doing very large numbers of probes, we would
 suggest that you increase the core count in our table by at least 50% and
 make sure the turbo frequency is greater than 4 GHz. For 32 probes, you
-will be safe with a Passmark
-[Multi-thread](https://www.cpubenchmark.net/multithread/) score >= 50000.*
+will be safe with a
+[Passmark Multi-thread](https://www.cpubenchmark.net/multithread/) score >= 50000.*
 
 #### For 1536-channel probes
 
 * **CPU clock speed >= 3.0 GHz**
-* **[Single-thread](https://www.cpubenchmark.net/single-thread/) Passmark score >= 3000**
+* **[Passmark Single-thread](https://www.cpubenchmark.net/single-thread/) score >= 3000**
 
 **To run N 1536-channel probes:**
 
@@ -469,12 +469,12 @@ will be safe with a Passmark
 > *\* Note: 6 cores (workstation or laptop) is marginally adequate for
 (4) 1536-channel probes, meaning that any other activity on the machine could
 easily cause the run to quit. We are more comfortable recommending 8 cores
-to run 4 probes. For 8 probes, you will be safe with a Passmark
-[Multi-thread](https://www.cpubenchmark.net/multithread/) score >= 50000.*
+to run 4 probes. For 8 probes, you will be safe with a
+[Passmark Multi-thread](https://www.cpubenchmark.net/multithread/) score >= 50000.*
 
 ### Acquisition GPU
 
-* **Graphics Card: [PassMark G3D score](https://www.videocardbenchmark.net/high_end_gpus.html) > 3000**.
+* **Graphics Card: [PassMark G3D](https://www.videocardbenchmark.net/high_end_gpus.html) score > 3000**.
 
 > Note: Your computer power supply should be rated at greater than 2.5 X
 the GPU power requirement. Power supplies are pretty affordable; **get the
