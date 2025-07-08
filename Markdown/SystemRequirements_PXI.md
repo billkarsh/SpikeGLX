@@ -456,7 +456,7 @@ will be safe with a Passmark
 #### For 1536-channel probes
 
 * **CPU clock speed >= 3.0 GHz**
-* **(Single-thread)(https://www.cpubenchmark.net/single-thread/) Passmark score >= 3000**
+* **[Single-thread](https://www.cpubenchmark.net/single-thread/) Passmark score >= 3000**
 
 **To run N 1536-channel probes:**
 
