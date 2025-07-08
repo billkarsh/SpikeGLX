@@ -464,7 +464,7 @@ will be safe with a
 | ---------- | --------- |
 | 2          | 4         |
 | 4\*        | 6 (8 preferred) |
-| 8          | 20 (*to be tested*) |
+| 8\*        | 20 (*to be tested*) |
 
 > *\* Note: 6 cores (workstation or laptop) is marginally adequate for
 (4) 1536-channel probes, meaning that any other activity on the machine could
