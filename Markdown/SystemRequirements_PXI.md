@@ -1,6 +1,6 @@
 ## System Requirements for Neuropixels
 
-**>> Updated: June, 2025 <<**
+**>> Updated: July, 2025 <<**
 
 What's new:
 
@@ -26,6 +26,7 @@ What's new:
     * [Online Computer](#online-computer)
         * [Windows OS](#windows-os)
         * [Intel vs AMD](#intel-vs-amd)
+        * [Is My Current Computer Good Enough?](#is-my-current-computer-good-enough)
         * [WorkStation vs Laptop](#workStation-vs-laptop)
         * [RAM](#ram)
         * [Acquisition CPU](#acquisition-cpu)
@@ -73,8 +74,10 @@ options for your recording system:
 
 **Why OneBox might be better than PXI**:
 
-* Easier purchasing (single vendor).
+* Already includes a 12-channel non-neural recorder.
+* Fewer parts needed to get started.
 * Less expensive to get started.
+* Easier purchasing (single vendor).
 * Smaller and lighter.
 * Quieter (no fans).
 
@@ -98,11 +101,11 @@ OneBoxes ship as all-inclusive kits, for about 3600 euro:
 
 * OneBox recording device with:
     * 2 headstage ports
-    * 12 analog IO aux channels
+    * 12 analog IO aux (non-neural) channels
 * Power supply
 * USB 3.0 Cable
 * Breakout cable
-* Breakout card to access analog channels
+* Breakout card to access aux channels
 
 Notes:
 
@@ -129,7 +132,7 @@ follow the PXI standards and can interoperate.
     * 4 headstage ports
     * 1 TTL (1-bit) input aux channel
 
-**For non-neural (aux) channels**:
+**For aux (non-neural) channels**:
 
 You almost certainly want to add another card for non-neural channels.
 SpikeGLX talks to these devices with NI DAQmx drivers, so they must
@@ -356,6 +359,22 @@ recommend using only intel systems.
 but we have not specifically tested that yet. Reports from users via
 slack would be very helpful here.*
 
+### Is My Current Computer Good Enough?
+
+In these paragraphs we outline what we think you should get if buying a new
+computer today. The idea is to enable you to run trouble-free and to add
+more probes or 1536-channel probes to your program without running out of
+computer power.
+
+Of course you may already have a pretty good computer in your lab. It is
+likely older, so its performance rating may be lower than what we recommend
+here, but it may serve your needs...you can test it. You can do some data
+acquisition runs while monitoring performance metrics. Look especially at
+these sections in this document:
+
+* [Settings and Behavior](#settings-and-behavior)
+* [Test Performance](#test-performance)
+
 ### Workstation vs Laptop
 
 #### Thunderbolt support
@@ -411,7 +430,8 @@ Check out ["Guide to RAM Memory Channels as Fast As Possible."](https://www.yout
 
 #### For 384-channel probes
 
-* **Minimum 2.5 GHz CPU**
+* **CPU clock speed >= 2.5 GHz**
+* **[Single-thread](https://www.cpubenchmark.net/single-thread/) Passmark score >= 2500**
 
 **To run N 384-channel probes:**
 
@@ -429,11 +449,14 @@ up. In the 20-probe case, that CPU was running in its turbo mode at over
 frequency of 3.5 GHz, and was running in turbo mode at over 4 GHz. To be
 on the safe side, if you are doing very large numbers of probes, we would
 suggest that you increase the core count in our table by at least 50% and
-make sure the turbo frequency is greater than 4 GHz.*
+make sure the turbo frequency is greater than 4 GHz. For 32 probes, you
+will be safe with a Passmark
+[Multi-thread](https://www.cpubenchmark.net/multithread/) score >= 50000.*
 
 #### For 1536-channel probes
 
-* **Minimum 3.0 GHz CPU**
+* **CPU clock speed >= 3.0 GHz**
+* **(Single-thread)(https://www.cpubenchmark.net/single-thread/) Passmark score >= 3000**
 
 **To run N 1536-channel probes:**
 
@@ -446,7 +469,8 @@ make sure the turbo frequency is greater than 4 GHz.*
 > *\* Note: 6 cores (workstation or laptop) is marginally adequate for
 (4) 1536-channel probes, meaning that any other activity on the machine could
 easily cause the run to quit. We are more comfortable recommending 8 cores
-to run 4 probes.*
+to run 4 probes. For 8 probes, you will be safe with a Passmark
+[Multi-thread](https://www.cpubenchmark.net/multithread/) score >= 50000.*
 
 ### Acquisition GPU
 
