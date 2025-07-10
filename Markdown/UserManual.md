@@ -342,7 +342,7 @@ Set the following values:
 * USB settings/USB selective suspend setting: Disable.
 * Intel(R) Graphics Settings/Intel(R) Graphics Power Plan: Maximum Performance.
 * PCI Express/Link State Power Management: Off.
-* Processor power management/Minimum processor state: 100%.
+* Processor power management/Minimum processor state: 5%.
 * Processor power management/System cooling policy: Active.
 * Processor power management/Maximum processor state: 100%.
 

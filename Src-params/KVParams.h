@@ -20,7 +20,7 @@ class KVParams : public KeyValMap
 {
 public:
     KVParams() : QMap()                         {}
-    KVParams( const KVParams &rhs ) : QMap()    {(*this) = rhs;}
+    KVParams( const KVParams &rhs ) : QMap(rhs) {}
     KVParams( const QString &s ) : QMap()       {fromString( s );}
     virtual ~KVParams()                         {}
 

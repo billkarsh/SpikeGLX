@@ -94,6 +94,10 @@ concurrently running as many as (12) 384-channel, or, (3) 1536-channel
 probes. It's a good idea to look at the Metrics Window for any signs of
 instability.
 
+> A filtered stream will auto-disable for a few seconds if the system is
+overstressed. When that happens, the filtered data are replaced by zeros,
+hence, ShankViews will appear black and audio will shut off.
+
 --------
 
 ## Probe Database

@@ -263,6 +263,7 @@ struct ImAcqShared {
 
 
 struct ImAcqQFlt {
+    double          tTrip;
     AIQ             *Qf;
     Biquad          *hipass,
                     *lopass;
@@ -275,7 +276,9 @@ struct ImAcqQFlt {
     ImAcqQFlt( const DAQ::Params &p, AIQ *Qf, int ip );
     virtual ~ImAcqQFlt();
     void mapChanged( const DAQ::Params &p, int ip );
-    void enqueue( qint16 *D, int ntpts ) const;
+    void trip();
+    bool testTrip();
+    void enqueue( qint16 *D, int ntpts );
     void enqueueZero( int ntpts ) const;
 };
 
@@ -304,6 +307,10 @@ struct qbfifo {
             for( int i = 0; i < 4; ++i )
                 each[i] = (each[i] - emin) / nave;
         }
+    }
+    bool is_increased()
+    {
+        return delta_is > delta_was;
     }
     bool is_changed()
     {

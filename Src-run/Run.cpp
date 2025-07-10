@@ -17,6 +17,7 @@
 
 #include <QAction>
 #include <QMessageBox>
+#include <QProcess>
 
 #ifdef DO_SNAPSHOTS
 #include <QTimer>
@@ -601,6 +602,7 @@ bool Run::startRun( QString &err )
 
     DAQ::Params &p = app->cfgCtl()->acceptedParams;
 
+    setProcessorMin( 100 );
     setHighPriority( true );
     setPreciseTiming( true );
 
@@ -763,6 +765,7 @@ void Run::stopRun()
 
     setPreciseTiming( false );
     setHighPriority( false );
+    setProcessorMin( 5 );
 
     QString s = "Acquisition stopped.";
 
@@ -1163,6 +1166,18 @@ void Run::workerStopsRun()
 /* ---------------------------------------------------------------- */
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+void Run::setProcessorMin( int pct )
+{
+    QStringList cmd;
+    cmd << "$output = powercfg -getactivescheme\n";
+    cmd << "$tokens = $output -split '\\s+'\n";
+    cmd << "$GUID = $tokens[3]\n";
+    cmd << QString("powercfg /setacvalueindex $GUID SUB_PROCESSOR PROCTHROTTLEMIN %1\n").arg( pct );
+    cmd << "powercfg /s $GUID";
+    QProcess::execute( "powershell", cmd );
+}
+
 
 void Run::aoStartDev()
 {

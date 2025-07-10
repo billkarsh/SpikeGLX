@@ -136,9 +136,9 @@ private slots:
     void workerStopsRun();
 
 private:
+    void setProcessorMin( int pct );
     void aoStartDev();
     bool aoStopDev();
-    void createGraphsWindow( const DAQ::Params &p );
 };
 
 #endif  // RUN_H

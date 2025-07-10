@@ -619,7 +619,8 @@ void ImAcqShared::tStampHist_PInfo( const PacketInfo* H, int ip, int it )
 /* ImAcqQFlt ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-ImAcqQFlt::ImAcqQFlt( const DAQ::Params &p, AIQ *Qf, int ip ) : Qf(Qf)
+ImAcqQFlt::ImAcqQFlt( const DAQ::Params &p, AIQ *Qf, int ip )
+    :   tTrip(0), Qf(Qf)
 {
     const CimCfg::PrbEach   &E = p.im.prbj[ip];
 
@@ -668,19 +669,39 @@ void ImAcqQFlt::mapChanged( const DAQ::Params &p, int ip )
 }
 
 
-void ImAcqQFlt::enqueue( qint16 *D, int ntpts ) const
+void ImAcqQFlt::trip()
 {
-    if( hipass )
-        hipass->applyBlockwiseMem( D, maxInt, ntpts, nC, 0, nAP );
+    tTrip = getTime();
+}
 
-    if( lopass )
-        lopass->applyBlockwiseMem( D, maxInt, ntpts, nC, 0, nAP );
 
-    carMtx.lock();
-        car.gbl_dmx_tbl_auto( D, ntpts );
-    carMtx.unlock();
+bool ImAcqQFlt::testTrip()
+{
+    if( tTrip && (getTime() - tTrip) < 4.0 )
+        return true;
 
-    Qf->enqueue( D, ntpts );
+    tTrip = 0;
+    return false;
+}
+
+
+void ImAcqQFlt::enqueue( qint16 *D, int ntpts )
+{
+    if( testTrip() )
+        enqueueZero( ntpts );
+    else {
+        if( hipass )
+            hipass->applyBlockwiseMem( D, maxInt, ntpts, nC, 0, nAP );
+
+        if( lopass )
+            lopass->applyBlockwiseMem( D, maxInt, ntpts, nC, 0, nAP );
+
+        carMtx.lock();
+            car.gbl_dmx_tbl_auto( D, ntpts );
+        carMtx.unlock();
+
+        Qf->enqueue( D, ntpts );
+    }
 }
 
 
@@ -1046,6 +1067,9 @@ bool ImAcqStream::checkFifo( int *packets, CimAcqImec *acq )
             fifoAve /= fifoN;
             sqb.ave();
         }
+
+        if( QFlt && (fifoAve > 1 || sqb.is_increased()) )
+            QFlt->trip();
 
         QString stream = metricsName();
 
