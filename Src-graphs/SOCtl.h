@@ -20,6 +20,10 @@ class AIQ;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// ---------------------
+// Spike Overlay feature
+// ---------------------
+
 struct SOGroup {
     SOGraph *grf;
     float   i2uV;
@@ -34,7 +38,7 @@ struct SOStream {
     const AIQ   *aiQ;
     quint64     fromCt;
     int         ip, ch, T;
-    SOStream() : ip(-1) {}
+    SOStream() : aiQ(0), ip(-1) {}
 };
 
 class SOWorker : public QObject

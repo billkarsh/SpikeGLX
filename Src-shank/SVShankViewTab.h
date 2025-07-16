@@ -57,6 +57,7 @@ public:
     virtual ~SVShankViewTab();
 
     void init();
+    void qf_enable();
     void setAnatomyPP( const QString &elems, int ip, int sk );
     void colorTraces( MGraphX *theX, std::vector<MGraphY> &vY );
     QString getLbl( int s, int r )  {return anat.getLbl( s, r );}

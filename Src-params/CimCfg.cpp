@@ -2780,6 +2780,14 @@ guiBreathe();
             err = np_bistSR( P.slot, P.port, P.dock );
 
             if( err != SUCCESS ) {
+                if( err == TIMEOUT ) {
+                    slVers.append(
+                        QString("Shift register BIST(slot %1, port %2, dock %3)"
+                        " not conclusive due to a timeout error.")
+                        .arg( P.slot ).arg( P.port ).arg( P.dock ) );
+                    slVers.append("Check connections and try again.");
+                    slVers.append("Use BIST dialog for comprehensive checking.");
+                }
                 slBIST.append(
                     QString("slot %1, port %2, dock %3: Shift Register")
                     .arg( P.slot ).arg( P.port ).arg( P.dock ) );

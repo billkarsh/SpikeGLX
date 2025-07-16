@@ -162,6 +162,11 @@ void CmdWorker::run()
 // Self cleanup
 // ------------
 
+    QMetaObject::invokeMethod(
+        mainApp()->getRun(),
+        "qf_remoteClientDisable",
+        Qt::QueuedConnection );
+
     Debug() << "End " << SU.tag() << SU.addr();
 
     emit finished();
@@ -919,6 +924,9 @@ void CmdWorker::fetch( const QStringList &toks )
         errMsg = "FETCH: Not running or stream not enabled.";
         return;
     }
+
+    if( js == -jsIM )
+        aiQ->qf_remoteClient( true );
 
 // -----
 // Chans

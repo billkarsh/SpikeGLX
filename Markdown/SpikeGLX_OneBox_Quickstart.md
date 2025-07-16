@@ -241,7 +241,8 @@ channel or by putting a 50-ohm terminator on it.*
 
 # Driver Installation
 
-You need the proper FTDI driver for the FT601 chip in the OneBox...
+You need the proper FTDI driver (**1.3.0.10**) for the FT601 chip in
+the OneBox...
 
 >Note that the OneBox does not use enclustra drivers. Those are only
 needed for PXIe basestations.
@@ -262,8 +263,8 @@ If you see an entry like this,
 ![*Fig 2. Installed*](ObxInstalled.png)
 
 then check the version of the driver: Right-click >> Properties >> Driver tab.
-If the version is 1.3.0.10, you're done. If the version is earlier, you must
-update it.
+If the version is 1.3.0.10, you're done. If the version is either earlier or
+later, you must update it.
 
 >*Update: SpikeGLX version 20241001 and later will automatically check the
 driver version and if there is an issue, will inform you what version you

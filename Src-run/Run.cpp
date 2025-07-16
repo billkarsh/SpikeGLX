@@ -538,6 +538,15 @@ const AIQ* Run::getQ( int js, int ip ) const
 }
 
 
+void Run::qf_remoteClientDisable()
+{
+    QMutexLocker    ml( &runMtx );
+
+    for( int ip = 0, np = imQf.size(); ip < np; ++ip )
+        imQf[ip]->qf_remoteClient( false );
+}
+
+
 // Get a stream-based time for profiling lag in imec streams.
 // NO MUTEX: Should only be called by imec worker thread.
 //

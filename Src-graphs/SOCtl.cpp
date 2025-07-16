@@ -27,12 +27,21 @@ void SOWorker::setGroups( const SOGroup *grpbase )
 
     memcpy( grp, grpbase, 4 * sizeof(SOGroup) );
 
-    Run *run = mainApp()->getRun();
+    Run         *run = mainApp()->getRun();
+    QSet<int>   oldprb, newprb;
+
+    for( int i = 0; i < 4; ++i ) {
+        oldprb.insert( str[i].ip );
+        newprb.insert( grp[i].ip );
+    }
 
     for( int i = 0; i < 4; ++i ) {
 
         SOStream    &S = str[i];
         SOGroup     &G = grp[i];
+
+        if( S.aiQ && !newprb.contains( S.ip ) )
+            S.aiQ->qf_spikeClient( false );
 
         S.stream = QString("imec%1").arg( G.ip );
         S.aiQ    = run->getQ( -jsIM, G.ip );
@@ -41,6 +50,9 @@ void SOWorker::setGroups( const SOGroup *grpbase )
         S.ip = G.ip;
         S.ch = G.ch;
         S.T  = G.T;
+
+        if( S.aiQ && !oldprb.contains( S.ip ) )
+            S.aiQ->qf_spikeClient( true );
     }
 }
 
@@ -69,6 +81,11 @@ void SOWorker::run()
             QThread::usleep( loopPeriod_us - loopT );
         else
             QThread::usleep( 1000 * 10 );
+    }
+
+    for( int i = 0; i < 4; ++i ) {
+        if( str[i].aiQ )
+            str[i].aiQ->qf_spikeClient( false );
     }
 
     emit finished();
@@ -175,7 +192,7 @@ void SOFetcher::setGroups( SOGroup *grpbase, const DAQ::Params &p )
     for( int i = 0; i < 4; ++i ) {
         SOGroup                 &G = grpbase[i];
         const CimCfg::PrbEach   &E = p.im.prbj[G.ip];
-        G.i2uV  = 1E6 * E.intToV( 1,  G.ch );
+        G.i2uV  = 1E6 * E.intToV( 1, G.ch );
         G.nC    = E.imCumTypCnt[CimCfg::imSumAll];
     }
 

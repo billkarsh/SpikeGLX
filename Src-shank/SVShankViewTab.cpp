@@ -121,6 +121,12 @@ void SVShankViewTab::init()
 }
 
 
+void SVShankViewTab::qf_enable()
+{
+    heat.qf_enable( true );
+}
+
+
 void SVShankViewTab::setAnatomyPP( const QString &elems, int ip, int sk )
 {
     anat.parse( elems, p.im.prbj[ip].roTbl, sk );
@@ -195,6 +201,7 @@ void SVShankViewTab::putSamps( const vec_i16 &_data, quint64 headCt )
 
 void SVShankViewTab::winClosed()
 {
+    heat.qf_enable( false );
     heat.resetFilter( set.what );
 }
 

@@ -50,6 +50,12 @@ void SVShankCtl_Im::mapChanged()
 }
 
 
+void SVShankCtl_Im::qf_enable()
+{
+    svTab->qf_enable();
+}
+
+
 void SVShankCtl_Im::setAnatomyPP( const QString &elems, int sk )
 {
     svTab->setAnatomyPP( elems, ip, sk );

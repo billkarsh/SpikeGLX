@@ -47,6 +47,8 @@ public:
     void setStatus( const QString &s );
     void update();
 
+    virtual void qf_enable()
+        {}
     virtual void setAnatomyPP( const QString& /*elems*/, int /*sk*/ )
         {}
     virtual void colorTraces( MGraphX* /*theX*/, std::vector<MGraphY>& /*vY*/ )

@@ -37,9 +37,9 @@ This helps you see the experiment as an integrated whole.
 2) **Several options for timer or event-driven control of file writing**.
 
 3) **Remote control**.
-You can use the MATLAB or C++ interfaces over a network connection to: set/get
-run parameters, start/stop runs and file writing, and retrieve data, all in
-real time.
+You can use the MATLAB, Python, C#, C or C++ interfaces over a network
+connection to: set/get run parameters, start/stop runs and file writing,
+and retrieve data, all in real time.
 
 --------
 
@@ -202,6 +202,9 @@ messages like: **"AIQ::enqueue low mem."**
 one or more of:
 **"AIQ::catBlocks low mem"**, **"GraphFetcher low mem…"**,
 **"Write queue low mem"**, **"Trigger low mem"**.
+
+- The Metrics window (Ctrl+M) gathers these readouts making it easy to
+monitor run health. Be sure to read the help file for that window.
 
 --------
 

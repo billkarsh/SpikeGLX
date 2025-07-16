@@ -119,8 +119,10 @@ void ShankCtlBase::showDialog()
     showNormal();
     scroll()->scrollToSelected();
 
-    if( !modal )
+    if( !modal ) {
+        qf_enable();
         mainApp()->modelessOpened( this );
+    }
 }
 
 

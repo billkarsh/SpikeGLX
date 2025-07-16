@@ -191,9 +191,61 @@ void RingFltWalker::filter()
 
 AIQ::AIQ( double srate, int nchans, double capacitySecs )
     :   srate(srate), nchans(nchans), bufmax(capacitySecs * srate),
-        tzero(0), endCt(0), bufhead(0), buflen(0)
+        tzero(0), endCt(0), bufhead(0), buflen(0), clients(0)
 {
     buf.resize( SAMPS(bufmax) );
+}
+
+
+void AIQ::qf_audioClient( bool on ) const
+{
+    QMutexLocker    ml( &qfMtx );
+
+    if( on )
+        clients |= 1;
+    else
+        clients &= ~1;
+}
+
+
+void AIQ::qf_shankClient( bool on ) const
+{
+    QMutexLocker    ml( &qfMtx );
+
+    if( on )
+        clients |= 2;
+    else
+        clients &= ~2;
+}
+
+
+void AIQ::qf_spikeClient( bool on ) const
+{
+    QMutexLocker    ml( &qfMtx );
+
+    if( on )
+        clients |= 4;
+    else
+        clients &= ~4;
+}
+
+
+void AIQ::qf_remoteClient( bool on ) const
+{
+    QMutexLocker    ml( &qfMtx );
+
+    if( on )
+        clients |= 8;
+    else
+        clients &= ~8;
+}
+
+
+bool AIQ::qf_isClient() const
+{
+    QMutexLocker    ml( &qfMtx );
+
+    return clients != 0;
 }
 
 

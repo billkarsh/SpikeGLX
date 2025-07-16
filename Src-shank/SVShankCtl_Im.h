@@ -29,6 +29,7 @@ public:
         QWidget             *parent = 0 );
     virtual void init();
     virtual void mapChanged();
+    virtual void qf_enable();
     virtual void setAnatomyPP( const QString &elems, int sk );
     virtual void colorTraces( MGraphX *theX, std::vector<MGraphY> &vY );
     virtual QString getLbl( int s, int r );

@@ -50,6 +50,7 @@ public:
 
     void updateMap( const ShankMap *S );
 
+    void qf_enable( bool on );
     void resetFilter( int what );
     void apFilter( vec_i16 &odata, const vec_i16 &idata, quint64 headCt );
     void lfFilter( vec_i16 &odata, const vec_i16 &idata );

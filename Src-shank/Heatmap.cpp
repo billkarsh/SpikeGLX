@@ -118,6 +118,13 @@ void Heatmap::updateMap( const ShankMap *S )
 }
 
 
+void Heatmap::qf_enable( bool on )
+{
+    if( Qf )
+        Qf->qf_shankClient( on );
+}
+
+
 void Heatmap::resetFilter( int what )
 {
     if( what == 2 ) {

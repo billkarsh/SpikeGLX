@@ -687,7 +687,7 @@ bool ImAcqQFlt::testTrip()
 
 void ImAcqQFlt::enqueue( qint16 *D, int ntpts )
 {
-    if( testTrip() )
+    if( testTrip() || !Qf->qf_isClient() )
         enqueueZero( ntpts );
     else {
         if( hipass )
@@ -1214,8 +1214,11 @@ void ImAcqWorker::run()
 
             ImAcqStream &S = streams[iID];
 
-            if( !S.totPts )
+            if( !S.totPts ) {
                 S.Q->setTZero( loopT );
+                if( S.QFlt )
+                    S.QFlt->Qf->setTZero( loopT );
+            }
 
             if( S.QFlt && S.ip == shr.checkCAR() ) {
                 shr.updateCAR( -1 );
@@ -1981,11 +1984,15 @@ ImAcqThread::ImAcqThread(
     Connect( worker, SIGNAL(finished()), worker, SLOT(deleteLater()) );
     Connect( worker, SIGNAL(destroyed()), thread, SLOT(quit()), Qt::DirectConnection );
 
+// Boost priority for worker handling single high channel count probe.
+
+//    if( streams.size() == 1 && streams[0].nAP > 384 )
+//        thread->setServiceLevel( QThread::QualityOfService::High );
+
     thread->start();
 
-// Demo how to boost priority for: worker handling
-// single high channel count probe.
-//
+// Boost priority for worker handling single high channel count probe.
+
     if( streams.size() == 1 && streams[0].nAP > 384 )
         thread->setPriority( QThread::HighestPriority );
 }

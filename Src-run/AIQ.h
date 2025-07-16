@@ -43,11 +43,13 @@ private:
     const int       nchans,
                     bufmax;
     vec_i16         buf;
-    mutable QMutex  QMtx;
+    mutable QMutex  QMtx,
+                    qfMtx;
     mutable double  tzero;
     quint64         endCt;
     int             bufhead,
                     buflen;
+    mutable uint    clients;
 
 /* ------- */
 /* Methods */
@@ -62,6 +64,12 @@ public:
 
     void setTZero( double t0 ) const    {tzero = t0;}
     double tZero() const                {return tzero;}
+
+    void qf_audioClient( bool on ) const;
+    void qf_shankClient( bool on ) const;
+    void qf_spikeClient( bool on ) const;
+    void qf_remoteClient( bool on ) const;
+    bool qf_isClient() const;
 
     void enqueueZero( double t0, double tLim );
     void enqueueZeroIM( int nCts, int nStat, quint16 status );

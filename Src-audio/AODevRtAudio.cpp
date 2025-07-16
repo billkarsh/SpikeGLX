@@ -407,10 +407,15 @@ bool AODevRtAudio::devStart(
         case jsNI: this->aiQ = niQ; break;
         case jsOB: this->aiQ = obQ[drv.streamip]; break;
         case jsIM:
-            if( aoC->usr.useQf && imQf.size() )
+            if( aoC->usr.useQf && imQf.size() ) {
                 this->aiQ = imQf[drv.streamip];
-            else
+                this->aiQ->qf_audioClient( true );
+            }
+            else {
+                if( this->aiQ && this->aiQ->qf_isClient() )
+                    this->aiQ->qf_audioClient( false );
                 this->aiQ = imQ[drv.streamip];
+            }
             break;
     }
 
@@ -461,6 +466,9 @@ void AODevRtAudio::devStop()
         catch( RtAudioError &e ) {
             Warning() << "Audio error: " << e.what();
         }
+
+        if( aoC->usr.useQf && aoC->drv.streamjs == jsIM )
+            this->aiQ->qf_audioClient( false );
 
         delete rta;
         rta = 0;

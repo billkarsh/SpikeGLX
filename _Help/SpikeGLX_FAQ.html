@@ -37,7 +37,7 @@
 <ol style="list-style-type: decimal">
 <li><p><strong>Strong integration and synchronization</strong>. As originally conceived the Imec 'Neuropixels' probes recorded lots of neural channels but had very limited auxiliary inputs for accelerometers, physiological readouts, lick responses, door activations and so on. Combining the Imec and Nidq streams vastly expands the aux inputs available in your experiment. Moreover, all of the data are tightly synchronized. You can see them together on screen during an experiment, the output files are synced to within a few samples and the offline File Viewer lets you review all the recorded data in a time-locked way. This helps you see the experiment as an integrated whole.</p></li>
 <li><p><strong>Several options for timer or event-driven control of file writing</strong>.</p></li>
-<li><p><strong>Remote control</strong>. You can use the MATLAB or C++ interfaces over a network connection to: set/get run parameters, start/stop runs and file writing, and retrieve data, all in real time.</p></li>
+<li><p><strong>Remote control</strong>. You can use the MATLAB, Python, C#, C or C++ interfaces over a network connection to: set/get run parameters, start/stop runs and file writing, and retrieve data, all in real time.</p></li>
 </ol>
 <hr />
 <h2 id="how-to-uninstall">How to Uninstall</h2>
@@ -91,6 +91,7 @@
 <li><p>If data are not being pulled from the hardware fast enough you’ll start to see messages like this: <strong>&quot;IMEC FIFOQFill% value, …”</strong> These messages are triggered if the fill % exceeds 5%. The run is automatically stopped at 95%. No messages are written if the percentage stays or drops below 5%.</p></li>
 <li><p>The data are placed into a central stream where graphs, file writing and other services can get it. If that queue is backing up you’ll get messages like: <strong>&quot;AIQ::enqueue low mem.&quot;</strong></p></li>
 <li><p>If a data service is bogging down fetching from the stream you may see one or more of: <strong>&quot;AIQ::catBlocks low mem&quot;</strong>, <strong>&quot;GraphFetcher low mem…&quot;</strong>, <strong>&quot;Write queue low mem&quot;</strong>, <strong>&quot;Trigger low mem&quot;</strong>.</p></li>
+<li><p>The Metrics window (Ctrl+M) gathers these readouts making it easy to monitor run health. Be sure to read the help file for that window.</p></li>
 </ul>
 <hr />
 <h2 id="how-to-report-bugs">How to Report Bugs</h2>

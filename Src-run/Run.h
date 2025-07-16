@@ -88,6 +88,7 @@ public:
     int streamSpanMax( const DAQ::Params &p, bool warn = true );
     quint64 getSampleCount( int js, int ip ) const;
     const AIQ* getQ( int js, int ip ) const;
+    void qf_remoteClientDisable();
     double getStreamTime() const;
 
 // Run control
