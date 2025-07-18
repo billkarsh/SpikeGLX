@@ -68,7 +68,7 @@ void SVShankCtl_Im::colorTraces( MGraphX *theX, std::vector<MGraphY> &vY )
 }
 
 
-QString SVShankCtl_Im::getLbl( int s, int r )
+QString SVShankCtl_Im::getLbl( int s, int r ) const
 {
     return svTab->getLbl( s, r );
 }

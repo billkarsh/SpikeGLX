@@ -14,9 +14,10 @@ class FVShankCtl_Im : public FVShankCtl
 public:
     FVShankCtl_Im( const DataFile *df, QWidget *parent = 0 );
     virtual void init( const ShankMap *map );
+    virtual int fvw_maxr() const;
     virtual void setAnatomyPP( const QString &elems, int sk );
     virtual void colorTraces( MGraphX *theX, std::vector<MGraphY> &vY );
-    virtual QString getLbl( int s, int r );
+    virtual QString getLbl( int s, int r ) const;
     virtual void exportHeat( QFile *f, const double *val );
 
 protected:

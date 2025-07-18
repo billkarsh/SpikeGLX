@@ -206,9 +206,9 @@ bool SvyPrbRun::nextBank()
         run->grfHardPause( false );
 
         // Record (S B t1 t2) transition times.
-        // t2 = resume time + 1.0 sec margin
+        // t2 = resume time + 1.5 sec margin
 
-        t2 = run->getQ( jsIM, ip )->endCount() + E.srate - t0;
+        t2 = run->getQ( jsIM, ip )->endCount() + qint64(1.5 * E.srate) - t0;
 
         vSBTT[ip] +=
             QString("(%1 %2 %3 %4)").arg( S ).arg( B ).arg( t1 ).arg( t2 );

@@ -47,13 +47,15 @@ public:
     void setStatus( const QString &s );
     void update();
 
+    virtual int fvw_maxr() const
+        {return -1;}
     virtual void qf_enable()
         {}
     virtual void setAnatomyPP( const QString& /*elems*/, int /*sk*/ )
         {}
     virtual void colorTraces( MGraphX* /*theX*/, std::vector<MGraphY>& /*vY*/ )
         {}
-    virtual QString getLbl( int /*s*/, int /*r*/ )
+    virtual QString getLbl( int /*s*/, int /*r*/ ) const
         {return QString();}
 
     virtual void loadSettings()         {}

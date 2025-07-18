@@ -740,8 +740,8 @@ bool FileViewerWindow::viewFile( QString &error, const QString &fname )
 
         if( shankCtl ) {
 
-            car.setSU( shankMap );
             shankCtl->init( shankMap );
+            car.setSU( shankMap, shankCtl->fvw_maxr() );
 
             const IMROTbl *R = df->imro();
             if( R ) {
@@ -754,11 +754,15 @@ bool FileViewerWindow::viewFile( QString &error, const QString &fname )
             }
 
             ConnectUI( shankCtl, SIGNAL(runSaveChansDlg(QString)), this, SLOT(editSave(QString)) );
+            ConnectUI( shankCtl, SIGNAL(gbldmxChanged()), this, SLOT(gbldmxChanged()) );
+            ConnectUI( shankCtl, SIGNAL(maxrowChanged()), this, SLOT(maxrowChanged()) );
             ConnectUI( shankCtl, SIGNAL(feedMe(bool)), this, SLOT(feedShankCtl(bool)) );
             ConnectUI( shankCtl, SIGNAL(gimmeTraces()), this, SLOT(colorTraces()) );
             ConnectUI( shankCtl, SIGNAL(selChanged(int)), this, SLOT(externSelectChan(int)) );
             ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
         }
+        else
+            car.setSU( shankMap );
     }
 
 // ---------------
@@ -846,7 +850,12 @@ void FileViewerWindow::getInverseGains(
 }
 
 
-const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
+const double* FileViewerWindow::svyAllBanks(
+    int     what,
+    int     T,
+    int     inarow,
+    int     maxrow,
+    bool    gbldmx )
 {
     if( !isSvy() )
         return 0;
@@ -880,7 +889,7 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
                     R0;
 
     heat.setStream( df );
-    heat.updateMap( m );
+    heat.updateMap( m, maxrow );
     sums = heat.sums();
 
     std::vector<double> *S = 0;
@@ -918,7 +927,7 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
             // new bank
 
             const SvySBTT   &M = SVY.e[im - 1];
-            f0  = M.t2 + (what == 2 ? int(2.0*df->samplingRateHz()) : 0);
+            f0  = M.t2 + (what == 2 ? int(1.5*df->samplingRateHz()) : 0);
             fL  = (im < SVY.nmaps - 1 ? SVY.e[im].t1 : qint64(df->sampCount()));
             fn  = 0;
             ib  = M.b;
@@ -930,6 +939,7 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
                 delete m;
 
             m = df->shankMap_svy( is, ib );
+            heat.updateMap( m, maxrow );
         }
 
         // zero result vector
@@ -946,12 +956,12 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
 
             switch( what ) {
                 case 0:
-                    heat.apFilter( odata, idata, 0 );
+                    heat.apFilter( odata, idata, 0, gbldmx );
                     heat.accumSpikes( odata, T, inarow );
                     heat.normSpikes();
                     break;
                 case 1:
-                    heat.apFilter( odata, idata, 0 );
+                    heat.apFilter( odata, idata, 0, gbldmx );
                     heat.accumPkPk( odata );
                     heat.normPkPk( 1 );
                     break;
@@ -1472,6 +1482,19 @@ void FileViewerWindow::editSave( QString sInit )
 
     if( SV.edit( saveStr, lfPair ) )
         shankCtl->setStatus( "Save chans string copied to clipboard" );
+}
+
+
+void FileViewerWindow::gbldmxChanged()
+{
+    svyAPPkPk.clear();
+}
+
+
+void FileViewerWindow::maxrowChanged()
+{
+    svyAPPkPk.clear();
+    shankMapChanged();
 }
 
 
@@ -3129,12 +3152,13 @@ void FileViewerWindow::selectShankMap( qint64 pos )
 
 void FileViewerWindow::shankMapChanged()
 {
-    car.setSU( shankMap );
-
     if( shankCtl ) {
+        car.setSU( shankMap, shankCtl->fvw_maxr() );
         shankCtl->mapChanged( shankMap );
         selectGraph( igSelected, false );
     }
+    else
+        car.setSU( shankMap );
 }
 
 

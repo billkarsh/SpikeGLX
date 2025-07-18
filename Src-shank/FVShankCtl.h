@@ -34,6 +34,8 @@ public:
 
 signals:
     void selChanged( int ig );
+    void gbldmxChanged();
+    void maxrowChanged();
     void feedMe( bool needMap );
 
 public slots:

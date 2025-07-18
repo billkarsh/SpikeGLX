@@ -129,13 +129,15 @@ void CAR::setSU( const GeomMap *map )
 }
 
 
-void CAR::setSU( const ShankMap *map )
+void CAR::setSU( const ShankMap *map, int maxr )
 {
+    int R = (maxr >= 0 ? maxr : 100000);
+
     SU.clear();
 
     for( int ie = 0, ne = map->e.size(); ie < ne; ++ie ) {
         const ShankMapDesc  &E = map->e[ie];
-        SU.push_back( SUElem( E.s, E.u ) );
+        SU.push_back( SUElem( E.s, (E.r <= R ? E.u : 0) ) );
     }
 }
 

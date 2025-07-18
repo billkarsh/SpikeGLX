@@ -68,7 +68,7 @@ public:
     void setSepShanks( int _nS )    {nS = _nS;}
     void setChans( int _nC, int _nAP, int _dwnSmp = 1 );
     void setSU( const GeomMap *map );
-    void setSU( const ShankMap *map );
+    void setSU( const ShankMap *map, int maxr = -1 );
     const SUList &getSU() const     {return SU;}
     void setMuxTbl( const IMROTbl *R );
     const int* getMuxTbl( int &nADC, int &nGrp ) const;

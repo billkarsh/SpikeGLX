@@ -164,7 +164,7 @@ next_rgn:;
 }
 
 
-QString Anatomy::getLbl( int s, int r )
+QString Anatomy::getLbl( int s, int r ) const
 {
     QMutexLocker    ml( &rgnMtx );
 

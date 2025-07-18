@@ -410,7 +410,12 @@ public:
 // ShankView
     bool isSvy() const      {return SVY.nmaps > 0;}
     int svyMaxbank() const  {return SVY.maxbank;}
-    const double* svyAllBanks( int what, int T, int inarow );
+    const double* svyAllBanks(
+        int     what,
+        int     T,
+        int     inarow,
+        int     maxrow,
+        bool    gbldmx );
     void svyScrollToShankBank( int shank, int bank );
 
 public slots:
@@ -437,6 +442,8 @@ public slots:
 
 // ShankView
     void editSave( QString sInit );
+    void gbldmxChanged();
+    void maxrowChanged();
     void feedShankCtl( bool needMap = false );
     void colorTraces();
     void externSelectChan( int ig );

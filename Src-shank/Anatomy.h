@@ -38,7 +38,7 @@ struct Anatomy {
     void fillLegend( QTextEdit *leg ) const;
     void colorShanks( ShankView *view, bool on ) const;
     void colorTraces( MGraphX *theX, std::vector<MGraphY> &vY, bool on );
-    QString getLbl( int s, int r );
+    QString getLbl( int s, int r ) const;
 };
 
 

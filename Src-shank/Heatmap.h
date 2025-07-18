@@ -48,11 +48,15 @@ public:
     void setStream( const DAQ::Params &p, int js, int ip );
     void setStream( const DataFile *df );
 
-    void updateMap( const ShankMap *S );
+    void updateMap( const ShankMap *S, int maxr = -1 );
 
     void qf_enable( bool on );
     void resetFilter( int what );
-    void apFilter( vec_i16 &odata, const vec_i16 &idata, quint64 headCt );
+    void apFilter(
+            vec_i16         &odata,
+            const vec_i16   &idata,
+            quint64         headCt,
+            bool            fvw_gbldmx = false );
     void lfFilter( vec_i16 &odata, const vec_i16 &idata );
 
     void accumReset( bool resetFlt, int what );

@@ -136,18 +136,26 @@ same time.
 
 ### File Viewer Data Flow
 
-`Average current window` applies a 300Hz high-pass and global CAR filer,
-then counts spikes and tallies peak-to-peak voltages over the data currently
-displayed in the File Viewer window. The Shank Viewer updates as you scroll.
+Colorizing by spike rate or AP peak-to-peak voltage first applies a 300Hz
+high-pass filter then optionally applies a global CAR filer. Turn the CAR
+filter on or off using the `Gbl dmx` checkbox. Turning CAR off can make it
+much easier to visually identify the boundary between tissue and outside.
+Point the cursor at the boundary to read out the row. Enter that row in the
+`Max row` box to exclude electrodes outside the brain. Setting `-1` turns
+the Max-row feature off.
+
+`Average current window` applies a 300Hz high-pass and optional global
+CAR filter, then counts spikes and tallies peak-to-peak voltages over the
+data currently displayed in the File Viewer window. The Shank Viewer updates
+as you scroll.
 
 `Sample whole survey` is specifically for viewing survey result files. It
 averages up to four half-second time chunks drawn from each of the banks
 on the probe to build a whole-probe activity map. You have to click `Update
-whole survey` to trigger the calculation. If you change the spike threshold
-or 'stay low' values you need to click `Update` again. Peak-to-peak calculation
-has no parameters so only one `Update` click each is needed.
+whole survey` to trigger the calculation. If you change {`Gbl dmx`, `Max row`,
+`T(-uV)`, `Stay low`} you need to click `Update` again.
 
-### Setting a Spike Threshold
+### Setting a Spike Threshold 'T(-uV)'
 
 You can read an appropriate threshold level from a graph:
 
@@ -166,7 +174,7 @@ Unfortunately, if you've got a lot of electrical noise, the signal could
 cross back and forth rapidly across the threshold. The detector thinks
 such spikes are narrow and they are rejected if 'stay low' is too high.
 
-If your spike rates seem too low, try lowering 'stay low'.
+If your spike rates seem too low, try lowering 'Stay low'.
 
 To directly examine the noise in a selected graph:
 

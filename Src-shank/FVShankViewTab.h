@@ -27,11 +27,13 @@ class FVShankViewTab : public QObject
 private:
     struct UsrSettings {
         int     yPix,
+                maxrow,
                 what,
                 thresh,     // uV
                 inarow,
                 rng[3];     // {rate, uV, uV}
-        bool    colorShanks,
+        bool    gbldmx,
+                colorShanks,
                 colorTraces;
 
         void loadSettings( QSettings &S );
@@ -80,9 +82,10 @@ public:
     void init( const ShankMap *map );
     void setAnatomyPP( const QString &elems, int sk );
     void colorTraces( MGraphX *theX, std::vector<MGraphY> &vY );
-    QString getLbl( int s, int r );
+    QString getLbl( int s, int r ) const;
 
     bool isLFP() const          {return lfp;}
+    int fvw_maxr() const        {return set.maxrow;}
     void setWhat( int what )    {set.what = what;}
     void mapChanged( const ShankMap *map );
     void selChan( int sh, int bk, int ig );
@@ -102,6 +105,8 @@ public slots:
 
 private slots:
     void ypixChanged( int y );
+    void gbldmxCheck( bool on );
+    void maxrowChanged( int r );
     void howChanged( int i );
     void updtBut();
     void whatChanged( int i );

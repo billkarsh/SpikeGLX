@@ -23,6 +23,12 @@ void FVShankCtl_Im::init( const ShankMap *map )
 }
 
 
+int FVShankCtl_Im::fvw_maxr() const
+{
+    return svTab->fvw_maxr();
+}
+
+
 void FVShankCtl_Im::setAnatomyPP( const QString &elems, int sk )
 {
     svTab->setAnatomyPP( elems, sk );
@@ -35,7 +41,7 @@ void FVShankCtl_Im::colorTraces( MGraphX *theX, std::vector<MGraphY> &vY )
 }
 
 
-QString FVShankCtl_Im::getLbl( int s, int r )
+QString FVShankCtl_Im::getLbl( int s, int r ) const
 {
     return svTab->getLbl( s, r );
 }

@@ -20,12 +20,14 @@
 void FVShankViewTab::UsrSettings::loadSettings( QSettings &S )
 {
     yPix        = S.value( "yPix", 8 ).toInt();
+    maxrow      = S.value( "maxrow", -1 ).toInt();
     what        = S.value( "what", 1 ).toInt();
     thresh      = S.value( "thresh", -75 ).toInt();
     inarow      = S.value( "staylow", 3 ).toInt();
     rng[0]      = S.value( "rngSpk", 100 ).toInt();
     rng[1]      = S.value( "rngAP", 100 ).toInt();
     rng[2]      = S.value( "rngLF", 100 ).toInt();
+    gbldmx      = S.value( "gbldmx", true ).toBool();
     colorShanks = S.value( "colorShanks", true ).toBool();
     colorTraces = S.value( "colorTraces", false ).toBool();
 }
@@ -34,12 +36,14 @@ void FVShankViewTab::UsrSettings::loadSettings( QSettings &S )
 void FVShankViewTab::UsrSettings::saveSettings( QSettings &S ) const
 {
     S.setValue( "yPix", yPix );
+    S.setValue( "maxrow", maxrow );
     S.setValue( "what", what );
     S.setValue( "thresh", thresh );
     S.setValue( "staylow", inarow );
     S.setValue( "rngSpk", rng[0] );
     S.setValue( "rngAP", rng[1] );
     S.setValue( "rngLF", rng[2] );
+    S.setValue( "gbldmx", gbldmx );
     S.setValue( "colorShanks", colorShanks );
     S.setValue( "colorTraces", colorTraces );
 }
@@ -96,6 +100,9 @@ void FVShankViewTab::init( const ShankMap *map )
     fvTabUI->ypixSB->installEventFilter( SC );
     fvTabUI->ypixSB->setValue( set.yPix );
 
+    fvTabUI->gbldmxChk->setChecked( set.gbldmx );
+    fvTabUI->maxrowSB->setValue( set.maxrow );
+
     FileViewerWindow *f = dynamic_cast<FileViewerWindow*>(SC->parent());
     if( !f || !f->isSvy() )
         fvTabUI->howCB->removeItem( 1 );
@@ -125,6 +132,8 @@ void FVShankViewTab::init( const ShankMap *map )
     fvTabUI->tracesChk->setEnabled( false );
 
     ConnectUI( fvTabUI->ypixSB, SIGNAL(valueChanged(int)), this, SLOT(ypixChanged(int)) );
+    ConnectUI( fvTabUI->gbldmxChk, SIGNAL(clicked(bool)), this, SLOT(gbldmxCheck(bool)) );
+    ConnectUI( fvTabUI->maxrowSB, SIGNAL(valueChanged(int)), this, SLOT(maxrowChanged(int)) );
     ConnectUI( fvTabUI->howCB, SIGNAL(currentIndexChanged(int)), this, SLOT(howChanged(int)) );
     ConnectUI( fvTabUI->updtBut, SIGNAL(clicked()), this, SLOT(updtBut()) );
     ConnectUI( fvTabUI->whatCB, SIGNAL(currentIndexChanged(int)), this, SLOT(whatChanged(int)) );
@@ -161,7 +170,7 @@ void FVShankViewTab::colorTraces( MGraphX *theX, std::vector<MGraphY> &vY )
 }
 
 
-QString FVShankViewTab::getLbl( int s, int r )
+QString FVShankViewTab::getLbl( int s, int r ) const
 {
     return anat.getLbl( s, r );
 }
@@ -171,7 +180,7 @@ void FVShankViewTab::mapChanged( const ShankMap *map )
 {
     if( !fvTabUI->howCB->currentIndex() ) {
         SC->drawMtx.lock();
-            heat.updateMap( map );
+            heat.updateMap( map, set.maxrow );
             SC->view()->setShankMap( map );
         SC->drawMtx.unlock();
     }
@@ -224,11 +233,11 @@ void FVShankViewTab::putSamps( const vec_i16 &_data )
     SC->drawMtx.lock();
         switch( set.what ) {
             case 0:
-                heat.apFilter( data, _data, 0 );
+                heat.apFilter( data, _data, 0, set.gbldmx );
                 heat.accumSpikes( data, set.thresh, set.inarow );
                 break;
             case 1:
-                heat.apFilter( data, _data, 0 );
+                heat.apFilter( data, _data, 0, set.gbldmx );
                 heat.accumPkPk( data );
                 break;
             default:
@@ -322,6 +331,35 @@ void FVShankViewTab::ypixChanged( int y )
 }
 
 
+void FVShankViewTab::gbldmxCheck( bool on )
+{
+    SC->drawMtx.lock();
+        set.gbldmx = on;
+    SC->drawMtx.unlock();
+    SC->saveSettings();
+
+    emit dynamic_cast<FVShankCtl*>(SC)->gbldmxChanged();
+    emit dynamic_cast<FVShankCtl*>(SC)->feedMe( false );
+
+    if( fvTabUI->howCB->currentIndex() )
+        SC->setStatus( "Click Update!" );
+}
+
+
+void FVShankViewTab::maxrowChanged( int r )
+{
+    SC->drawMtx.lock();
+        set.maxrow = r;
+    SC->drawMtx.unlock();
+    SC->saveSettings();
+
+    emit dynamic_cast<FVShankCtl*>(SC)->maxrowChanged();
+
+    if( fvTabUI->howCB->currentIndex() )
+        SC->setStatus( "Click Update!" );
+}
+
+
 void FVShankViewTab::howChanged( int i )
 {
     int sel = SC->view()->getSel();
@@ -355,9 +393,12 @@ void FVShankViewTab::updtBut()
 
     if( f ) {
         SC->drawMtx.lock();
+            QGuiApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
             svySums[set.what] =
-                f->svyAllBanks( set.what, set.thresh, set.inarow );
+                f->svyAllBanks(
+                    set.what, set.thresh, set.inarow, set.maxrow, set.gbldmx );
             color();
+            QGuiApplication::restoreOverrideCursor();
         SC->drawMtx.unlock();
         SC->setStatus( "Updated" );
     }
@@ -393,6 +434,9 @@ void FVShankViewTab::threshChanged( int t )
         set.thresh = -t;
     SC->drawMtx.unlock();
     SC->saveSettings();
+
+    if( fvTabUI->howCB->currentIndex() )
+        SC->setStatus( "Click Update!" );
 }
 
 
@@ -402,6 +446,9 @@ void FVShankViewTab::inarowChanged( int s )
         set.inarow = s;
     SC->drawMtx.unlock();
     SC->saveSettings();
+
+    if( fvTabUI->howCB->currentIndex() )
+        SC->setStatus( "Click Update!" );
 }
 
 

@@ -112,9 +112,9 @@ void Heatmap::setStream( const DataFile *df )
 }
 
 
-void Heatmap::updateMap( const ShankMap *S )
+void Heatmap::updateMap( const ShankMap *S, int maxr )
 {
-    car.setSU( S );
+    car.setSU( S, maxr );
 }
 
 
@@ -136,7 +136,11 @@ void Heatmap::resetFilter( int what )
 }
 
 
-void Heatmap::apFilter( vec_i16 &odata, const vec_i16 &idata, quint64 headCt )
+void Heatmap::apFilter(
+    vec_i16         &odata,
+    const vec_i16   &idata,
+    quint64         headCt,
+    bool            fvw_gbldmx )
 {
     int ntpts = int(idata.size()) / nC;
 
@@ -171,7 +175,7 @@ use_raw:
         aphipass->applyBlockwiseMem( &odata[0], maxInt, ntpts, nAP, 0, nAP );
 
         if( js == jsIM ) {
-            if( offline ) {
+            if( offline && fvw_gbldmx ) {
                 // For online, allow user to enable global demux or not
                 // via the Qf option. Probe diagnostics and visualization
                 // of brain/air boundary are clearer with demux off.

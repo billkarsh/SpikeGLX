@@ -435,9 +435,13 @@ bool Config_devtab::imDetect()
     imWrite( "\nConnecting...allow several seconds." );
     guiBreathe();
 
+    QGuiApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+
     availIM = CimCfg::detect(
                 slVers, slBIST, vHSpsv, vHS20, T,
                 devTabUI->bistChk->isChecked() );
+
+    QGuiApplication::restoreOverrideCursor();
 
 // -------
 // Reports

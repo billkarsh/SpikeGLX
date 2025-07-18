@@ -4,6 +4,8 @@
 20250525
 --------
 + Probe PRB_1_2_480_2 -> PRB_1_2_0480_2.
++ Extend survey transition by 0.5 second.
++ Added gbldmx control to offline ShankViewer.
 + Auto-show Metrics window if error flag.
 + Boost SpikeGLX priority during acquisition.
 + Filtered IM streams pause if system stressed.
