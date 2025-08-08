@@ -29,6 +29,8 @@
 <li><a href="#multidrive-run-splitting">Multidrive Run Splitting</a></li>
 <li><a href="#display-settings">Display Settings</a></li>
 <li><a href="#screen-saver-and-power-settings">Screen Saver and Power Settings</a></li>
+<li><a href="#power-mode-slider">Power Mode Slider</a></li>
+<li><a href="#power-notes">Power Notes</a></li>
 <li><a href="#graphics-problems">Graphics Problems</a></li>
 </ul></li>
 <li><a href="#data-stream">Data Stream</a></li>
@@ -238,6 +240,9 @@
 <h4 id="screen-saver-and-power-settings">Screen Saver and Power Settings</h4>
 <p>Use the following computer settings to guard against interruption during prolonged data acquisition runs (running on batteries is discouraged):</p>
 <p>Screen saver settings group:</p>
+<blockquote>
+<p><strong>NEW</strong>: As of version 20250525 The SpikeGLX download folder contains a script named <code>DAQ_power_settings.bat.</code> Double-click on it to run it. It makes the changes listed below, even in versions of the OS that hide the settings.</p>
+</blockquote>
 <ul>
 <li>Screen saver: (None).</li>
 </ul>
@@ -249,8 +254,9 @@
 </blockquote>
 <p>Power plan settings:</p>
 <blockquote>
-<p>Keep drilling down until you find the following advanced power plan options:</p>
+<p>Keep drilling down until you find the following advanced power plan options. If you don't see some of the following settings they are hidden on your machine. In any case, you can use the double-clickable <code>DAQ_power_settings.bat</code> script in your SpikeGLX download to set them automatically.</p>
 </blockquote>
+<p>Set the following values:</p>
 <ul>
 <li>Put the computer to sleep: Never.</li>
 <li>Hard disk/Turn off hard disk after: Never.</li>
@@ -259,13 +265,18 @@
 <li>USB settings/USB selective suspend setting: Disable.</li>
 <li>Intel(R) Graphics Settings/Intel(R) Graphics Power Plan: Maximum Performance.</li>
 <li>PCI Express/Link State Power Management: Off.</li>
-<li>Processor power management/Minimum processor state: 100%.</li>
+<li>Processor power management/Minimum processor state: 5%.</li>
 <li>Processor power management/System cooling policy: Active.</li>
 <li>Processor power management/Maximum processor state: 100%.</li>
 </ul>
 <blockquote>
 <p>Tip: For some settings, 'Never' might not appear as a choice. Try typing either 'never' or '0' directly into the box.</p>
 </blockquote>
+<h4 id="power-mode-slider">Power Mode Slider</h4>
+<p>First, a reminder to acquire data plugged into AC power. In some versions of Windows 10, for some laptops, there is a user control that impacts the performance of your machine. Look in the System Tray area of the Windows Task Bar for the battery icon. Open that window. If you see a slider called <code>Power mode</code>, then (while on AC power) slide it all the way to the right before doing acquisition runs.</p>
+<h4 id="power-notes">Power Notes</h4>
+<p>Be aware that the Lenovo <code>Vantage</code> applications include a setting for <code>Airplane Power Mode</code> which, if enabled, cause the machine to run at half speed, even when plugged in. This is not what you want for data acquisition. Other laptops may have similar energy saving modes that you should probably disable when you need maximum performance.</p>
+<p>Do not do acquisition runs immediatly after a reboot! Whenever you reboot the computer, allow at least 2 minutes (5 is better) for the OS to complete the launching and initialization of services and apps. The computer can be very busy during startup, which can destabilize the run.</p>
 <h4 id="graphics-problems">Graphics Problems</h4>
 <p>If your Graph windows or Shank viewers appear black, or if they flash or flicker, there are solutions on the <a href="SpikeGLX_FAQ.html#graphics-problems">SpikeGLX FAQ</a> page.</p>
 <hr />

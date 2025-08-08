@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+August 8, 2025
+
+* CatGT 4.8 (Supercat support for -save and -sepShanks).
+
 May 27, 2025
 
 * SpikeGLX 20250325-phase30 (Missing samples, better survey, imec v3.70.3).
