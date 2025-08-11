@@ -156,6 +156,28 @@ bool DataFile::openForRead( QString &error, const QString &filename )
 
     mode = Input;
 
+// ----------------
+// Check imErrFlags
+// ----------------
+
+    {
+        QMap<QString,QVariant>::const_iterator
+            it  = kvp.begin(),
+            end = kvp.end();
+        for( ; it != end; ++it ) {
+            if( it.key().startsWith( "imErrFlags" ) ) {
+                if( !it.value().toString().trimmed().startsWith( "0 " ) ) {
+                    Warning() <<
+                    QString("Metadata <%1=%2> in '%3'.")
+                    .arg( it.key() )
+                    .arg( it.value().toString().trimmed() )
+                    .arg( QFileInfo( bFile ).fileName() );
+                }
+                break;
+            }
+        }
+    }
+
     return true;
 }
 
