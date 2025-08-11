@@ -42,6 +42,8 @@ IMHSTCtl::IMHSTCtl( QObject *parent ) : QObject(parent)
 
     hstUI = new Ui::IMBISTDlg;
     hstUI->setupUi( dlg );
+    hstUI->dockLbl->hide();
+    hstUI->dockSB->hide();
     ConnectUI( hstUI->goBut, SIGNAL(clicked()), this, SLOT(go()) );
     ConnectUI( hstUI->clearBut, SIGNAL(clicked()), this, SLOT(clear()) );
     ConnectUI( hstUI->saveBut, SIGNAL(clicked()), this, SLOT(save()) );
@@ -57,7 +59,7 @@ IMHSTCtl::IMHSTCtl( QObject *parent ) : QObject(parent)
 
     write(
         "\nBefore running these tests...\n"
-        "Connect the HST (tester dongle) to the desired headstage." );
+        "Connect the 1.0 HST (tester dongle) to the desired headstage." );
     isHelloText = true;
 
     _closeSlots();

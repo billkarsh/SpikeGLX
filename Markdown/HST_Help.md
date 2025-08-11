@@ -1,5 +1,8 @@
 ## Headstage Tester (HST)
 
+> Only NP 1.0 headstages can be tested in this way, but 1.0 headstages
+are used with {NP 1.0, NHP, UHD} probes.
+
 ### Overview
 
 A headstage can be checked by plugging an imec HST dongle component

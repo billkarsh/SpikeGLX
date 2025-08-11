@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>414</width>
+    <width>484</width>
     <height>516</height>
    </rect>
   </property>
@@ -81,7 +81,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_4">
+      <widget class="QLabel" name="dockLbl">
        <property name="text">
         <string>Dock</string>
        </property>
