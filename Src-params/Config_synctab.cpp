@@ -169,7 +169,7 @@ void Config_synctab::syncSourceCBChanged()
     }
 
     syncTabUI->imSlotSB->setEnabled(
-        cfg->usingIM &&
+        cfg->prbTab.anySlotPXIType() &&
         (   // source not PXI
             sourceIdx < DAQ::eSyncSourceIM ||
             !cfg->prbTab.isSlotPXIType(
