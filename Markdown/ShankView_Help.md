@@ -141,8 +141,9 @@ high-pass filter then optionally applies a global CAR filer. Turn the CAR
 filter on or off using the `Gbl dmx` checkbox. Turning CAR off can make it
 much easier to visually identify the boundary between tissue and outside.
 Point the cursor at the boundary to read out the row. Enter that row in the
-`Max row` box to exclude electrodes outside the brain. Setting `-1` turns
-the Max-row feature off.
+`Max row` box to exclude electrodes outside the brain when 'Gbl Dmx' is on.
+Setting `-1` turns the Max-row feature off ('Gbl Dmx' uses all channels when
+it is on).
 
 `Average current window` applies a 300Hz high-pass and optional global
 CAR filter, then counts spikes and tallies peak-to-peak voltages over the

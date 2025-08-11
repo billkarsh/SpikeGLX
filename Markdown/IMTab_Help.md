@@ -86,13 +86,12 @@ are out of the brain.
 As of SpikeGLX version 20230425, you can set up a filtered probe AP-band
 stream that runs in parallel with the raw stream. You can set the bandpass
 edges for this stream, and the stream automatically gets global `demux` CAR.
-These data, when present, are used to improve signal-to-background in both
-audio output and Shank Viewers (for {spike, AP pk-pk} calculations). There
-is a checkbox to disable this feature just in case you are running out of
-RAM or CPU, but we don't think this will be necessary unless you are
-concurrently running as many as (12) 384-channel, or, (3) 1536-channel
-probes. It's a good idea to look at the Metrics Window for any signs of
-instability.
+These data are **required for SpikeViewer**, and when present, are used to
+improve signal-to-background in both **audio output** and **ShankViewers**.
+There is a checkbox to disable this feature if you are running out of RAM
+or CPU, but we don't think this will be necessary unless you are running
+as many as (12) 384-channel, or, (3) 1536-channel probes. It's a good idea
+to look at the Metrics Window for any signs of instability.
 
 > A filtered stream will auto-disable for a few seconds if the system is
 overstressed. When that happens, the filtered data are replaced by zeros,

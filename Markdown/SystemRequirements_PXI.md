@@ -309,6 +309,9 @@ There are easier to use options like the BNC-2110 that provide BNCs for the
 most often accessed channels, and the SCB-68A that offers only screw terminals
 but is more versatile because you can access all channels.
 
+To match {IO cards, breakout boxes, cables} consult this
+[NI accessory table](https://www.ni.com/en/support/documentation/cable-accessory-guide/daq-multifunction-i-o-cable-accessory-compatibility/main-page---daq-multifunction-i-o-cable-and-accessory-compatibil/63xx-models.html).
+
 --------
 
 ## Computing Overview

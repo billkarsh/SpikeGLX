@@ -542,14 +542,16 @@ int AODevRtAudio::callbackMono(
     Q_UNUSED( streamTime )
     Q_UNUSED( userData )
 
-    if( status )
-        Debug() << "Audio stream underflow detected.";
-
     QMutexLocker    ml( &ME->aoC->aoMtx );
 
     const AOCtl::Derived    &drv = ME->aoC->drv;
     qint16                  *dst = (qint16*)outputBuffer;
     qint64                  headCt;
+
+    if( status ) {
+        Debug() << QString("Audio stream(js,ip=%1,%2) underflow detected.")
+                    .arg( drv.streamjs ).arg( drv.streamip );
+    }
 
 // Fetch data from stream
 
@@ -574,7 +576,8 @@ int AODevRtAudio::callbackMono(
 
 // Fetch failed
 
-    Warning() << "Audio getting no samples.";
+    Warning() << QString("Audio stream(js,ip=%1,%2) getting no samples.")
+                    .arg( drv.streamjs ).arg( drv.streamip );
 
 #if 0
     // Stopping from within callback crashes sometimes...
@@ -622,14 +625,16 @@ int AODevRtAudio::callbackStereo(
     Q_UNUSED( streamTime )
     Q_UNUSED( userData )
 
-    if( status )
-        Debug() << "Audio stream underflow detected.";
-
     QMutexLocker    ml( &ME->aoC->aoMtx );
 
     const AOCtl::Derived    &drv = ME->aoC->drv;
     qint16                  *dst = (qint16*)outputBuffer;
     qint64                  headCt;
+
+    if( status ) {
+        Debug() << QString("Audio stream(js,ip=%1,%2) underflow detected.")
+                    .arg( drv.streamjs ).arg( drv.streamip );
+    }
 
 // Fetch data from stream
 
@@ -656,7 +661,8 @@ int AODevRtAudio::callbackStereo(
 
 // Fetch failed
 
-    Warning() << "Audio getting no samples.";
+    Warning() << QString("Audio stream(js,ip=%1,%2) getting no samples.")
+                    .arg( drv.streamjs ).arg( drv.streamip );
 
 #if 0
     // Stopping from within callback crashes sometimes...
