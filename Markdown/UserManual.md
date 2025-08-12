@@ -18,6 +18,7 @@
         + [Power Mode Slider](#power-mode-slider)
         + [Power Notes](#power-notes)
         + [Graphics Problems](#graphics-problems)
+        + [Overnight POP Errors](#overnight-pop-errors)
     + [Data Stream](#data-stream)
     + [Supported Streams](#supported-streams)
         + [Stream Length](#stream-length)
@@ -376,6 +377,16 @@ very busy during startup, which can destabilize the run.
 If your Graph windows or Shank viewers appear black, or if they flash
 or flicker, there are solutions on the
 [SpikeGLX FAQ](SpikeGLX_FAQ.html#graphics-problems) page.
+
+#### Overnight POP Errors
+
+Windows Task Scheduler runs "Microsoft Compatibility Appraiser" every day
+at around 3am or 4am in the morning. This task checks whether you should
+be notified to update your system from Windows 10 to 11. The scan drives
+CPU usage to 100% for several seconds and can disrupt a data acquisition
+run. The evidence for that is POP errors (visible in SpikeGLX Metrics
+Window). If this is happening to you, run the double-clickable
+`Disable_MS_Compat_Appraiser.bat` script in your SpikeGLX download.
 
 --------
 
