@@ -9,9 +9,6 @@
 #include "SignalBlocker.h"
 #include "Version.h"
 
-#ifdef HAVE_NXT
-#include "IMEC/NeuropixAPI_NXT.h"
-#endif
 #ifdef HAVE_IMEC
 #include "IMEC/NeuropixAPI.h"
 using namespace Neuropixels;
@@ -1729,6 +1726,20 @@ void CimCfg::saveSettings( QSettings &S ) const
 }
 
 
+bool CimCfg::isBSSupported( int slot )
+{
+#ifdef HAVE_IMEC
+    firmware_Info   bs_inf, bsc_inf;
+    bool            bs_ok,  bsc_ok;
+    np_checkBasestationSupported(slot, &bs_inf, &bsc_inf, &bs_ok, &bsc_ok);
+    return bs_ok && bsc_ok;
+#else
+    Q_UNUSED( slot )
+    return false;
+#endif
+}
+
+
 // Close all installed slots and decouple their sync outputs.
 //
 void CimCfg::closeAllBS( bool report )
@@ -1762,18 +1773,14 @@ void CimCfg::closeAllBS( bool report )
 
     for( int slot = imSlotMin; slot < imSlotPhyLim; ++slot ) {
 
-        if( SUCCESS == np_getDeviceInfo( slot, BS ) ) {
-
-            // Note: These calls all return SUCCESS regardless of API.
+        if( isBSSupported( slot ) &&
+            SUCCESS == np_getDeviceInfo( slot, BS ) ) {
 
             np_closeBS( slot );
             np_openBS( slot );
-            if( BS->platformid == NPPlatform_PXI ) {
-                np_switchmatrix_clear( slot, SM_Output_SMA );
-                np_switchmatrix_clear( slot, SM_Output_PXISYNC );
-            }
-            else
-                np_switchmatrix_clear( slot, SM_Output_SMA1 );
+            np_switchmatrix_clear( slot, SM_Output_SMA );
+            if( BS->platformid == NPPlatform_PXI )
+                np_switchmatrix_clear( slot, SM_Output_PXI7 );
             np_closeBS( slot );
         }
     }
@@ -2142,8 +2149,21 @@ guiBreathe();
                     .arg( slot ).arg( VERS_IMEC_BSC ) );
             }
         }
-        else
-            V.bscfw = "0.0.0";
+        else {
+
+            err = np_ob_getFirmwareInfo( slot, &info );
+
+            if( err != SUCCESS ) {
+                slVers.append(
+                    QString("IMEC ob_getFirmwareInfo(slot %1)%2")
+                    .arg( slot ).arg( makeErrorString( err ) ) );
+                return false;
+            }
+
+            V.bscfw = QString("%1.%2.%3")
+                        .arg( info.major ).arg( info.minor )
+                        .arg( info.build );
+        }
 #else
         V.bscfw = "0.0.0";
 #endif
@@ -2291,6 +2311,21 @@ guiBreathe();
         if( T.simprb.isSimProbe( P.slot, P.port, P.dock ) )
             continue;
 
+// @@@ Experiment to fix NXT timeouts
+#ifdef HAVE_NXT
+{
+    HardwareID  H;
+    np_closeBS( P.slot );
+    np_openBS( P.slot );
+//    Log()<<np_getProbeHardwareID(P.slot, P.port, 1, &H);
+    Log()<<np_getFlexHardwareID(P.slot, P.port, 1, &H);
+
+    np_closeBS( P.slot );
+    np_openBS( P.slot );
+//    Log()<<np_getProbeHardwareID(P.slot, P.port, 1, &H);
+    Log()<<np_getFlexHardwareID(P.slot, P.port, 1, &H);
+}
+#endif
         // ----
         // isHS
         // ----
@@ -2417,14 +2452,11 @@ guiBreathe();
         // HS20 (tests for no EEPROM)
         // --------------------------
 
-        bool    noEEPROM;
-#ifdef HAVE_NXT
         QString smaj(hID.version_Major), smin(hID.version_Minor);
-        noEEPROM = (smaj == "" || smaj == "0" || smaj == "1") &&
-                   (smin == "" || smin == "0");
-#else
-        noEEPROM = (hID.version_Major == 0 || hID.version_Major == 1) && !hID.version_Minor;
-#endif
+        bool    noEEPROM =
+                    (smaj == "" || smaj == "0" || smaj == "1") &&
+                    (smin == "" || smin == "0");
+
         if( !P.hssn && noEEPROM ) {
 
             if( vHS20.isEmpty() )
@@ -2622,6 +2654,13 @@ guiBreathe();
                     slVers.append("");
                     slVers.append("Error 8 will occur if you detect with a headstage tester attached.");
                     slVers.append("Use the headstage test dongle only with command: Tools/HST.");
+                }
+                else if( err == DESERIALIZER_MODE_ERROR ) {
+                    slVers.append("");
+                    slVers.append("Reinitialize chassis ports:");
+                    slVers.append("1. Shut down computer and chassis.");
+                    slVers.append("2. Plug USB-C cable into each port you will use.");
+                    slVers.append("3. Power up with plugs in.");
                 }
                 return false;
             }

@@ -1,10 +1,6 @@
 
 #ifdef HAVE_IMEC
 
-#ifdef HAVE_NXT
-#include "IMEC/NeuropixAPI_dbg.h"
-#endif
-
 #include "CimAcqImec.h"
 #include "Util.h"
 
@@ -161,7 +157,7 @@ bool ImCfgWorker::_mt_openProbe( const CimCfg::ImProbeDat &P )
         return false;
     }
 
-#ifdef HAVE_NXT
+#ifdef HAVE_NXT_
     err = np_writeI2Cflex( P.slot, P.port, P.dock, 0xE0, 0x00, 0x48 );
 
     if( err != SUCCESS ) {

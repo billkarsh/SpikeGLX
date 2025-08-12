@@ -395,14 +395,10 @@ bool IMBISTCtl::EEPROMCheck()
 // HS20 (tests for no EEPROM)
 // --------------------------
 
-    bool noEEPROM;
-#ifdef HAVE_NXT
     QString smaj(hID.version_Major), smin(hID.version_Minor);
-    noEEPROM = (smaj == "" || smaj == "0" || smaj == "1") &&
-               (smin == "" || smin == "0");
-#else
-    noEEPROM = (hID.version_Major == 0 || hID.version_Major == 1) && !hID.version_Minor;
-#endif
+    bool    noEEPROM =
+                (smaj == "" || smaj == "0" || smaj == "1") &&
+                (smin == "" || smin == "0");
 
     if( !hID.SerialNumber && noEEPROM )
         testEEPROM = false;
@@ -580,17 +576,44 @@ void IMBISTCtl::test_bistSR()
     NP_ErrorCode    err = SUCCESS;
 
     IMROTbl *R      = IMROTbl::alloc( pn );
+    int     nShnk   = R->nShank();
     bool    testSR  = (R->nBanks() > 1);
+    uint8_t mask    = 0;
     delete R;
 
     if( testSR ) {
         err = np_bistSR(
                 bistUI->slotSB->value(),
                 bistUI->portSB->value(),
-                bistUI->dockSB->value() );
+                bistUI->dockSB->value(), &mask );
     }
 
-    stdFinish( err );
+    if( err == SUCCESS )
+        write( "result = 0 'SUCCESS'" );
+    else if( err == TIMEOUT ) {
+        write( QString("result = %1 '%2'")
+            .arg( err ).arg( getNPErrorString() ) );
+        write( "Test inconclusive." );
+        write( "Check connections and try again." );
+    }
+    else {
+        write( QString("result = %1 '%2'")
+            .arg( err ).arg( getNPErrorString() ) );
+        QString s;
+        int     ngood = 0;
+        for( int is = 0; is < nShnk; ++is ) {
+            if( mask & (1<<is) ) {
+                s += QString(" %1").arg( is );
+                ++ngood;
+            }
+        }
+        write( QString("Zero-based good shank list = { %1 }")
+            .arg( s.trimmed() ) );
+        if( ngood < nShnk )
+            write( "You should not use this probe." );
+    }
+
+    _closeProbe();
 }
 
 

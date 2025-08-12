@@ -830,7 +830,6 @@ int IMROTbl::selectRefs( int slot, int port, int dock ) const
 // Disconnect the 4 shank switches
 // -------------------------------
 
-#ifndef HAVE_NXT
     if( nShank() == 4 ) {
 
         for( int ic = 0; ic < 4; ++ic ) {
@@ -842,7 +841,6 @@ int IMROTbl::selectRefs( int slot, int port, int dock ) const
                 return err;
         }
     }
-#endif
 
 // ---------------------------------------
 // Connect all according to table ref data

@@ -9,9 +9,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>474</width>
-    <height>473</height>
+    <width>459</width>
+    <height>492</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Update Imec Firmware</string>
@@ -161,7 +167,7 @@
       <bool>true</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
+      <item row="1" column="1">
        <widget class="QLineEdit" name="bsfileLE">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -180,7 +186,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
+      <item row="1" column="2">
        <widget class="QPushButton" name="bsBrowse">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -190,6 +196,20 @@
         </property>
         <property name="text">
          <string>Browse...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QRadioButton" name="bsExtRadio">
+        <property name="text">
+         <string>File</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="2">
+       <widget class="QRadioButton" name="bsIntRadio">
+        <property name="text">
+         <string>Load data from this SpikeGLX</string>
         </property>
        </widget>
       </item>
@@ -205,7 +225,20 @@
       <bool>true</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout_4">
-      <item row="0" column="0">
+      <item row="1" column="2">
+       <widget class="QPushButton" name="bscBrowse">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Browse...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
        <widget class="QLineEdit" name="bscfileLE">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -224,16 +257,17 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QPushButton" name="bscBrowse">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
+      <item row="1" column="0">
+       <widget class="QRadioButton" name="bscExtRadio">
         <property name="text">
-         <string>Browse...</string>
+         <string>File</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="2">
+       <widget class="QRadioButton" name="bscIntRadio">
+        <property name="text">
+         <string>Load data from this SpikeGLX</string>
         </property>
        </widget>
       </item>
@@ -287,22 +321,6 @@
     </widget>
    </item>
    <item row="5" column="0">
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeType">
-      <enum>QSizePolicy::MinimumExpanding</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="6" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QLabel" name="label_4">
@@ -350,8 +368,12 @@
  <tabstops>
   <tabstop>slotCB</tabstop>
   <tabstop>bsGrp</tabstop>
+  <tabstop>bsIntRadio</tabstop>
+  <tabstop>bsExtRadio</tabstop>
   <tabstop>bsBrowse</tabstop>
   <tabstop>bscGrp</tabstop>
+  <tabstop>bscIntRadio</tabstop>
+  <tabstop>bscExtRadio</tabstop>
   <tabstop>bscBrowse</tabstop>
   <tabstop>updateBut</tabstop>
   <tabstop>buttonBox</tabstop>

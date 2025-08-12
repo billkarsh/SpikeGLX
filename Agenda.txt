@@ -3,6 +3,7 @@
 
 20250525
 --------
++ API 4.1.3.
 + Probe PRB_1_2_480_2 -> PRB_1_2_0480_2.
 + Extend survey transition by 0.5 second.
 + Added gbldmx control to offline ShankViewer.
@@ -10,9 +11,12 @@
 + FileViewer reports error flags to log.
 + Boost SpikeGLX priority during acquisition.
 + Filtered IM streams pause if system stressed.
++ Record OBX firmware version.
++ Faster remote obx_AO_set().
 
 20250325
 --------
++ API 4.0.2.
 + Support NP1.0 probe PRB_1_2_480_2.
 + Improve IMRO file error reporting.
 + Fix immediate gate start sensitivity.

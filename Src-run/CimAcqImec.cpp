@@ -23,6 +23,7 @@
 //#define TESTDUPSAMPS
 //#define TSTAMPCHECKS
 //#define LATENCYFILE
+//#define GENSERDES       0
 //#define PROFILE
 //#define TUNE            0
 //#define TUNEOBX         0
@@ -1181,6 +1182,16 @@ void ImAcqWorker::run()
             case 2: ++nT2; T2Chans = qMax( T2Chans, S.nAP ); break;
             case 9: ++nT2; T2Chans = qMax( T2Chans, OBX_N_ACQ ); break;
         }
+
+        // GENSERDES
+
+#ifdef GENSERDES
+        if( S.js == jsIM && GENSERDES == S.ip ) {
+            np_configureSerDesErrorGenerator( S.slot, S.port,
+                SERDES_ERROR_RATE_MEDIUM, SERDES_ERROR_COUNT_1024 );
+            np_enableSerDesErrorGenerator( S.slot, S.port, true );
+        }
+#endif
     }
 
     i16Buf.resize( MAXE * TPNTPERFETCH * nCHMax );
@@ -1277,8 +1288,17 @@ void ImAcqWorker::run()
     }
 
 exit:
-    for( int iID = 0; iID < nID; ++iID )
-        streams[iID].fileMissReport();
+    for( int iID = 0; iID < nID; ++iID ) {
+
+        ImAcqStream &S = streams[iID];
+
+        S.fileMissReport();
+
+#ifdef GENSERDES
+        if( S.js == jsIM && GENSERDES == S.ip )
+            np_enableSerDesErrorGenerator( S.slot, S.port, false );
+#endif
+    }
 
     emit finished();
 }
@@ -2064,7 +2084,7 @@ CimAcqImec::~CimAcqImec()
         if( !T.simprb.isSimSlot( slot ) ) {
             if( T.isSlotPXIType( slot ) ) {
                 np_switchmatrix_clear( slot, SM_Output_SMA );
-                np_switchmatrix_clear( slot, SM_Output_PXISYNC );
+                np_switchmatrix_clear( slot, SM_Output_PXI7 );
             }
             else
                 _aux_doneObxSlot( slot );

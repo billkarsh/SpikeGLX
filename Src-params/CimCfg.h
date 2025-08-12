@@ -502,6 +502,7 @@ public:
     // Config
     // ------
 
+    static bool isBSSupported( int slot );
     static void closeAllBS( bool report = true );
     static bool detect(
         QStringList             &slVers,

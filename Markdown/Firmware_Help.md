@@ -30,6 +30,10 @@ down the PC in order to shut down the chassis.
 files for this version of SpikeGLX are in the folder named `Firmware` that
 is included in your SpikeGLX release.
 
+> *As of version 20250525 matched BS and BSC firmware data are embedded into
+the SpikeGLX app, so you can elect to use that data instead of finding files.
+You can still load files to target an older version of SpikeGLX.*
+
 3. Click `Update`.
 
 4. Check the Console (Log) window for any error messages.

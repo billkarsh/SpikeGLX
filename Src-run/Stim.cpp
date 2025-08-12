@@ -801,6 +801,15 @@ QString CStim::obx_wave_download_buf(
     OBX             X( istr );
     NP_ErrorCode    err;
 
+// Stop existing
+
+    err = np_waveplayer_stop( X.slot );
+    if( err != SUCCESS ) {
+        return
+        QString("waveplayer_stop(slot %1)%2")
+        .arg( X.slot ).arg( obx_errorString( err ) );
+    }
+
 // Set frequency
 
     err = np_waveplayer_setSampleFrequency( X.slot, freq );
@@ -877,7 +886,7 @@ QString CStim::obx_wave_arm( int istr, int trig, bool loop )
     switchmatrixinput_t trigSrc = SM_Input_SWTrigger2;
 
     switch( trig ) {
-        case -1: trigSrc = SM_Input_SMA1; break;
+        case -1: trigSrc = SM_Input_SMA; break;
         case  0: trigSrc = SM_Input_ADC0; break;
         case  1: trigSrc = SM_Input_ADC1; break;
         case  2: trigSrc = SM_Input_ADC2; break;
@@ -947,10 +956,10 @@ QString CStim::obx_wave_start_stop( int istr, bool start )
         }
     }
     else {
-        err = np_waveplayer_arm( X.slot, true );
+        err = np_waveplayer_stop( X.slot );
         if( err != SUCCESS ) {
             return
-            QString("waveplayer_arm(slot %1)%2")
+            QString("waveplayer_stop(slot %1)%2")
             .arg( X.slot ).arg( obx_errorString( err ) );
         }
     }
@@ -1028,16 +1037,22 @@ QString CStim::obx_set_AO( int istr, const QString &chn_vlt )
 // Set values
 
 #ifdef HAVE_IMEC
+    double      V[12];
+    uint16_t    mask = 0;
+
     for( int ip = 0; ip < nprn; ++ip ) {
+        int ch = chn[ip];
+        V[ch]  = vlt[ip];
+        mask  |= (1 << ch);
+    }
 
-        NP_ErrorCode err = np_DAC_setVoltage( X.slot, chn[ip], vlt[ip] );
+    NP_ErrorCode err = np_DAC_setVoltages( X.slot, mask, V );
 
-        if( err != SUCCESS ) {
-            return
-            QString("DAC_setVoltage(slot %1, chn %2, %3)%4")
-            .arg( X.slot ).arg( chn[ip] ).arg( vlt[ip] )
-            .arg( obx_errorString( err ) );
-        }
+    if( err != SUCCESS ) {
+        return
+        QString("DAC_setVoltages(slot %1, list[%2])%3")
+        .arg( X.slot ).arg( chn_vlt )
+        .arg( obx_errorString( err ) );
     }
 #endif
 
