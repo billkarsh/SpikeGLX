@@ -16,25 +16,25 @@ TEMPLATE = app
 
 contains(DEFINES, HAVE_NIDAQmx) {
     contains(DEFINES, HAVE_NXT) {
-        TARGET = SpikeGLX_NXT
+        TARGET = SpikeGLX_NP3
     }
     else {
-        TARGET = SpikeGLX
+        TARGET = SpikeGLX_STD
     }
 }
 else {
     contains(DEFINES, HAVE_NXT) {
-        TARGET = SpikeGLX_NXT_NISIM
+        TARGET = SpikeGLX_NP3_NISIM
     }
     else {
-        TARGET = SpikeGLX_NISIM
+        TARGET = SpikeGLX_STD_NISIM
     }
 }
 
 CONFIG(debug, debug|release) {
     win32-g++ {
         contains(QT_ARCH, x86_64) {
-            DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/DEBUG30
+            DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/DEBUG413
         }
         else {
             DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/DEBUG510
@@ -44,7 +44,7 @@ CONFIG(debug, debug|release) {
 else {
     win32-g++ {
         contains(QT_ARCH, x86_64) {
-            DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/Release30
+            DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/Release413
         }
         else {
             DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/SpikeGLX510
@@ -122,10 +122,10 @@ win32 {
         QMAKE_LIBDIR += $${_PRO_FILE_PWD_}/IMEC
         contains(QT_ARCH, x86_64) {
             contains(DEFINES, HAVE_NXT) {
-                LIBS += -lNeuropixAPI_x64_3_69_dbg-NXT-PR2-77985af
+                LIBS += -lNeuropixAPI_x64_4_1_3
             }
             else {
-                LIBS += -lNeuropixAPI_x64_3_70_3
+                LIBS += -lNeuropixAPI_x64_4_1_3
             }
         }
         else {
