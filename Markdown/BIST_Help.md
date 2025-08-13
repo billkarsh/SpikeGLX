@@ -71,10 +71,9 @@ to close tightly onto the flex.
 The next thing to suspect is a bad 5-meter cable. Sometimes the leads can
 wiggle loose inside the Omnetics connectors after many dis/connect cycles.
 
-In any case, it is very unlikely that the headstage has an electronic
-issue. There is little reason to try the headstage tester dongle, which,
-by the way, is not supported in the latest imec firmware, hence, not
-supported in the current SpikeGLX-phase30.
+Finally, while it is very unlikely that the headstage has an electronic
+issue, for a 1.0 headstage, you can try running the HST dialog with the
+headstage tester dongle.
 
 ```
 Terminology:

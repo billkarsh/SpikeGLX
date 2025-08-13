@@ -24,7 +24,7 @@ There are several branches in this repo tracking major Imec Neuropixels
 project development phases. The various phases have involved both software
 and hardware evolution and redesign, so obtain the appropriate materials
 for your needs. Release software packages are labeled as phase3A, phase3B1,
-phase3B2, phase20, phase30 or phase40. All early releases having no phase
+phase3B2, phase20, phase30 or API4. All early releases having no phase
 label are actually phase3A. All releases support NI-DAQ based acquisition.
 
 Summaries of development phases (newest to oldest):

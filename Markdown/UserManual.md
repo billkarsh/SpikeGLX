@@ -51,7 +51,7 @@
 * [SpikeGLX_OneBox_Quickstart](SpikeGLX_OneBox_Quickstart.html)
 * [Stimulus Waveform Planner](WavePlan_Help.html)
 * [SpikeGLX FAQ](SpikeGLX_FAQ.html)
-* [Metadata Tags](Metadata_30.html)
+* [Metadata Tags](Metadata_Help.html)
 
 --------
 
@@ -1399,7 +1399,7 @@ start another, you won't see any anatomy data until one of these events
 triggers a message to be sent.
 
 5. The latest overlay of anatomical data is now stored in your run's
-metadata as item `~anatomy_shankj`. See the [Metadata guide](Metadata_30.html).
+metadata as item `~anatomy_shankj`. See the [Metadata guide](Metadata_Help.html).
 
 --------
 
