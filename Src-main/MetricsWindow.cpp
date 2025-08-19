@@ -114,11 +114,13 @@ void MetricsWindow::showDialog()
 }
 
 
-QString MetricsWindow::getErrFlags( int ip, int shank )
+QString MetricsWindow::getErrFlags( int js, int ip, int shank )
 {
     QString stream;
 
-    if( shank < 0 )
+    if( js == jsOB )
+        stream = QString(" obx%1").arg( ip, 2, 10, QChar('0') );
+    else if( shank < 0 )
         stream = QString("imec%1").arg( ip, 2, 10, QChar('0') );
     else
         stream = QString("quad%1-%2").arg( ip, 2, 10, QChar('0') ).arg( shank );

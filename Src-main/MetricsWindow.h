@@ -115,7 +115,7 @@ public:
     void runStart();
     void runEnd();
 
-    QString getErrFlags( int ip, int shank = -1 );
+    QString getErrFlags( int js, int ip, int shank = -1 );
 
 signals:
     void closed( QWidget *w );

@@ -157,7 +157,7 @@ bool DataFile::openForRead( QString &error, const QString &filename )
     mode = Input;
 
 // ----------------
-// Check imErrFlags
+// Check xxErrFlags
 // ----------------
 
     {
@@ -165,7 +165,7 @@ bool DataFile::openForRead( QString &error, const QString &filename )
             it  = kvp.begin(),
             end = kvp.end();
         for( ; it != end; ++it ) {
-            if( it.key().startsWith( "imErrFlags" ) ) {
+            if( it.key().contains( "ErrFlags" ) ) {
                 if( !it.value().toString().trimmed().startsWith( "0 " ) ) {
                     Warning() <<
                     QString("Metadata <%1=%2> in '%3'.")
@@ -873,7 +873,8 @@ void DataFile::setRemoteParams( const KeyValMap &kvm )
 
         if( it.key() == "~svySBTT" ||
             it.key().startsWith( "~anatomy" ) ||
-            it.key().startsWith( "imErr" ) ) {
+            it.key().startsWith( "imErr" ) ||
+            it.key().startsWith( "obErr" ) ) {
 
             kvp[it.key()] = it.value();
         }

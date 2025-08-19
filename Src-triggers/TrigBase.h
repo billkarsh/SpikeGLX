@@ -178,7 +178,7 @@ private:
     bool writeDataIM( vec_i16 &data, quint64 headCt, int ip );
     bool writeDataOB( vec_i16 &data, quint64 headCt, int ip );
     bool writeDataNI( vec_i16 &data, quint64 headCt );
-    void getErrFlags( int ip );
+    void getErrFlags( int js, int ip );
 };
 
 

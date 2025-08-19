@@ -13,6 +13,7 @@
 + Filtered IM streams pause if system stressed.
 + Record OBX firmware version.
 + Faster remote obx_AO_set().
++ obErrFlags(ip) reported per obx stream.
 
 20250325
 --------
