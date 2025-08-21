@@ -47,6 +47,7 @@ private:
 public:
     GraphsWindow( const DAQ::Params &p, int igw );
     virtual ~GraphsWindow();
+    void predelete();
 
     ColorTTLCtl *getTTLColorCtl()   {return TTLCC;}
     void soSetChan( int gp, int ip, int ch );

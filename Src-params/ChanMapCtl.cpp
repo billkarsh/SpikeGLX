@@ -8,6 +8,7 @@
 
 #include <QDialog>
 #include <QFileDialog>
+#include <QRegularExpression>
 #include <QSettings>
 #include <QSet>
 
@@ -489,16 +490,15 @@ void ChanMapCtl::theseChansToTop( const QString &s )
 // Make mapping from channel name to chanMap entry index
 // Make mapping from table order  to chanMap entry index
 
-    QMap<int,int>   nam2Idx;
-    QMap<int,int>   ord2Idx;
-    QRegExp         re(";(\\d+)");
-    int             ne = Mcur->e.size();
+    QMap<int,int>       nam2Idx;
+    QMap<int,int>       ord2Idx;
+    QRegularExpression  re(";(\\d+)");
+    int                 ne = Mcur->e.size();
 
     for( int i = 0; i < ne; ++i ) {
 
-        Mcur->e[i].name.contains( re );
-        nam2Idx[re.cap(1).toInt()]  = i;
-        ord2Idx[Mcur->e[i].order]      = i;
+        nam2Idx[re.match( Mcur->e[i].name ).captured(1).toInt()] = i;
+        ord2Idx[Mcur->e[i].order] = i;
     }
 
 // Initialize new order array with -1
@@ -513,14 +513,14 @@ void ChanMapCtl::theseChansToTop( const QString &s )
     int o_next = 0;
 
     QStringList terms = s.split(
-                            QRegExp("[,;]"),
-                            QString::SkipEmptyParts );
+                            QRegularExpression("[,;]"),
+                            Qt::SkipEmptyParts );
 
     foreach( const QString &t, terms ) {
 
         QStringList rng = t.split(
-                            QRegExp("[:]"),
-                            QString::SkipEmptyParts );
+                            QRegularExpression("[:]"),
+                            Qt::SkipEmptyParts );
         int         n   = rng.count(),
                     r1, r2, id;
         bool        ok1, ok2;

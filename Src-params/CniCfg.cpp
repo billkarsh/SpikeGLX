@@ -11,6 +11,7 @@
 #endif
 
 #include <QComboBox>
+#include <QRegularExpression>
 #include <QSettings>
 #include <QThread>
 
@@ -131,8 +132,8 @@ void CniCfg::fillSRateCB( QComboBox *CB, const QString &selKey ) const
 double CniCfg::key2SetRate( const QString &key ) const
 {
     const QStringList   sl = key.split(
-                                QRegExp("\\s*:\\s*"),
-                                QString::SkipEmptyParts );
+                                QRegularExpression("\\s*:\\s*"),
+                                Qt::SkipEmptyParts );
 
     if( sl.count() < 2 )
         return 100.0;   // min NI rate Bill allows
@@ -488,7 +489,7 @@ static QStringList getPhysChans(
 
     // "\\s*,\\s*" encodes <optional wh spc><comma><optional wh spc>
     return QString( &buf[0] )
-            .split( QRegExp("\\s*,\\s*"), QString::SkipEmptyParts );
+            .split( QRegularExpression("\\s*,\\s*"), Qt::SkipEmptyParts );
 
 Error_Out:
     if( DAQmxFailed( dmxErrNum ) ) {
@@ -984,12 +985,12 @@ QString CniCfg::parseDIStr(
 {
     QString err;
 
-    QRegExp re("^([^/]+)/");    // device name up to slash
-    re.setCaseSensitivity( Qt::CaseInsensitive );
+    QRegularExpression re("^([^/]+)/");    // device name up to slash
+    re.setPatternOptions( QRegularExpression::CaseInsensitiveOption );
 
     if( lineStr.contains( re ) ) {
 
-        dev = re.cap(1);
+        dev = re.match( lineStr ).captured(1);
 
         QStringList L = getDILines( dev );
 
@@ -1021,8 +1022,8 @@ bool CniCfg::isHardware()
         return false;
 
     niDevNames = QString(data).split(
-                                QRegExp("\\s*,\\s*"),
-                                QString::SkipEmptyParts );
+                                QRegularExpression("\\s*,\\s*"),
+                                Qt::SkipEmptyParts );
 
     return !niDevNames.isEmpty();
 }

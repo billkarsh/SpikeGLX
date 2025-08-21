@@ -2,6 +2,7 @@
 #include "ShankMap.h"
 #include "Util.h"
 
+#include <QRegularExpression>
 #include <QFileInfo>
 
 
@@ -54,8 +55,8 @@ QString ShankMapDesc::toWhSpcSepString() const
 ShankMapDesc ShankMapDesc::fromString( const QString &s_in )
 {
     const QStringList   sl = s_in.split(
-                                QRegExp("^\\s+|\\s*:\\s*"),
-                                QString::SkipEmptyParts );
+                                QRegularExpression("^\\s+|\\s*:\\s*"),
+                                Qt::SkipEmptyParts );
 
     return ShankMapDesc(
             sl.at( 0 ).toUInt(),
@@ -70,8 +71,8 @@ ShankMapDesc ShankMapDesc::fromString( const QString &s_in )
 ShankMapDesc ShankMapDesc::fromWhSpcSepString( const QString &s_in )
 {
     const QStringList   sl = s_in.split(
-                                QRegExp("\\s+"),
-                                QString::SkipEmptyParts );
+                                QRegularExpression("\\s+"),
+                                Qt::SkipEmptyParts );
 
     return ShankMapDesc(
             sl.at( 0 ).toUInt(),
@@ -387,15 +388,15 @@ QString ShankMap::toWhSpcSepString() const
 void ShankMap::fromString( const QString &s_in )
 {
     QStringList sl = s_in.split(
-                        QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
+                        Qt::SkipEmptyParts );
     int         n  = sl.size();
 
 // Header
 
     QStringList hl = sl[0].split(
-                        QRegExp("^\\s+|\\s*,\\s*"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s+|\\s*,\\s*"),
+                        Qt::SkipEmptyParts );
 
     ns = hl[0].toUInt();
     nc = hl[1].toUInt();
@@ -416,15 +417,15 @@ void ShankMap::fromString( const QString &s_in )
 void ShankMap::fromWhSpcSepString( const QString &s_in )
 {
     QStringList sl = s_in.split(
-                        QRegExp("[\r\n]+"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("[\r\n]+"),
+                        Qt::SkipEmptyParts );
     int         n  = sl.size();
 
 // Header
 
     QStringList hl = sl[0].split(
-                        QRegExp("^\\s+|\\s*,\\s*"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s+|\\s*,\\s*"),
+                        Qt::SkipEmptyParts );
 
     ns = hl[0].toUInt();
     nc = hl[1].toUInt();

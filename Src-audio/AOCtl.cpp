@@ -234,7 +234,7 @@ AOCtl::AOCtl( const DAQ::Params &p, QWidget *parent )
 }
 
 
-AOCtl::~AOCtl()
+void AOCtl::predelete()
 {
     saveScreenState();
 

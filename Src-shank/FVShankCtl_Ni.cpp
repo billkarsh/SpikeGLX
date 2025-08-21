@@ -1,7 +1,6 @@
 
 #include "Util.h"
 #include "FVShankCtl_Ni.h"
-#include "ShankView.h"
 
 #include <QSettings>
 

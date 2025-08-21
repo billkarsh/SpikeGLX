@@ -80,21 +80,21 @@ void Par2Worker::readyOutput()
 /* ----------- */
 
 // Remove all leading whites
-    out.replace( QRegExp("^\\s+"), QString() );
+    out.replace( QRegularExpression("^\\s+"), QString() );
 
 // Convert line end runs (and any enclosing space) to single '\n'
-    out.replace( QRegExp("[ ]*[\r\n]+[ ]*"), "\n" );
+    out.replace( QRegularExpression("[ ]*[\r\n]+[ ]*"), "\n" );
 
 // Subst('\n' -> space)...
 // Don't do this in front of low-case app name 'par2...'.
 // Do do this in front of 'Free Software Foundation'.
 // Do do this if follower not capitalized.
-    out.replace( QRegExp("\n(?!par2)(?=Free|[^A-Z])"), " " );
+    out.replace( QRegularExpression("\n(?!par2)(?=Free|[^A-Z])"), " " );
 
 // No terminal '\n'.
 // Rather, QTextEdit::append() will insert final '\n',
 // or, CmdServer will explicity add final '\n'.
-    out.replace( QRegExp("\n*$"), QString() );
+    out.replace( QRegularExpression("\n*$"), QString() );
 
     if( out.size() )
         emit report( out );

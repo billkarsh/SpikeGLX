@@ -213,7 +213,7 @@ SOCtl::SOCtl( const DAQ::Params &p, QWidget *parent )
 }
 
 
-SOCtl::~SOCtl()
+void SOCtl::predelete()
 {
     saveScreenState();
     emit closed( this );
@@ -275,8 +275,9 @@ void SOCtl::init()
     G->grf->sRate = p.im.prbj[G->ip].srate;
     soUI->pSB0->setValue( G->ip );
     maxch = p.im.prbj[G->ip].roTbl->nAP() - 1;
+    G->ch = (G->ch <= maxch ? G->ch : 0);
     soUI->cSB0->setMaximum( maxch );
-    soUI->cSB0->setValue( G->ch <= maxch ? G->ch : 0 );
+    soUI->cSB0->setValue( G->ch );
     soUI->tSB0->setValue( -G->T );
     soUI->ySB0->setValue( G->grf->yscl );
 
@@ -286,8 +287,9 @@ void SOCtl::init()
     G->grf->sRate = p.im.prbj[G->ip].srate;
     soUI->pSB1->setValue( G->ip );
     maxch = p.im.prbj[G->ip].roTbl->nAP() - 1;
+    G->ch = (G->ch <= maxch ? G->ch : 0);
     soUI->cSB1->setMaximum( maxch );
-    soUI->cSB1->setValue( G->ch <= maxch ? G->ch : 0 );
+    soUI->cSB1->setValue( G->ch );
     soUI->tSB1->setValue( -G->T );
     soUI->ySB1->setValue( G->grf->yscl );
 
@@ -297,8 +299,9 @@ void SOCtl::init()
     G->grf->sRate = p.im.prbj[G->ip].srate;
     soUI->pSB2->setValue( G->ip );
     maxch = p.im.prbj[G->ip].roTbl->nAP() - 1;
+    G->ch = (G->ch <= maxch ? G->ch : 0);
     soUI->cSB2->setMaximum( maxch );
-    soUI->cSB2->setValue( G->ch <= maxch ? G->ch : 0 );
+    soUI->cSB2->setValue( G->ch );
     soUI->tSB2->setValue( -G->T );
     soUI->ySB2->setValue( G->grf->yscl );
 
@@ -308,8 +311,9 @@ void SOCtl::init()
     G->grf->sRate = p.im.prbj[G->ip].srate;
     soUI->pSB3->setValue( G->ip );
     maxch = p.im.prbj[G->ip].roTbl->nAP() - 1;
+    G->ch = (G->ch <= maxch ? G->ch : 0);
     soUI->cSB3->setMaximum( maxch );
-    soUI->cSB3->setValue( G->ch <= maxch ? G->ch : 0 );
+    soUI->cSB3->setValue( G->ch );
     soUI->tSB3->setValue( -G->T );
     soUI->ySB3->setValue( G->grf->yscl );
 

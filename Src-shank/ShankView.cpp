@@ -806,7 +806,7 @@ bool ShankView::evt2Pad( int &s, int &c, int &r, const QMouseEvent *evt )
 
 // To local view x-coords
 
-    float   x = (VRGT-VLFT)*(evt->x()-MRGPX)/w + VLFT + hlfWid;
+    float   x = (VRGT-VLFT)*(evt->position().x()-MRGPX)/w + VLFT + hlfWid;
 
     if( x <= 0 )
         return false;
@@ -834,7 +834,9 @@ bool ShankView::evt2Pad( int &s, int &c, int &r, const QMouseEvent *evt )
 // To local view y-coords
 
     float   vmrg = (rowPix/(1.0f+ROWSEP)) * ROWSEP/2,   // half-gap margin
-            y    = spanPix() - (evt->y() - MRGPX + slidePos) - TIPPX + vmrg;
+            y    = spanPix()
+                    - (evt->position().y() - MRGPX + slidePos)
+                    - TIPPX + vmrg;
 
     if( y <= 0 )
         return false;

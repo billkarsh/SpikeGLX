@@ -107,7 +107,7 @@ private:
 
 public:
     MetricsWindow( QWidget *parent = 0 );
-    virtual ~MetricsWindow();
+    void predelete();
 
     void showDialog();
 

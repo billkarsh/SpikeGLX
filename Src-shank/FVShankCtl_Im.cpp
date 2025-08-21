@@ -2,7 +2,6 @@
 #include "Util.h"
 #include "FVShankCtl_Im.h"
 #include "DataFile.h"
-#include "ShankView.h"
 
 #include <QSettings>
 

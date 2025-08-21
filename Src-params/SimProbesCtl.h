@@ -43,6 +43,7 @@ private slots:
     void editPath();
 
 private:
+    QMap<SPAddr,QString>::iterator mapAt( int row );
     SPAddr lowestAvailAddr();
     SPAddr selectedAddr();
     int addr2row( SPAddr &A );

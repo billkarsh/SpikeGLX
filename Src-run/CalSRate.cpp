@@ -9,7 +9,7 @@
 
 #include <QMessageBox>
 #include <QProgressDialog>
-#include <QDesktopWidget>
+#include <QScreen>
 
 #include <math.h>
 
@@ -168,7 +168,7 @@ void CalSRWorker::calcRateIM( CalSRStream &S )
 // ---------------------------
 
     qv = df->getParam( "syncSourcePeriod" );
-    if( qv == QVariant::Invalid ) {
+    if( !qv.isValid() ) {
         S.err =
         QString("%1 missing meta item 'syncSourcePeriod'")
         .arg( df->streamFromObj() );
@@ -218,7 +218,7 @@ void CalSRWorker::calcRateOB( CalSRStream &S )
 // ---------------------------
 
     qv = df->getParam( "syncSourcePeriod" );
-    if( qv == QVariant::Invalid ) {
+    if( !qv.isValid() ) {
         S.err =
         QString("%1 missing meta item 'syncSourcePeriod'")
         .arg( df->streamFromObj() );
@@ -270,7 +270,7 @@ void CalSRWorker::calcRateNI( CalSRStream &S )
 // ---------------------------
 
     qv = df->getParam( "syncSourcePeriod" );
-    if( qv == QVariant::Invalid ) {
+    if( !qv.isValid() ) {
         S.err =
         QString("%1 missing meta item 'syncSourcePeriod'")
         .arg( df->streamFromObj() );
@@ -280,7 +280,7 @@ void CalSRWorker::calcRateNI( CalSRStream &S )
         syncPer = qv.toDouble();
 
     qv = df->getParam( "syncNiThresh" );
-    if( qv == QVariant::Invalid ) {
+    if( !qv.isValid() ) {
         S.err =
         QString("%1 missing meta item 'syncNiThresh'")
         .arg( df->streamFromObj() );
@@ -290,7 +290,7 @@ void CalSRWorker::calcRateNI( CalSRStream &S )
         syncThresh = qv.toDouble();
 
     qv = df->getParam( "syncNiChanType" );
-    if( qv == QVariant::Invalid ) {
+    if( !qv.isValid() ) {
         S.err =
         QString("%1 missing meta item 'syncNiChanType'")
         .arg( df->streamFromObj() );
@@ -300,7 +300,7 @@ void CalSRWorker::calcRateNI( CalSRStream &S )
         syncType = qv.toInt();
 
     qv = df->getParam( "syncNiChan" );
-    if( qv == QVariant::Invalid ) {
+    if( !qv.isValid() ) {
         S.err =
         QString("%1 missing meta item 'syncNiChan'")
         .arg( df->streamFromObj() );
@@ -979,7 +979,7 @@ void CalSRRun::createPrgDlg()
     prgDlg->setCancelButtonText( QString() );
 
     QSize   dlg = prgDlg->sizeHint();
-    QRect   DT  = QApplication::desktop()->screenGeometry();
+    QRect   DT  = QApplication::primaryScreen()->geometry();
 
     prgDlg->setMinimumWidth( 1.25 * dlg.width() );
     dlg = prgDlg->sizeHint();

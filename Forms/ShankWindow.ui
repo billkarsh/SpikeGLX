@@ -6,33 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>264</width>
+    <width>224</width>
     <height>493</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout" columnstretch="3,1">
-   <item row="0" column="0">
-    <widget class="ShankScroll" name="scroll" native="true">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>100</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="focusPolicy">
-      <enum>Qt::WheelFocus</enum>
-     </property>
-    </widget>
-   </item>
+  <layout class="QGridLayout" name="gridLayout" rowstretch="1,0" columnstretch="3,1">
    <item row="1" column="0" colspan="2">
     <widget class="QLabel" name="statusLbl">
      <property name="sizePolicy">
@@ -51,10 +32,10 @@
       <string/>
      </property>
      <property name="frameShape">
-      <enum>QFrame::Panel</enum>
+      <enum>QFrame::Shape::Panel</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Sunken</enum>
+      <enum>QFrame::Shadow::Sunken</enum>
      </property>
      <property name="text">
       <string/>
@@ -64,7 +45,7 @@
    <item row="0" column="1">
     <widget class="QTabWidget" name="tabsW">
      <property name="focusPolicy">
-      <enum>Qt::StrongFocus</enum>
+      <enum>Qt::FocusPolicy::StrongFocus</enum>
      </property>
      <property name="currentIndex">
       <number>0</number>
@@ -81,19 +62,24 @@
      </widget>
     </widget>
    </item>
+   <item row="0" column="0">
+    <widget class="QWidget" name="scroll" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>60</width>
+       <height>0</height>
+      </size>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>ShankScroll</class>
-   <extends>QWidget</extends>
-   <header>ShankView.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
- <tabstops>
-  <tabstop>scroll</tabstop>
- </tabstops>
  <resources/>
  <connections/>
 </ui>

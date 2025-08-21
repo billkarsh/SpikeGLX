@@ -74,9 +74,9 @@ int Params::stream2js( const QString &stream )
 int Params::stream2ip( const QString &stream )
 {
     if( stream_isIM( stream ) )
-        return stream.rightRef( stream.size() - 4 ).toInt();
+        return stream.last( stream.size() - 4 ).toInt();
     else if( stream_isOB( stream ) )
-        return stream.rightRef( stream.size() - 3 ).toInt();
+        return stream.last( stream.size() - 3 ).toInt();
     return 0;
 }
 

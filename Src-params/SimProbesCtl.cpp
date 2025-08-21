@@ -122,7 +122,7 @@ void SimProbesCtl::rmvBut()
 
 // remove
 
-    maddr.erase( maddr.begin() + ir );
+    maddr.erase( mapAt( ir ) );
     toTable();
 
 // select next
@@ -169,10 +169,10 @@ void SimProbesCtl::cellDoubleClicked( int row, int col )
 
 void SimProbesCtl::editPath()
 {
-    QString file = (maddr.begin() + clkRow).value() + ".ap.bin";
+    QString file = mapAt(clkRow).value() + ".ap.bin";
 
     if( selectFile( file ) ) {
-        maddr[(maddr.begin() + clkRow).key()] = file;
+        maddr[mapAt(clkRow).key()] = file;
         toTable();
     }
 }
@@ -180,6 +180,17 @@ void SimProbesCtl::editPath()
 /* ---------------------------------------------------------------- */
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+QMap<SPAddr,QString>::iterator SimProbesCtl::mapAt( int row )
+{
+    QMap<SPAddr,QString>::iterator it = maddr.begin();
+
+    while( row-- > 0 )
+        ++it;
+
+    return it;
+}
+
 
 SPAddr SimProbesCtl::lowestAvailAddr()
 {
@@ -262,8 +273,8 @@ bool SimProbesCtl::selectFile( QString &file )
 
     if( !file.isEmpty() ) {
 
-        QRegExp re("\\.ap\\..*");
-        re.setCaseSensitivity( Qt::CaseInsensitive );
+        QRegularExpression re("\\.ap\\..*");
+        re.setPatternOptions( QRegularExpression::CaseInsensitiveOption );
 
         file = file.remove( re );
         return true;

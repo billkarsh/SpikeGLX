@@ -5,14 +5,16 @@
 #include "DataFileIMAP.h"
 #include "Subset.h"
 
+#include <QRegularExpression>
+
 
 
 
 int DataFileIMAP::numNeuralChans() const
 {
     QStringList sl = kvp["snsApLfSy"].toString().split(
-                        QRegExp("^\\s+|\\s*,\\s*"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s+|\\s*,\\s*"),
+                        Qt::SkipEmptyParts );
     return sl[0].toInt();
 }
 
@@ -461,8 +463,8 @@ void DataFileIMAP::subclassUpdateChanMap(
 void DataFileIMAP::parseChanCounts()
 {
     const QStringList   sl = kvp["acqApLfSy"].toString().split(
-                                QRegExp("^\\s+|\\s*,\\s*"),
-                                QString::SkipEmptyParts );
+                                QRegularExpression("^\\s+|\\s*,\\s*"),
+                                Qt::SkipEmptyParts );
 
 // --------------------------------
 // First count each type separately

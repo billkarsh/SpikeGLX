@@ -60,7 +60,7 @@ MetricsWindow::MetricsWindow( QWidget *parent )
 }
 
 
-MetricsWindow::~MetricsWindow()
+void MetricsWindow::predelete()
 {
     saveScreenState();
 

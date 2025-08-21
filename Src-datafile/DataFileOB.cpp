@@ -5,6 +5,8 @@
 #include "DataFileOB.h"
 #include "Subset.h"
 
+#include <QRegularExpression>
+
 
 
 
@@ -197,8 +199,8 @@ void DataFileOB::subclassUpdateChanMap(
 void DataFileOB::parseChanCounts()
 {
     const QStringList   sl = kvp["acqXaDwSy"].toString().split(
-                                QRegExp("^\\s+|\\s*,\\s*"),
-                                QString::SkipEmptyParts );
+                                QRegularExpression("^\\s+|\\s*,\\s*"),
+                                Qt::SkipEmptyParts );
 
 // --------------------------------
 // First count each type separately

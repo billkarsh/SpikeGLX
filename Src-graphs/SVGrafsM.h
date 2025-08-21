@@ -97,8 +97,8 @@ protected:
     std::vector<GraphStats> ic2stat;
     QVector<int>            ic2iy,
                             ig2ic;
-    mutable QMutex          drawMtx,
-                            fltMtx;
+    mutable QRecursiveMutex drawMtx;
+    mutable QMutex          fltMtx;
     UsrSettings             set;
     DCAve                   Tn,
                             Tx;
@@ -157,6 +157,7 @@ public slots:
     // Navbar
     void toggleSorting();
     void showShanks();
+    void closeShanks();
     void nchanChanged( int val, int first );
     void firstChanged( int first );
     // SVTools

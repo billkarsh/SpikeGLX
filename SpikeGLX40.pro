@@ -34,7 +34,7 @@ else {
 CONFIG(debug, debug|release) {
     win32-g++ {
         contains(QT_ARCH, x86_64) {
-            DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/DEBUG413
+            DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/DEBUG64
         }
         else {
             DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/DEBUG510
@@ -44,7 +44,7 @@ CONFIG(debug, debug|release) {
 else {
     win32-g++ {
         contains(QT_ARCH, x86_64) {
-            DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/Release413
+            DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/Release64
         }
         else {
             DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/SpikeGLX510
@@ -59,7 +59,7 @@ else {
 DEPENDPATH  += $$PWD
 INCLUDEPATH += $$PWD
 
-QT += opengl network svg
+QT += gui widgets openglwidgets network svg
 
 # Our sources
 SRC_SGLX = \

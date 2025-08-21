@@ -2,6 +2,7 @@
 #define SHANKCTLBASE_H
 
 #include "ShankEditTab.h"
+#include "ShankView.h"
 
 #include <QDialog>
 #include <QMutex>
@@ -10,8 +11,6 @@ namespace Ui {
 class ShankWindow;
 }
 
-class ShankView;
-class ShankScroll;
 struct ShankMap;
 class MGraphX;
 class MGraphY;
@@ -26,6 +25,7 @@ class ShankCtlBase : public QDialog
 
 protected:
     Ui::ShankWindow     *scUI;
+    ShankScroll         *_scroll;
     ShankEditTab        *seTab;
     ShankMap            *modal_map;
     bool                modal;
@@ -77,7 +77,7 @@ protected:
     virtual bool eventFilter( QObject *watched, QEvent *event );
     virtual void keyPressEvent( QKeyEvent *e );
 
-    virtual QString screenStateName() const {}
+    virtual QString screenStateName() const {return QString();}
     void restoreScreenState();
     void saveScreenState() const;
 };

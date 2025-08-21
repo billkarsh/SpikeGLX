@@ -15,6 +15,7 @@
 
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QRegularExpression>
 #include <QScrollBar>
 #include <QSettings>
 #include <QTimer>
@@ -303,6 +304,13 @@ QString Config_imtab::remoteSetPrbEach( const QString &s, int ip )
 
 void Config_imtab::imro_done( ShankCtlBase *editor, QString fn, bool ok )
 {
+    // These needed to run dialog using exec()
+    //
+    // if( ok )
+    //     editor->accept();
+    // else
+    //     editor->reject();
+
     if( !ok && !imro_cancelName.isEmpty() ) {
         ok = true;
         fn = imro_cancelName;
@@ -968,7 +976,7 @@ void Config_imtab::fromTbl( int ip )
         bool    ok;
 
         v = ti->text()
-                .split( QRegExp("\\s+"), QString::SkipEmptyParts )
+                .split( QRegularExpression("\\s+"), Qt::SkipEmptyParts )
                 .at( 0 ).toInt( &ok );
 
         if( !ok || v < 0 || v > maxb )

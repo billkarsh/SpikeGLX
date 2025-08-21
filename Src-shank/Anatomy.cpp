@@ -1,9 +1,9 @@
 
 #include "Anatomy.h"
 #include "ShankView.h"
-#include "DAQ.h"
 #include "MGraph.h"
 
+#include <QRegularExpression>
 #include <QTextEdit>
 #include <math.h>
 
@@ -26,8 +26,8 @@ void Anatomy::parse( const QString &elems, const IMROTbl *roTbl, int sk )
 // Parse entries
 
     QStringList sle = elems.split(
-                        QRegExp("^\\s*\\(\\s*|\\s*\\)\\s*\\(\\s*|\\s*\\)\\s*$"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s*\\(\\s*|\\s*\\)\\s*\\(\\s*|\\s*\\)\\s*$"),
+                        Qt::SkipEmptyParts );
     int         ne  = sle.size();
 
     if( !ne )
@@ -36,8 +36,8 @@ void Anatomy::parse( const QString &elems, const IMROTbl *roTbl, int sk )
     for( int ie = 0; ie < ne; ++ie ) {
 
         QStringList slp = sle[ie].split(
-                            QRegExp("^\\s*|\\s*,\\s*|\\s*$"),
-                            QString::SkipEmptyParts );
+                            QRegularExpression("^\\s*|\\s*,\\s*|\\s*$"),
+                            Qt::SkipEmptyParts );
         int         np  = slp.size();
 
         if( np != 6 ) {
@@ -101,7 +101,7 @@ void Anatomy::colorShanks( ShankView *view, bool on ) const
 
     if( on ) {
         rgnMtx.lock();
-            foreach( const AnatomyRgn &R, rgn )
+            for( const AnatomyRgn &R : rgn )
                 vA.push_back( SVAnaRgn( R.row0, R.rowN, R.shank, R.r, R.g, R.b ) );
         rgnMtx.unlock();
     }
@@ -143,7 +143,7 @@ next_rgn:;
 
             MGraphY &Y = vY[iy];
 
-            foreach( const AnatomyRgn &R, rgn ) {
+            for( const AnatomyRgn &R : rgn ) {
 
                 if( Y.anashank == R.shank &&
                     Y.anarow >= R.row0 &&
@@ -168,7 +168,7 @@ QString Anatomy::getLbl( int s, int r ) const
 {
     QMutexLocker    ml( &rgnMtx );
 
-    foreach( const AnatomyRgn &R, rgn ) {
+    for( const AnatomyRgn &R : rgn ) {
         if( R.contains( s, r ) )
             return R.lbl;
     }

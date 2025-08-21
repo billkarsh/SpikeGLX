@@ -44,7 +44,7 @@ ConsoleWindow::ConsoleWindow( QWidget *p, Qt::WindowFlags f )
 }
 
 
-ConsoleWindow::~ConsoleWindow()
+void ConsoleWindow::predelete()
 {
     saveScreenState();
 }

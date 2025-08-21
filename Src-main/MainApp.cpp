@@ -31,6 +31,7 @@
 #include <QMessageBox>
 #include <QAction>
 #include <QFileDialog>
+#include <QRegularExpression>
 #include <QSettings>
 #include <QTimer>
 
@@ -67,14 +68,16 @@ void AppData::makePathAbsolute( QString &path ) const
 {
     if( !QFileInfo( path ).isAbsolute() ) {
 
-        QRegExp re("([^/\\\\]+_[gG]\\d+)_[tT]\\d+");
+        QRegularExpression re("([^/\\\\]+_[gG]\\d+)_[tT]\\d+");
 
         QMutexLocker    ml( &remoteMtx );
 
         if( path.contains( re ) ) {
 
             path = QString("%1/%2/%3")
-                    .arg( slDataDir[0] ).arg( re.cap(1) ).arg( path );
+                    .arg( slDataDir[0] )
+                    .arg( re.match( path ).captured(1) )
+                    .arg( path );
         }
         else {
             path = QString("%1/%2")
@@ -344,6 +347,7 @@ MainApp::~MainApp()
     }
 
     if( aoCtl ) {
+        aoCtl->predelete();
         delete aoCtl;
         aoCtl = 0;
     }
@@ -354,11 +358,13 @@ MainApp::~MainApp()
     }
 
     if( mxWin ) {
+        mxWin->predelete();
         delete mxWin;
         mxWin = 0;
     }
 
     if( consoleWindow ) {
+        consoleWindow->predelete();
         delete consoleWindow;
         consoleWindow = 0;
     }
@@ -517,11 +523,11 @@ void MainApp::file_Open()
         //
         //      path + slash + one-or-more-not-slashes + dot + arb.
 
-        QRegExp re("(.*)[/\\\\][^/\\\\]+\\..*");
+        QRegularExpression re("(.*)[/\\\\][^/\\\\]+\\..*");
 
         if( last.contains( re ) ) {
 
-            fi.setFile( last = re.cap(1) );
+            fi.setFile( last = re.match( last ).captured(1) );
 
             if( !fi.isDir() )
                 last = dataDir();
@@ -1054,6 +1060,23 @@ static void test1()
 
 
 //=================================================================
+// Experiment to see Qt6 windows styles.
+//
+// windows11, windowsvista, Windows, fusion
+//
+#if 0
+#include <QStyleFactory>
+static void test1()
+{
+
+    foreach( QString s, QStyleFactory::keys() )
+        Log()<<s;
+}
+#endif
+//=================================================================
+
+
+//=================================================================
 // Experiment to test ProbeTable ops.
 #if 0
 #include "ProbeTable.h"
@@ -1501,11 +1524,20 @@ void MainApp::rsInit()
     rsUI->auxBar->setValue( 0 );
     rsUI->auxBar->setMaximum( p.stream_nNI() + 3 * p.im.enabled );
 
-    int np = p.stream_nIM();
+    QPalette palette;
+    palette = rsUI->auxBar->palette();
+    palette.setBrush( QPalette::Highlight, Qt::darkGray );
+    rsUI->auxBar->setPalette( palette );
+
+   int np = p.stream_nIM();
     if( np ) {
         rsUI->label->setText( QString("%1").arg( np ) );
         rsUI->prb0->setValue( 0 );
         rsUI->prb0->setMaximum( 11 * np );
+
+        palette = rsUI->prb0->palette();
+        palette.setBrush( QPalette::Highlight, Qt::darkGray );
+        rsUI->prb0->setPalette( palette );
     }
     else {
         QSize   sz = rsUI->probesBox->sizeHint();
@@ -1515,6 +1547,10 @@ void MainApp::rsInit()
 
     rsUI->startBar->setValue( 0 );
     rsUI->startBar->setMaximum( p.stream_nNI() + 3 * p.im.enabled );
+
+    palette = rsUI->startBar->palette();
+    palette.setBrush( QPalette::Highlight, Qt::darkGray );
+    rsUI->startBar->setPalette( palette );
 
     rsWin->layout()->update();
     rsWin->layout()->activate();

@@ -61,7 +61,8 @@ private:
     Trigger             *trg;           // guarded by runMtx
     mutable QMutex      runMtx;
     bool                running,        // guarded by runMtx
-                        dumx[3];
+                        stopping,       // guarded by runMtx
+                        dumx[2];
 
 public:
     Run( MainApp *app );

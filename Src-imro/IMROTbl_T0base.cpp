@@ -1,6 +1,8 @@
 
 #include "IMROTbl_T0base.h"
 
+#include <QIODevice>
+#include <QRegularExpression>
 #include <QTextStream>
 
 /* ---------------------------------------------------------------- */
@@ -32,8 +34,8 @@ QString IMRODesc_T0base::toString( int chn ) const
 bool IMRODesc_T0base::fromString( QString *msg, const QString &s )
 {
     const QStringList   sl = s.split(
-                                QRegExp("\\s+"),
-                                QString::SkipEmptyParts );
+                                QRegularExpression("\\s+"),
+                                Qt::SkipEmptyParts );
     bool                ok;
 
     if( sl.size() != 6 )
@@ -133,15 +135,15 @@ QString IMROTbl_T0base::toString() const
 bool IMROTbl_T0base::fromString( QString *msg, const QString &s )
 {
     QStringList sl = s.split(
-                        QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
+                        Qt::SkipEmptyParts );
     int         n  = sl.size();
 
 // Header
 
     QStringList hl = sl[0].split(
-                        QRegExp("^\\s+|\\s*,\\s*"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s+|\\s*,\\s*"),
+                        Qt::SkipEmptyParts );
 
     if( hl.size() != 2 ) {
         if( msg )

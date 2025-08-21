@@ -11,6 +11,8 @@
 #include <QDesktopServices>
 #include <QHostInfo>
 #include <QNetworkInterface>
+#include <QRandomGenerator>
+#include <QRegularExpression>
 #include <QUrl>
 
 /* ---------------------------------------------------------------- */
@@ -214,14 +216,8 @@ bool feq( double a, double b )
 
 double uniformDev( double rmin, double rmax )
 {
-    static bool seeded = false;
-
-    if( !seeded ) {
-        seeded = true;
-        qsrand( std::time(0) );
-    }
-
-    return rmin + (rmax-rmin) * qrand() / RAND_MAX;
+#define TOP 0x7fffffff
+    return rmin + (rmax-rmin)*QRandomGenerator::global()->bounded(TOP) / TOP;
 }
 
 
@@ -383,9 +379,9 @@ void res2Str( QString &str, const QString &resFile )
 
 QString rmvLastSlash( const QString &path )
 {
-    QString _path = path;
-    QRegExp re("[/\\\\]+$");
-    int     i = _path.indexOf( re );
+    QString             _path = path;
+    QRegularExpression  re("[/\\\\]+$");
+    int                 i = _path.indexOf( re );
 
     if( i > 0 )
         _path.truncate( i );

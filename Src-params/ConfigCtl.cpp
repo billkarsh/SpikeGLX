@@ -2623,8 +2623,8 @@ static int runNameExists( const DAQ::Params &q )
         // - runname_gN     (run folder),
         // - runname.xxx    (log file).
 
-        QRegExp re( QString("%1_g\\d+|%1\\.").arg( q.sns.runName ) );
-        re.setCaseSensitivity( Qt::CaseInsensitive );
+        QRegularExpression re( QString("^%1_g\\d+|^%1\\.").arg( q.sns.runName ) );
+        re.setPatternOptions( QRegularExpression::CaseInsensitiveOption );
 
         for( int idir = 0; idir < ndir; ++idir ) {
 
@@ -2634,7 +2634,7 @@ static int runNameExists( const DAQ::Params &q )
 
                 it.next();
 
-                if( re.indexIn( it.fileName() ) == 0 )
+                if( re.match( it.fileName() ).hasMatch() )
                     return idir;
             }
         }
@@ -2751,13 +2751,15 @@ bool ConfigCtl::validRunName(
         return false;
     }
 
-    QRegExp re("(.*)_[gG](\\d)+_[tT](\\d+)$");
+    QRegularExpression re("(.*)_[gG](\\d)+_[tT](\\d+)$");
 
     if( runName.contains( re ) ) {
 
-        q.mode.initG    = re.cap(2).toInt();
-        q.mode.initT    = re.cap(3).toInt();
-        q.sns.runName   = re.cap(1);
+        QRegularExpressionMatch match = re.match( runName );
+
+        q.mode.initG    = match.captured(2).toInt();
+        q.mode.initT    = match.captured(3).toInt();
+        q.sns.runName   = match.captured(1);
     }
     else {
         q.mode.initG    = -1;

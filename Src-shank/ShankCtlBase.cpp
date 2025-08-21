@@ -8,6 +8,7 @@
 #include <QAction>
 #include <QKeyEvent>
 #include <QSettings>
+#include <QWindow>
 
 
 /* ---------------------------------------------------------------- */
@@ -37,6 +38,11 @@ ShankCtlBase::~ShankCtlBase()
         delete scUI;
         scUI = 0;
     }
+
+    if( _scroll ) {
+        delete _scroll;
+        _scroll = 0;
+    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -47,6 +53,38 @@ void ShankCtlBase::baseInit( const IMROTbl *R, bool hasViewTab )
 {
     scUI = new Ui::ShankWindow;
     scUI->setupUi( this );
+
+    // Edit the layout to replace the scroll QWidget with
+    // a container holding a proper ShankScroll. Crucially,
+    // the ShankScroll is not in the parent-child hierarchy
+    // so does not interfere with owning windows. We must
+    // show and delete the embedded _scroll manually.
+    {
+        _scroll = new ShankScroll();
+        _scroll->setWindowFlags( Qt::FramelessWindowHint );
+
+        QWindow     *W = QWindow::fromWinId( _scroll->winId() );
+        QWidget     *C = QWidget::createWindowContainer( W );
+
+        QSizePolicy szp( QSizePolicy::Policy::MinimumExpanding,
+                         QSizePolicy::Policy::MinimumExpanding );
+        szp.setHorizontalStretch( 0 );
+        szp.setVerticalStretch( 0 );
+        szp.setHeightForWidth( C->sizePolicy().hasHeightForWidth() );
+        C->setSizePolicy( szp );
+        C->setMinimumSize( QSize( 80, 0 ) );
+
+        QGridLayout *G = findChild<QGridLayout*>("gridLayout");
+        QWidget     *X = findChild<QWidget*>("scroll");
+        QLayoutItem *I = G->replaceWidget( X, C );
+
+        if( I ) {
+            if( I->widget() )
+                delete I->widget();
+            delete I;
+        }
+    }
+
     ConnectUI( view(), SIGNAL(gridHover(int,int,bool)), this, SLOT(gridHover(int,int,bool)) );
     ConnectUI( view(), SIGNAL(gridClicked(int,int,int,bool)), this, SLOT(gridClicked(int,int,int,bool)) );
     ConnectUI( view(), SIGNAL(lbutReleased()), this, SLOT(lbutReleased()) );
@@ -89,9 +127,12 @@ void ShankCtlBase::baseInit( const IMROTbl *R, bool hasViewTab )
 
         // cur width of editor, height taller than parent
         int h = int(1.10 * parentWidget()->height());
+        h = qMin( h,
+            QApplication::primaryScreen()->availableGeometry().height()
+            - 40 );
 
         // Actualize geometry using show()
-        resize( width(), h );
+        _scroll->show();
         show();
         guiBreathe();
 
@@ -117,11 +158,17 @@ void ShankCtlBase::setOriginal( const QString &inFile )
 void ShankCtlBase::showDialog()
 {
     showNormal();
-    scroll()->scrollToSelected();
+    _scroll->show();
+    _scroll->scrollToSelected();
 
     if( !modal ) {
         qf_enable();
         mainApp()->modelessOpened( this );
+    }
+    else {
+        // Run exec() here, but not needed
+        //
+        // exec();
     }
 }
 
@@ -137,13 +184,13 @@ void ShankCtlBase::syncYPix( int y )
 
 ShankView* ShankCtlBase::view() const
 {
-    return scUI->scroll->theV;
+    return _scroll->theV;
 }
 
 
 ShankScroll* ShankCtlBase::scroll() const
 {
-    return scUI->scroll;
+    return _scroll;
 }
 
 

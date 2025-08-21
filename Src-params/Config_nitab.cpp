@@ -1005,10 +1005,10 @@ void Config_nitab::setupNiVRangeCB()
 
     if( CB->count() ) {
 
-        QRegExp re("\\[.*, (.*)\\]");
+        QRegularExpression re("\\[.*, (.*)\\]");
 
         if( CB->currentText().contains( re ) )
-            targV = re.cap(1).toDouble();
+            targV = re.match( CB->currentText() ).captured(1).toDouble();
     }
     else
         targV = cfg->acceptedParams.ni.range.rmax;

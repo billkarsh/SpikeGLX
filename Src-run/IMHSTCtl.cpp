@@ -225,7 +225,7 @@ bool IMHSTCtl::_openSlot()
 
 void IMHSTCtl::_closeSlots()
 {
-    foreach( int is, openSlots )
+    for( int is : openSlots )
         np_closeBS( is );
 
     openSlots.clear();

@@ -4,6 +4,7 @@
 #include "IMROTbl.h"
 
 #include <QDir>
+#include <QRegularExpression>
 
 
 /* ---------------------------------------------------------------- */
@@ -35,16 +36,18 @@ DFRunTag::DFRunTag( const QString &filePath )
 {
 // Search for filename: (notslash-runName)_g(N)_t(M)(cap4-notslash)EOL
 
-    QRegExp re("([^/\\\\]+)_g(\\d+)_t(\\d+|cat)([^/\\\\]*)$");
-    re.setCaseSensitivity( Qt::CaseInsensitive );
+    QRegularExpression re("([^/\\\\]+)_g(\\d+)_t(\\d+|cat)([^/\\\\]*)$");
+    re.setPatternOptions( QRegularExpression::CaseInsensitiveOption );
 
     int i = filePath.indexOf( re );
 
-    runName = re.cap(1);
-    g       = re.cap(2).toInt();
-    t       = re.cap(3);
+    QRegularExpressionMatch match = re.match( filePath );
 
-    QString cap4 = re.cap(4);
+    runName = match.captured(1);
+    g       = match.captured(2).toInt();
+    t       = match.captured(3);
+
+    QString cap4 = match.captured(4);
 
     exported = cap4.contains( ".exported" );
 
@@ -213,8 +216,8 @@ QString DFName::chopExtension( const QString &name )
 
 QString DFName::chopType( const QString &name )
 {
-    QRegExp re("\\.imec.*|\\.obx.*|\\.nidq.*");
-    re.setCaseSensitivity( Qt::CaseInsensitive );
+    QRegularExpression re("\\.imec.*|\\.obx.*|\\.nidq.*");
+    re.setPatternOptions( QRegularExpression::CaseInsensitiveOption );
 
     return QString(name).remove( re );
 }
@@ -222,8 +225,8 @@ QString DFName::chopType( const QString &name )
 
 QString DFName::forceTxtSuffix( const QString &name )
 {
-    QRegExp re("meta$");
-    re.setCaseSensitivity( Qt::CaseInsensitive );
+    QRegularExpression re("meta$");
+    re.setPatternOptions( QRegularExpression::CaseInsensitiveOption );
 
     return QString(name).replace( re, "txt" );
 }
@@ -231,8 +234,8 @@ QString DFName::forceTxtSuffix( const QString &name )
 
 QString DFName::forceBinSuffix( const QString &name )
 {
-    QRegExp re("meta$");
-    re.setCaseSensitivity( Qt::CaseInsensitive );
+    QRegularExpression re("meta$");
+    re.setPatternOptions( QRegularExpression::CaseInsensitiveOption );
 
     return QString(name).replace( re, "bin" );
 }
@@ -240,8 +243,8 @@ QString DFName::forceBinSuffix( const QString &name )
 
 QString DFName::forceMetaSuffix( const QString &name )
 {
-    QRegExp re("bin$");
-    re.setCaseSensitivity( Qt::CaseInsensitive );
+    QRegularExpression re("bin$");
+    re.setPatternOptions( QRegularExpression::CaseInsensitiveOption );
 
     return QString(name).replace( re, "meta" );
 }
@@ -256,26 +259,26 @@ int DFName::typeAndIP( int &ip, const QString &name, QString *error )
     int type    = -1;
     ip          = -1;
 
-    QString fname_no_path = QFileInfo( name ).fileName();
-    QRegExp re_ap("\\.imec(\\d+)?\\.ap\\."),
-            re_lf("\\.imec(\\d+)?\\.lf\\."),
-            re_ob("\\.obx(\\d+)?\\.obx\\.");
+    QString             fname_no_path = QFileInfo( name ).fileName();
+    QRegularExpression  re_ap("\\.imec(\\d+)?\\.ap\\."),
+                        re_lf("\\.imec(\\d+)?\\.lf\\."),
+                        re_ob("\\.obx(\\d+)?\\.obx\\.");
 
-    re_ap.setCaseSensitivity( Qt::CaseInsensitive );
-    re_lf.setCaseSensitivity( Qt::CaseInsensitive );
-    re_ob.setCaseSensitivity( Qt::CaseInsensitive );
+    re_ap.setPatternOptions( QRegularExpression::CaseInsensitiveOption );
+    re_lf.setPatternOptions( QRegularExpression::CaseInsensitiveOption );
+    re_ob.setPatternOptions( QRegularExpression::CaseInsensitiveOption );
 
     if( fname_no_path.contains( re_ap ) ) {
         type    = 0;
-        ip      = re_ap.cap(1).toInt();
+        ip      = re_ap.match( fname_no_path ).captured(1).toInt();
     }
     else if( fname_no_path.contains( re_lf ) ) {
         type    = 1;
-        ip      = re_lf.cap(1).toInt();
+        ip      = re_lf.match( fname_no_path ).captured(1).toInt();
     }
     else if( fname_no_path.contains( re_ob ) ) {
         type    = 2;
-        ip      = re_ob.cap(1).toInt();
+        ip      = re_ob.match( fname_no_path ).captured(1).toInt();
     }
     else if( fname_no_path.contains( ".nidq.", Qt::CaseInsensitive ) )
         type = 3;

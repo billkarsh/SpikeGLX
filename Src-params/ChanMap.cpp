@@ -4,6 +4,7 @@
 #include "IMROTbl.h"
 
 #include <QFileInfo>
+#include <QRegularExpression>
 
 
 /* ---------------------------------------------------------------- */
@@ -31,8 +32,8 @@ QString ChanMapDesc::toWhSpcSepString() const
 ChanMapDesc ChanMapDesc::fromString( const QString &s_in )
 {
     const QStringList   sl = s_in.split(
-                                QRegExp("^\\s+|\\s*:\\s*"),
-                                QString::SkipEmptyParts );
+                                QRegularExpression("^\\s+|\\s*:\\s*"),
+                                Qt::SkipEmptyParts );
 
     return ChanMapDesc( sl.at( 0 ), sl.at( 1 ).toUInt() );
 }
@@ -43,8 +44,8 @@ ChanMapDesc ChanMapDesc::fromString( const QString &s_in )
 ChanMapDesc ChanMapDesc::fromWhSpcSepString( const QString &s_in )
 {
     const QStringList   sl = s_in.split(
-                                QRegExp("\\s+"),
-                                QString::SkipEmptyParts );
+                                QRegularExpression("\\s+"),
+                                Qt::SkipEmptyParts );
 
     return ChanMapDesc( sl.at( 0 ), sl.at( 1 ).toUInt() );
 }
@@ -277,15 +278,15 @@ QString ChanMapNI::toWhSpcSepString() const
 void ChanMapNI::fromString( const QString &s_in )
 {
     QStringList sl = s_in.split(
-                        QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
+                        Qt::SkipEmptyParts );
     int         n  = sl.size();
 
 // Header
 
     QStringList hl = sl[0].split(
-                        QRegExp("^\\s+|\\s*,\\s*"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s+|\\s*,\\s*"),
+                        Qt::SkipEmptyParts );
 
     MN = hl[0].toUInt();
     MA = hl[1].toUInt();
@@ -308,15 +309,15 @@ void ChanMapNI::fromString( const QString &s_in )
 void ChanMapNI::fromWhSpcSepString( const QString &s_in )
 {
     QStringList sl = s_in.split(
-                        QRegExp("[\r\n]+"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("[\r\n]+"),
+                        Qt::SkipEmptyParts );
     int         n  = sl.size();
 
 // Header
 
     QStringList hl = sl[0].split(
-                        QRegExp("^\\s+|\\s*,\\s*"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s+|\\s*,\\s*"),
+                        Qt::SkipEmptyParts );
 
     MN = hl[0].toUInt();
     MA = hl[1].toUInt();
@@ -430,15 +431,15 @@ QString ChanMapOB::toWhSpcSepString() const
 void ChanMapOB::fromString( const QString &s_in )
 {
     QStringList sl = s_in.split(
-                        QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
+                        Qt::SkipEmptyParts );
     int         n  = sl.size();
 
 // Header
 
     QStringList hl = sl[0].split(
-                        QRegExp("^\\s+|\\s*,\\s*"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s+|\\s*,\\s*"),
+                        Qt::SkipEmptyParts );
 
     XA = hl[0].toUInt();
     XD = hl[1].toUInt();
@@ -459,15 +460,15 @@ void ChanMapOB::fromString( const QString &s_in )
 void ChanMapOB::fromWhSpcSepString( const QString &s_in )
 {
     QStringList sl = s_in.split(
-                        QRegExp("[\r\n]+"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("[\r\n]+"),
+                        Qt::SkipEmptyParts );
     int         n  = sl.size();
 
 // Header
 
     QStringList hl = sl[0].split(
-                        QRegExp("^\\s+|\\s*,\\s*"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s+|\\s*,\\s*"),
+                        Qt::SkipEmptyParts );
 
     XA = hl[0].toUInt();
     XD = hl[1].toUInt();
@@ -595,15 +596,15 @@ QString ChanMapIM::toWhSpcSepString() const
 void ChanMapIM::fromString( const QString &s_in )
 {
     QStringList sl = s_in.split(
-                        QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
+                        Qt::SkipEmptyParts );
     int         n  = sl.size();
 
 // Header
 
     QStringList hl = sl[0].split(
-                        QRegExp("^\\s+|\\s*,\\s*"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s+|\\s*,\\s*"),
+                        Qt::SkipEmptyParts );
 
     AP = hl[0].toUInt();
     LF = hl[1].toUInt();
@@ -624,15 +625,15 @@ void ChanMapIM::fromString( const QString &s_in )
 void ChanMapIM::fromWhSpcSepString( const QString &s_in )
 {
     QStringList sl = s_in.split(
-                        QRegExp("[\r\n]+"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("[\r\n]+"),
+                        Qt::SkipEmptyParts );
     int         n  = sl.size();
 
 // Header
 
     QStringList hl = sl[0].split(
-                        QRegExp("^\\s+|\\s*,\\s*"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s+|\\s*,\\s*"),
+                        Qt::SkipEmptyParts );
 
     AP = hl[0].toUInt();
     LF = hl[1].toUInt();

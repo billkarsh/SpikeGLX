@@ -5,7 +5,6 @@
 #include "FVShankViewTab.h"
 #include "FVShankCtl.h"
 #include "FileViewerWindow.h"
-#include "ShankView.h"
 #include "DataFile.h"
 #include "SignalBlocker.h"
 

@@ -7,6 +7,8 @@
 #include "AIQ.h"
 #include "DataFile.h"
 
+#include <QRegularExpression>
+
 
 /* ---------------------------------------------------------------- */
 /* SvySBTT -------------------------------------------------------- */
@@ -17,8 +19,8 @@
 SvySBTT SvySBTT::fromString( const QString &s_in )
 {
     const QStringList   sl = s_in.split(
-                                QRegExp("\\s+"),
-                                QString::SkipEmptyParts );
+                                QRegularExpression("\\s+"),
+                                Qt::SkipEmptyParts );
 
     return SvySBTT(
             sl.at( 0 ).toInt(),
@@ -39,7 +41,7 @@ void SvyVSBTT::fromMeta( const DataFile *df )
 
     maxbank = 0;
 
-    if( qv != QVariant::Invalid )
+    if( qv.isValid() )
         maxbank = qv.toInt();
 
     e.clear();
@@ -48,7 +50,7 @@ void SvyVSBTT::fromMeta( const DataFile *df )
 
     qv = df->getParam( "imIsSvyRun" );
 
-    if( qv == QVariant::Invalid || !qv.toBool() ) {
+    if( !qv.isValid() || !qv.toBool() ) {
         nmaps = 0;
         return;
     }
@@ -59,12 +61,12 @@ void SvyVSBTT::fromMeta( const DataFile *df )
 
     qv = df->getParam( "~svySBTT" );
 
-    if( qv == QVariant::Invalid )
+    if( !qv.isValid() )
         return;
 
     QStringList sl = qv.toString().split(
-                        QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
+                        Qt::SkipEmptyParts );
     int         n  = sl.size();
 
 // Entries

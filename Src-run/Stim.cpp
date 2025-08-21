@@ -14,6 +14,7 @@ typedef void*   TaskHandle;
 #endif
 
 #include <QDir>
+#include <QRegularExpression>
 #include <QSettings>
 #include <QStack>
 #include <QThread>
@@ -310,7 +311,8 @@ enum {
 //
 QString WaveMeta::parseText( vec_i16 &buf, const QString &text, int testMax )
 {
-    QRegExp         reDo("do(\\d+)$"),
+    QRegularExpression
+                    reDo("do(\\d+)$"),
                     reShape("(.*)\\((.*)");
     QStack<LOOP>    Lstk;
     QString         token;
@@ -405,7 +407,8 @@ QString WaveMeta::parseText( vec_i16 &buf, const QString &text, int testMax )
                 .arg( token ).arg( tlin ).arg( tpos );
             }
 
-            Lstk.push( LOOP( reDo.cap(1).toInt(), offset ) );
+            QRegularExpressionMatch match = reDo.match( token );
+            Lstk.push( LOOP( match.captured(1).toInt(), 0 ) );
             ++nlbrace;
             state = inNone;
         }
@@ -434,8 +437,9 @@ QString WaveMeta::parseText( vec_i16 &buf, const QString &text, int testMax )
                 .arg( token ).arg( tlin ).arg( tpos );
             }
 
-            QString     shape   = reShape.cap(1);
-            QStringList args    = reShape.cap(2).split(',');
+            QRegularExpressionMatch match = reShape.match( token );
+            QString     shape   = match.captured(1);
+            QStringList args    = match.captured(2).split(',');
             int         nsamp;
 
             token += ')';   // for error messages
@@ -987,8 +991,8 @@ QString CStim::obx_set_AO( int istr, const QString &chn_vlt )
 // Parse into ()
 
     QStringList prn  = chn_vlt.split(
-                        QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
+                        Qt::SkipEmptyParts );
     int         nprn = prn.size();
 
     if( !nprn ) {
@@ -1005,8 +1009,8 @@ QString CStim::obx_set_AO( int istr, const QString &chn_vlt )
     foreach( const QString &s, prn ) {
 
         QStringList val = s.split(
-                            QRegExp("^\\s+|\\s*,\\s*"),
-                            QString::SkipEmptyParts );
+                            QRegularExpression("^\\s+|\\s*,\\s*"),
+                            Qt::SkipEmptyParts );
 
         if( val.size() != 2 ) {
             return

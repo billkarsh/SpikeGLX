@@ -6,6 +6,8 @@
 using namespace Neuropixels;
 #endif
 
+#include <QIODevice>
+#include <QRegularExpression>
 #include <QTextStream>
 
 /* ---------------------------------------------------------------- */
@@ -40,8 +42,8 @@ QString IMRODesc_T1110::toString( int grp ) const
 IMRODesc_T1110 IMRODesc_T1110::fromString( const QString &s )
 {
     const QStringList   sl = s.split(
-                                QRegExp("\\s+"),
-                                QString::SkipEmptyParts );
+                                QRegularExpression("\\s+"),
+                                Qt::SkipEmptyParts );
 
     return IMRODesc_T1110( sl.at( 1 ).toInt(), sl.at( 2 ).toInt() );
 }
@@ -120,15 +122,15 @@ QString IMROTbl_T1110::toString() const
 bool IMROTbl_T1110::fromString( QString *msg, const QString &s )
 {
     QStringList sl = s.split(
-                        QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
+                        Qt::SkipEmptyParts );
     int         n  = sl.size();
 
 // Header
 
     QStringList hl = sl[0].split(
-                        QRegExp("^\\s+|\\s*,\\s*"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s+|\\s*,\\s*"),
+                        Qt::SkipEmptyParts );
 
     if( hl.size() != 6 ) {
         if( msg )

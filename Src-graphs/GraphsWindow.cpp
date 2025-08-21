@@ -97,10 +97,26 @@ GraphsWindow::GraphsWindow( const DAQ::Params &p, int igw )
 
 
 // Note:
-// Destructor order: {GW, toolbar, LED, niW}.
+// Destructor order:
+// {soctrl, GW, toolbar, LED, select, svgraphsM, colorttl}.
 //
 GraphsWindow::~GraphsWindow()
 {
+}
+
+
+void GraphsWindow::predelete()
+{
+// ShankCtl save screen state
+
+    if( lW )
+        lW->closeShanks();
+
+    if( rW )
+        rW->closeShanks();
+
+// ME save screen state
+
     saveScreenState();
     setUpdatesEnabled( false );
 }
@@ -115,8 +131,10 @@ void GraphsWindow::soSetChan( int gp, int ip, int ch )
 
 void GraphsWindow::soStopFetching()
 {
-    if( soctl )
+    if( soctl ) {
         soctl->stopFetching();
+        soctl->predelete();
+    }
 }
 
 
@@ -489,7 +507,8 @@ void GraphsWindow::installLeft( QSplitter *sp )
 
     if( sp->count() > 0 ) {
 
-        vis = lW->isShankVis();
+        if( (vis = lW->isShankVis()) )
+            lW->closeShanks();
 
         switch( js ) {
             case jsNI: w = new SViewM_Ni( lW, this, p, jpanel ); break;
@@ -539,6 +558,9 @@ bool GraphsWindow::installRight( QSplitter *sp )
                 int     ip, js  = SEL->rjsip( ip ),
                         jpanel  = 2*igw + 1;
                 bool    vis     = rW->isShankVis();
+
+                if( vis )
+                    rW->closeShanks();
 
                 switch( js ) {
                     case jsNI: w = new SViewM_Ni( rW, this, p, jpanel ); break;

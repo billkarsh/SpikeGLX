@@ -1,6 +1,8 @@
 
 #include "GeomMap.h"
 
+#include <QIODevice>
+#include <QRegularExpression>
 #include <QTextStream>
 
 
@@ -45,8 +47,8 @@ QString GeomMapDesc::toString() const
 GeomMapDesc GeomMapDesc::fromString( const QString &s_in )
 {
     const QStringList   sl = s_in.split(
-                                QRegExp("^\\s+|\\s*:\\s*"),
-                                QString::SkipEmptyParts );
+                                QRegularExpression("^\\s+|\\s*:\\s*"),
+                                Qt::SkipEmptyParts );
 
     return GeomMapDesc(
             sl.at( 0 ).toInt(),
@@ -229,15 +231,15 @@ QString GeomMap::toString( const QBitArray &onBits, int offset ) const
 void GeomMap::fromString( const QString &s_in )
 {
     QStringList sl = s_in.split(
-                        QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
+                        Qt::SkipEmptyParts );
     int         n  = sl.size();
 
 // Header
 
     QStringList hl = sl[0].split(
-                        QRegExp("^\\s+|\\s*,\\s*"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s+|\\s*,\\s*"),
+                        Qt::SkipEmptyParts );
 
     if( hl.size() == 4 ) {
         pn = hl[0];

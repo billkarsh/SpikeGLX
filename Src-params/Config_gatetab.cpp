@@ -99,12 +99,12 @@ void Config_gatetab::gateModeChanged()
 #if QT_VERSION >= 0x050300
     QList<QWidget*> wL =
         gateTabUI->gateFrame->findChildren<QWidget*>(
-            QRegExp("panel_*"),
+            QRegularExpression("panel_*"),
             Qt::FindDirectChildrenOnly );
 #else
     QList<QWidget*> wL =
         gateTabUI->gateFrame->findChildren<QWidget*>(
-            QRegExp("panel_*") );
+            QRegularExpression("panel_*") );
 #endif
 
     foreach( QWidget* w, wL ) {

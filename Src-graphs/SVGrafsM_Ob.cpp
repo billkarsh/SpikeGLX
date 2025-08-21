@@ -242,7 +242,7 @@ void SVGrafsM_Ob::updateRHSFlags()
 
     if( mainApp()->getAOCtl()->uniqueAIs( vAI, p.jsip2stream( jsOB, ip ) ) ) {
 
-        foreach( int ic, vAI ) {
+        for( int ic : vAI ) {
 
             MGraphY &Y = ic2Y[ic];
 

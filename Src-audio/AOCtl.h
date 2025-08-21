@@ -86,7 +86,7 @@ private:
 
 public:
     AOCtl( const DAQ::Params &p, QWidget *parent = 0 );
-    virtual ~AOCtl();
+    void predelete();
 
     bool uniqueAIs( std::vector<int> &vAI, const QString &stream ) const;
 

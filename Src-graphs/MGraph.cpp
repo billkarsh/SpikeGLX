@@ -3,7 +3,6 @@
 #include "Util.h"
 #include "MainApp.h"
 
-#include <QDesktopWidget>
 #include <QPoint>
 #include <QMouseEvent>
 #include <QPainter>
@@ -87,7 +86,7 @@ void MGraphX::attach( MGraph *newG )
 
     dataMtx.lock();
 
-    foreach( MGraphY *y, Y )
+    for( MGraphY *y : Y )
         y->erase();
 
     if( Y.size() )
@@ -154,7 +153,7 @@ void MGraphX::setSpanSecs( double t, double srate )
 // -------------------
 
     double  spanSmp = t * srate;
-    QRect   rect    = QApplication::desktop()->screenGeometry();
+    QRect   rect    = QApplication::primaryScreen()->geometry();
     int     maxDim  = 2 * qMax( rect.width(), rect.height() );
 
     dsmpMtx.lock();
@@ -165,7 +164,7 @@ void MGraphX::setSpanSecs( double t, double srate )
 
     uint    newSize = uint(ceil( spanSmp/dwnSmp ));
 
-    foreach( MGraphY *y, Y )
+    for( MGraphY *y : Y )
         y->resize( newSize );
 
     initVerts( newSize );
@@ -632,8 +631,8 @@ const MGraph *MGraph::getShr( const QString &usr )
 //
 int MGraph::evtCoords( double &x, double &y, QMouseEvent *evt, int ny )
 {
-    x = evt->x();
-    y = evt->y() + X->clipTop;
+    x = evt->position().x();
+    y = evt->position().y() + X->clipTop;
 
     int iy0 = X->clipTop / X->ypxPerGrf,
         iy  = y / X->ypxPerGrf;
@@ -819,7 +818,9 @@ void MGraph::drawLabels()
         if( isR ) {
 
             renderTextWin(
-                right - X->Y[iy]->rhsLabel.size() * FM.width( 'S' ),
+                right
+                    - X->Y[iy]->rhsLabel.size()
+                    * FM.boundingRect( 'S' ).width(),
                 y_base,
                 X->Y[iy]->rhsLabel, font );
         }

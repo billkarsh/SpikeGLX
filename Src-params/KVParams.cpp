@@ -2,6 +2,8 @@
 #include "KVParams.h"
 #include "Util.h"
 
+#include <QRegularExpression>
+
 
 
 
@@ -20,14 +22,16 @@ bool KVParams::parseOneLine( QString &line )
 // ChanMap strings might include them, so exception is
 // made for anything called 'map'.
 
-    QRegExp comment("(\\[|\\s+;|^;|\\s+#|^#|\\s+//|^//).*");
+    QRegularExpression comment("(\\[|\\s+;|^;|\\s+#|^#|\\s+//|^//).*");
 
     if( !line.contains( "file", Qt::CaseInsensitive )
         && !line.contains( "notes", Qt::CaseInsensitive )
         && !line.contains( "map", Qt::CaseInsensitive )
         && line.contains( comment ) ) {
 
-        Debug() << "Params comment skipped: '" << comment.cap(0) << "'";
+        Debug()
+            << "Params comment skipped: '"
+            << comment.match( line ).captured(0) << "'";
         line.replace( comment, QString() );
         line = line.trimmed();
 
@@ -39,11 +43,12 @@ bool KVParams::parseOneLine( QString &line )
 /* Capture (name)=(val) pairs */
 /* -------------------------- */
 
-    QRegExp re("([^=]+)=(.*)");
+    QRegularExpression re("^([^=]+)=(.*)$");    // whole line ^...$
+    QRegularExpressionMatch match = re.match( line );
 
-    if( re.exactMatch( line ) ) {
+    if( match.hasMatch() ) {
 
-        (*this)[re.cap(1).trimmed()] = re.cap(2).trimmed();
+        (*this)[match.captured(1).trimmed()] = match.captured(2).trimmed();
         return true;
     }
     else {

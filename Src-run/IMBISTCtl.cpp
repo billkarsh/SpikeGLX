@@ -242,7 +242,7 @@ bool IMBISTCtl::_openSlot()
 
 void IMBISTCtl::_closeSlots()
 {
-    foreach( int is, openSlots )
+    for( int is : openSlots )
         np_closeBS( is );
 
     openSlots.clear();

@@ -28,7 +28,6 @@
 #include "Subset.h"
 #include "Version.h"
 
-#include <QDesktopWidget>
 #include <QDesktopServices>
 #include <QKeyEvent>
 #include <QResizeEvent>
@@ -43,6 +42,7 @@
 #include <QDoubleSpinBox>
 #include <QPixmap>
 #include <QCursor>
+#include <QRegularExpression>
 #include <QSettings>
 #include <QMessageBox>
 #include <QThread>
@@ -748,7 +748,7 @@ bool FileViewerWindow::viewFile( QString &error, const QString &fname )
                 for( int is = 0, ns = R->nShank(); is < ns; ++is ) {
                     QVariant    v =
                     df->getParam( QString("~anatomy_shank%1").arg( is ) );
-                    if( v != QVariant::Invalid )
+                    if( v.isValid() )
                         shankCtl->setAnatomyPP( v.toString(), is );
                 }
             }
@@ -1333,16 +1333,15 @@ void FileViewerWindow::cmApplyBut()
 // Make mapping from user channel name to chanMap entry index
 // Make mapping from table order to entry index
 
-    QMap<int,int>   nam2Idx;
-    QMap<int,int>   ord2Idx;
-    QRegExp         re(";(\\d+)");
-    int             ne = chanMap->e.size();
+    QMap<int,int>       nam2Idx;
+    QMap<int,int>       ord2Idx;
+    QRegularExpression  re(";(\\d+)");
+    int                 ne = chanMap->e.size();
 
     for( int i = 0; i < ne; ++i ) {
 
-        chanMap->e[i].name.contains( re );
-        nam2Idx[re.cap(1).toInt()]      = i;
-        ord2Idx[chanMap->e[i].order]    = i;
+        nam2Idx[re.match( chanMap->e[i].name ).captured(1).toInt()] = i;
+        ord2Idx[chanMap->e[i].order]  = i;
     }
 
 // Initialize new order array with -1
@@ -1358,14 +1357,14 @@ void FileViewerWindow::cmApplyBut()
 
     QString     s       = mapUI->listTE->toPlainText();
     QStringList terms   = s.split(
-                            QRegExp("[,;]"),
-                            QString::SkipEmptyParts );
+                            QRegularExpression("[,;]"),
+                            Qt::SkipEmptyParts );
 
     foreach( const QString &t, terms ) {
 
         QStringList rng = t.split(
-                            QRegExp("[:]"),
-                            QString::SkipEmptyParts );
+                            QRegularExpression("[:]"),
+                            Qt::SkipEmptyParts );
         int         n   = rng.count(),
                     r1, r2, id;
         bool        ok1, ok2;
@@ -2521,19 +2520,19 @@ void FileViewerWindow::initMenus()
     QMenu   *m;
 
     m = mb->addMenu( "&File" );
-    m->addAction( "&Link", this, SLOT(file_Link()), QKeySequence( tr("Ctrl+L") ) );
-    m->addAction( "&Unlink", this, SLOT(file_Unlink()), QKeySequence( tr("Ctrl+U") ) );
-    m->addAction( "&Export...", this, SLOT(file_Export()), QKeySequence( tr("Ctrl+E") ) );
+    m->addAction( "&Link", QKeySequence( tr("Ctrl+L") ), this, SLOT(file_Link()) );
+    m->addAction( "&Unlink", QKeySequence( tr("Ctrl+U") ), this, SLOT(file_Unlink()) );
+    m->addAction( "&Export...", QKeySequence( tr("Ctrl+E") ), this, SLOT(file_Export()) );
     m->addSeparator();
-    m->addAction( "Zoom &In...", this, SLOT(file_ZoomIn()), QKeySequence( tr("Ctrl++") ) );
-    m->addAction( "Zoom &Out...", this, SLOT(file_ZoomOut()), QKeySequence( tr("Ctrl+-") ) );
+    m->addAction( "Zoom &In...", QKeySequence( tr("Ctrl++") ), this, SLOT(file_ZoomIn()) );
+    m->addAction( "Zoom &Out...", QKeySequence( tr("Ctrl+-") ), this, SLOT(file_ZoomOut()) );
     m->addAction( "&Time Scrolling...", this, SLOT(file_Options()) );
     m->addSeparator();
     m->addAction( "&View Notes", this, SLOT(file_Notes()) );
-    m->addAction( "View &Metadata", this, SLOT(file_Meta()), QKeySequence( tr("Ctrl+X") ) );
+    m->addAction( "View &Metadata", QKeySequence( tr("Ctrl+X") ), this, SLOT(file_Meta()) );
 
     m = mb->addMenu( "&Channels" );
-    m->addAction( "&Channel Mapping...", this, SLOT(file_ChanMap()), QKeySequence( tr("Ctrl+C") ) );
+    m->addAction( "&Channel Mapping...", QKeySequence( tr("Ctrl+C") ), this, SLOT(file_ChanMap()) );
     m->addSeparator();
     m->addAction( "&Show All", this, SLOT(channels_ShowAll()) );
     m->addAction( "&Hide All", this, SLOT(channels_HideAll()) );
@@ -2542,7 +2541,7 @@ void FileViewerWindow::initMenus()
     channelsMenu = m;
 
     m = mb->addMenu( "&Help" );
-    m->addAction( "File Viewer &Help", this, SLOT(help_ShowHelp()), QKeySequence( tr("Ctrl+H") ) );
+    m->addAction( "File Viewer &Help", QKeySequence( tr("Ctrl+H") ), this, SLOT(help_ShowHelp()) );
 }
 
 
@@ -4297,7 +4296,7 @@ void FileViewerWindow::linkTile( FVLinkRec &L )
 
 #define MG  0
 
-    QRect   scr = QApplication::desktop()->availableGeometry();
+    QRect   scr = QApplication::primaryScreen()->availableGeometry();
     int     N   = ceil( sqrt( nT ) ),
             W   = scr.width() / ceil( double(nT) / N ),
             H   = scr.height() / N;

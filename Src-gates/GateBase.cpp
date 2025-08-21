@@ -245,7 +245,7 @@ samples_loop_again:;
                     err     = "Sync signal not detected/matched on streams:";
                 int nbad    = 0;
 
-                foreach( const SyncStream &S, vS ) {
+                for( const SyncStream &S : vS ) {
 
                     if( !nbad )
                         err += "\n    { ";

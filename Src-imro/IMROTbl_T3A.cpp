@@ -3,6 +3,7 @@
 #include "Util.h"
 
 #include <QFileInfo>
+#include <QRegularExpression>
 
 /* ---------------------------------------------------------------- */
 /* struct IMRODesc_T3A -------------------------------------------- */
@@ -26,8 +27,8 @@ QString IMRODesc_T3A::toString( int chn ) const
 bool IMRODesc_T3A::fromString( QString *msg, const QString &s )
 {
     const QStringList   sl = s.split(
-                                QRegExp("\\s+"),
-                                QString::SkipEmptyParts );
+                                QRegularExpression("\\s+"),
+                                Qt::SkipEmptyParts );
     bool                ok;
 
     if( sl.size() != 5 )
@@ -113,15 +114,15 @@ QString IMROTbl_T3A::toString() const
 bool IMROTbl_T3A::fromString( QString *msg, const QString &s )
 {
     QStringList sl = s.split(
-                        QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
+                        Qt::SkipEmptyParts );
     int         n  = sl.size();
 
 // Header
 
     QStringList hl = sl[0].split(
-                        QRegExp("^\\s+|\\s*,\\s*"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s+|\\s*,\\s*"),
+                        Qt::SkipEmptyParts );
 
     if( hl.size() != 3 ) {
         if( msg )

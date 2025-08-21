@@ -11,6 +11,7 @@
 #include <QSettings>
 #endif
 
+#include <QRegularExpression>
 
 #define STOPCHECK   if( isStopped() ) return false;
 
@@ -454,7 +455,7 @@ bool CimAcqImec::_aux_setPXITrigBus( const QVector<int> &vslots, int srcSlot )
 
     S.beginGroup( "Chassis1" );
     busList = S.value( "TriggerBusList" ).toString()
-                .split( ",", QString::SkipEmptyParts );
+                .split( ",", Qt::SkipEmptyParts );
     S.endGroup();
 
     int nb = busList.size();
@@ -472,7 +473,7 @@ bool CimAcqImec::_aux_setPXITrigBus( const QVector<int> &vslots, int srcSlot )
 
         S.beginGroup( QString("Chassis1TriggerBus%1").arg( busList[ib] ) );
         QStringList sl = S.value( "SlotList" ).toString()
-                            .split( ",", QString::SkipEmptyParts );
+                            .split( ",", Qt::SkipEmptyParts );
         S.endGroup();
         ib2maxslot.push_back( sl.last().toInt() );
     }

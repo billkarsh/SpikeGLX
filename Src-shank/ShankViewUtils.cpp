@@ -2,6 +2,8 @@
 #include "Util.h"
 #include "ShankViewUtils.h"
 
+#include <QRegularExpression>
+
 
 
 
@@ -21,8 +23,8 @@ void loadLut( std::vector<SColor> &lut )
         lut.assign( 256, SColor() );
 
         QStringList sl = QString( f.readAll() ).split(
-                            QRegExp("[\r\n]+"),
-                            QString::SkipEmptyParts );
+                            QRegularExpression("[\r\n]+"),
+                            Qt::SkipEmptyParts );
         int         n  = sl.size();
 
         if( n != 257 ) {
@@ -33,8 +35,8 @@ void loadLut( std::vector<SColor> &lut )
         for( int i = 1; i <= 256; ++i ) {
 
             QStringList cl = sl[i].split(
-                        QRegExp("^\\s+|\\s*,\\s*"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s+|\\s*,\\s*"),
+                        Qt::SkipEmptyParts );
 
             SColor  &C = lut[cl[0].toUInt()];
             C.r = cl[1].toUInt();

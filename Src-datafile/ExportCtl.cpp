@@ -301,12 +301,10 @@ void ExportCtl::okBut()
 //
 QString ExportCtl::sglFilename( const QFileInfo &fi )
 {
-    QRegExp re("([^/\\\\]+_g\\d+_t(\\d+|cat))\\.");
-    re.setCaseSensitivity( Qt::CaseInsensitive );
+    QRegularExpression re("([^/\\\\]+_g\\d+_t(\\d+|cat))\\.");
+    re.setPatternOptions( QRegularExpression::CaseInsensitiveOption );
 
-    fi.fileName().indexOf( re );
-
-    return re.cap(1);
+    return re.match( fi.fileName() ).captured(1);
 }
 
 

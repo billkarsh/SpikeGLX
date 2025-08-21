@@ -50,6 +50,12 @@ IMFirmCtl::IMFirmCtl( QObject *parent ) : QObject(parent)
     firmUI->setupUi( dlg );
     firmUI->PBar->setMaximum( 1 );
     firmUI->PBar->setValue( 0 );
+
+    QPalette palette;
+    palette = firmUI->PBar->palette();
+    palette.setBrush( QPalette::Highlight, Qt::darkGray );
+    firmUI->PBar->setPalette( palette );
+
     ConnectUI( firmUI->bsBrowse, SIGNAL(clicked()), this, SLOT(bsBrowse()) );
     ConnectUI( firmUI->bscBrowse, SIGNAL(clicked()), this, SLOT(bscBrowse()) );
     ConnectUI( firmUI->updateBut, SIGNAL(clicked()), this, SLOT(update()) );

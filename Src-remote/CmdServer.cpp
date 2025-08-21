@@ -15,6 +15,7 @@
 
 #include <QDir>
 #include <QDirIterator>
+#include <QRegularExpression>
 #include <QThread>
 
 
@@ -2384,8 +2385,8 @@ bool CmdWorker::processLine( const QString &line )
 // -------------
 
     QStringList toks = line.split(
-                        QRegExp("\\s+"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("\\s+"),
+                        Qt::SkipEmptyParts );
 
     if( toks.empty() ) {
         errMsg = "CmdWorker: Missing command token.";

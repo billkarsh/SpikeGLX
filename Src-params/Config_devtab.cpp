@@ -13,6 +13,7 @@
 
 #include <QCommonStyle>
 #include <QMessageBox>
+#include <QRegularExpression>
 #include <QSettings>
 
 
@@ -560,12 +561,12 @@ runDialog:
         snval = ui.snLE->text().trimmed();
 
         const QStringList   slpn = pnval.split(
-                                    QRegExp("^\\s+|\\s*,\\s*"),
-                                    QString::SkipEmptyParts );
+                                    QRegularExpression("^\\s+|\\s*,\\s*"),
+                                    Qt::SkipEmptyParts );
 
         const QStringList   slsn = snval.split(
-                                    QRegExp("^\\s+|\\s*,\\s*"),
-                                    QString::SkipEmptyParts );
+                                    QRegularExpression("^\\s+|\\s*,\\s*"),
+                                    Qt::SkipEmptyParts );
 
         if( slpn.size() != vP.size() ) {
 
@@ -693,8 +694,8 @@ runDialog:
         val = ui.snLE->text().trimmed();
 
         const QStringList   sl = val.split(
-                                    QRegExp("^\\s+|\\s*,\\s*"),
-                                    QString::SkipEmptyParts );
+                                    QRegularExpression("^\\s+|\\s*,\\s*"),
+                                    Qt::SkipEmptyParts );
 
         if( sl.size() != vP.size() ) {
 

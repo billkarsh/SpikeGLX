@@ -1,6 +1,8 @@
 
 #include "Subset.h"
 
+#include <QIODevice>
+#include <QRegularExpression>
 #include <QStringList>
 #include <QTextStream>
 
@@ -145,7 +147,7 @@ QString Subset::cmdStr2Bits(
 
         chanBits.fill( false, nTotalBits );
 
-        QStringList CL = s.split( '#', QString::SkipEmptyParts );
+        QStringList CL = s.split( '#', Qt::SkipEmptyParts );
 
         if( !CL.size() )
             return "Bad channel string format.";
@@ -269,14 +271,14 @@ bool Subset::rngStr2Bits( QBitArray &b, const QString &s )
 
     int         sz = 0;
     QStringList terms = s.split(
-                            QRegExp("[,;]"),
-                            QString::SkipEmptyParts );
+                            QRegularExpression("[,;]"),
+                            Qt::SkipEmptyParts );
 
     foreach( const QString &t, terms ) {
 
         QStringList rng = t.split(
-                            QRegExp("[:]"),
-                            QString::SkipEmptyParts );
+                            QRegularExpression("[:]"),
+                            Qt::SkipEmptyParts );
         int         n   = rng.count(),
                     r1, r2, sw;
         bool        ok1, ok2;

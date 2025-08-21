@@ -2,6 +2,7 @@
 #include "IMROTbl_T1221.h"
 #include "Util.h"
 
+#include <QRegularExpression>
 #include <QSettings>
 
 /* ---------------------------------------------------------------- */
@@ -35,13 +36,13 @@ IMROTbl_T1221::IMROTbl_T1221( const QString &pn )
 
     _col2vis_ev.clear();
     s  = S.value( "occupied_GUI_columns_on_even_rows", "1 3" ).toString();
-    sl = s.split( QRegExp("\\s+"), QString::SkipEmptyParts );
+    sl = s.split( QRegularExpression("\\s+"), Qt::SkipEmptyParts );
     for( int i = 0, n = sl.size(); i < n; ++i )
         _col2vis_ev.push_back( sl.at( i ).toInt() );
 
     _col2vis_od.clear();
     s  = S.value( "occupied_GUI_columns_on_odd_rows", "0 2" ).toString();
-    sl = s.split( QRegExp("\\s+"), QString::SkipEmptyParts );
+    sl = s.split( QRegularExpression("\\s+"), Qt::SkipEmptyParts );
     for( int i = 0, n = sl.size(); i < n; ++i )
         _col2vis_od.push_back( sl.at( i ).toInt() );
 

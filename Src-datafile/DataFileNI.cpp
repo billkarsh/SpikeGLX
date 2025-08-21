@@ -2,14 +2,16 @@
 #include "DataFileNI.h"
 #include "Subset.h"
 
+#include <QRegularExpression>
+
 
 
 
 int DataFileNI::numNeuralChans() const
 {
     QStringList sl = kvp["snsMnMaXaDw"].toString().split(
-                        QRegExp("^\\s+|\\s*,\\s*"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s+|\\s*,\\s*"),
+                        Qt::SkipEmptyParts );
     return sl[0].toInt();
 }
 
@@ -306,8 +308,8 @@ void DataFileNI::subclassUpdateChanMap(
 void DataFileNI::parseChanCounts()
 {
     const QStringList   sl = kvp["acqMnMaXaDw"].toString().split(
-                                QRegExp("^\\s+|\\s*,\\s*"),
-                                QString::SkipEmptyParts );
+                                QRegularExpression("^\\s+|\\s*,\\s*"),
+                                Qt::SkipEmptyParts );
 
 // --------------------------------
 // First count each type separately

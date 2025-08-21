@@ -11,7 +11,7 @@
 #include "MainApp.h"
 
 #include <QThread>
-#include <QGLContext>
+//#include <QGLContext>
 
 /* ---------------------------------------------------------------- */
 /* Includes single OS --------------------------------------------- */
@@ -19,6 +19,8 @@
 
 #ifdef Q_OS_WIN
     #include <QDir>
+    #include <GL/gl.h>
+    #include <windows.h>
 #elif defined(Q_WS_X11)
     #include <GL/gl.h>
     #include <GL/glx.h>
@@ -396,7 +398,7 @@ bool hasOpenGLExtension( const char *ext_name )
 /* setOpenGLVSyncMode --------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-#ifdef Q_OS_WIN
+#ifndef Q_OS_WIN
 
 typedef BOOL (APIENTRY *wglswapfn_t)( int );
 

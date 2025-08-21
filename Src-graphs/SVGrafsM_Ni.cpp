@@ -395,7 +395,7 @@ void SVGrafsM_Ni::updateRHSFlags()
 
     if( mainApp()->getAOCtl()->uniqueAIs( vAI, p.jsip2stream( jsNI, 0 ) ) ) {
 
-        foreach( int ic, vAI ) {
+        for( int ic : vAI ) {
 
             MGraphY &Y = ic2Y[ic];
 

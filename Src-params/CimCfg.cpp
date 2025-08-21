@@ -18,6 +18,7 @@ using namespace Neuropixels;
 
 #include <QDirIterator>
 #include <QFileInfo>
+#include <QRegularExpression>
 #include <QSettings>
 #include <QTableWidget>
 
@@ -76,32 +77,32 @@ void CimCfg::ImProbeDat::loadSettings( QSettings &S, int i )
         S.value( QString("row%1").arg( i ), defRow ).toString();
 
     QStringList sl = row.split(
-                        QRegExp("\\s+"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("\\s+"),
+                        Qt::SkipEmptyParts );
 
     QStringList s;
 
     s = sl[0].split(
-            QRegExp("^\\s+|\\s*:\\s*"),
-            QString::SkipEmptyParts );
+            QRegularExpression("^\\s+|\\s*:\\s*"),
+            Qt::SkipEmptyParts );
 
     slot = s.at( 1 ).toUInt();
 
     s = sl[1].split(
-            QRegExp("^\\s+|\\s*:\\s*"),
-            QString::SkipEmptyParts );
+            QRegularExpression("^\\s+|\\s*:\\s*"),
+            Qt::SkipEmptyParts );
 
     port = s.at( 1 ).toUInt();
 
     s = sl[2].split(
-            QRegExp("^\\s+|\\s*:\\s*"),
-            QString::SkipEmptyParts );
+            QRegularExpression("^\\s+|\\s*:\\s*"),
+            Qt::SkipEmptyParts );
 
     dock = s.at( 1 ).toUInt();
 
     s = sl[3].split(
-            QRegExp("^\\s+|\\s*:\\s*"),
-            QString::SkipEmptyParts );
+            QRegularExpression("^\\s+|\\s*:\\s*"),
+            Qt::SkipEmptyParts );
 
     enab = s.at( 1 ).toUInt();
 }

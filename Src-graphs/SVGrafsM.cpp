@@ -143,10 +143,9 @@ SVGrafsM::SVGrafsM(
     int                 ip,
     int                 jpanel )
     :   gw(gw), shankCtl(0), p(p), hipass(0), lopass(0),
-        drawMtx(QMutex::Recursive), timStatBar(250, this),
-        js(js), ip(ip), jpanel(jpanel), lastMouseOverChan(-1),
-        selected(-1), maximized(-1), externUpdateTimes(true),
-        inConstructor(true)
+        timStatBar(250, this), js(js), ip(ip), jpanel(jpanel),
+        lastMouseOverChan(-1), selected(-1), maximized(-1),
+        externUpdateTimes(true), inConstructor(true)
 {
 }
 
@@ -228,11 +227,6 @@ SVGrafsM::~SVGrafsM()
     drawMtx.lock();
     drawMtx.unlock();
 
-// Tell shankCtl to save screen state
-
-    if( shankCtl )
-        shankCtl->close();
-
 // OK to destroy
 
     fltMtx.lock();
@@ -292,6 +286,13 @@ void SVGrafsM::showShanks()
 {
     if( shankCtl )
         shankCtl->showDialog();
+}
+
+
+void SVGrafsM::closeShanks()
+{
+    if( shankCtl )
+        shankCtl->close();
 }
 
 

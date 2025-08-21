@@ -260,12 +260,12 @@ void Config_trigtab::trigModeChanged()
 #if QT_VERSION >= 0x050300
     QList<QWidget*> wL =
         trigTabUI->trigFrame->findChildren<QWidget*>(
-            QRegExp("panel_*"),
+            QRegularExpression("panel_*"),
             Qt::FindDirectChildrenOnly );
 #else
     QList<QWidget*> wL =
         trigTabUI->trigFrame->findChildren<QWidget*>(
-            QRegExp("panel_*") );
+            QRegularExpression("panel_*") );
 #endif
 
     foreach( QWidget* w, wL ) {

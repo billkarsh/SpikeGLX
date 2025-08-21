@@ -26,7 +26,7 @@ private:
 
 public:
     ConsoleWindow( QWidget *parent = 0, Qt::WindowFlags flags = Qt::WindowFlags() );
-    virtual ~ConsoleWindow();
+    void predelete();
 
     void setReadOnly( bool readOnly );
 

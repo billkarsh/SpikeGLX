@@ -9,7 +9,7 @@ pandoc -s -c pandoc.css --self-contained Firmware_Help.md -o ../_Help/Firmware_H
 pandoc -s -c pandoc.css --self-contained GateTab_Help.md -o ../_Help/GateTab_Help.html
 pandoc -s -c pandoc.css --self-contained HST_Help.md -o ../_Help/HST_Help.html
 pandoc -s -c pandoc.css --self-contained IMTab_Help.md -o ../_Help/IMTab_Help.html
-pandoc -s -c pandoc.css --self-contained Metadata_30.md -o ../_Help/Metadata_30.html
+pandoc -s -c pandoc.css --self-contained Metadata_Help.md -o ../_Help/Metadata_Help.html
 pandoc -s -c pandoc.css --self-contained Metrics_Help.md -o ../_Help/Metrics_Help.html
 pandoc -s -c pandoc.css --self-contained NIClock_Help.md -o ../_Help/NIClock_Help.html
 pandoc -s -c pandoc.css --self-contained NITab_Help.md -o ../_Help/NITab_Help.html

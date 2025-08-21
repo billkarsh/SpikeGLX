@@ -10,6 +10,7 @@
 #include "Subset.h"
 #include "Biquad.h"
 
+#include <QRegularExpression>
 #include <QThread>
 
 
@@ -20,13 +21,13 @@
 #define MAXE            24
 
 // Experiment switches
-//#define TESTDUPSAMPS
-//#define TSTAMPCHECKS
-//#define LATENCYFILE
-//#define GENSERDES       0
-//#define PROFILE
-//#define TUNE            0
-//#define TUNEOBX         0
+// #define TESTDUPSAMPS
+// #define TSTAMPCHECKS
+// #define LATENCYFILE
+// #define GENSERDES       0
+// #define PROFILE
+// #define TUNE            0
+// #define TUNEOBX         0
 
 
 /* ---------------------------------------------------------------- */
@@ -71,8 +72,8 @@ bool ImSimLfDat::init( QString &err, const QString &pfName )
     QStringList sl;
 
     sl = kvp["acqApLfSy"].toString().split(
-            QRegExp("^\\s+|\\s*,\\s*"),
-            QString::SkipEmptyParts );
+            QRegularExpression("^\\s+|\\s*,\\s*"),
+            Qt::SkipEmptyParts );
     for( int i = 0; i < 3; ++i )
         acq[i] = sl[i].toInt();
 
@@ -184,8 +185,8 @@ bool ImSimApDat::init( QString &err, const QString &pfName )
     QStringList sl;
 
     sl = kvp["acqApLfSy"].toString().split(
-            QRegExp("^\\s+|\\s*,\\s*"),
-            QString::SkipEmptyParts );
+            QRegularExpression("^\\s+|\\s*,\\s*"),
+            Qt::SkipEmptyParts );
     for( int i = 0; i < 3; ++i )
         acq[i] = sl[i].toInt();
 
@@ -2007,8 +2008,8 @@ ImAcqThread::ImAcqThread(
 // Boost priority for worker handling single high channel count probe.
 // As of Qt 6.9.
 
-//    if( streams.size() == 1 && streams[0].nAP > 384 )
-//        thread->setServiceLevel( QThread::QualityOfService::High );
+    if( streams.size() == 1 && streams[0].nAP > 384 )
+        thread->setServiceLevel( QThread::QualityOfService::High );
 
     thread->start();
 

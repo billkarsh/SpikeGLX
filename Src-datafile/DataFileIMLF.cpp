@@ -5,14 +5,16 @@
 #include "DataFileIMLF.h"
 #include "Subset.h"
 
+#include <QRegularExpression>
+
 
 
 
 int DataFileIMLF::numNeuralChans() const
 {
     QStringList sl = kvp["snsApLfSy"].toString().split(
-                        QRegExp("^\\s+|\\s*,\\s*"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("^\\s+|\\s*,\\s*"),
+                        Qt::SkipEmptyParts );
     int lf = sl[1].toInt();
 
     return (lf ? lf : sl[0].toInt());
@@ -467,8 +469,8 @@ void DataFileIMLF::subclassUpdateChanMap(
 void DataFileIMLF::parseChanCounts()
 {
     const QStringList   sl = kvp["acqApLfSy"].toString().split(
-                                QRegExp("^\\s+|\\s*,\\s*"),
-                                QString::SkipEmptyParts );
+                                QRegularExpression("^\\s+|\\s*,\\s*"),
+                                Qt::SkipEmptyParts );
 
 // --------------------------------
 // First count each type separately

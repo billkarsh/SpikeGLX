@@ -8,6 +8,7 @@
 #include "Version.h"
 
 #include <QDir>
+#include <QRegularExpression>
 
 
 /* ---------------------------------------------------------------- */
@@ -404,7 +405,7 @@ bool DataFile::openForWrite(
 
     // All metadata are single lines of text
     QString noReturns = p.sns.notes;
-    noReturns.replace( QRegExp("[\r\n]"), "\\n" );
+    noReturns.replace( QRegularExpression("[\r\n]"), "\\n" );
     kvp["userNotes"]        = noReturns;
 
     if( p.mode.mGate == DAQ::eGateImmed ) {
@@ -894,7 +895,7 @@ QString DataFile::notes() const
     if( it != kvp.end() ) {
 
         QString withReturns = it.value().toString();
-        withReturns.replace( QRegExp("\\\\n"), "\n" );
+        withReturns.replace( QRegularExpression("\\\\n"), "\n" );
 
         return withReturns;
     }
@@ -959,7 +960,7 @@ const QVariant DataFile::getParam( const QString &name ) const
     if( it != kvp.end() )
         return it.value();
 
-    return QVariant::Invalid;
+    return QVariant();
 }
 
 /* ---------------------------------------------------------------- */

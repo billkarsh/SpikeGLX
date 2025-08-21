@@ -52,7 +52,7 @@ void CProbeTbl::ss2ini()
     // Ref: https://www.php.net/parse_ini_file
     // Section: Value Interpolation
 
-    QRegExp needQuote( ".*[,;\\?\\{\\}\\|\\&\\~\\!\\[\\(\\)\\^].*" );
+    QRegularExpression needQuote( ".*[,;\\?\\{\\}\\|\\&\\~\\!\\[\\(\\)\\^].*" );
 
     for(;;) {
         // get line

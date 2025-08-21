@@ -17,6 +17,7 @@
 
 #include <QAction>
 #include <QMessageBox>
+#include <QRegularExpression>
 #include <QProcess>
 
 #ifdef DO_SNAPSHOTS
@@ -97,6 +98,7 @@ void Run::GWPair::kill()
     stopFetching();
 
     if( gw ) {
+        gw->predelete();
         mainApp()->modelessClosed( gw );
         delete gw;
         gw = 0;
@@ -127,9 +129,8 @@ void Run::GWPair::stopFetching()
 /* ---------------------------------------------------------------- */
 
 Run::Run( MainApp *app )
-    :   QObject(0), app(app), niQ(0),
-        imReader(0), niReader(0),
-        gate(0), trg(0), running(false)
+    :   QObject(0), app(app), niQ(0), imReader(0), niReader(0),
+        gate(0), trg(0), running(false), stopping(false)
 {
 }
 
@@ -428,6 +429,11 @@ void Run::grfClose( GraphsWindow *gw )
 
     Q_UNUSED( gw )
 
+    if( !isRunning() || stopping )
+        return;
+
+    QMutexLocker    ml( &runMtx );
+
     if( vGW.size() > 1 ) {
 
         vGW[1].kill();
@@ -611,7 +617,7 @@ bool Run::startRun( QString &err )
 
     DAQ::Params &p = app->cfgCtl()->acceptedParams;
 
-    setProcessorMin( 100 );
+    setProcessorMin( 50 );
     setHighPriority( true );
     setPreciseTiming( true );
 
@@ -702,20 +708,21 @@ bool Run::startRun( QString &err )
 
 void Run::stopRun()
 {
+    if( !isRunning() || stopping )
+        return;
+
+    QMutexLocker    ml( &runMtx );
+
+    running  = false;
+    stopping = true;
+
 #ifdef DO_SNAPSHOTS
     QTimer::singleShot( 0, mainApp(), SLOT(runSnapStopping()) );
 #endif
 
     CStim::ni_run_cleanup();
 
-    aoStopDev();
-
-    QMutexLocker    ml( &runMtx );
-
-    if( !running )
-        return;
-
-    running = false;
+   aoStopDev();
 
     vGW[0].gw->soStopFetching();
 
@@ -783,6 +790,7 @@ void Run::stopRun()
     Log() << s;
 
     app->rsStopped();
+    stopping = false;
 }
 
 
@@ -1057,8 +1065,8 @@ QString Run::setAnatomyPP( const QString &s )
 // [probe-id,shank-id](startpos,endpos,R,G,B,rgnname)(startpos,endpos,R,G,B,rgnname)...()
 
     QStringList sl = s.split(
-                        QRegExp("\\s*\\]\\s*"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("\\s*\\]\\s*"),
+                        Qt::SkipEmptyParts );
     int         n  = sl.size();
 
     if( n != 2 )
@@ -1067,8 +1075,8 @@ QString Run::setAnatomyPP( const QString &s )
 // Parse header
 
     QStringList slh = sl[0].split(
-                        QRegExp("\\[\\s*|\\s*,\\s*"),
-                        QString::SkipEmptyParts );
+                        QRegularExpression("\\[\\s*|\\s*,\\s*"),
+                        Qt::SkipEmptyParts );
     n = slh.size();
 
     if( n != 2 )
