@@ -8,9 +8,7 @@
 #include "IMFirmCtl.h"
 #include "HelpButDialog.h"
 #include "Util.h"
-#include "Version.h"
 
-#include <QButtonGroup>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QThread>
@@ -50,29 +48,8 @@ IMFirmCtl::IMFirmCtl( QObject *parent ) : QObject(parent)
 
     firmUI = new Ui::IMFirmDlg;
     firmUI->setupUi( dlg );
-
-    QButtonGroup    *bg;
-
-    bg = new QButtonGroup( this );
-    bg->addButton( firmUI->bsIntRadio );
-    bg->addButton( firmUI->bsExtRadio );
-    firmUI->bsIntRadio->setChecked( true );
-    bsRadClicked();
-
-    bg = new QButtonGroup( this );
-    bg->addButton( firmUI->bscIntRadio );
-    bg->addButton( firmUI->bscExtRadio );
-    firmUI->bscIntRadio->setChecked( true );
-    bscRadClicked();
-
     firmUI->PBar->setMaximum( 1 );
     firmUI->PBar->setValue( 0 );
-
-    ConnectUI( firmUI->bsIntRadio, SIGNAL(clicked()), this, SLOT(bsRadClicked()) );
-    ConnectUI( firmUI->bsExtRadio, SIGNAL(clicked()), this, SLOT(bsRadClicked()) );
-    ConnectUI( firmUI->bscIntRadio, SIGNAL(clicked()), this, SLOT(bscRadClicked()) );
-    ConnectUI( firmUI->bscExtRadio, SIGNAL(clicked()), this, SLOT(bscRadClicked()) );
-
     ConnectUI( firmUI->bsBrowse, SIGNAL(clicked()), this, SLOT(bsBrowse()) );
     ConnectUI( firmUI->bscBrowse, SIGNAL(clicked()), this, SLOT(bscBrowse()) );
     ConnectUI( firmUI->updateBut, SIGNAL(clicked()), this, SLOT(update()) );
@@ -97,22 +74,6 @@ IMFirmCtl::~IMFirmCtl()
 /* ---------------------------------------------------------------- */
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
-
-void IMFirmCtl::bsRadClicked()
-{
-    bool enab = firmUI->bsExtRadio->isChecked();
-    firmUI->bsfileLE->setEnabled( enab );
-    firmUI->bsBrowse->setEnabled( enab );
-}
-
-
-void IMFirmCtl::bscRadClicked()
-{
-    bool enab = firmUI->bscExtRadio->isChecked();
-    firmUI->bscfileLE->setEnabled( enab );
-    firmUI->bscBrowse->setEnabled( enab );
-}
-
 
 void IMFirmCtl::bsBrowse()
 {
@@ -181,72 +142,50 @@ void IMFirmCtl::update()
     bscBytes    = 0;
     barOffset   = 0;
 
-// -------
-// BS prep
-// -------
-
     if( firmUI->bsGrp->isChecked() ) {
 
-        if( firmUI->bsExtRadio->isChecked() ) {
+        sbs = firmUI->bsfileLE->text();
 
-            sbs = firmUI->bsfileLE->text();
-
-            if( sbs.contains( "(" ) ) {
-                QMessageBox::critical( dlg,
-                    "BS Path Not Set",
-                    "Use Browse button to select a BS file." );
-                goto exit;
-            }
-
-            QFileInfo   fi( sbs );
-
-            if( !fi.fileName().contains( "BS_" ) ) {
-                QMessageBox::critical( dlg,
-                    "Not BS File",
-                    "File name should contain 'BS_ and _FPGA_'." );
-                goto exit;
-            }
-
-            bsBytes = fi.size();
+        if( sbs.contains( "(" ) ) {
+            QMessageBox::critical( dlg,
+                "BS Path Not Set",
+                "Use Browse button to select a BS file." );
+            goto exit;
         }
-        else {
-            sbs     = "x";
-            bsBytes = VERS_IMEC_BS_BYTES;
+
+        QFileInfo   fi( sbs );
+
+        if( !fi.fileName().contains( "BS_" ) ) {
+            QMessageBox::critical( dlg,
+                "Not BS File",
+                "File name should contain 'BS_ and _FPGA_'." );
+            goto exit;
         }
+
+        bsBytes = fi.size();
     }
-
-// --------
-// BSC prep
-// --------
 
     if( firmUI->bscGrp->isChecked() ) {
 
-        if( firmUI->bsExtRadio->isChecked() ) {
+        sbsc = firmUI->bscfileLE->text();
 
-            sbsc = firmUI->bscfileLE->text();
-
-            if( sbsc.contains( "(" ) ) {
-                QMessageBox::critical( dlg,
-                    "BSC Path Not Set",
-                    "Use Browse button to select a BCS file." );
-                goto exit;
-            }
-
-            QFileInfo   fi( sbsc );
-
-            if( !fi.fileName().contains( "QBSC_" ) ) {
-                QMessageBox::critical( dlg,
-                    "Not BSC File",
-                    "File name should contain 'QBSC_ and _FPGA_'." );
-                goto exit;
-            }
-
-            bscBytes = fi.size();
+        if( sbsc.contains( "(" ) ) {
+            QMessageBox::critical( dlg,
+                "BSC Path Not Set",
+                "Use Browse button to select a BCS file." );
+            goto exit;
         }
-        else {
-            sbsc        = "x";
-            bscBytes    = VERS_IMEC_BSC_BYTES;
+
+        QFileInfo   fi( sbsc );
+
+        if( !fi.fileName().contains( "QBSC_" ) ) {
+            QMessageBox::critical( dlg,
+                "Not BSC File",
+                "File name should contain 'QBSC_ and _FPGA_'." );
+            goto exit;
         }
+
+        bscBytes = fi.size();
     }
 
     if( sbs.isEmpty() && sbsc.isEmpty() ) {
@@ -255,42 +194,31 @@ void IMFirmCtl::update()
         firmUI->PBar->setValue( 0 );
 
         QMessageBox::information( dlg,
-            "No Source Data Selected",
-            "Select BS and/or BSC sources and then 'Update'." );
+            "No Files Selected",
+            "Select a BS or BSC file (or both) and then 'Update'." );
         goto exit;
     }
 
     firmUI->PBar->setMaximum( bsBytes + bscBytes );
 
-// ---------
-// BS update
-// ---------
+// --
+// BS
+// --
 
     if( !sbs.isEmpty() ) {
 
+        sbs.replace( "/", "\\" );
+
         firmUI->statusLE->setText( "Updating BS..." );
 
-        if( firmUI->bsExtRadio->isChecked() ) {
+        err = np_bs_updateFirmware( slot, STR2CHR( sbs ), callback );
 
-            sbs.replace( "/", "\\" );
-            err = np_bs_updateFirmware( slot, STR2CHR( sbs ), callback );
-            if( err != SUCCESS ) {
-                Error() <<
-                    QString("IMEC bs_updateFirmware(slot %1)%2")
-                    .arg( slot ).arg( makeErrorString( err ) );
-                firmUI->statusLE->setText( "Error updating BS" );
-                goto close;
-            }
-        }
-        else {
-            err = np_bs_resetFirmware( slot, callback );
-            if( err != SUCCESS ) {
-                Error() <<
-                    QString("IMEC bs_resetFirmware(slot %1)%2")
-                    .arg( slot ).arg( makeErrorString( err ) );
-                firmUI->statusLE->setText( "Error updating BS" );
-                goto close;
-            }
+        if( err != SUCCESS ) {
+            Error() <<
+                QString("IMEC bs_updateFirmware(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) );
+            firmUI->statusLE->setText( "Error updating BS" );
+            goto close;
         }
 
         firmUI->statusLE->setText( "BS update OK" );
@@ -298,43 +226,28 @@ void IMFirmCtl::update()
         barOffset = bsBytes;
     }
 
-// ----------
-// BSC update
-// ----------
+// ---
+// BSC
+// ---
 
     if( !sbsc.isEmpty() ) {
 
+        sbsc.replace( "/", "\\" );
+
         firmUI->statusLE->setText( "Updating BSC..." );
 
-        if( firmUI->bscExtRadio->isChecked() ) {
+        err = np_bsc_updateFirmware( slot, STR2CHR( sbsc ), callback );
 
-            sbsc.replace( "/", "\\" );
-            err = np_bsc_updateFirmware( slot, STR2CHR( sbsc ), callback );
-            if( err != SUCCESS ) {
-                Error() <<
-                    QString("IMEC bsc_updateFirmware(slot %1)%2")
-                    .arg( slot ).arg( makeErrorString( err ) );
-                firmUI->statusLE->setText( "Error updating BSC" );
-                goto close;
-            }
-        }
-        else {
-            err = np_bsc_resetFirmware( slot, callback );
-            if( err != SUCCESS ) {
-                Error() <<
-                    QString("IMEC bsc_resetFirmware(slot %1)%2")
-                    .arg( slot ).arg( makeErrorString( err ) );
-                firmUI->statusLE->setText( "Error updating BSC" );
-                goto close;
-            }
+        if( err != SUCCESS ) {
+            Error() <<
+                QString("IMEC bsc_updateFirmware(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) );
+            firmUI->statusLE->setText( "Error updating BSC" );
+            goto close;
         }
 
         firmUI->statusLE->setText( "BSC update OK" );
     }
-
-// ------
-// Report
-// ------
 
     firmUI->PBar->setMaximum( 1 );
     firmUI->PBar->setValue( 1 );

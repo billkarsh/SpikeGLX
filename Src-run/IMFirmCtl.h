@@ -31,8 +31,6 @@ public:
     virtual ~IMFirmCtl();
 
 private slots:
-    void bsRadClicked();
-    void bscRadClicked();
     void bsBrowse();
     void bscBrowse();
     void update();
