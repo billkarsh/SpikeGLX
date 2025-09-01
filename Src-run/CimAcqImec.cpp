@@ -2525,8 +2525,15 @@ if( S.ip == 0 ) {
         static double tlastpkreport = getTime();
         double tpk = getTime() - tlastpkreport;
         if( tpk >= 5.0 ) {
-            Log()<<QString("---------------------- ave %1  max %2")
-                .arg( AVEE ).arg( MAXE );
+            // Calc ave
+            uint num = 0,
+                 den = 0;
+            for( int i = 1; i <= MAXE; ++i ) {
+                num += i * pkthist[i];
+                den += pkthist[i];
+            }
+            Log()<<QString("---------------------- typ %1  max %2  ave %3")
+                .arg( AVEE ).arg( MAXE ).arg( double(num)/den, 0, 'f', 1 );
             for( int i = 0; i <= MAXE; ++i ) {
                 uint x = pkthist[i];
                 if( x )
@@ -2653,8 +2660,17 @@ if( S.ip == 0 && shank == SourceAP ) {
         static double tlastpkreport = getTime();
         double tpk = getTime() - tlastpkreport;
         if( tpk >= 5.0 ) {
-            Log()<<QString("---------------------- ave %1  max %2")
-                .arg( AVEE*TPNTPERFETCH ).arg( MAXE*TPNTPERFETCH );
+            // Calc ave
+            uint num = 0,
+                 den = 0;
+            for( int i = 1; i <= MAXE*TPNTPERFETCH; ++i ) {
+                num += i * pkthist[i];
+                den += pkthist[i];
+            }
+            Log()<<QString("---------------------- typ %1  max %2  ave %3")
+                .arg( AVEE*TPNTPERFETCH )
+                .arg( MAXE*TPNTPERFETCH )
+                .arg( double(num)/den, 0, 'f', 1 );
             for( int i = 0; i <= MAXE*TPNTPERFETCH; ++i ) {
                 uint x = pkthist[i];
                 if( x )
@@ -2768,8 +2784,17 @@ if( S.ip == 0 ) {
         static double tlastpkreport = getTime();
         double tpk = getTime() - tlastpkreport;
         if( tpk >= 5.0 ) {
-            Log()<<QString("---------------------- ave %1  max %2")
-                .arg( AVEE*TPNTPERFETCH ).arg( MAXE*TPNTPERFETCH );
+            // Calc ave
+            uint num = 0,
+                 den = 0;
+            for( int i = 1; i <= MAXE*TPNTPERFETCH; ++i ) {
+                num += i * pkthist[i];
+                den += pkthist[i];
+            }
+            Log()<<QString("---------------------- typ %1  max %2  ave %3")
+                .arg( AVEE*TPNTPERFETCH )
+                .arg( MAXE*TPNTPERFETCH )
+                .arg( double(num)/den, 0, 'f', 1 );
             for( int i = 0; i <= MAXE*TPNTPERFETCH; ++i ) {
                 uint x = pkthist[i];
                 if( x )
