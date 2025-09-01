@@ -122,7 +122,7 @@ void SimProbesCtl::rmvBut()
 
 // remove
 
-    maddr.erase( mapAt( ir ) );
+    maddr.erase( std::next(maddr.begin(), ir) );
     toTable();
 
 // select next
@@ -169,10 +169,10 @@ void SimProbesCtl::cellDoubleClicked( int row, int col )
 
 void SimProbesCtl::editPath()
 {
-    QString file = mapAt(clkRow).value() + ".ap.bin";
+    QString file = std::next(maddr.begin(), clkRow).value() + ".ap.bin";
 
     if( selectFile( file ) ) {
-        maddr[mapAt(clkRow).key()] = file;
+        maddr[std::next(maddr.begin(), clkRow).key()] = file;
         toTable();
     }
 }
@@ -180,17 +180,6 @@ void SimProbesCtl::editPath()
 /* ---------------------------------------------------------------- */
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
-
-QMap<SPAddr,QString>::iterator SimProbesCtl::mapAt( int row )
-{
-    QMap<SPAddr,QString>::iterator it = maddr.begin();
-
-    while( row-- > 0 )
-        ++it;
-
-    return it;
-}
-
 
 SPAddr SimProbesCtl::lowestAvailAddr()
 {

@@ -413,7 +413,7 @@ static void _sortini( const QString &dst, const QString &src )
             itm = itd.value().begin(), endm = itd.value().end();
         for( ; itm != endm; ++itm )
             ts << itm.key();
-        if( itd + 1 != endd )
+        if( std::next(itd) != endd )
             ts << "\n";
     }
 }
