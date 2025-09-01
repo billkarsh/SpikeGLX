@@ -723,11 +723,11 @@ ImAcqStream::ImAcqStream(
     int                         js,
     int                         ip )
     :   tLastErrFlagsReport(0), tLastFifoReport(0), peakDT(0),
-        sumTot(0), totPts(0ULL), Q(Q), QFlt(0),
+        sumTot(0), totPts(0ULL), Q(Q), QFlt(0), tStampLastFetch(0),
         errCOUNT{0,0,0,0}, errSERDES{0,0,0,0}, errLOCK{0,0,0,0},
         errPOP{0,0,0,0}, errSYNC{0,0,0,0}, errMISS{0,0,0,0},
-        tStampLastFetch(0), fifoAve(0), fifoN(0),
-        sumN(0), js(js), ip(ip), statusLastFetch(0), simType(false)
+        fifoAve(0), fifoN(0), sumN(0), js(js), ip(ip),
+        statusLastFetch(0), simType(false)
 #ifdef PAUSEWHOLESLOT
         , zeroFill(false)
 #endif
@@ -1870,11 +1870,10 @@ next_j:;
 
 bool ImAcqWorker::workerYield()
 {
-// Get maximum outstanding packets for this worker thread
+// Sum outstanding packets for this worker thread
 
-    int     maxQPkts    = 0,
-            nID         = streams.size();
-    bool    hichn       = false;
+    int sumPkts = 0,
+        nID     = streams.size();
 
     for( int iID = 0; iID < nID; ++iID ) {
 
@@ -1884,21 +1883,12 @@ bool ImAcqWorker::workerYield()
         if( !S.checkFifo( &packets, acq ) )
             return false;
 
-        if( S.fetchType != 0 ) {
-            // Round to TPNTPERFETCH
-            int pkt = packets;
-            packets /= TPNTPERFETCH;
-            if( pkt - packets * TPNTPERFETCH >= TPNTPERFETCH/2 )
-                ++packets;
+        if( S.fetchType == t_fetch_np1 )
+            packets *= TPNTPERFETCH;
+        else if( S.fetchType == t_fetch_qb )
+            packets *= S.nAP / 384;
 
-            if( S.nAP > 384 ) {
-                packets *= S.nAP / 384;
-                hichn    = true;
-            }
-        }
-
-        if( packets > maxQPkts )
-            maxQPkts = packets;
+        sumPkts += packets;
     }
 
 // Yield time if fewer than the average fetched packet count.
@@ -1906,21 +1896,15 @@ bool ImAcqWorker::workerYield()
 
     double  t = getTime();
 
-    if( !acq->p.im.prbAll.lowLatency && maxQPkts < AVEE ) {
+    if( !acq->p.im.prbAll.lowLatency && sumPkts < 60 ) {
 
         double  udev    = uniformDev();
         bool    sleep   = false;
 
-        if( acq->p.im.prbAll.qf_on ) {
-            if( hichn )
-                sleep = udev <= 0.05;
-            else
-                sleep = udev <= 0.40;
-        }
-        else if( hichn )
-            sleep = udev <= 0.40;
+        if( acq->p.im.prbAll.qf_on )
+            sleep = udev <= 0.08;
         else
-            sleep = true;
+            sleep = udev <= 0.40;
 
         if( sleep ) {
             QThread::usleep( 250 );
