@@ -543,16 +543,6 @@ const AIQ* Run::getQ( int js, int ip ) const
     return 0;
 }
 
-
-void Run::qf_remoteClientDisable()
-{
-    QMutexLocker    ml( &runMtx );
-
-    for( int ip = 0, np = imQf.size(); ip < np; ++ip )
-        imQf[ip]->qf_remoteClient( false );
-}
-
-
 // Get a stream-based time for profiling lag in imec streams.
 // NO MUTEX: Should only be called by imec worker thread.
 //
@@ -621,12 +611,6 @@ bool Run::startRun( QString &err )
     setHighPriority( true );
     setPreciseTiming( true );
 
-// ------
-// Graphs
-// ------
-
-    vGW.push_back( GWPair( p, 0 ) );
-
 // -------
 // Streams
 // -------
@@ -658,6 +642,16 @@ bool Run::startRun( QString &err )
         niQ = new AIQ(
         p.stream_rate( jsNI, 0 ), p.stream_nChans( jsNI, 0 ), streamSecs );
     }
+
+// ------
+// Graphs
+// ------
+
+    vGW.push_back( GWPair( p, 0 ) );
+
+// -------
+// Readers
+// -------
 
     if( nIM || p.im.get_nOneBox() ) {
         imReader = new IMReader( p, imQ, imQf, obQ );
@@ -751,6 +745,15 @@ void Run::stopRun()
         imReader = 0;
     }
 
+// Note: graphFetcher (e.g., putSamps), gate and trg (e.g., setTriggerLED)
+// talk to graphsWindow. Therefore, we must wait for those threads to
+// complete before tearing graphsWindow down.
+
+    for( int igw = 0, ngw = vGW.size(); igw < ngw; ++igw )
+        vGW[igw].kill();
+
+    vGW.clear();
+
     if( niQ ) {
         delete niQ;
         niQ = 0;
@@ -768,17 +771,6 @@ void Run::stopRun()
         delete imQ[ip];
     imQ.clear();
 
-// Note: graphFetcher (e.g., putSamps), gate and trg (e.g., setTriggerLED)
-// talk to graphsWindow. Therefore, we must wait for those threads to
-// complete before tearing graphsWindow down.
-
-    for( int igw = 0, ngw = vGW.size(); igw < ngw; ++igw )
-        vGW[igw].kill();
-
-    vGW.clear();
-
-    grfUpdateWindowTitles();
-
     setPreciseTiming( false );
     setHighPriority( false );
     setProcessorMin( 5 );
@@ -788,6 +780,8 @@ void Run::stopRun()
     Systray() << s;
     Status() << s;
     Log() << s;
+
+    grfUpdateWindowTitles();
 
     app->rsStopped();
     stopping = false;
@@ -1153,6 +1147,18 @@ QString Run::opto_emit( int ip, int color, int site )
     }
     else
         return "OPTOEMIT: imec not enabled in this run.";
+}
+
+/* ---------------------------------------------------------------- */
+/* AIQ ops -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void Run::qf_remoteClientDisable()
+{
+    QMutexLocker    ml( &runMtx );
+
+    for( int ip = 0, np = imQf.size(); ip < np; ++ip )
+        imQf[ip]->qf_remoteClient( false );
 }
 
 /* ---------------------------------------------------------------- */

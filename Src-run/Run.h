@@ -89,7 +89,6 @@ public:
     int streamSpanMax( const DAQ::Params &p, bool warn = true );
     quint64 getSampleCount( int js, int ip ) const;
     const AIQ* getQ( int js, int ip ) const;
-    void qf_remoteClientDisable();
     double getStreamTime() const;
 
 // Run control
@@ -132,6 +131,9 @@ public slots:
 // Opto ops
     QString opto_getAttens( int ip, int color );
     QString opto_emit( int ip, int color, int site );
+
+// AIQ ops
+    void qf_remoteClientDisable();
 
 private slots:
     void gettingSamples();
