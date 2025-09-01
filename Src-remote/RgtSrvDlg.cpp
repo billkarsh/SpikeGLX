@@ -4,7 +4,6 @@
 #include "Util.h"
 #include "MainApp.h"
 #include "Run.h"
-#include "ConsoleWindow.h"
 #include "RgtServer.h"
 #include "RgtSrvDlg.h"
 

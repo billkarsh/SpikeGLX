@@ -1,7 +1,6 @@
 
 #include "TrigImmed.h"
 #include "Util.h"
-#include "DataFile.h"
 
 #include <QThread>
 

@@ -2,7 +2,6 @@
 #include "Pixmaps/shanks.xpm"
 
 #include "Util.h"
-#include "CimCfg.h"
 #include "SVGrafsM.h"
 #include "MNavbar.h"
 #include "SignalBlocker.h"

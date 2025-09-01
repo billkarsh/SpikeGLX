@@ -1,8 +1,7 @@
 
 #include "MGraph.h"
-#include "Util.h"
-#include "MainApp.h"
 
+#include <QApplication>
 #include <QPoint>
 #include <QMouseEvent>
 #include <QPainter>

@@ -3,7 +3,6 @@
 
 #include "Util.h"
 #include "MainApp.h"
-#include "ConsoleWindow.h"
 #include "CmdSrvDlg.h"
 #include "CmdServer.h"
 

@@ -1,7 +1,6 @@
 
 #include "ui_IMTab.h"
 #include "ui_IMForceDlg.h"
-#include "ui_IMSaveChansDlg.h"
 
 #include "Util.h"
 #include "ConfigCtl.h"

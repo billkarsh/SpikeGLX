@@ -22,6 +22,7 @@ public:
     KVParams() : QMap()                         {}
     KVParams( const KVParams &rhs ) : QMap(rhs) {}
     KVParams( const QString &s ) : QMap()       {fromString( s );}
+    KVParams& operator=( const KVParams& rhs )  {*(QMap*)this=rhs; return *this;}
     virtual ~KVParams()                         {}
 
     bool parseOneLine( QString &line );

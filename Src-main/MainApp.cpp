@@ -1096,7 +1096,7 @@ static void test1()
 
 void MainApp::file_NewRun()
 {
-//test1();return;
+// test1();return;
 
     if( !file_AskStopRun() )
         return;
