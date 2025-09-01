@@ -2958,7 +2958,7 @@ void CimAcqImec::createAcqWorkerThreads()
 
     for( int ip = 0, np = p.stream_nIM(); ip < np; ++ip ) {
 
-        if( p.stream_nChans( jsIM, ip ) > 384 ) {
+        if( p.im.prbj[ip].imCumTypCnt[CimCfg::imSumAP] > 384 ) {
 
             std::vector<ImAcqStream>    solo;
             solo.push_back( ImAcqStream( T, p, owner->imQ[ip], jsIM, ip ) );
