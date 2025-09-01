@@ -607,7 +607,8 @@ bool Run::startRun( QString &err )
 
     DAQ::Params &p = app->cfgCtl()->acceptedParams;
 
-    setProcessorMin( 50 );
+    setProcessAffinityMask( pCoreAffinityMask() );
+    setProcessorMin( 100 );     // Necessary for Xeon
     setHighPriority( true );
     setPreciseTiming( true );
 
@@ -774,6 +775,7 @@ void Run::stopRun()
     setPreciseTiming( false );
     setHighPriority( false );
     setProcessorMin( 5 );
+    setProcessAffinityMask( 0 );
 
     QString s = "Acquisition stopped.";
 

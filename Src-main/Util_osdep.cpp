@@ -640,61 +640,14 @@ void setPreciseTiming( bool on )
 #endif
 
 /* ---------------------------------------------------------------- */
-/* getNProcessors ------------------------------------------------- */
+/* getNAssignedThreads -------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-#ifdef Q_OS_WIN
-
-// Notes:
-// getNProcessors returns 4 for a single CPU system having
-// 2 cores/4 threads. Therefore, these are threads, a.k.a.
-// virtual/logical "cores".
-//
-int getNProcessors()
+int getNAssignedThreads()
 {
-    static int  nProcs = 0;
-
-    if( !nProcs ) {
-        SYSTEM_INFO si;
-        GetSystemInfo( &si );
-        nProcs = si.dwNumberOfProcessors;
-    }
-
-    return nProcs;
+    return qBound( 1, (int)std::thread::hardware_concurrency(), 64 );
 }
 
-#elif defined(Q_OS_LINUX)
-
-int getNProcessors()
-{
-    static int  nProcs = 0;
-
-    if( !nProcs )
-        nProcs = sysconf( _SC_NPROCESSORS_ONLN );
-
-    return nProcs;
-}
-
-#elif defined(Q_OS_DARWIN)
-
-int getNProcessors()
-{
-    static int  nProcs = 0;
-
-    if( !nProcs )
-        nProcs = MPProcessorsScheduled();
-
-    return nProcs;
-}
-
-#else /* !Q_OS_WIN && !Q_OS_LINUX && !Q_OS_DARWIN */
-
-int getNProcessors()
-{
-    return 1;
-}
-
-#endif
 
 /* ---------------------------------------------------------------- */
 /* getCurProcessorIdx --------------------------------------------- */
@@ -717,11 +670,113 @@ int getCurProcessorIdx()
 #endif
 
 /* ---------------------------------------------------------------- */
+/* pCoreAffinityMask ---------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+#ifdef Q_OS_WIN
+
+// Notes:
+// - Query key RelationProcessorCore defines union member Processor,
+// which is type _PROCESSOR_RELATIONSHIP.
+// - The enumerated records are physical processors, not cores.
+// - struct _PROCESSOR_RELATIONSHIP does not contain EfficiencyClass
+// member as of Qt 6.9.1, but we can see from microsoft pages that
+// EfficiencyClass maps to Reserved[0].
+// - Higher values of EfficiencyClass -> more power/less efficient.
+// - There can be multiple classes and we want highest value ones.
+// - So first pass assesses range of class values.
+// - Second pass builds mask.
+//
+quint64 pCoreAffinityMask()
+{
+// Fetch processor data
+
+    DWORD   len = 0;
+
+    GetLogicalProcessorInformationEx(
+        RelationProcessorCore, NULL, &len );
+
+    std::vector<BYTE>   buffer( len );
+
+    if( !len ||
+        !GetLogicalProcessorInformationEx(
+            RelationProcessorCore,
+            reinterpret_cast<PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX>(
+                buffer.data()),
+            &len) ) {
+
+        Warning() << "Failed to query processor info.";
+        return 0;
+    }
+
+// First pas: get range of classes
+
+    auto    ptr = buffer.data();
+    int     cmin = 99, cmax = 0;
+
+    while( ptr < buffer.data() + len ) {
+
+        auto info =
+        reinterpret_cast<PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX>(ptr);
+
+        if( info->Relationship == RelationProcessorCore ) {
+
+            auto &core  = info->Processor;
+            int  ceff   = core.Reserved[0];
+            cmin = qMin( ceff, cmin );
+            cmax = qMax( ceff, cmax );
+        }
+
+        ptr += info->Size;
+    }
+
+// Second pass: build cmax mask
+
+    if( cmin == cmax )
+        return 0;
+
+    DWORD_PTR   mask = 0;
+
+    ptr = buffer.data();
+
+    while( ptr < buffer.data() + len ) {
+
+        auto info =
+        reinterpret_cast<PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX>(ptr);
+
+        if( info->Relationship == RelationProcessorCore ) {
+
+            auto &core = info->Processor;
+
+            if( core.Reserved[0] == cmax ) {
+                // core.GroupMask[0].Mask = logical cores for this proc
+                mask |= core.GroupMask[0].Mask;
+            }
+        }
+
+        ptr += info->Size;
+    }
+
+    return mask;
+}
+
+#else
+
+quint64 pCoreAffinityMask()
+{
+    return 0;
+}
+
+#endif
+
+/* ---------------------------------------------------------------- */
 /* setProcessAffinityMask ----------------------------------------- */
 /* ---------------------------------------------------------------- */
 
 #ifdef Q_OS_WIN
 
+// Set which cores to run on, or zero for all available.
+//
 // Notes:
 // GetProcessAffinityMask returns 0xF for a single CPU system
 // having 2 cores/4 threads. Therefore, the mask bits refer to
@@ -729,11 +784,16 @@ int getCurProcessorIdx()
 //
 // setProcessAffinityMask( 0 ) has no effect.
 // setProcessAffinityMask( 0xFF ) on a 4 thread system is an error:
-//  the mask bits must be a subset of the system mask bits returned
-//  by GetProcessAffinityMask.
+// the mask bits must be a subset of the system mask bits returned
+// by GetProcessAffinityMask.
 //
-void setProcessAffinityMask( uint mask )
+void setProcessAffinityMask( quint64 mask )
 {
+    if( !mask ) {
+        for( int i = 0, n = getNAssignedThreads(); i < n; ++i )
+            mask |= (1LL << i);
+    }
+
     if( !SetProcessAffinityMask( GetCurrentProcess(), mask ) ) {
         Warning()
             << "Win32 Error setting process affinity mask: "
@@ -748,8 +808,13 @@ void setProcessAffinityMask( uint mask )
 
 #elif defined(Q_OS_LINUX)
 
-void setProcessAffinityMask( uint mask )
+void setProcessAffinityMask( quint64 mask )
 {
+    if( !mask ) {
+        for( int i = 0, n = getNAssignedThreads(); i < n; ++i )
+            mask |= (1LL << i);
+    }
+
     cpu_set_t   cpuset;
     int         nMaskBits = sizeof(mask) * 8;
 
@@ -757,7 +822,7 @@ void setProcessAffinityMask( uint mask )
 
     for( int i = 0; i < nMaskBits; ++i ) {
 
-        if( mask & (1 << i) )
+        if( mask & (1LL << i) )
             CPU_SET( i, &cpuset );
     }
 
@@ -778,7 +843,7 @@ void setProcessAffinityMask( uint mask )
 
 #else /* !Q_OS_WIN && !Q_OS_LINUX */
 
-void setProcessAffinityMask( uint )
+void setProcessAffinityMask( quint64 )
 {
     Warning() << "setProcessAffinityMask unimplemented on this system.";
 }
@@ -791,16 +856,16 @@ void setProcessAffinityMask( uint )
 
 #ifdef Q_OS_WIN
 
-uint setCurrentThreadAffinityMask( uint mask )
+quint64 setCurrentThreadAffinityMask( quint64 mask )
 {
     return
-        static_cast<uint>(
+        static_cast<quint64>(
         SetThreadAffinityMask( GetCurrentThread(), DWORD_PTR(mask) ));
 }
 
 #else /* !Q_OS_WIN */
 
-uint setCurrentThreadAffinityMask( uint )
+quint64 setCurrentThreadAffinityMask( quint64 )
 {
     Warning() << "setCurrentThreadAffinityMask not implemented.";
     return 0;

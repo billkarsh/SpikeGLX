@@ -132,6 +132,9 @@ double uniformDev( double rmin = 0.0, double rmax = 1.0 );
 // Position of least significant bit (like libc::ffs)
 int ffs( int x );
 
+// Return count of 1-bits
+int countBits( quint64 x );
+
 /* ---------------------------------------------------------------- */
 /* Objects -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -301,18 +304,21 @@ void setHighPriority( bool on );
 // Set higher precision system timing on/off
 void setPreciseTiming( bool on );
 
-// Number of real CPUs (cores) on the system
-int getNProcessors();
+// Number of threads currently assigned to process
+int getNAssignedThreads();
 
 // Which processor calling thread is running on
 int getCurProcessorIdx();
 
+// Mask-bits are p-cores on hybrid system; return zero if not hybrid
+quint64 pCoreAffinityMask();
+
 // Mask-bits set which processors to run on
-void setProcessAffinityMask( uint mask );
+void setProcessAffinityMask( quint64 mask );
 
 // Mask-bits set which processors to run on.
 // Return previous mask, or zero if error.
-uint setCurrentThreadAffinityMask( uint mask );
+quint64 setCurrentThreadAffinityMask( quint64 mask );
 
 // Installed RAM as seen by 32-bit application
 double getRAMBytes32BitApp();
