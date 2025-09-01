@@ -132,8 +132,8 @@ void ShankCtlBase::baseInit( const IMROTbl *R, bool hasViewTab )
             - 40 );
 
         // Actualize geometry using show()
-        _scroll->show();
         show();
+        _scroll->show();
         guiBreathe();
 
         // update cur width based on square pads
