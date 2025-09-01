@@ -1124,8 +1124,6 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
 
     type = -1;
 
-#ifdef HAVE_NXT
-
     switch( pn.mid( 2 ).toInt() ) {
         case 3010:  // NXT single shank (Ph 1B)
         case 3011:  // NXT single shank (Ph 1B) with cap
@@ -1139,8 +1137,6 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
             supp = true;
             break;
     }
-
-#else
 
 // Old codes ---------------------------------
     if( pn.startsWith( "PRB_1_4" ) ||
@@ -1258,7 +1254,6 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
                 break;
         }
     }
-#endif
 
     return supp;
 }

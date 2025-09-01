@@ -78,12 +78,8 @@ struct IMROTbl_T24base : public IMROTbl
     virtual int nLF() const             {return 0;}
     virtual int nBanks() const          {return imType24baseBanks;}
     virtual bool needADCCal() const     {return false;}
-
-    // {0=NP1000, 1=NP2000, 2=NP2010, 3=NP1110}-like
-    virtual int chanMapping() const     {return 2;}
-
-    // {0=NP1000, 2=NP2000, 4=NP2020}-like
-    virtual int apiFetchType() const    {return 2;}
+    virtual int chanMapping() const     {return t_map_np2ms;}
+    virtual int apiFetchType() const    {return t_fetch_np2;}
 
     virtual bool operator==( const IMROTbl &rhs ) const
         {return type == rhs.type && e == ((const IMROTbl_T24base*)&rhs)->e;}

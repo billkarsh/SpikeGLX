@@ -778,7 +778,7 @@ bool FileViewerWindow::viewFile( QString &error, const QString &fname )
 
     if( SVY.nmaps > 1 ) {
         const IMROTbl *R = df->imro();
-        sortingDisabled = (R && R->chanMapping() != 0);
+        sortingDisabled = (R && R->chanMapping() != t_map_np1);
     }
 
     if( sortingDisabled ) {

@@ -360,7 +360,7 @@ struct ImAcqStream {
                 slot,
                 port,
                 dock,
-                fetchType;  // {0=1.0, 2=2.0, 4=2020, 9=obx}
+                fetchType;
     quint16     statusLastFetch;
     bool        simType;
 #ifdef PAUSEWHOLESLOT

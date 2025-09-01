@@ -157,38 +157,6 @@ bool ImCfgWorker::_mt_openProbe( const CimCfg::ImProbeDat &P )
         return false;
     }
 
-#ifdef HAVE_NXT_
-    err = np_writeI2Cflex( P.slot, P.port, P.dock, 0xE0, 0x00, 0x48 );
-
-    if( err != SUCCESS ) {
-        shr.seterror(
-            QString("IMEC writeI2Cflex(slot %1, port %2, dock %3)%4")
-            .arg( P.slot ).arg( P.port ).arg( P.dock )
-            .arg( acq->makeErrorString( err ) ) );
-        return false;
-    }
-
-    err = np_writeI2Cflex( P.slot, P.port, P.dock, 0xE0, 0x07, 0x40 );
-
-    if( err != SUCCESS ) {
-        shr.seterror(
-            QString("IMEC writeI2Cflex(slot %1, port %2, dock %3)%4")
-            .arg( P.slot ).arg( P.port ).arg( P.dock )
-            .arg( acq->makeErrorString( err ) ) );
-        return false;
-    }
-
-    err = np_writeI2Cflex( P.slot, P.port, P.dock, 0xE0, 0x05, 0x0C );
-
-    if( err != SUCCESS ) {
-        shr.seterror(
-            QString("IMEC writeI2Cflex(slot %1, port %2, dock %3)%4")
-            .arg( P.slot ).arg( P.port ).arg( P.dock )
-            .arg( acq->makeErrorString( err ) ) );
-        return false;
-    }
-#endif
-
     return true;
 }
 
@@ -311,7 +279,7 @@ warn:
 
 bool ImCfgWorker::_mt_calibrateOpto( const CimCfg::ImProbeDat &P )
 {
-    if( !acq->p.im.prbj[P.ip].roTbl->nOptoSites() )
+    if( acq->p.im.prbj[P.ip].roTbl->probeTech() != t_tech_opto )
         return true;
 
     if( acq->p.im.prbAll.calPolicy == 2 ) {

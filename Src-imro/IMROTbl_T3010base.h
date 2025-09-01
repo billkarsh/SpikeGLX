@@ -79,9 +79,8 @@ struct IMROTbl_T3010base : public IMROTbl
     virtual int maxInt() const          {return 2048;}
     virtual double maxVolts() const     {return 0.67;}
     virtual bool needADCCal() const     {return false;}
-
-    // {0=NP1000, 2=NP2000, 4=NP2020}-like
-    virtual int apiFetchType() const    {return 2;}
+    virtual int probeTech() const       {return t_tech_nxt;}
+    virtual int apiFetchType() const    {return t_fetch_np2;}
 
     virtual bool operator==( const IMROTbl &rhs ) const
         {return type == rhs.type && e == ((const IMROTbl_T3010base*)&rhs)->e;}

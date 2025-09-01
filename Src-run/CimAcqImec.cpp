@@ -387,7 +387,7 @@ void ImSimDat::fifo( int *packets, int *empty ) const
 
     *empty = PFBUFSMP - *packets;
 
-    if( AP.fetchType == 0 ) {
+    if( AP.fetchType == t_fetch_np1 ) {
         *packets /= TPNTPERFETCH;
         *empty = PFBUFSMP / TPNTPERFETCH - *packets;
     }
@@ -785,7 +785,7 @@ ImAcqStream::ImAcqStream(
         port = P.port;
         dock = P.dock;
 
-        fetchType = 9;
+        fetchType = t_fetch_obx;
     }
 }
 
@@ -805,7 +805,7 @@ QString ImAcqStream::metricsName( int shank ) const
 {
     QString stream;
 
-    if( shank < 0 || fetchType != 4 ) {
+    if( shank < 0 || fetchType != t_fetch_qb ) {
         switch( js ) {
             case jsNI: stream = "  nidq"; break;
             case jsOB: stream = QString(" obx%1").arg( ip, 2, 10, QChar('0') ); break;
@@ -823,7 +823,7 @@ QString ImAcqStream::metricsName( int shank ) const
 //
 void ImAcqStream::sendErrMetrics() const
 {
-    int sMax = (fetchType == 4 ? 4 : 1);
+    int sMax = (fetchType == t_fetch_qb ? 4 : 1);
 
     for( int is = 0; is < sMax; ++is ) {
 
@@ -834,7 +834,7 @@ void ImAcqStream::sendErrMetrics() const
                 mainApp()->metrics(),
                 "errUpdateFlags",
                 Qt::QueuedConnection,
-                Q_ARG(QString, metricsName( fetchType == 4 ? is : -1 )),
+                Q_ARG(QString, metricsName( fetchType == t_fetch_qb ? is : -1 )),
                 Q_ARG(quint32, errCOUNT[is]),
                 Q_ARG(quint32, errSERDES[is]),
                 Q_ARG(quint32, errLOCK[is]),
@@ -1043,7 +1043,7 @@ void ImAcqStream::checkErrs_PInfo( PacketInfo* H, int nT, int shank )
         if( err & ELECTRODEPACKET_STATUS_ERR_SYNC )     ++errSYNC[shank];
     }
 
-    if( fetchType != 4 || shank == 3 ) {
+    if( fetchType != t_fetch_qb || shank == 3 ) {
 
         double  tFlags = getTime();
 
@@ -1178,10 +1178,10 @@ void ImAcqWorker::run()
         // acq voltage chans (D)
 
         switch( S.fetchType ) {
-            case 0: ++nT0; lfLast[iID].assign( S.nLF, 0 ); break;
-            case 4: nSY = 4;
-            case 2: ++nT2; T2Chans = qMax( T2Chans, S.nAP ); break;
-            case 9: ++nT2; T2Chans = qMax( T2Chans, OBX_N_ACQ ); break;
+            case t_fetch_np1: ++nT0; lfLast[iID].assign( S.nLF, 0 ); break;
+            case t_fetch_qb:  nSY = 4;
+            case t_fetch_np2: ++nT2; T2Chans = qMax( T2Chans, S.nAP ); break;
+            case t_fetch_obx: ++nT2; T2Chans = qMax( T2Chans, OBX_N_ACQ ); break;
         }
 
         // GENSERDES
@@ -1241,10 +1241,10 @@ void ImAcqWorker::run()
             bool    ok;
 
             switch( S.fetchType ) {
-                case 0: ok = doProbe_T0( &lfLast[iID][0], i16Buf, S ); break;
-                case 2:
-                case 4: ok = doProbe_T2( i16Buf, S ); break;
-                case 9: ok = do_obx( i16Buf, S ); break;
+                case t_fetch_np1: ok = doProbe_T0( &lfLast[iID][0], i16Buf, S ); break;
+                case t_fetch_np2:
+                case t_fetch_qb:  ok = doProbe_T2( i16Buf, S ); break;
+                case t_fetch_obx: ok = do_obx( i16Buf, S ); break;
             }
 
             if( !ok )
@@ -1477,11 +1477,11 @@ bool ImAcqWorker::doProbe_T2( vec_i16 &dst1D, ImAcqStream &S )
 // Fetch
 // -----
 
-    if( S.fetchType == 2 ) {
+    if( S.fetchType == t_fetch_np2 ) {
         if( !acq->fetchD_T2( nT, &H[0], src, S, S.nAP, MAXE * TPNTPERFETCH ) )
             return false;
     }
-    else {
+    else {  // t_fetch_qb
         nT = 0;
 
         // lowest pending
@@ -1600,7 +1600,7 @@ next_j:;
             if( S.mtStampMiss.size() < 30000 )
                 S.mtStampMiss[S.totPts] = z;
 
-            S.Q->enqueueZeroIM( z, (S.fetchType == 2 ? 1 : 4),
+            S.Q->enqueueZeroIM( z, (S.fetchType == t_fetch_np2 ? 1 : 4),
                 S.vstatusMiss[it] );
             if( S.QFlt )
                 S.QFlt->enqueueZero( z );
@@ -1613,11 +1613,11 @@ next_j:;
 
 // Option to invert sign; not needed in 3.0
 #if 1
-        if( S.fetchType == 2 ) {
+        if( S.fetchType == t_fetch_np2 ) {
             memcpy( dst, src, S.nAP * sizeof(qint16) );
             src += S.nAP;
         }
-        else {
+        else {  // t_fetch_qb
             int toff = 0;
             for( int is = 0; is < 4; ++is ) {
                 memcpy( dst + is * 384, src + (toff + it) * 384,
@@ -1636,9 +1636,9 @@ next_j:;
         // sync
         // ----
 
-        if( S.fetchType == 2 )
+        if( S.fetchType == t_fetch_np2 )
             *dst++ = H[it].Status;
-        else {
+        else {  // t_fetch_qb
             int toff = 0;
             for( int is = 0; is < 4; ++is ) {
                 *dst++ = H[toff + it].Status;
@@ -2841,7 +2841,7 @@ int CimAcqImec::fifoPct( int *packets, ImAcqStream &S ) const
         if( !S.simType ) {
 
             switch( S.fetchType ) {
-                case 0:
+                case t_fetch_np1:
                     err = np_getElectrodeDataFifoState(
                             S.slot, S.port, S.dock, packets, &nempty );
                     if( err != SUCCESS ) {
@@ -2851,7 +2851,7 @@ int CimAcqImec::fifoPct( int *packets, ImAcqStream &S ) const
                             .arg( makeErrorString( err ) );
                     }
                     break;
-                case 2:
+                case t_fetch_np2:
                     err = np_getPacketFifoStatus(
                             S.slot, S.port, S.dock, SourceAP, packets, &nempty );
                     if( err != SUCCESS ) {
@@ -2861,7 +2861,7 @@ int CimAcqImec::fifoPct( int *packets, ImAcqStream &S ) const
                             .arg( makeErrorString( err ) );
                     }
                     break;
-                case 4:
+                case t_fetch_qb:
                     {
                     int fmin = 10000000,
                         fmax = 0;
@@ -2884,7 +2884,7 @@ int CimAcqImec::fifoPct( int *packets, ImAcqStream &S ) const
                     ++S.sqb.nave;
                     }
                     break;
-                case 9:
+                case t_fetch_obx:
                     err = np_ADC_getPacketFifoStatus( S.slot, packets, &nempty );
                     if( err != SUCCESS ) {
                         Warning() <<

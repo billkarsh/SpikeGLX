@@ -1,11 +1,6 @@
 
 #include "IMROTbl_T3010base.h"
 
-#ifdef HAVE_IMEC
-#include "IMEC/NeuropixAPI.h"
-using namespace Neuropixels;
-#endif
-
 #include <QIODevice>
 #include <QRegularExpression>
 #include <QTextStream>

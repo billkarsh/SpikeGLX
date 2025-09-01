@@ -98,9 +98,7 @@ struct IMROTbl_T1110 : public IMROTbl
     virtual int maxInt() const          {return 512;}
     virtual double maxVolts() const     {return 0.6;}
     virtual bool needADCCal() const     {return true;}
-
-    // {0=NP1000, 1=NP2000, 2=NP2010, 3=NP1110}-like
-    virtual int chanMapping() const     {return 3;}
+    virtual int chanMapping() const     {return t_map_uhd;}
 
     virtual bool operator==( const IMROTbl &rhs ) const
         {return type == rhs.type

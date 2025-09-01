@@ -14,6 +14,26 @@ class QBitArray;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+enum T_probe_tech {
+    t_tech_std  = 0,
+    t_tech_opto = 1,
+    t_tech_nxt  = 2
+};
+
+enum T_probe_mapping {
+    t_map_np1   = 0,
+    t_map_np2ss = 1,
+    t_map_np2ms = 2,
+    t_map_uhd   = 3
+};
+
+enum T_probe_fetch {
+    t_fetch_np1 = 0,
+    t_fetch_np2 = 2,
+    t_fetch_qb  = 4,
+    t_fetch_obx = 9
+};
+
 #define IMRO_ROI_MAX    16
 
 // Editing helper - columns in hwr coords
@@ -133,12 +153,9 @@ public:
     virtual double maxVolts() const = 0;
     virtual bool needADCCal() const = 0;
     virtual bool needGainCal() const    {return true;}
-
-    // {0=NP1000, 1=NP2000, 2=NP2010, 3=NP1110}-like
-    virtual int chanMapping() const     {return 0;}
-
-    // {0=NP1000, 2=NP2000, 4=NP2020}-like
-    virtual int apiFetchType() const    {return 0;}
+    virtual int probeTech() const       {return t_tech_std;}
+    virtual int chanMapping() const     {return t_map_np1;}
+    virtual int apiFetchType() const    {return t_fetch_np1;}
 
     virtual bool operator==( const IMROTbl &rhs ) const = 0;
     virtual bool operator!=( const IMROTbl &rhs ) const = 0;
