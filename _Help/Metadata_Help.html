@@ -290,7 +290,7 @@ snsSaveChanSubset=all</code></pre>
 <pre><code>imDatPrb_type=21</code></pre>
 <p>This is the probe type {0=NP1.0, 21=NP2.0(1-shank), 24=NP2.0(4-shank)}.</p>
 <pre><code>imErrFlags0_IS_CT_SR_LK_PP_SY_MS=0 0 0 0 0 0 0</code></pre>
-<p>For each imec stream we monitor the cumulative count of several error flags, hence, imErrFlags5 denotes the flags for probe steam 5. Note that quad-base probes (part number NP2020/2021) record flags for each shank, hence, imErrFlags3_2 denotes that stream 3 is a quad-probe and the flags are from shank 2.</p>
+<p>For each imec stream we monitor the cumulative count of several error flags, hence, imErrFlags5 denotes the flags for probe stream 5. Note that quad-base probes (part number NP2020/2021) record flags for each shank, hence, imErrFlags3_2 denotes that stream 3 is a quad-probe and the flags are from shank 2.</p>
 <p>The flags are labeled {COUNT, SERDES, LOCK, POP, SYNC, MISS}. The metadata field 'IS' = 1 if any error occurred, 0 otherwise. I.e., &quot;is an error.&quot;</p>
 <p>These flags correspond to bits of the status/SYNC word that is visible as the last channel in the graphs and in your recorded data (quad-probes have 4 separate status words):</p>
 <pre><code>bit 0: Acquisition start trigger received
@@ -458,6 +458,24 @@ bit 11: MISS missed sample</code></pre>
 <li>Vmax = <code>obAiRangeMax</code></li>
 </ul>
 <pre><code>obAiRangeMin=-5.0</code></pre>
+<pre><code>obErrFlags0_IS_CT_SR_LK_PP_SY_MS=0 0 0 0 0 0 0</code></pre>
+<p>For each obx stream we monitor the cumulative count of several error flags, hence, obErrFlags1 denotes the flags for obx stream 1.</p>
+<p>The flags are labeled {COUNT, SERDES, LOCK, POP, SYNC, MISS}. The metadata field 'IS' = 1 if any error occurred, 0 otherwise. I.e., &quot;is an error.&quot;</p>
+<p>These flags correspond to bits of the status/SYNC word that is visible as the last channel in the graphs and in your recorded data:</p>
+<pre><code>bit 0: Acquisition start trigger received
+bit 1: not used
+bit 2: COUNT error
+bit 3: SERDES error
+bit 4: LOCK error
+bit 5: POP error
+bit 6: Synchronization waveform
+bit 7: SYNC error (unrelated to sync waveform)
+bit 11: MISS missed sample</code></pre>
+<p>The MISS field counts the total number of samples that the hardware has missed due to any of the other error types. SpikeGLX inserts zeros into the stream to replace missed samples, and each of those samples has the MISS bit set in the status word.</p>
+<p>The inserts are recorded in a file at the top level of your data directory. The name of the file will be &quot;runname.missed_samples.imecj.txt&quot; for probe-j or &quot;runname.missed_samples.obxj.txt&quot; for OneBox ADC stream-j. There is an entry in the file for each inserted run of zeros. The entries have the form: <sample,nzeros>, that is, the first value is the sample number at which the zeros are inserted (measured from the start of the acquisition run) and the second value is the number of inserted zeros. Each inserted sample is all zeros except for the status word(s) which set bit 11 and extend the flags from the neighbor status words.</p>
+<blockquote>
+<p>It is possible to see which region of recorded data experienced these errors if you see blips on those bits.</p>
+</blockquote>
 <pre><code>obMaxInt=32768</code></pre>
 <p>Maximum amplitude integer encoded in the 16-bit analog channels. Really, in this example [-32768..32767]. The reason for this apparent asymmetry is that, by convention, zero is grouped with the positive values. The stream is 16-bit so can encode 2^16 = 65536 values. There are 32768 negative values: [-32768..-1] and 32768 positives: [0..32767]. This convention (zero is a positive number) applies in all signed computer arithmetic.</p>
 <pre><code>obSampRate=30000</code></pre>

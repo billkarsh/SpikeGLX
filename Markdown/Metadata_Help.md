@@ -767,7 +767,7 @@ imErrFlags0_IS_CT_SR_LK_PP_SY_MS=0 0 0 0 0 0 0
 ```
 
 For each imec stream we monitor the cumulative count of several error flags,
-hence, imErrFlags5 denotes the flags for probe steam 5. Note that quad-base
+hence, imErrFlags5 denotes the flags for probe stream 5. Note that quad-base
 probes (part number NP2020/2021) record flags for each shank, hence,
 imErrFlags3_2 denotes that stream 3 is a quad-probe and the flags are from
 shank 2.
@@ -1139,6 +1139,49 @@ For obx data:
 ```
 obAiRangeMin=-5.0
 ```
+
+```
+obErrFlags0_IS_CT_SR_LK_PP_SY_MS=0 0 0 0 0 0 0
+```
+
+For each obx stream we monitor the cumulative count of several error flags,
+hence, obErrFlags1 denotes the flags for obx stream 1.
+
+The flags are labeled {COUNT, SERDES, LOCK, POP, SYNC, MISS}. The metadata
+field 'IS' = 1 if any error occurred, 0 otherwise. I.e., "is an error."
+
+These flags correspond to bits of the status/SYNC word that is visible as
+the last channel in the graphs and in your recorded data:
+
+```
+bit 0: Acquisition start trigger received
+bit 1: not used
+bit 2: COUNT error
+bit 3: SERDES error
+bit 4: LOCK error
+bit 5: POP error
+bit 6: Synchronization waveform
+bit 7: SYNC error (unrelated to sync waveform)
+bit 11: MISS missed sample
+```
+
+The MISS field counts the total number of samples that the hardware has
+missed due to any of the other error types. SpikeGLX inserts zeros into
+the stream to replace missed samples, and each of those samples has the
+MISS bit set in the status word.
+
+The inserts are recorded in a file at the top level of your data directory.
+The name of the file will be "runname.missed_samples.imecj.txt" for probe-j
+or "runname.missed_samples.obxj.txt" for OneBox ADC stream-j. There is an
+entry in the file for each inserted run of zeros. The entries have the form:
+<sample,nzeros>, that is, the first value is the sample number at which the
+zeros are inserted (measured from the start of the acquisition run) and the
+second value is the number of inserted zeros. Each inserted sample is all
+zeros except for the status word(s) which set bit 11 and extend the flags
+from the neighbor status words.
+
+>It is possible to see which region of recorded data experienced these
+errors if you see blips on those bits.
 
 ```
 obMaxInt=32768

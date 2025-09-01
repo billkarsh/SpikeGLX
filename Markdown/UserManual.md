@@ -140,31 +140,34 @@ SpikeGLX/
     _Calibration/
     _Help/
     _ImroX/
-    bearer/
+    _Waves/
+    generic/
     iconengines/
     imageformats/
+    networkinformation/
     platforms/
     styles/
+    tls/
     translations/
     D3Dcompiler_47.dll
     FpgaManager.dll
     FTD3XX.dll
-    libEGL.dll
     libgcc_s_seh-1.dll
-    libGLESV2.dll
     libstdc++-6.dll
     libwinpthread-1.dll
     msvcp(version).dll
     NeuropixAPI_version_info.dll
     opengl32sw.dll
-    Qt5Core.dll
-    Qt5Gui.dll
-    Qt5Network.dll
-    Qt5OpenGL.dll
-    Qt5Svg.dll
-    Qt5Widgets.dll
-    SpikeGLX.exe
-    SpikeGLX_NISIM.exe
+    qt.conf
+    Qt6Core.dll
+    Qt6Gui.dll
+    Qt6Network.dll
+    Qt6OpenGL.dll
+    Qt6OpenGLWidgets.dll
+    Qt6Svg.dll
+    Qt6Widgets.dll
+    SpikeGLX_STD.exe
+    SpikeGLX_STD_NISIM.exe
     vcruntime(version).dll
     vcruntime(version_1).dll
 ```
