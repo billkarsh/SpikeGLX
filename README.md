@@ -29,14 +29,15 @@ label are actually phase3A. All releases support NI-DAQ based acquisition.
 
 Summaries of development phases (newest to oldest):
 
-* **API4**: (Main branch) In 2025 Imec redesigned their API, easing their
-support for existing probes (STD = NP1 NP2), while adding forthcoming
-Opto (OPT) and NXT (NP3) probes. SpikeGLX is a unified code base resting on
-API 4. It builds now with Qt 6.9 rather than Qt 5.12. Individual builds of
-SplikeGLX.exe are tagged as either {STD, OPT, NP3}. The three builds need
-specific firmware and PXIe modules for that probe family. STD modules are
-identical to those used with phase30, but with a firmware update you can
-do from within SpikeGLX.
+* **API4**: (Main branch) In 2025 Imec introduced API 4.0, which extends
+support to three technologies (tech): {STD=NP1+NP2, OPTO, NXT=NP3}. There
+are three corresponding PXI basestation-module techs which will each need
+specific firmware. The SpikeGLX 'Upload Firmware' dialog will help manage
+this. OneBox is considered a STD-tech module. Existing modules and OneBox
+remain compatible with API4. There are rules about which probe-tech runs
+in which module-tech. SpikeGLX API4 supports all tech and will guide you
+accordingly. SpikeGLX now builds with Qt 6.9 rather than Qt 5.12, which
+slightly alters its appearance.
 
 * **Phase30**: This is unified software to support Neuropixels 1.0, 2.0 and
 all probe hardware produced through 8/1/2025. Again, the same base station

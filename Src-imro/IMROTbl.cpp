@@ -24,6 +24,7 @@
 #include "Util.h"
 
 #ifdef HAVE_IMEC
+#include "Version.h"
 #include "IMEC/NeuropixAPI.h"
 using namespace Neuropixels;
 #endif
@@ -1124,20 +1125,6 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
 
     type = -1;
 
-    switch( pn.mid( 2 ).toInt() ) {
-        case 3010:  // NXT single shank (Ph 1B)
-        case 3011:  // NXT single shank (Ph 1B) with cap
-            type = 3010;
-            supp = true;
-            break;
-        case 3020:  // NXT multishank (Ph 1B)
-        case 3021:  // NXT multishank (Ph 1B) with cap
-        case 3022:  // NXT multishank (Pre A) with cap
-            type = 3020;
-            supp = true;
-            break;
-    }
-
 // Old codes ---------------------------------
     if( pn.startsWith( "PRB_1_4" ) ||
         pn.startsWith( "PRB_1_2" ) ) {
@@ -1250,6 +1237,17 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
                 break;
             case 3000:  // Passive NXT probe
                 type = 1200;
+                supp = true;
+                break;
+            case 3010:  // NXT single shank (Ph 1B)
+            case 3011:  // NXT single shank (Ph 1B) with cap
+                type = 3010;
+                supp = true;
+                break;
+            case 3020:  // NXT multishank (Ph 1B)
+            case 3021:  // NXT multishank (Ph 1B) with cap
+            case 3022:  // NXT multishank (Pre A) with cap
+                type = 3020;
                 supp = true;
                 break;
         }
@@ -1369,6 +1367,142 @@ QString IMROTbl::default_imroLE( int type )
         case -3: return "*Default (bank 0, ref ext, gain 500/250)";
         default: return "*Default (bank 0, ref ext, gain 500/250, flt on)";
     }
+}
+
+
+int IMROTbl::bscpnToTech( const QString &pn )
+{
+    if( pn.isEmpty() )
+        return t_tech_opto;
+    else if( pn == "NPNXT_QBSC_01" )
+        return t_tech_nxt;
+
+    return t_tech_std;  // "NP2_QBSC_00", OneBox
+}
+
+
+int IMROTbl::prbpnToTech( const QString &pn )
+{
+    IMROTbl *R      = alloc( pn );
+    int     tech    = t_tech_std;
+
+    if( R ) {
+        tech = R->probeTech();
+        delete R;
+    }
+
+    return tech;
+}
+
+
+QString IMROTbl::strTech( int tech )
+{
+    switch( tech ) {
+        case t_tech_sim:  return "sim";
+        case t_tech_std:
+        case t_tech_qb:   return "std";
+        case t_tech_opto: return "opto";
+        case t_tech_nxt:  return "nxt";
+    }
+}
+
+
+void IMROTbl::bscReqVers( QString &bsreq, QString &bscreq, int bsctech )
+{
+    switch( bsctech ) {
+        case t_tech_std:
+            bsreq  = VERS_PXI_STD_BS;
+            bscreq = VERS_PXI_STD_BSC;
+            break;
+        case t_tech_opto:
+            bsreq  = VERS_PXI_OPTO_BS;
+            bscreq = VERS_PXI_OPTO_BSC;
+            break;
+        case t_tech_nxt:
+            bsreq  = VERS_PXI_NXT_BS;
+            bscreq = VERS_PXI_NXT_BSC;
+            break;
+        default:
+            return;
+    }
+}
+
+
+void IMROTbl::bscCheckTech(
+    QStringList bs_bsc,
+    QString     bsfw,
+    QString     bscfw,
+    int         bsctech,
+    int         slot )
+{
+#ifdef HAVE_IMEC
+    if( bsctech == t_tech_sim )
+        return;
+
+    QString bsreq,
+            bscreq;
+
+    bscReqVers( bsreq, bscreq, bsctech );
+
+    if( bsfw != bsreq ) {
+        bs_bsc.append(
+            QString("   - BS(slot %1) Has: %2 Requires: %3")
+            .arg( slot ).arg( bsfw ).arg( bsreq ) );
+    }
+
+    if( bscfw != bscreq ) {
+        bs_bsc.append(
+            QString("   - BSC(slot %1) Has: %2 Requires: %3")
+            .arg( slot ).arg( bscfw ).arg( bscreq ) );
+    }
+
+#else
+    Q_UNUSED( bs_bsc )
+    Q_UNUSED( bsfw )
+    Q_UNUSED( bscfw )
+    Q_UNUSED( bsctech )
+#endif
+}
+
+
+QString IMROTbl::compatTech(
+        int         prbtech,
+        int         bsctech,
+        int         slot,
+        int         port,
+        int         dock )
+{
+    QString msg;
+
+    if( prbtech == t_tech_sim || bsctech == t_tech_sim )
+        ;
+    else if( prbtech == t_tech_std )
+        ;
+    else if( prbtech != bsctech ) {
+
+        if( prbtech == t_tech_qb ) {
+            if( bsctech != t_tech_std ) {
+                msg = QString(
+                "Quad probe(slot %1, port %2, dock %3)"
+                " can only run in a STD PXI module.")
+                .arg( slot ).arg( port ).arg( dock );
+            }
+        }
+        else if( prbtech == t_tech_opto ) {
+            msg = QString(
+            "OPTO probe(slot %1, port %2, dock %3)"
+            " can only run in an OPTO PXI module.")
+            .arg( slot ).arg( port ).arg( dock );
+        }
+        else {
+            msg = QString(
+            "NXT probe(slot %1, port %2, dock %3)"
+            " can only run in an NXT PXI module.")
+            .arg( slot ).arg( port ).arg( dock );
+        }
+    }
+
+    return msg;
 }
 
 

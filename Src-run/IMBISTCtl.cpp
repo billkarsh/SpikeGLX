@@ -8,7 +8,6 @@
 #include "HelpButDialog.h"
 #include "Util.h"
 #include "MainApp.h"
-#include "Version.h"
 
 #include <QFileDialog>
 #include <QThread>
@@ -172,19 +171,18 @@ bool IMBISTCtl::okVersions()
 {
     basestationID   bs;
     firmware_Info   info;
+    HardwareID      hID;
     QString         bsfw, bscfw;
+    int             bstech,
+                    slot = bistUI->slotSB->value();
     NP_ErrorCode    err;
-    int             slot = bistUI->slotSB->value();
 
     np_scanBS();
-
     np_getDeviceInfo( slot, &bs );
-
     if( bs.platformid != NPPlatform_PXI )
         return true;
 
     err = np_bs_getFirmwareInfo( slot, &info );
-
     if( err != SUCCESS ) {
         write( "Error checking firmware:" );
         write(
@@ -193,12 +191,10 @@ bool IMBISTCtl::okVersions()
         write( getNPErrorString() );
         return false;
     }
-
     bsfw = QString("%1.%2.%3")
             .arg( info.major ).arg( info.minor ).arg( info.build );
 
     err = np_bsc_getFirmwareInfo( slot, &info );
-
     if( err != SUCCESS ) {
         write( "Error checking firmware:" );
         write(
@@ -207,21 +203,30 @@ bool IMBISTCtl::okVersions()
         write( getNPErrorString() );
         return false;
     }
-
     bscfw = QString("%1.%2.%3")
             .arg( info.major ).arg( info.minor ).arg( info.build );
 
-    if( bsfw != VERS_IMEC_BS || bscfw != VERS_IMEC_BSC ) {
+    err = np_getBSCHardwareID( slot, &hID );
+    if( err != SUCCESS ) {
+        write( "Error identifying module:" );
+        write(
+            QString("IMEC getBSCHardwareID(slot %1) error %2:")
+            .arg( slot ).arg( err ) );
+        write( getNPErrorString() );
+        return false;
+    }
+    bstech = IMROTbl::bscpnToTech( hID.ProductNumber );
+
+    QStringList bs_bsc;
+    IMROTbl::bscCheckTech( bs_bsc, bsfw, bscfw, bstech, slot );
+
+    if( bs_bsc.size() ) {
         write( "ERROR: Wrong IMEC Firmware Version(s) ---" );
-        if( bsfw != VERS_IMEC_BS )
-            write( QString("   - BS(slot %1) Has: %2 Requires: %3")
-                    .arg( slot ).arg( bsfw ).arg( VERS_IMEC_BS ) );
-        if( bscfw != VERS_IMEC_BSC )
-            write( QString("   - BSC(slot %1) Has: %2 Requires: %3")
-                    .arg( slot ).arg( bscfw ).arg( VERS_IMEC_BSC ) );
+        foreach( const QString &s, bs_bsc )
+            write( s );
         write("(1) Select menu item 'Tools/Update Imec PXIe Firmware'.");
         write("(2) Read the help for that dialog (click '?' in title bar).");
-        write("(3) Required files are in the download package 'Firmware' folder.");
+        write("(3) Required files are in the download package 'NP_PXI_Firmware' folder.");
         return false;
     }
 

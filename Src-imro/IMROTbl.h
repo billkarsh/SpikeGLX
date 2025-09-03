@@ -15,9 +15,11 @@ class QBitArray;
 /* ---------------------------------------------------------------- */
 
 enum T_probe_tech {
-    t_tech_std  = 0,
-    t_tech_opto = 1,
-    t_tech_nxt  = 2
+    t_tech_sim  = 0,
+    t_tech_std  = 1,
+    t_tech_qb   = 2,
+    t_tech_opto = 20,
+    t_tech_nxt  = 30
 };
 
 enum T_probe_mapping {
@@ -236,6 +238,25 @@ public:
     static bool pnToType( int &type, const QString &pn );
     static IMROTbl* alloc( const QString &pn );
     static QString default_imroLE( int type );
+
+// Tech
+
+    static int bscpnToTech( const QString &pn );
+    static int prbpnToTech( const QString &pn );
+    static QString strTech( int tech );
+    static void bscReqVers( QString &bsreq, QString &bscreq, int bsctech );
+    static void bscCheckTech(
+        QStringList bs_bsc,
+        QString     bsfw,
+        QString     bscfw,
+        int         bsctech,
+        int         slot );
+    static QString compatTech(
+        int         prbtech,
+        int         bsctech,
+        int         slot,
+        int         port,
+        int         dock );
 };
 
 #endif  // IMROTBL_H

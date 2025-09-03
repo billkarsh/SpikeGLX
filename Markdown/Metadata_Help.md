@@ -691,6 +691,12 @@ imDatBsc_sn=175
 This is the PXI BSC serial number or OneBox physical ID number.
 
 ```
+imDatBsc_tech=std
+```
+
+This is the PXI BSC or OneBox technology {sim,std,opto,nxt}.
+
+```
 imDatFx_hw=1.7
 ```
 
@@ -755,6 +761,12 @@ imDatPrb_sn=19011116444
 ```
 
 This is the probe serial number.
+
+```
+imDatPrb_tech=std
+```
+
+This is the probe technology {sim,std,opto,nxt}.
 
 ```
 imDatPrb_type=21

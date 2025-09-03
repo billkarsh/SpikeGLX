@@ -342,6 +342,10 @@ void Config_devtab::imWriteCurrent()
             QString("BSC(slot %1) firmware version %2")
             .arg( it.key() ).arg( it.value().bscfw ) );
 
+        imWrite(
+            QString("BSC(slot %1) tech %2")
+            .arg( it.key() ).arg( IMROTbl::strTech( it.value().bsctech ) ) );
+
         for( int k = 0, n = T.nTblEntries(); k < n; ++k ) {
 
             const CimCfg::ImProbeDat    &P = T.get_kTblEntry( k );

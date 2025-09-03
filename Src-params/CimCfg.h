@@ -108,7 +108,8 @@ public:
         quint64     hssn,       // detect   {UNSET64=unset}
                     sn;         // detect   {UNSET64=unset}
         int         obsn,       // detect   {-1=unset}
-                    type;       // detect   {-1=unset}
+                    type,       // detect   {-1=unset}
+                    tech;       // detect   {-1=unset}
         quint16     dock,       // ini
                     cal,        // detect   {-1=unset,0=N,1=Y}
                     ip;         // calc     {-1=unset}
@@ -133,6 +134,7 @@ public:
                 sn      = UNSET64;
                 obsn    = -1;
                 type    = -1;
+                tech    = -1;
                 cal     = -1;
                 ip      = -1;
             }
@@ -165,11 +167,12 @@ public:
     };
 
     struct ImSlotVers {
-        QString     bsfw,   // maj.min
-                    bscpn,  // char
-                    bscsn,  // u64
-                    bschw,  // maj.min
-                    bscfw;  // maj.min
+        QString     bsfw,       // maj.min
+                    bscpn,      // char
+                    bscsn,      // u64
+                    bschw,      // maj.min
+                    bscfw;      // maj.min
+        int         bsctech;    // T_probe_tech
     };
 
     struct ProbeAddr {
@@ -514,20 +517,40 @@ public:
     static void detect_API(
         QStringList             &slVers,
         ImProbeTable            &T );
-    static bool detect_Slots(
+    static bool detect_slots(
         QStringList             &slVers,
         ImProbeTable            &T );
+    static bool detect_slot_type(
+        QStringList             &slVers,
+        ImProbeTable            &T,
+        int                     slot );
+    static bool detect_slot_openBS(
+        QStringList             &slVers,
+        int                     slot );
+    static bool detect_slot_BSFW(
+        QStringList             &slVers,
+        ImSlotVers              &V,
+        int                     slot );
+    static bool detect_slot_BSC_hID(
+        QStringList             &slVers,
+        ImSlotVers              &V,
+        int                     slot );
+    static bool detect_slot_BSCFW(
+        QStringList             &slVers,
+        ImProbeTable            &T,
+        ImSlotVers              &V,
+        int                     slot );
     static void detect_simSlot(
         QStringList             &slVers,
         ImProbeTable            &T,
         int                     slot );
-    static bool detect_Headstages(
+    static bool detect_headstages(
         QStringList             &slVers,
         QMap<int,QString>       &qbMap,
         QVector<int>            &vHSpsv,
         QVector<int>            &vHS20,
         ImProbeTable            &T );
-    static bool detect_Probes(
+    static bool detect_probes(
         QStringList             &slVers,
         QStringList             &slBIST,
         const QMap<int,QString> &qbMap,

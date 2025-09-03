@@ -1864,7 +1864,7 @@ guiBreathe();
 Log()<<"[ Start detect_Slots";
 guiBreathe();
 #endif
-    bool    ok = detect_Slots( slVers, T );
+    bool    ok = detect_slots( slVers, T );
 #if DBG
 Log()<<"End detect_Slots ]";
 guiBreathe();
@@ -1877,7 +1877,7 @@ Log()<<"[ Start detect_Headstages";
 guiBreathe();
 #endif
     if( ok )
-        ok = detect_Headstages( slVers, qbMap, vHSpsv, vHS20, T );
+        ok = detect_headstages( slVers, qbMap, vHSpsv, vHS20, T );
 #if DBG
 Log()<<"End detect_Headstages ]";
 guiBreathe();
@@ -1888,7 +1888,7 @@ Log()<<"[ Start detect_Probes";
 guiBreathe();
 #endif
     if( ok )
-        ok = detect_Probes( slVers, slBIST, qbMap, vHSpsv, T, doBIST );
+        ok = detect_probes( slVers, slBIST, qbMap, vHSpsv, T, doBIST );
 #if DBG
 Log()<<"End detect_Probes ]";
 guiBreathe();
@@ -1946,236 +1946,43 @@ guiBreathe();
 }
 
 
-bool CimCfg::detect_Slots(
+bool CimCfg::detect_slots(
     QStringList             &slVers,
     ImProbeTable            &T )
 {
-#ifdef HAVE_IMEC
-    QStringList     bs_bsc;
-    firmware_Info   info;
-    NP_ErrorCode    err;
-    HardwareID      hID;
-#endif
+    QStringList bs_bsc;
 
     for( int is = 0, ns = T.nSelSlots(); is < ns; ++is ) {
 
-        // ---------
-        // Slot type
-        // ---------
-
-#ifdef HAVE_IMEC
-        basestationID   bs;
-#endif
-        ImSlotVers      V;
-        int             slot = T.getEnumSlot( is );
+        ImSlotVers  V;
+        int         slot = T.getEnumSlot( is );
 #if DBG
 Log()<<"start slot "<<slot;
 guiBreathe();
 #endif
 
-        // ----------
-        // Simulated?
-        // ----------
-
         if( T.simprb.isSimSlot( slot ) ) {
-
             detect_simSlot( slVers, T, slot );
             continue;
         }
 
-#ifdef HAVE_IMEC
-        err = np_getDeviceInfo( slot, &bs );
-
-        if( err != SUCCESS ) {
-            slVers.append(
-                QString("IMEC getDeviceInfo(slot %1)%2")
-                .arg( slot ).arg( makeErrorString( err ) ) );
-            slVers.append(
-                "Use 'Configure Slots' (above the table)"
-                " to check your slot assignments." );
+        if( !detect_slot_type( slVers, T, slot ) )
             return false;
-        }
 
-        T.setSlotType( slot, bs.platformid );
-#endif
-#if DBG
-Log()<<"  np_getDeviceInfo done";
-guiBreathe();
-#endif
-
-        // ------
-        // OpenBS
-        // ------
-
-#ifdef HAVE_IMEC
-        err = np_openBS( slot );
-
-        if( err != SUCCESS ) {
-            slVers.append(
-                QString("IMEC openBS(slot %1)%2")
-                .arg( slot ).arg( makeErrorString( err ) ) );
-            slVers.append(
-                "Check {slot,port} assignments, connections and power." );
+        if( !detect_slot_openBS( slVers, slot ) )
             return false;
-        }
-#endif
-#if DBG
-Log()<<"  np_openBS done";
-guiBreathe();
-#endif
 
-        // ----
-        // BSFW
-        // ----
-
-#ifdef HAVE_IMEC
-        err = np_bs_getFirmwareInfo( slot, &info );
-
-        if( err != SUCCESS ) {
-            slVers.append(
-                QString("IMEC bs_getFirmwareInfo(slot %1)%2")
-                .arg( slot ).arg( makeErrorString( err ) ) );
+        if( !detect_slot_BSFW( slVers, V, slot ) )
             return false;
-        }
 
-        V.bsfw = QString("%1.%2.%3")
-                    .arg( info.major ).arg( info.minor ).arg( info.build );
-
-        if( T.getSlotType( slot ) == NPPlatform_PXI ) {
-
-            if( V.bsfw != VERS_IMEC_BS ) {
-                bs_bsc.append(
-                    QString("    - BS(slot %1) Requires: %2")
-                    .arg( slot ).arg( VERS_IMEC_BS ) );
-            }
-        }
-#else
-        V.bsfw = "0.0.0";
-#endif
-#if DBG
-Log()<<"  np_bs_getFirmwareInfo done";
-guiBreathe();
-#endif
-
-        slVers.append(
-            QString("BS(slot %1) firmware version %2")
-            .arg( slot ).arg( V.bsfw ) );
-
-        // -----
-        // BSCPN
-        // -----
-
-#ifdef HAVE_IMEC
-        err = np_getBSCHardwareID( slot, &hID );
-
-        if( err != SUCCESS ) {
-            slVers.append(
-                QString("IMEC getBSCHardwareID(slot %1)%2")
-                .arg( slot ).arg( makeErrorString( err ) ) );
+        if( !detect_slot_BSC_hID( slVers, V, slot ) )
             return false;
-        }
 
-#if 0
-//@OBX367 May be fixed in 3.62
-        //@OBX367 part number fudge
-        hID.ProductNumber[HARDWAREID_PN_LEN-1] = 0;
-        if( strlen( hID.ProductNumber ) >= 40 )
-            strcpy( hID.ProductNumber, "NP2_QBSC_01" );
-#endif
+        if( !detect_slot_BSCFW( slVers, T, V, slot ) )
+            return false;
 
-        V.bscpn = hID.ProductNumber;
-#else
-        V.bscpn = "sim";
-#endif
-#if DBG
-Log()<<"  np_getBSCHardwareID done";
-guiBreathe();
-#endif
-
-        slVers.append(
-            QString("BSC(slot %1) part number %2")
-            .arg( slot ).arg( V.bscpn ) );
-
-        // -----
-        // BSCSN
-        // -----
-
-#ifdef HAVE_IMEC
-        V.bscsn = QString::number( hID.SerialNumber );
-#else
-        V.bscsn = "0";
-#endif
-
-        slVers.append(
-            QString("BSC(slot %1) serial number %2")
-            .arg( slot ).arg( V.bscsn ) );
-
-        // -----
-        // BSCHW
-        // -----
-
-#ifdef HAVE_IMEC
-        V.bschw = QString("%1.%2").arg( hID.version_Major ).arg( hID.version_Minor );
-#else
-        V.bschw = "0.0";
-#endif
-
-        slVers.append(
-            QString("BSC(slot %1) hardware version %2")
-            .arg( slot ).arg( V.bschw ) );
-
-        // -----
-        // BSCFW
-        // -----
-
-#ifdef HAVE_IMEC
-        if( T.getSlotType( slot ) == NPPlatform_PXI ) {
-
-            err = np_bsc_getFirmwareInfo( slot, &info );
-
-            if( err != SUCCESS ) {
-                slVers.append(
-                    QString("IMEC bsc_getFirmwareInfo(slot %1)%2")
-                    .arg( slot ).arg( makeErrorString( err ) ) );
-                return false;
-            }
-
-            V.bscfw = QString("%1.%2.%3")
-                        .arg( info.major ).arg( info.minor )
-                        .arg( info.build );
-
-            if( V.bscfw != VERS_IMEC_BSC ) {
-                bs_bsc.append(
-                    QString("    - BSC(slot %1) Requires: %2")
-                    .arg( slot ).arg( VERS_IMEC_BSC ) );
-            }
-        }
-        else {
-
-            err = np_ob_getFirmwareInfo( slot, &info );
-
-            if( err != SUCCESS ) {
-                slVers.append(
-                    QString("IMEC ob_getFirmwareInfo(slot %1)%2")
-                    .arg( slot ).arg( makeErrorString( err ) ) );
-                return false;
-            }
-
-            V.bscfw = QString("%1.%2.%3")
-                        .arg( info.major ).arg( info.minor )
-                        .arg( info.build );
-        }
-#else
-        V.bscfw = "0.0.0";
-#endif
-#if DBG
-Log()<<"  np_bsc_getFirmwareInfo done";
-guiBreathe();
-#endif
-
-        slVers.append(
-            QString("BSC(slot %1) firmware version %2")
-            .arg( slot ).arg( V.bscfw ) );
+        if( T.getSlotType( slot ) == NPPlatform_PXI )
+            IMROTbl::bscCheckTech( bs_bsc, V.bsfw, V.bscfw, V.bsctech, slot );
 
         // -------------
         // Add map entry
@@ -2197,9 +2004,238 @@ guiBreathe();
             slVers.append( s );
         slVers.append("(1) Select menu item 'Tools/Update Imec PXIe Firmware'.");
         slVers.append("(2) Read the help for that dialog (click '?' in title bar).");
-        slVers.append("(3) Required files are in the download package 'Firmware' folder.");
+        slVers.append("(3) Required files are in the download package 'NP_PXI_Firmware' folder.");
         return false;
     }
+#endif
+
+    return true;
+}
+
+
+bool CimCfg::detect_slot_type(
+    QStringList             &slVers,
+    ImProbeTable            &T,
+    int                     slot )
+{
+#ifdef HAVE_IMEC
+    basestationID   bs;
+    NP_ErrorCode    err = np_getDeviceInfo( slot, &bs );
+
+    if( err != SUCCESS ) {
+        slVers.append(
+            QString("IMEC getDeviceInfo(slot %1)%2")
+            .arg( slot ).arg( makeErrorString( err ) ) );
+        slVers.append(
+            "Use 'Configure Slots' (above the table)"
+            " to check your slot assignments." );
+        return false;
+    }
+
+    T.setSlotType( slot, bs.platformid );
+#endif
+
+#if DBG
+Log()<<"  np_getDeviceInfo done";
+guiBreathe();
+#endif
+
+    return true;
+}
+
+
+bool CimCfg::detect_slot_openBS(
+    QStringList             &slVers,
+    int                     slot )
+{
+#ifdef HAVE_IMEC
+    NP_ErrorCode    err = np_openBS( slot );
+
+    if( err != SUCCESS ) {
+        slVers.append(
+            QString("IMEC openBS(slot %1)%2")
+            .arg( slot ).arg( makeErrorString( err ) ) );
+        slVers.append(
+            "Check {slot,port} assignments, connections and power." );
+        return false;
+    }
+#endif
+
+#if DBG
+Log()<<"  np_openBS done";
+guiBreathe();
+#endif
+
+    return true;
+}
+
+
+bool CimCfg::detect_slot_BSFW(
+    QStringList             &slVers,
+    ImSlotVers              &V,
+    int                     slot )
+{
+#ifdef HAVE_IMEC
+    firmware_Info   info;
+    NP_ErrorCode    err = np_bs_getFirmwareInfo( slot, &info );
+
+    if( err != SUCCESS ) {
+        slVers.append(
+            QString("IMEC bs_getFirmwareInfo(slot %1)%2")
+            .arg( slot ).arg( makeErrorString( err ) ) );
+        return false;
+    }
+
+    V.bsfw = QString("%1.%2.%3")
+                .arg( info.major ).arg( info.minor ).arg( info.build );
+#else
+    V.bsfw = "0.0.0";
+#endif
+
+    slVers.append(
+        QString("BS(slot %1) firmware version %2")
+        .arg( slot ).arg( V.bsfw ) );
+
+#if DBG
+Log()<<"  np_bs_getFirmwareInfo done";
+guiBreathe();
+#endif
+
+    return true;
+}
+
+
+bool CimCfg::detect_slot_BSC_hID(
+    QStringList             &slVers,
+    ImSlotVers              &V,
+    int                     slot )
+{
+#ifdef HAVE_IMEC
+    HardwareID      hID;
+    NP_ErrorCode    err = np_getBSCHardwareID( slot, &hID );
+
+    if( err != SUCCESS ) {
+        slVers.append(
+            QString("IMEC getBSCHardwareID(slot %1)%2")
+            .arg( slot ).arg( makeErrorString( err ) ) );
+        return false;
+    }
+
+// -----
+// BSCPN
+// -----
+
+    V.bscpn = hID.ProductNumber;
+#else
+    V.bscpn = "sim";
+#endif
+
+    slVers.append(
+        QString("BSC(slot %1) part number %2")
+        .arg( slot ).arg( V.bscpn ) );
+
+// -----
+// BSCSN
+// -----
+
+#ifdef HAVE_IMEC
+    V.bscsn = QString::number( hID.SerialNumber );
+#else
+    V.bscsn = "0";
+#endif
+
+    slVers.append(
+        QString("BSC(slot %1) serial number %2")
+        .arg( slot ).arg( V.bscsn ) );
+
+// -----
+// BSCHW
+// -----
+
+#ifdef HAVE_IMEC
+    V.bschw = QString("%1.%2").arg( hID.version_Major ).arg( hID.version_Minor );
+#else
+    V.bschw = "0.0";
+#endif
+
+    slVers.append(
+        QString("BSC(slot %1) hardware version %2")
+        .arg( slot ).arg( V.bschw ) );
+
+// -------
+// BSCtech
+// -------
+
+#ifdef HAVE_IMEC
+    V.bsctech = IMROTbl::bscpnToTech( V.bscpn );
+#else
+    V.bsctech = t_tech_sim;
+#endif
+
+    slVers.append(
+        QString("BSC(slot %1) tech %2")
+        .arg( slot ).arg( IMROTbl::strTech( V.bsctech ) ) );
+
+#if DBG
+Log()<<"  np_getBSCHardwareID done";
+guiBreathe();
+#endif
+
+    return true;
+}
+
+
+bool CimCfg::detect_slot_BSCFW(
+    QStringList             &slVers,
+    ImProbeTable            &T,
+    ImSlotVers              &V,
+    int                     slot )
+{
+#ifdef HAVE_IMEC
+    firmware_Info   info;
+    NP_ErrorCode    err;
+
+    if( T.getSlotType( slot ) == NPPlatform_PXI ) {
+
+        err = np_bsc_getFirmwareInfo( slot, &info );
+
+        if( err != SUCCESS ) {
+            slVers.append(
+                QString("IMEC bsc_getFirmwareInfo(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
+            return false;
+        }
+
+        V.bscfw = QString("%1.%2.%3")
+                    .arg( info.major ).arg( info.minor )
+                    .arg( info.build );
+    }
+    else {
+
+        err = np_ob_getFirmwareInfo( slot, &info );
+
+        if( err != SUCCESS ) {
+            slVers.append(
+                QString("IMEC ob_getFirmwareInfo(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
+            return false;
+        }
+
+        V.bscfw = QString("%1.%2.%3")
+                    .arg( info.major ).arg( info.minor )
+                    .arg( info.build );
+    }
+#else
+    V.bscfw = "0.0.0";
+#endif
+
+    slVers.append(
+        QString("BSC(slot %1) firmware version %2")
+        .arg( slot ).arg( V.bscfw ) );
+
+#if DBG
+Log()<<"  np_bsc_getFirmwareInfo done";
+guiBreathe();
 #endif
 
     return true;
@@ -2213,11 +2249,12 @@ void CimCfg::detect_simSlot(
 {
     ImSlotVers  V;
 
-    V.bsfw  = "0.0.0";
-    V.bscpn = "sim";
-    V.bscsn = "0";
-    V.bschw = "0.0";
-    V.bscfw = "0.0.0";
+    V.bsfw      = "0.0.0";
+    V.bscpn     = "sim";
+    V.bscsn     = "0";
+    V.bschw     = "0.0";
+    V.bscfw     = "0.0.0";
+    V.bsctech   = t_tech_sim;
 
     slVers.append(
         QString("BS(slot %1) firmware version %2")
@@ -2234,6 +2271,9 @@ void CimCfg::detect_simSlot(
     slVers.append(
         QString("BSC(slot %1) firmware version %2")
         .arg( slot ).arg( V.bscfw ) );
+    slVers.append(
+        QString("BSC(slot %1) tech %2")
+        .arg( slot ).arg( IMROTbl::strTech( V.bsctech ) ) );
 
     T.slot2Vers[slot] = V;
 }
@@ -2274,7 +2314,7 @@ static bool qbAdd(
 }
 
 
-bool CimCfg::detect_Headstages(
+bool CimCfg::detect_headstages(
     QStringList             &slVers,
     QMap<int,QString>       &qbMap,
     QVector<int>            &vHSpsv,
@@ -2312,21 +2352,24 @@ guiBreathe();
         if( T.simprb.isSimProbe( P.slot, P.port, P.dock ) )
             continue;
 
-// @@@ Experiment to fix NXT timeouts
-#ifdef HAVE_NXT
-{
-    HardwareID  H;
-    np_closeBS( P.slot );
-    np_openBS( P.slot );
-//    Log()<<np_getProbeHardwareID(P.slot, P.port, 1, &H);
-    Log()<<np_getFlexHardwareID(P.slot, P.port, 1, &H);
+        // ----------------------------------
+        // @@@ Experiment to fix NXT timeouts
+        // ----------------------------------
 
-    np_closeBS( P.slot );
-    np_openBS( P.slot );
-//    Log()<<np_getProbeHardwareID(P.slot, P.port, 1, &H);
-    Log()<<np_getFlexHardwareID(P.slot, P.port, 1, &H);
-}
-#endif
+        if( T.slot2Vers[P.slot].bsctech == t_tech_nxt ) {
+
+            HardwareID  H;
+            np_closeBS( P.slot );
+            np_openBS( P.slot );
+        //    Log()<<np_getProbeHardwareID(P.slot, P.port, 1, &H);
+            Log()<<np_getFlexHardwareID(P.slot, P.port, 1, &H);
+
+            np_closeBS( P.slot );
+            np_openBS( P.slot );
+        //    Log()<<np_getProbeHardwareID(P.slot, P.port, 1, &H);
+            Log()<<np_getFlexHardwareID(P.slot, P.port, 1, &H);
+        }
+
         // ----
         // isHS
         // ----
@@ -2487,7 +2530,6 @@ guiBreathe();
         // HSFW
         // ----
 
-#ifdef HAVE_NXT
         if( P.hspn.contains( "NXT" ) ) {
 
             firmware_Info   info;
@@ -2505,7 +2547,6 @@ guiBreathe();
                         .arg( info.major ).arg( info.minor ).arg( info.build );
         }
         else
-#endif
             P.hsfw = "0.0.0";
 
         slVers.append(
@@ -2567,7 +2608,7 @@ guiBreathe();
 }
 
 
-bool CimCfg::detect_Probes(
+bool CimCfg::detect_probes(
     QStringList             &slVers,
     QStringList             &slBIST,
     const QMap<int,QString> &qbMap,
@@ -2593,6 +2634,7 @@ bool CimCfg::detect_Probes(
     for( int ip = 0, np = T.nSelProbes(); ip < np; ++ip ) {
 
         ImProbeDat  &P = T.mod_iProbe( ip );
+        QString     techMsg;
 #ifdef HAVE_IMEC
         bool        isHSpsv = vHSpsv.contains( ip );
 #endif
@@ -2760,17 +2802,6 @@ guiBreathe();
         // Type
         // ----
 
-#ifdef HAVE_NXT
-        if( !P.setProbeType() || (P.type != 3010 && P.type != 3020) ) {
-            slVers.append(
-                QString("SpikeGLX setProbeType(slot %1, port %2, dock %3)"
-                " error 'Probe part number %4 unsupported in NXT version'.")
-                .arg( P.slot ).arg( P.port ).arg( P.dock )
-                .arg( P.pn ) );
-            slVers.append("Use standard SpikeGLX for this probe.");
-            return false;
-        }
-#else
         if( !P.setProbeType() ) {
             slVers.append(
                 QString("SpikeGLX setProbeType(slot %1, port %2, dock %3)"
@@ -2780,7 +2811,23 @@ guiBreathe();
             slVers.append("Try updating to a newer SpikeGLX/API version.");
             return false;
         }
-#endif
+
+        // ----
+        // Tech
+        // ----
+
+        P.tech = IMROTbl::prbpnToTech( P.pn );
+
+        techMsg =
+            IMROTbl::compatTech(
+                P.tech, T.slot2Vers[P.slot].bsctech,
+                P.slot, P.port, P.dock );
+
+        if( !techMsg.isEmpty() ) {
+            slVers.append( techMsg );
+            return false;
+        }
+
 #if DBG
 Log()<<"  probe: setProbeType done";
 guiBreathe();
@@ -2913,6 +2960,8 @@ bool CimCfg::detect_simProbe(
     P.fxhw = kvp["imDatFx_hw"].toString();
     P.pn   = kvp["imDatPrb_pn"].toString();
     P.sn   = kvp["imDatPrb_sn"].toULongLong();
+    P.tech = t_tech_sim;
+    P.type = kvp["imDatPrb_type"].toInt();
     P.cal  = kvp["imCalibrated"].toBool();
 
     if( !IMROTbl::pnToType( P.type, P.pn ) ) {

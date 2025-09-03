@@ -87,6 +87,7 @@ struct IMROTbl_T2020 : public IMROTbl
     virtual int maxInt() const          {return 2048;}
     virtual double maxVolts() const     {return 0.62;}
     virtual bool needADCCal() const     {return false;}
+    virtual int probeTech() const       {return t_tech_qb;}
     virtual int apiFetchType() const    {return t_fetch_qb;}
 
     virtual bool operator==( const IMROTbl &rhs ) const

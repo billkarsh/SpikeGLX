@@ -7,7 +7,6 @@
 #DEFINES += DO_SNAPSHOTS
 
 # Select real or simulated {IM,NI}:
-# DEFINES += HAVE_NXT
 DEFINES += HAVE_IMEC
 DEFINES += HAVE_VISA
 DEFINES += HAVE_NIDAQmx
@@ -15,20 +14,10 @@ DEFINES += HAVE_NIDAQmx
 TEMPLATE = app
 
 contains(DEFINES, HAVE_NIDAQmx) {
-    contains(DEFINES, HAVE_NXT) {
-        TARGET = SpikeGLX_NP3
-    }
-    else {
-        TARGET = SpikeGLX_STD
-    }
+    TARGET = SpikeGLX
 }
 else {
-    contains(DEFINES, HAVE_NXT) {
-        TARGET = SpikeGLX_NP3_NISIM
-    }
-    else {
-        TARGET = SpikeGLX_STD_NISIM
-    }
+    TARGET = SpikeGLX_NISIM
 }
 
 CONFIG(debug, debug|release) {
@@ -121,12 +110,7 @@ win32 {
     contains(DEFINES, HAVE_IMEC) {
         QMAKE_LIBDIR += $${_PRO_FILE_PWD_}/IMEC
         contains(QT_ARCH, x86_64) {
-            contains(DEFINES, HAVE_NXT) {
-                LIBS += -lNeuropixAPI_x64_4_1_3
-            }
-            else {
-                LIBS += -lNeuropixAPI_x64_4_1_3
-            }
+            LIBS += -lNeuropixAPI_x64_4_1_3
         }
         else {
             LIBS += -lNeuropixAPI_x86_1_20
