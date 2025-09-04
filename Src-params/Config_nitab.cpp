@@ -7,7 +7,6 @@
 #include "Config_nitab.h"
 #include "ChanMapCtl.h"
 #include "ShankMapCtl.h"
-#include "HelpButDialog.h"
 #include "Subset.h"
 
 #include <math.h>
