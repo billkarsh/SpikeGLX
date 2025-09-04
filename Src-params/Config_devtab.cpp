@@ -325,26 +325,21 @@ void Config_devtab::imWriteCurrent()
         imWrite(
             QString("BS(slot %1) firmware version %2")
             .arg( it.key() ).arg( it.value().bsfw ) );
-
         imWrite(
             QString("BSC(slot %1) part number %2")
             .arg( it.key() ).arg( it.value().bscpn ) );
-
-        imWrite(
-            QString("BSC(slot %1) serial number %2")
-            .arg( it.key() ).arg( it.value().bscsn ) );
-
-        imWrite(
-            QString("BSC(slot %1) hardware version %2")
-            .arg( it.key() ).arg( it.value().bschw ) );
-
-        imWrite(
-            QString("BSC(slot %1) firmware version %2")
-            .arg( it.key() ).arg( it.value().bscfw ) );
-
         imWrite(
             QString("BSC(slot %1) tech %2")
             .arg( it.key() ).arg( IMROTbl::strTech( it.value().bsctech ) ) );
+        imWrite(
+            QString("BSC(slot %1) serial number %2")
+            .arg( it.key() ).arg( it.value().bscsn ) );
+        imWrite(
+            QString("BSC(slot %1) hardware version %2")
+            .arg( it.key() ).arg( it.value().bschw ) );
+        imWrite(
+            QString("BSC(slot %1) firmware version %2")
+            .arg( it.key() ).arg( it.value().bscfw ) );
 
         for( int k = 0, n = T.nTblEntries(); k < n; ++k ) {
 
@@ -356,23 +351,18 @@ void Config_devtab::imWriteCurrent()
             imWrite(
                 QString("HS(slot %1, port %2) part number %3")
                 .arg( P.slot ).arg( P.port ).arg( P.hspn ) );
-
             imWrite(
                 QString("HS(slot %1, port %2) hardware version %3")
                 .arg( P.slot ).arg( P.port ).arg( P.hshw ) );
-
             imWrite(
                 QString("HS(slot %1, port %2) firmware version %3")
                 .arg( P.slot ).arg( P.port ).arg( P.hsfw ) );
-
             imWrite(
                 QString("FX(slot %1, port %2, dock %3) part number %4")
                 .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( P.fxpn ) );
-
             imWrite(
                 QString("FX(slot %1, port %2, dock %3) serial number %4")
                 .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( P.fxsn ) );
-
             imWrite(
                 QString("FX(slot %1, port %2, dock %3) hardware version %4")
                 .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( P.fxhw ) );

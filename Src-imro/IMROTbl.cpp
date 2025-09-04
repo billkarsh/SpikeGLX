@@ -1381,6 +1381,37 @@ int IMROTbl::bscpnToTech( const QString &pn )
 }
 
 
+// Headstages: phase 3B2 and later
+//
+// NP2_HS_30        // 1.0
+// NPNH_HS_30       // 128-channel
+// NPNH_HS_31       // 128-channel
+//
+// NPM_HS_01        // precommercial 2.0
+// NPM_HS_30        // precommercial 2.0
+// NPM_HS_31        //    commercial 2.0
+// NPM_HS_32        // quad-base primary
+// NPM_HS_32_ext    // quad-base extension
+// NPM_HSTC_ext     // quad-base extension (deprecated)
+//
+// OPTO_HS_00       // OPTO-1
+//
+// NPNXT_HS_03      // NXT pre-pre-alpha (2-dock, OBX-only)
+// NPNXT_HS_04      // NXT pre-alpha (1-dock, PXI-only)
+//
+int IMROTbl::hspnToTech( const QString &pn )
+{
+    if( pn == "NPM_HS_32" || pn == "NPM_HS_32_ext" || pn == "NPM_HSTC_ext" )
+        return t_tech_qb;
+    else if( pn == "OPTO_HS_00" )
+        return t_tech_opto;
+    else if( pn == "NPNXT_HS_03" || pn == "NPNXT_HS_04" )
+        return t_tech_nxt;
+
+    return t_tech_std;
+}
+
+
 int IMROTbl::prbpnToTech( const QString &pn )
 {
     IMROTbl *R      = alloc( pn );
@@ -1465,7 +1496,47 @@ void IMROTbl::bscCheckTech(
 }
 
 
-QString IMROTbl::compatTech(
+QString IMROTbl::hsCompatTech(
+        int         hstech,
+        int         bsctech,
+        int         slot,
+        int         port )
+{
+    QString msg;
+
+    if( bsctech == t_tech_sim )
+        ;
+    else if( hstech == t_tech_std )
+        ;
+    else if( hstech != bsctech ) {
+
+        if( hstech == t_tech_qb ) {
+            if( bsctech != t_tech_std ) {
+                msg = QString(
+                "Quad headstage(slot %1, port %2)"
+                " can only run in a STD PXI module.")
+                .arg( slot ).arg( port );
+            }
+        }
+        else if( hstech == t_tech_opto ) {
+            msg = QString(
+            "OPTO headstage(slot %1, port %2)"
+            " can only run in an OPTO PXI module.")
+            .arg( slot ).arg( port );
+        }
+        else {
+            msg = QString(
+            "NXT headstage(slot %1, port %2)"
+            " can only run in an NXT PXI module.")
+            .arg( slot ).arg( port );
+        }
+    }
+
+    return msg;
+}
+
+
+QString IMROTbl::prbCompatTech(
         int         prbtech,
         int         bsctech,
         int         slot,

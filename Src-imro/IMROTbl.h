@@ -242,6 +242,7 @@ public:
 // Tech
 
     static int bscpnToTech( const QString &pn );
+    static int hspnToTech( const QString &pn );
     static int prbpnToTech( const QString &pn );
     static QString strTech( int tech );
     static void bscReqVers( QString &bsreq, QString &bscreq, int bsctech );
@@ -251,7 +252,12 @@ public:
         QString     bscfw,
         int         bsctech,
         int         slot );
-    static QString compatTech(
+    static QString hsCompatTech(
+        int         hstech,
+        int         bsctech,
+        int         slot,
+        int         port );
+    static QString prbCompatTech(
         int         prbtech,
         int         bsctech,
         int         slot,

@@ -256,7 +256,7 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imDatPrb_port"]    = P.port;
     kvp["imDatPrb_slot"]    = P.slot;
     kvp["imDatPrb_sn"]      = P.sn;
-    kvp["imDatPrb_tech"]    = IMROTbl::strTech( P.tech );
+    kvp["imDatPrb_tech"]    = IMROTbl::strTech( P.prbtech );
     kvp["imDatPrb_type"]    = E.roTbl->type;
 
     kvp["syncImInputSlot"]  = p.sync.imPXIInputSlot;

@@ -52,13 +52,16 @@ bool CimCfg::ImProbeDat::setProbeType()
 }
 
 
+// Identify headstages with 2 docks.
+// Comprehensive HS list at IMROTbl::hspnToTech().
+//
 int CimCfg::ImProbeDat::nHSDocks() const
 {
     if( hspn == "NPM_HS_01" ||      // precommercial 2.0
         hspn == "NPM_HS_30" ||      // precommercial 2.0
         hspn == "NPM_HS_31" ||      //    commercial 2.0
-        hspn == "NPM_HS_32" ||      // quadbase
-        hspn == "NPNXT_HS_03" ) {   // NXT alpha
+        hspn == "NPM_HS_32" ||      // quad-base
+        hspn == "NPNXT_HS_03" ) {   // NXT pre-pre-alpha
 
         return 2;
     }
@@ -2134,6 +2137,20 @@ bool CimCfg::detect_slot_BSC_hID(
         QString("BSC(slot %1) part number %2")
         .arg( slot ).arg( V.bscpn ) );
 
+// ----
+// Tech
+// ----
+
+#ifdef HAVE_IMEC
+    V.bsctech = IMROTbl::bscpnToTech( V.bscpn );
+#else
+    V.bsctech = t_tech_sim;
+#endif
+
+    slVers.append(
+        QString("BSC(slot %1) tech %2")
+        .arg( slot ).arg( IMROTbl::strTech( V.bsctech ) ) );
+
 // -----
 // BSCSN
 // -----
@@ -2161,20 +2178,6 @@ bool CimCfg::detect_slot_BSC_hID(
     slVers.append(
         QString("BSC(slot %1) hardware version %2")
         .arg( slot ).arg( V.bschw ) );
-
-// -------
-// BSCtech
-// -------
-
-#ifdef HAVE_IMEC
-    V.bsctech = IMROTbl::bscpnToTech( V.bscpn );
-#else
-    V.bsctech = t_tech_sim;
-#endif
-
-    slVers.append(
-        QString("BSC(slot %1) tech %2")
-        .arg( slot ).arg( IMROTbl::strTech( V.bsctech ) ) );
 
 #if DBG
 Log()<<"  np_getBSCHardwareID done";
@@ -2263,6 +2266,9 @@ void CimCfg::detect_simSlot(
         QString("BSC(slot %1) part number %2")
         .arg( slot ).arg( V.bscpn ) );
     slVers.append(
+        QString("BSC(slot %1) tech %2")
+        .arg( slot ).arg( IMROTbl::strTech( V.bsctech ) ) );
+    slVers.append(
         QString("BSC(slot %1) serial number %2")
         .arg( slot ).arg( V.bscsn ) );
     slVers.append(
@@ -2271,9 +2277,6 @@ void CimCfg::detect_simSlot(
     slVers.append(
         QString("BSC(slot %1) firmware version %2")
         .arg( slot ).arg( V.bscfw ) );
-    slVers.append(
-        QString("BSC(slot %1) tech %2")
-        .arg( slot ).arg( IMROTbl::strTech( V.bsctech ) ) );
 
     T.slot2Vers[slot] = V;
 }
@@ -2337,6 +2340,7 @@ bool CimCfg::detect_headstages(
     for( int ip = 0, np = T.nSelProbes(); ip < np; ++ip ) {
 
         ImProbeDat  &P = T.mod_iProbe( ip );
+        QString     techMsg;
 #ifdef XX_HAVE_IMEC
         bool        isHS;
 #endif
@@ -2423,11 +2427,26 @@ guiBreathe();
             return false;
         }
 
+        // ----
+        // Tech
+        // ----
+
+        QString prod(hID.ProductNumber);
+
+        techMsg =
+            IMROTbl::hsCompatTech(
+                IMROTbl::hspnToTech( prod ),
+                T.slot2Vers[P.slot].bsctech,
+                P.slot, P.port );
+
+        if( !techMsg.isEmpty() ) {
+            slVers.append( techMsg );
+            return false;
+        }
+
         // -------------------------------
         // Test for NHP 128-channel analog
         // -------------------------------
-
-        QString prod(hID.ProductNumber);
 
         if( prod == "NPNH_HS_30" || prod == "NPNH_HS_31" ) {
 
@@ -2461,7 +2480,6 @@ guiBreathe();
         slVers.append(
             QString("HS(slot %1, port %2) part number %3")
             .arg( P.slot ).arg( P.port ).arg( P.hspn ) );
-
 
         // -----------
         // Wrong dock?
@@ -2816,11 +2834,11 @@ guiBreathe();
         // Tech
         // ----
 
-        P.tech = IMROTbl::prbpnToTech( P.pn );
+        P.prbtech = IMROTbl::prbpnToTech( P.pn );
 
         techMsg =
-            IMROTbl::compatTech(
-                P.tech, T.slot2Vers[P.slot].bsctech,
+            IMROTbl::prbCompatTech(
+                P.prbtech, T.slot2Vers[P.slot].bsctech,
                 P.slot, P.port, P.dock );
 
         if( !techMsg.isEmpty() ) {
@@ -2955,14 +2973,14 @@ bool CimCfg::detect_simProbe(
     else
         P.hsfw = "0.0.0";
 
-    P.fxpn = kvp["imDatFx_pn"].toString();
-    P.fxsn = kvp["imDatFx_sn"].toString();
-    P.fxhw = kvp["imDatFx_hw"].toString();
-    P.pn   = kvp["imDatPrb_pn"].toString();
-    P.sn   = kvp["imDatPrb_sn"].toULongLong();
-    P.tech = t_tech_sim;
-    P.type = kvp["imDatPrb_type"].toInt();
-    P.cal  = kvp["imCalibrated"].toBool();
+    P.fxpn      = kvp["imDatFx_pn"].toString();
+    P.fxsn      = kvp["imDatFx_sn"].toString();
+    P.fxhw      = kvp["imDatFx_hw"].toString();
+    P.pn        = kvp["imDatPrb_pn"].toString();
+    P.sn        = kvp["imDatPrb_sn"].toULongLong();
+    P.prbtech   = t_tech_sim;
+    P.type      = kvp["imDatPrb_type"].toInt();
+    P.cal       = kvp["imCalibrated"].toBool();
 
     if( !IMROTbl::pnToType( P.type, P.pn ) ) {
         slVers.append(

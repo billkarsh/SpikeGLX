@@ -109,7 +109,7 @@ public:
                     sn;         // detect   {UNSET64=unset}
         int         obsn,       // detect   {-1=unset}
                     type,       // detect   {-1=unset}
-                    tech;       // detect   {-1=unset}
+                    prbtech;    // detect   {-1=unset}
         quint16     dock,       // ini
                     cal,        // detect   {-1=unset,0=N,1=Y}
                     ip;         // calc     {-1=unset}
@@ -134,7 +134,7 @@ public:
                 sn      = UNSET64;
                 obsn    = -1;
                 type    = -1;
-                tech    = -1;
+                prbtech = -1;
                 cal     = -1;
                 ip      = -1;
             }
