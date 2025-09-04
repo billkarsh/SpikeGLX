@@ -4,8 +4,6 @@
 #include "WavePlanCtl.h"
 #include "Stim.h"
 #include "Util.h"
-#include "MainApp.h"
-#include "HelpButDialog.h"
 
 #include <QFileDialog>
 
@@ -18,7 +16,7 @@
 
 WavePlanCtl::WavePlanCtl( QObject *parent ) : QObject(parent)
 {
-    wvDlg = new HelpButDialog( "WavePlan_Help" );
+    wvDlg = new QDialog();
 
     wvUI = new Ui::WavePlanDialog;
     wvUI->setupUi( wvDlg );
@@ -37,6 +35,7 @@ WavePlanCtl::WavePlanCtl( QObject *parent ) : QObject(parent)
     ConnectUI( wvUI->devVCB, SIGNAL(currentIndexChanged( int )), this, SLOT(devVChanged()) );
     ConnectUI( wvUI->newBut, SIGNAL(clicked()), this, SLOT(newBut()) );
     ConnectUI( wvUI->loadBut, SIGNAL(clicked()), this, SLOT(loadBut()) );
+    ConnectUI( wvUI->helpBut, SIGNAL(clicked()), this, SLOT(helpBut()) );
     ConnectUI( wvUI->checkBut, SIGNAL(clicked()), this, SLOT(checkBut()) );
     ConnectUI( wvUI->saveBut, SIGNAL(clicked()), this, SLOT(saveBut()) );
     ConnectUI( wvUI->buttonBox, SIGNAL(rejected()), this, SLOT(closeBut()) );
@@ -204,6 +203,12 @@ void WavePlanCtl::loadBut()
 
         beep( err );
     }
+}
+
+
+void WavePlanCtl::helpBut()
+{
+    showHelp( "WavePlan_Help" );
 }
 
 

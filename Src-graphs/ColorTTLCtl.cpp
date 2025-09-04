@@ -5,7 +5,6 @@
 #include "DAQ.h"
 #include "ColorTTLCtl.h"
 #include "MGraph.h"
-#include "HelpButDialog.h"
 #include "SignalBlocker.h"
 #include "Subset.h"
 
@@ -340,7 +339,7 @@ ColorTTLCtl::ColorTTLCtl( QObject *parent, const DAQ::Params &p )
     resetState();
     loadSettings();
 
-    dlg = new HelpButDialog( "ColorTTL_Help" );
+    dlg = new QDialog();
 
     cttlUI = new Ui::ColorTTLDialog;
     cttlUI->setupUi( dlg );
@@ -388,6 +387,7 @@ ColorTTLCtl::ColorTTLCtl( QObject *parent, const DAQ::Params &p )
     ConnectUI( cttlUI->analog2CB, SIGNAL(currentIndexChanged(int)), this, SLOT(ana2CBChanged()) );
     ConnectUI( cttlUI->analog3CB, SIGNAL(currentIndexChanged(int)), this, SLOT(ana3CBChanged()) );
 
+    ConnectUI( cttlUI->helpBut, SIGNAL(clicked()), this, SLOT(helpBut()) );
     ConnectUI( cttlUI->buttonBox, SIGNAL(accepted()), this, SLOT(okBut()) );
 }
 
@@ -551,6 +551,12 @@ void ColorTTLCtl::ana2CBChanged()
 void ColorTTLCtl::ana3CBChanged()
 {
     grp[3].analogChanged( uiSet.clr[3], true );
+}
+
+
+void ColorTTLCtl::helpBut()
+{
+    showHelp( "ColorTTL_Help" );
 }
 
 

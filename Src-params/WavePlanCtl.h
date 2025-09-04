@@ -7,7 +7,7 @@ namespace Ui {
 class WavePlanDialog;
 }
 
-class HelpButDialog;
+class QDialog;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
@@ -18,7 +18,7 @@ class WavePlanCtl : public QObject
     Q_OBJECT
 
 private:
-    HelpButDialog       *wvDlg;
+    QDialog             *wvDlg;
     Ui::WavePlanDialog  *wvUI;
     QString             type;
     int                 binsamp;
@@ -32,6 +32,7 @@ private slots:
     void devVChanged();
     void newBut();
     void loadBut();
+    void helpBut();
     bool checkBut();
     void saveBut();
     void closeBut();

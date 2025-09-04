@@ -757,7 +757,7 @@ void Config_nitab::newSourceBut()
 // Set up dialog
 // -------------
 
-    HelpButDialog   D( "NIClock_Help" );
+    QDialog D;
 
     sourceUI = new Ui::NISourceDlg;
     sourceUI->setupUi( &D );
@@ -809,6 +809,7 @@ void Config_nitab::newSourceBut()
     ConnectUI( sourceUI->intRadio, SIGNAL(clicked()), this, SLOT(sourceEnabItems()) );
     ConnectUI( sourceUI->extRadio, SIGNAL(clicked()), this, SLOT(sourceEnabItems()) );
     ConnectUI( sourceUI->whisperRadio, SIGNAL(clicked()), this, SLOT(sourceWhisperChecked()) );
+    ConnectUI( sourceUI->helpBut, SIGNAL(clicked()), this, SLOT(sourceHelpBut()) );
 
     if( isMuxingFromDlg() ) {
         sourceUI->whisperRadio->setChecked( true );
@@ -825,6 +826,8 @@ void Config_nitab::newSourceBut()
         sourceUI->safeRadio->setFocus();
         sourceSafeChecked();    // consequences for that
     }
+
+    D.adjustSize();
 
 redo:
     if( QDialog::Accepted == D.exec() ) {
@@ -919,6 +922,12 @@ void Config_nitab::sourceWhisperChecked()
     sourceUI->rateSB->setValue( 25000.0 );
 
     sourceEnabItems();
+}
+
+
+void Config_nitab::sourceHelpBut()
+{
+    showHelp( "NIClock_Help" );
 }
 
 

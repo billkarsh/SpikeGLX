@@ -85,6 +85,7 @@ private slots:
     void sourceMaxChecked();
     void sourceSafeChecked();
     void sourceWhisperChecked();
+    void sourceHelpBut();
     void sourceEnabItems();
     void sourceDivChanged( int i );
     void sourceSetDiv( int i );

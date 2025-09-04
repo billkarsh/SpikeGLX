@@ -7,7 +7,7 @@ namespace Ui {
 class CalSRateDlg;
 }
 
-class HelpButDialog;
+class QDialog;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
@@ -18,7 +18,7 @@ class CalSRateCtl : public QObject
     Q_OBJECT
 
 private:
-    HelpButDialog               *dlg;
+    QDialog                     *dlg;
     Ui::CalSRateDlg             *calUI;
     DFRunTag                    runTag;
     std::vector<CalSRStream>    vIM;
@@ -37,6 +37,7 @@ public slots:
 private slots:
     void browse();
     void go();
+    void helpBut();
     void apply();
 
 private:

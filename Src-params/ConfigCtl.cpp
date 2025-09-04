@@ -7,7 +7,6 @@
 #include "MainApp.h"
 #include "ConfigCtl.h"
 #include "Run.h"
-#include "HelpButDialog.h"
 #include "AOCtl.h"
 #include "ColorTTLCtl.h"
 #include "Subset.h"
@@ -47,7 +46,7 @@ ConfigCtl::ConfigCtl( QObject *parent )
 // Main dialog
 // -----------
 
-    cfgDlg = new HelpButDialog( "UserManual" );
+    cfgDlg = new QDialog();
     cfgDlg->setWindowIcon( QIcon(QPixmap(Icon_Config_xpm)) );
     cfgDlg->setAttribute( Qt::WA_DeleteOnClose, false );
 
@@ -56,7 +55,7 @@ ConfigCtl::ConfigCtl( QObject *parent )
     ConnectUI( cfgUI->tabsW, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)) );
     ConnectUI( cfgUI->resetBut, SIGNAL(clicked()), this, SLOT(reset()) );
     ConnectUI( cfgUI->verifyBut, SIGNAL(clicked()), this, SLOT(verify()) );
-    ConnectUI( cfgUI->helpBut, SIGNAL(clicked()), this, SLOT(tabHelp()) );
+    ConnectUI( cfgUI->helpBut, SIGNAL(clicked()), this, SLOT(helpBut()) );
     ConnectUI( cfgUI->buttonBox, SIGNAL(accepted()), this, SLOT(okBut()) );
 
 // Make OK default button
@@ -1061,7 +1060,7 @@ void ConfigCtl::tabChanged( int tab )
 }
 
 
-void ConfigCtl::tabHelp()
+void ConfigCtl::helpBut()
 {
     QString s;
 

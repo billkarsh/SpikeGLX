@@ -3,13 +3,13 @@
  <class>IMBISTDlg</class>
  <widget class="QDialog" name="IMBISTDlg">
   <property name="windowModality">
-   <enum>Qt::NonModal</enum>
+   <enum>Qt::WindowModality::NonModal</enum>
   </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>484</width>
+    <width>498</width>
     <height>516</height>
    </rect>
   </property>
@@ -106,7 +106,7 @@
         </sizepolicy>
        </property>
        <property name="focusPolicy">
-        <enum>Qt::StrongFocus</enum>
+        <enum>Qt::FocusPolicy::StrongFocus</enum>
        </property>
        <item>
         <property name="text">
@@ -181,7 +181,7 @@
    <item row="1" column="0">
     <widget class="QTextEdit" name="outTE">
      <property name="focusPolicy">
-      <enum>Qt::NoFocus</enum>
+      <enum>Qt::FocusPolicy::NoFocus</enum>
      </property>
      <property name="acceptDrops">
       <bool>false</bool>
@@ -190,7 +190,7 @@
       <bool>false</bool>
      </property>
      <property name="lineWrapMode">
-      <enum>QTextEdit::NoWrap</enum>
+      <enum>QTextEdit::LineWrapMode::NoWrap</enum>
      </property>
      <property name="readOnly">
       <bool>true</bool>
@@ -212,19 +212,19 @@
       <number>8</number>
      </property>
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QPushButton" name="helpBut">
        <property name="text">
-        <string>Help: Titlebar &quot;?&quot;</string>
+        <string>Help</string>
        </property>
       </widget>
      </item>
      <item>
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeType">
-        <enum>QSizePolicy::MinimumExpanding</enum>
+        <enum>QSizePolicy::Policy::MinimumExpanding</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>

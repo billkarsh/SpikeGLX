@@ -1,8 +1,7 @@
 #ifndef SOCTL_H
 #define SOCTL_H
 
-#include "HelpButDialog.h"
-
+#include <QDialog>
 #include <QMutex>
 
 namespace Ui {
@@ -104,7 +103,7 @@ public:
     void waitPaused()           {worker->waitPaused();}
 };
 
-class SOCtl : public HelpButDialog
+class SOCtl : public QDialog
 {
     Q_OBJECT
 
@@ -142,6 +141,7 @@ private slots:
     void ySB1Changed( int v );
     void ySB2Changed( int v );
     void ySB3Changed( int v );
+    void helpBut();
 
 protected:
     virtual bool eventFilter( QObject *watched, QEvent *event );

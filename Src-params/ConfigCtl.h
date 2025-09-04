@@ -17,7 +17,7 @@ namespace Ui {
 class ConfigureDialog;
 }
 
-class HelpButDialog;
+class QDialog;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
@@ -28,6 +28,7 @@ class ConfigCtl : public QObject
     Q_OBJECT
 
 private:
+    QDialog                 *cfgDlg;
     Ui::ConfigureDialog     *cfgUI;
     Config_devtab           *devTab;
     Config_imtab            *imTab;
@@ -37,7 +38,6 @@ private:
     Config_gatetab          *gateTab;
     Config_trigtab          *trigTab;
     Config_snstab           *snsTab;
-    HelpButDialog           *cfgDlg;
 
 public:
     CimCfg::ImProbeTable    prbTab; // THE TABLE, filled in by detect()
@@ -115,7 +115,7 @@ public slots:
 
 private slots:
     void tabChanged( int tab );
-    void tabHelp();
+    void helpBut();
     void reset();
     void verify();
     void okBut();

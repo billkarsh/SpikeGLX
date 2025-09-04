@@ -150,7 +150,7 @@ void Main_Actions::initActions()
 // Help
 // ----
 
-    helpAct = new QAction( APPNAME" &Help", this );
+    helpAct = new QAction( APPNAME" &User Manual", this );
     ConnectUI( helpAct, SIGNAL(triggered()), app, SLOT(help_HelpDlg()) );
 
     exploreAppAct = new QAction( "&Explore " APPNAME" Folder", this );

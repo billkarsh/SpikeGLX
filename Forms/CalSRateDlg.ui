@@ -3,13 +3,13 @@
  <class>CalSRateDlg</class>
  <widget class="QDialog" name="CalSRateDlg">
   <property name="windowModality">
-   <enum>Qt::NonModal</enum>
+   <enum>Qt::WindowModality::NonModal</enum>
   </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>449</width>
+    <width>475</width>
     <height>400</height>
    </rect>
   </property>
@@ -136,7 +136,7 @@
         <item>
          <spacer name="horizontalSpacer">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <enum>Qt::Orientation::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
@@ -173,13 +173,6 @@
       <string>Output</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="1" column="0">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Help: Titlebar &quot;?&quot;</string>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="2">
        <widget class="QPushButton" name="cancelBut">
         <property name="sizePolicy">
@@ -196,7 +189,7 @@
       <item row="0" column="0" colspan="3">
        <widget class="QTextEdit" name="outTE">
         <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
+         <enum>Qt::FocusPolicy::NoFocus</enum>
         </property>
         <property name="acceptDrops">
          <bool>false</bool>
@@ -205,7 +198,7 @@
          <bool>false</bool>
         </property>
         <property name="lineWrapMode">
-         <enum>QTextEdit::NoWrap</enum>
+         <enum>QTextEdit::LineWrapMode::NoWrap</enum>
         </property>
         <property name="readOnly">
          <bool>true</bool>
@@ -218,7 +211,7 @@
       <item row="1" column="1">
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -227,6 +220,13 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item row="1" column="0">
+       <widget class="QPushButton" name="helpBut">
+        <property name="text">
+         <string>Help</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -278,7 +278,7 @@
       <item row="0" column="2">
        <spacer name="horizontalSpacer_3">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -306,7 +306,11 @@
   <tabstop>oneRB</tabstop>
   <tabstop>allRB</tabstop>
   <tabstop>goBut</tabstop>
+  <tabstop>helpBut</tabstop>
   <tabstop>cancelBut</tabstop>
+  <tabstop>globalChk</tabstop>
+  <tabstop>fileChk</tabstop>
+  <tabstop>applyBut</tabstop>
  </tabstops>
  <resources/>
  <connections/>

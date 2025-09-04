@@ -225,7 +225,7 @@ AOCtl::AOCtl( const DAQ::Params &p, QWidget *parent )
     ConnectUI( aoUI->hiCB, SIGNAL(currentTextChanged(QString)), this, SLOT(hiCBChanged(QString)) );
     ConnectUI( aoUI->cpChk, SIGNAL(clicked(bool)), this, SLOT(cpChecked(bool)) );
     ConnectUI( aoUI->volSB, SIGNAL(valueChanged(double)), this, SLOT(volSBChanged(double)) );
-    ConnectUI( aoUI->helpBut, SIGNAL(clicked()), this, SLOT(help()) );
+    ConnectUI( aoUI->helpBut, SIGNAL(clicked()), this, SLOT(helpBut()) );
     ConnectUI( aoUI->resetBut, SIGNAL(clicked()), this, SLOT(reset()) );
     ConnectUI( aoUI->stopBut, SIGNAL(clicked()), this, SLOT(stop()) );
     ConnectUI( aoUI->applyBut, SIGNAL(clicked()), this, SLOT(apply()) );
@@ -611,7 +611,7 @@ void AOCtl::volSBChanged( double val )
 }
 
 
-void AOCtl::help()
+void AOCtl::helpBut()
 {
     showHelp( "Audio_Help" );
 }

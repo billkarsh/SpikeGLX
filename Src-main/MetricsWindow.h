@@ -152,7 +152,7 @@ public slots:
 
 private slots:
     void updateMx();
-    void help();
+    void helpBut();
     void save();
 
 protected:

@@ -208,7 +208,7 @@ void SOFetcher::setGroups( SOGroup *grpbase, const DAQ::Params &p )
 /* ---------------------------------------------------------------- */
 
 SOCtl::SOCtl( const DAQ::Params &p, QWidget *parent )
-    :   HelpButDialog("SpikeView_Help", parent), p(p), soUI(0), fetch(0)
+    :   QDialog(parent), p(p), soUI(0), fetch(0)
 {
 }
 
@@ -339,11 +339,11 @@ void SOCtl::init()
     ConnectUI( soUI->ySB2, SIGNAL(valueChanged(int)), this, SLOT(ySB2Changed(int)) );
     ConnectUI( soUI->ySB3, SIGNAL(valueChanged(int)), this, SLOT(ySB3Changed(int)) );
 
+    ConnectUI( soUI->helpBut, SIGNAL(clicked()), this, SLOT(helpBut()) );
+
 // Window
 
-// Can't have tool look with '?' icon.
-//    setWindowFlags( windowFlags() | Qt::Tool );
-
+    setWindowFlags( windowFlags() | Qt::Tool );
     setAttribute( Qt::WA_DeleteOnClose, false );
 
     restoreScreenState();
@@ -473,6 +473,12 @@ void SOCtl::ySB2Changed( int v )
 void SOCtl::ySB3Changed( int v )
 {
     ySBChanged( 3, v );
+}
+
+
+void SOCtl::helpBut()
+{
+    showHelp( "SpikeView_Help" );
 }
 
 /* ---------------------------------------------------------------- */

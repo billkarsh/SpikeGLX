@@ -7,7 +7,6 @@
 #include "ConfigCtl.h"
 #include "DFName.h"
 #include "KVParams.h"
-#include "HelpButDialog.h"
 
 #include <QFileDialog>
 #include <QMessageBox>
@@ -20,7 +19,7 @@
 CalSRateCtl::CalSRateCtl( QObject *parent )
     :   QObject(parent), thd(0)
 {
-    dlg = new HelpButDialog( "CalSRate_Help" );
+    dlg = new QDialog();
 
     calUI = new Ui::CalSRateDlg;
     calUI->setupUi( dlg );
@@ -28,6 +27,7 @@ CalSRateCtl::CalSRateCtl( QObject *parent )
     calUI->cancelBut->setEnabled( false );
     ConnectUI( calUI->browseBut, SIGNAL(clicked()), this, SLOT(browse()) );
     ConnectUI( calUI->goBut, SIGNAL(clicked()), this, SLOT(go()) );
+    ConnectUI( calUI->helpBut, SIGNAL(clicked()), this, SLOT(helpBut()) );
     ConnectUI( calUI->applyBut, SIGNAL(clicked()), this, SLOT(apply()) );
 
     dlg->exec();
@@ -146,6 +146,12 @@ void CalSRateCtl::go()
     Connect( calUI->cancelBut, SIGNAL(clicked()), thd->worker, SLOT(cancel()), Qt::DirectConnection );
 
     thd->startRun();
+}
+
+
+void CalSRateCtl::helpBut()
+{
+    showHelp( "CalSRate_Help" );
 }
 
 

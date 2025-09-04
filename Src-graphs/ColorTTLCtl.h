@@ -12,9 +12,9 @@ namespace Ui {
 class ColorTTLDialog;
 }
 
-class HelpButDialog;
 class MGraphX;
 
+class QDialog;
 class QLabel;
 class QGroupBox;
 class QComboBox;
@@ -87,7 +87,7 @@ private:
 
 private:
     const DAQ::Params   &p;
-    HelpButDialog       *dlg;
+    QDialog             *dlg;
     Ui::ColorTTLDialog  *cttlUI;
     Stream              A,
                         B;
@@ -132,6 +132,7 @@ private slots:
     void ana1CBChanged();
     void ana2CBChanged();
     void ana3CBChanged();
+    void helpBut();
     void okBut();
 
 private:

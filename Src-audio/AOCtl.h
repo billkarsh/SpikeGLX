@@ -131,7 +131,7 @@ private slots:
     void hiCBChanged( const QString &str );
     void cpChecked( bool checked );
     void volSBChanged( double val );
-    void help();
+    void helpBut();
     void stop();
     void apply();
 

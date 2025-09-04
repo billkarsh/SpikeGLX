@@ -39,7 +39,7 @@ MetricsWindow::MetricsWindow( QWidget *parent )
 {
     mxUI = new Ui::MetricsWindow;
     mxUI->setupUi( this );
-    ConnectUI( mxUI->helpBut, SIGNAL(clicked()), this, SLOT(help()) );
+    ConnectUI( mxUI->helpBut, SIGNAL(clicked()), this, SLOT(helpBut()) );
     ConnectUI( mxUI->saveBut, SIGNAL(clicked()), this, SLOT(save()) );
 
     mxTimer.setTimerType( Qt::CoarseTimer );
@@ -498,7 +498,7 @@ void MetricsWindow::updateMx()
 }
 
 
-void MetricsWindow::help()
+void MetricsWindow::helpBut()
 {
     showHelp( "Metrics_Help" );
 }

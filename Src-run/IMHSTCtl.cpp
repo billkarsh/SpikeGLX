@@ -5,7 +5,6 @@
 
 #include "IMHSTCtl.h"
 #include "IMROTbl.h"
-#include "HelpButDialog.h"
 #include "Util.h"
 #include "MainApp.h"
 
@@ -38,13 +37,14 @@ static QString getNPErrorString()
 
 IMHSTCtl::IMHSTCtl( QObject *parent ) : QObject(parent)
 {
-    dlg = new HelpButDialog( "HST_Help" );
+    dlg = new QDialog();
 
     hstUI = new Ui::IMBISTDlg;
     hstUI->setupUi( dlg );
     hstUI->dockLbl->hide();
     hstUI->dockSB->hide();
     ConnectUI( hstUI->goBut, SIGNAL(clicked()), this, SLOT(go()) );
+    ConnectUI( hstUI->helpBut, SIGNAL(clicked()), this, SLOT(helpBut()) );
     ConnectUI( hstUI->clearBut, SIGNAL(clicked()), this, SLOT(clear()) );
     ConnectUI( hstUI->saveBut, SIGNAL(clicked()), this, SLOT(save()) );
 
@@ -107,6 +107,12 @@ void IMHSTCtl::go()
             case 6: test_signalGenerator(); break;
         }
     }
+}
+
+
+void IMHSTCtl::helpBut()
+{
+    showHelp( "HST_Help" );
 }
 
 
@@ -200,7 +206,7 @@ bool IMHSTCtl::okVersions()
         foreach( const QString &s, bs_bsc )
             write( s );
         write("(1) Select menu item 'Tools/Update Imec PXIe Firmware'.");
-        write("(2) Read the help for that dialog (click '?' in title bar).");
+        write("(2) Read the help for that dialog.");
         write("(3) Required files are in the download package 'NP_PXI_Firmware' folder.");
         return false;
     }

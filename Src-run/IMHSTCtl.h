@@ -11,7 +11,7 @@ namespace Ui {
 class IMBISTDlg;
 }
 
-class HelpButDialog;
+class QDialog;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
@@ -22,7 +22,7 @@ class IMHSTCtl : public QObject
     Q_OBJECT
 
 private:
-    HelpButDialog       *dlg;
+    QDialog             *dlg;
     Ui::IMBISTDlg       *hstUI;
     std::vector<int>    openSlots;
     bool                isHelloText;
@@ -33,6 +33,7 @@ public:
 
 private slots:
     void go();
+    void helpBut();
     void clear();
     void save();
 
