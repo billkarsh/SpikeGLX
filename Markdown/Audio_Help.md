@@ -14,8 +14,7 @@ Audio is fine as long as the system is not at maximum stress.
 
 ## Output to Speakers and Headphones
 
-As of version **20170501** SpikeGLX  no longer uses NI-DAQ based analog out.
-Rather, selected channels are fed to the Windows sound drivers and are accessed
+Selected channels are fed to the Windows sound drivers and are accessed
 the same way as other audio on your PC.
 
 If you want, you can make a cable to go from the audio jack to a BNC and

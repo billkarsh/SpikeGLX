@@ -286,7 +286,7 @@ higher performance graphics card. Follow these steps:
 "Can I use Windows Remote Desktop Services (RDP) to check up on SpikeGLX
 remotely?"
 
-* For **Phase20 and Phase3B2**: No. These versions of SpikeGLX use a later
+* For **Phase3B2 and later**: No. These versions of SpikeGLX use a later
 release of OpenGL that is incompatible with RDP. There are many other
 remote control apps that do work fine, like AnyDesk or TeamViewer.
 
