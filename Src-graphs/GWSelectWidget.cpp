@@ -7,6 +7,7 @@
 #include <QHBoxLayout>
 #include <QComboBox>
 #include <QLabel>
+#include <QPushButton>
 
 
 
@@ -21,8 +22,16 @@ GWSelectWidget::GWSelectWidget( GraphsWindow *gw, const DAQ::Params &p )
     : gw(gw), p(p), lIdx(-1), rIdx(-1)
 {
     QHBoxLayout *HBX = new QHBoxLayout;
+    QPushButton *help;
     QLabel      *LBL;
     QString     lhs;
+
+// Help
+
+    help = new QPushButton( "Help" );
+    help->setFixedWidth( 60 );
+    ConnectUI( help, SIGNAL(clicked()), gw, SLOT(helpBut()) );
+    HBX->addWidget( help );
 
 // Left label
 

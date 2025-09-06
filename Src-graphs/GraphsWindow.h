@@ -81,6 +81,7 @@ public slots:
 
 // Toolbar
     void tbSetRecordingEnabled( bool checked );
+    void helpBut();
 
 protected:
     virtual bool eventFilter( QObject *watched, QEvent *event );

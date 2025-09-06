@@ -7,6 +7,7 @@ pandoc -s -c pandoc.css --self-contained DevTab_Help.md -o ../_Help/DevTab_Help.
 pandoc -s -c pandoc.css --self-contained FileViewer_Help.md -o ../_Help/FileViewer_Help.html
 pandoc -s -c pandoc.css --self-contained Firmware_Help.md -o ../_Help/Firmware_Help.html
 pandoc -s -c pandoc.css --self-contained GateTab_Help.md -o ../_Help/GateTab_Help.html
+pandoc -s -c pandoc.css --self-contained Graphs_Help.md -o ../_Help/Graphs_Help.html
 pandoc -s -c pandoc.css --self-contained HST_Help.md -o ../_Help/HST_Help.html
 pandoc -s -c pandoc.css --self-contained IMTab_Help.md -o ../_Help/IMTab_Help.html
 pandoc -s -c pandoc.css --self-contained Metadata_Help.md -o ../_Help/Metadata_Help.html

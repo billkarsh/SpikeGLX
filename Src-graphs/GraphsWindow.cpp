@@ -364,6 +364,12 @@ void GraphsWindow::tbSetRecordingEnabled( bool checked )
         rW->setRecordingEnabled( checked );
 }
 
+
+void GraphsWindow::helpBut()
+{
+    showHelp( "Graphs_Help" );
+}
+
 /* ---------------------------------------------------------------- */
 /* Protected ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
