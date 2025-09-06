@@ -2007,7 +2007,6 @@ guiBreathe();
             slVers.append( s );
         slVers.append("(1) Select menu item 'Tools/Update Imec PXIe Firmware'.");
         slVers.append("(2) Read the help for that dialog.");
-        slVers.append("(3) Required files are in the download package 'NP_PXI_Firmware' folder.");
         return false;
     }
 #endif

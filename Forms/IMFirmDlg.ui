@@ -9,12 +9,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>474</width>
-    <height>532</height>
+    <width>376</width>
+    <height>525</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+   <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -22,16 +22,111 @@
   <property name="windowTitle">
    <string>Update Imec Firmware</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_5">
+  <layout class="QGridLayout" name="gridLayout_4">
    <property name="verticalSpacing">
     <number>15</number>
    </property>
+   <item row="2" column="0">
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>Update</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0">
+       <widget class="QProgressBar" name="PBar">
+        <property name="value">
+         <number>24</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QPushButton" name="updateBut">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Update</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="title">
+      <string>Required action</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_6">
+      <item row="0" column="0">
+       <widget class="QTextEdit" name="actionTE">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>330</width>
+          <height>140</height>
+         </size>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::FocusPolicy::NoFocus</enum>
+        </property>
+        <property name="acceptDrops">
+         <bool>false</bool>
+        </property>
+        <property name="undoRedoEnabled">
+         <bool>false</bool>
+        </property>
+        <property name="lineWrapMode">
+         <enum>QTextEdit::LineWrapMode::NoWrap</enum>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="acceptRichText">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
    <item row="0" column="0">
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>Select the target base station module</string>
+      <string>Select target base station module</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,0,0">
+     <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,0,0,0,0">
+      <item row="2" column="2">
+       <widget class="QLineEdit" name="bscurLE">
+        <property name="focusPolicy">
+         <enum>Qt::FocusPolicy::NoFocus</enum>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>BS:</string>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="0">
        <widget class="QLabel" name="label">
         <property name="text">
@@ -39,7 +134,89 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="3" column="1">
+       <widget class="QLabel" name="label_9">
+        <property name="text">
+         <string>cur</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>cur</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string>BSC:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>req</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="4">
+       <widget class="QLineEdit" name="bsreqLE">
+        <property name="focusPolicy">
+         <enum>Qt::FocusPolicy::NoFocus</enum>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLineEdit" name="bsccurLE">
+        <property name="focusPolicy">
+         <enum>Qt::FocusPolicy::NoFocus</enum>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="3">
+       <widget class="QLabel" name="label_10">
+        <property name="text">
+         <string>req</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="4">
+       <widget class="QLineEdit" name="bscreqLE">
+        <property name="focusPolicy">
+         <enum>Qt::FocusPolicy::NoFocus</enum>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="4">
+       <widget class="QLineEdit" name="techLE">
+        <property name="focusPolicy">
+         <enum>Qt::FocusPolicy::NoFocus</enum>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>tech</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" colspan="2">
        <widget class="QComboBox" name="slotCB">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -142,194 +319,15 @@
         </item>
        </widget>
       </item>
-      <item row="1" column="2">
-       <spacer name="horizontalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Orientation::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QGroupBox" name="bsGrp">
-     <property name="title">
-      <string>Load BS firmware (power cycle chassis, restart SpikeGLX after)</string>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="bsfileLE">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="focusPolicy">
-         <enum>Qt::FocusPolicy::NoFocus</enum>
-        </property>
-        <property name="text">
-         <string>(E.g., BS_FPGA_xxx.bin)</string>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QPushButton" name="bsBrowse">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Browse...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QRadioButton" name="bsExtRadio">
-        <property name="text">
-         <string>File</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0" colspan="2">
-       <widget class="QRadioButton" name="bsIntRadio">
-        <property name="text">
-         <string>Load data from this SpikeGLX</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QGroupBox" name="bscGrp">
-     <property name="title">
-      <string>Load BSC firmware (restart SpikeGLX after)</string>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_4">
-      <item row="1" column="2">
-       <widget class="QPushButton" name="bscBrowse">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Browse...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="bscfileLE">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="focusPolicy">
-         <enum>Qt::FocusPolicy::NoFocus</enum>
-        </property>
-        <property name="text">
-         <string>(E.g., QBSC_FPGA_yyy.bin)</string>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QRadioButton" name="bscExtRadio">
-        <property name="text">
-         <string>File</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0" colspan="2">
-       <widget class="QRadioButton" name="bscIntRadio">
-        <property name="text">
-         <string>Load data from this SpikeGLX</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="QGroupBox" name="groupBox_3">
-     <property name="title">
-      <string>Update (can't be cancelled)</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_3">
-      <item row="0" column="0">
-       <widget class="QProgressBar" name="PBar">
-        <property name="value">
-         <number>24</number>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QPushButton" name="updateBut">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Update</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="QLineEdit" name="statusLE">
-        <property name="focusPolicy">
-         <enum>Qt::FocusPolicy::NoFocus</enum>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
      </layout>
     </widget>
    </item>
    <item row="4" column="0">
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>Note: Check the Console (log) window for any error messages.</string>
+    <layout class="QGridLayout" name="gridLayout">
+     <property name="verticalSpacing">
+      <number>8</number>
      </property>
-    </widget>
-   </item>
-   <item row="5" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>Help: Titlebar &quot;?&quot;</string>
-       </property>
-      </widget>
-     </item>
-     <item>
+     <item row="1" column="1">
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Orientation::Horizontal</enum>
@@ -342,7 +340,7 @@
        </property>
       </spacer>
      </item>
-     <item>
+     <item row="1" column="2">
       <widget class="QDialogButtonBox" name="buttonBox">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -361,22 +359,35 @@
        </property>
       </widget>
      </item>
+     <item row="1" column="0">
+      <widget class="QPushButton" name="helpBut">
+       <property name="text">
+        <string>Help</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0" colspan="3">
+      <widget class="QLabel" name="statusLbl">
+       <property name="frameShape">
+        <enum>QFrame::Shape::Panel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Shadow::Sunken</enum>
+       </property>
+       <property name="text">
+        <string>Status:</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
   </layout>
  </widget>
  <tabstops>
   <tabstop>slotCB</tabstop>
-  <tabstop>bsGrp</tabstop>
-  <tabstop>bsIntRadio</tabstop>
-  <tabstop>bsExtRadio</tabstop>
-  <tabstop>bsBrowse</tabstop>
-  <tabstop>bscGrp</tabstop>
-  <tabstop>bscIntRadio</tabstop>
-  <tabstop>bscExtRadio</tabstop>
-  <tabstop>bscBrowse</tabstop>
   <tabstop>updateBut</tabstop>
   <tabstop>buttonBox</tabstop>
+  <tabstop>helpBut</tabstop>
  </tabstops>
  <resources/>
  <connections>

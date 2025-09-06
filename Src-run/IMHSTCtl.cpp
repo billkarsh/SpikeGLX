@@ -207,7 +207,6 @@ bool IMHSTCtl::okVersions()
             write( s );
         write("(1) Select menu item 'Tools/Update Imec PXIe Firmware'.");
         write("(2) Read the help for that dialog.");
-        write("(3) Required files are in the download package 'NP_PXI_Firmware' folder.");
         return false;
     }
 

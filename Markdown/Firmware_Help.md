@@ -22,27 +22,22 @@ a BS update. If your chassis is connected by Thunderbolt you can power
 cycle it without power cycling the PC. Otherwise, you will need to shut
 down the PC in order to shut down the chassis.
 
-### Typical Update Procedure
+### Update Procedure
 
-1. Select which slot you want to update.
+1. Select which PXIe slot you want to update. The dialog shows you that
+modules tech {std, opto, nxt} and the current and required firmware version
+numbers. The updater will automatically select the correct firmware tech
+and version.
 
-2. Check the box and select the file(s) for a BS and/or a BSC update. The
-files for this version of SpikeGLX are in the folder named `Firmware` that
-is included in your SpikeGLX release.
+2. Follow instructions in the `Required action` box.
 
-> *As of version 20250525 matched BS and BSC firmware data are embedded into
-the SpikeGLX app, so you can elect to use that data instead of finding files.
-You can still load files to target an older version of SpikeGLX.*
+3. Check the status box and Log (Console) window for any error messages.
 
-3. Click `Update`.
-
-4. Check the Console (Log) window for any error messages.
-
-5. If you updated the BS you need to power cycle the chassis for the
+4. If you updated the BS you need to power cycle the chassis for the
 change to take effect. After any update you need to quit and restart
 SpikeGLX for the change to take effect in the computer.
 
-6. After restarting, you'll be able to see which versions are installed
+5. After restarting, you'll be able to see which versions are installed
 when you click `Detect` in the `Configure Acquisition` dialog.
 
 ### Corruption
