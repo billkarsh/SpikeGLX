@@ -1,0 +1,192 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link href="data:text/css;charset=utf-8,body%20%7B%0Amargin%3A%20auto%3B%0Apadding%2Dright%3A%201em%3B%0Apadding%2Dleft%3A%201em%3B%0Amax%2Dwidth%3A%2068em%3B%20%0Aborder%2Dleft%3A%201px%20solid%20black%3B%0Aborder%2Dright%3A%201px%20solid%20black%3B%0Acolor%3A%20black%3B%0Afont%2Dfamily%3A%20Verdana%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%20100%25%3B%0Aline%2Dheight%3A%20140%25%3B%0Acolor%3A%20%23333%3B%0A%7D%0Ablockquote%20%7B%0Aborder%2Dleft%3A%205px%20solid%20%23cccccc%3B%0Amargin%2Dleft%3A%2020px%3B%0Apadding%3A%200%200%200%2015px%3B%0A%7D%0Apre%20%7B%0Aborder%3A%201px%20dotted%20gray%3B%0Aborder%2Dstyle%3A%20dotted%3B%0Abackground%2Dcolor%3A%20%23f5f5f5%3B%20%0Adisplay%3A%20block%3B%0Acolor%3A%20%23f5f5f5%3B%0Apadding%2Dtop%3A%200%3B%0Apadding%2Dbottom%3A%200%3B%0A%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20monospace%3B%0Afont%2Dsize%3A%20115%25%3B%0Abackground%2Dcolor%3A%20transparent%3B%0Acolor%3A%20%231d9d1d%3B%0A%7D%0Ah1%20a%2C%20h2%20a%2C%20h3%20a%2C%20h4%20a%2C%20h5%20a%20%7B%0Atext%2Ddecoration%3A%20none%3B%0Acolor%3A%20%237a5ada%3B%0A%7D%0Ah1%2C%20h2%2C%20h3%2C%20h4%2C%20h5%20%7B%0Afont%2Dfamily%3A%20verdana%3B%0Afont%2Dweight%3A%20bold%3B%0Aborder%2Dbottom%3A%20none%3B%20%0Acolor%3A%20%237a5ada%3B%20%7D%0Ah1%20%7B%0Afont%2Dsize%3A%20130%25%3B%0A%7D%0Ah2%20%7B%0Afont%2Dsize%3A%20110%25%3B%0A%7D%0Ah3%20%7B%0Afont%2Dsize%3A%2095%25%3B%0A%7D%0Ah4%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah5%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah1%2Etitle%20%7B%0Afont%2Dsize%3A%20200%25%3B%0Afont%2Dweight%3A%20bold%3B%0Apadding%2Dtop%3A%200%2E2em%3B%0Apadding%2Dbottom%3A%200%2E2em%3B%0Atext%2Dalign%3A%20left%3B%0Aborder%3A%20none%3B%0A%7D%0Adt%20code%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Add%20p%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0A%23footer%20%7B%0Apadding%2Dtop%3A%201em%3B%0Afont%2Dsize%3A%2070%25%3B%0Acolor%3A%20gray%3B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Atable%20%7B%0Amargin%2Dbottom%3A%202em%3B%0Aborder%2Dbottom%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dright%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dspacing%3A%200%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Apadding%3A%20%2E2em%201em%3B%0Abackground%2Dcolor%3A%20%23eee%3B%0Aborder%2Dtop%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dleft%3A%201px%20solid%20%23ddd%3B%0A%7D%0Atable%20td%20%7B%0Apadding%3A%20%2E2em%201em%3B%0Aborder%2Dtop%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dleft%3A%201px%20solid%20%23ddd%3B%0Avertical%2Dalign%3A%20top%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<h1 id="spikeglx-quadbase-quickstart">SpikeGLX Quadbase Quickstart</h1>
+<p><strong>Topics</strong>:</p>
+<ul>
+<li><a href="#quad-base-hardware">Quad-base Hardware</a></li>
+<li><a href="#system-hardware-requirements">System Hardware Requirements</a>
+<ul>
+<li><a href="#computer-requirements">Computer Requirements</a></li>
+<li><a href="#api4-and-tech-requirements">API4 and Tech Requirements</a></li>
+</ul></li>
+<li><a href="#critical-rules">Critical Rules</a>
+<ul>
+<li><a href="#cant-mix-tech">Can't Mix Tech</a></li>
+<li><a href="#plugs-in-startup">Plugs-in Startup</a></li>
+</ul></li>
+<li><a href="#Configure-run">Configure Run</a>
+<ul>
+<li><a href="#two-consecutive-ports">Two Consecutive Ports</a></li>
+<li><a href="#imro-table">IMRO Table</a>
+<ul>
+<li><a href="#channels">Channels</a></li>
+<li><a href="#references">References</a></li>
+</ul></li>
+<li><a href="#savefile-channels">Save/File Channels</a>
+<ul>
+<li><a href="#catgt-splits-shanks">CatGT Splits Shanks</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#run-instability">Run Instability</a>
+<ul>
+<li><a href="#symptoms">Symptoms</a>
+<ul>
+<li><a href="#worker-thread-activity">Worker-Thread Activity</a></li>
+<li><a href="#pop-errors">POP Errors</a></li>
+<li><a href="#missed-samples">Missed Samples</a></li>
+<li><a href="#shank-disparity">Shank Disparity</a></li>
+</ul></li>
+<li><a href="#causessolutions">Causes/Solutions</a>
+<ul>
+<li><a href="#spikeglx-filtered-im-stream">SpikeGLX Filtered IM Stream</a></li>
+<li><a href="#matlab">MATLAB</a></li>
+<li><a href="#videos">Videos</a></li>
+<li><a href="#ms-compatibility-appraiser">MS Compatibility Appraiser</a></li>
+<li><a href="#hybrid-core-scheduling">Hybrid Core Scheduling</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#broken-shanks">Broken Shanks</a></li>
+</ul>
+<h1 id="quad-base-hardware">Quad-base Hardware</h1>
+<h3 id="probe">Probe</h3>
+<p>Quad-probes NP2020 and NP2021 (metal cap) are technically four single shank 2.0 probes that are packaged together with 250 um shank spacing as if they were a 4-shank probe. The difference is you can read out 1536 neural channels (384 from each of the shanks). The single-chip base comprises the equivalent circuitry of four standard 2.0 bases.</p>
+<p>Crucially, the four base circuits receive their start signals and sample clock edges effectively simultaneously. That allows treating the whole probe as a single 4-shank, 1536-channel entity, which is how SpikeGLX models these probes.</p>
+<blockquote>
+<p>Actually 1540 channels are read from the probe: each shank/base supplies 384 neural channels and an SY channel (sync bit + error flags).</p>
+</blockquote>
+<h3 id="headstage">Headstage</h3>
+<p>The bespoke QB headstage accommodates two QB probes in its two docks.</p>
+<h3 id="cable">Cable</h3>
+<p>The bespoke QB cable must be plugged into two ports at the same time.</p>
+<hr />
+<h1 id="system-hardware-requirements">System Hardware Requirements</h1>
+<h2 id="computer-requirements">Computer Requirements</h2>
+<p>Each QB probe is at least as demanding upon compute resources, as four 2.0 probes. However, to create the illusion of a single 1536-channel probe, SpikeGLX must acquire, process and merge the data from the four shanks within each sample clock period, which places additional demands on CPU performance. In particular, QB probes benefit more from single-thread performance than other types of probes because these operations need to be done within a single acquisition worker thread to maintain synchrony and low latency. The following is excerpted from our <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_PXI.md">general requirements</a> document.</p>
+<h3 id="for-1536-channel-probes">For 1536-channel probes</h3>
+<ul>
+<li><strong>CPU clock speed &gt;= 3.0 GHz</strong></li>
+<li><strong><a href="https://www.cpubenchmark.net/single-thread/">PassMark Single-thread</a> score &gt;= 3000</strong></li>
+</ul>
+<p><strong>To run N 1536-channel probes:</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Max Probes</th>
+<th align="left">CPU Cores</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">2</td>
+<td align="left">4</td>
+</tr>
+<tr class="even">
+<td align="left">4*</td>
+<td align="left">6 (8 preferred)</td>
+</tr>
+<tr class="odd">
+<td align="left">8*</td>
+<td align="left">20 (<em>to be tested</em>)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><em>* Note: 6 cores (workstation or laptop) is marginally adequate for (4) 1536-channel probes, meaning that any other activity on the machine could easily cause the run to quit. We are more comfortable recommending 8 cores to run 4 probes. For 8 probes, you will be safe with a <a href="https://www.cpubenchmark.net/multithread/">PassMark Multi-thread</a> score &gt;= 50000.</em></p>
+</blockquote>
+<h2 id="api4-and-tech-requirements">API4 and Tech Requirements</h2>
+<p>The earliest SpikeGLX version to use with quad-probes is <strong>20250525-API4</strong>.</p>
+<p>With this version, SpikeGLX and imec move to major API revision 4.0, or <code>API4</code>. API4 allows imec to better support a wide variety of hardware technologies (<code>tech</code>). Probes/headstages have tech types {STD, QB, OPTO, NXT} and basestation-modules are {STD, OPTO, NXT}. These have to be matched to work properly. The rules are pretty simple:</p>
+<ul>
+<li>OneBox is a STD tech.</li>
+<li>Existing STD-PXI modules are STD tech.</li>
+<li>Existing OPTO-PXI modules are OPTO tech.</li>
+<li>OPTO-probes ONLY work in OPTO modules.</li>
+<li>NXT-probes ONLY work in NXT modules.</li>
+<li>QB-probes ONLY work in STD module tech.</li>
+<li>STD-probes work in any module.</li>
+</ul>
+<p>QB summary:</p>
+<ul>
+<li>QB-probes work in your existing STD PXI module or OneBox.</li>
+<li>SpikeGLX is tech-aware and makes sure you do this correctly.</li>
+</ul>
+<hr />
+<h1 id="critical-rules">Critical Rules</h1>
+<h2 id="cant-mix-tech">Can't Mix Tech</h2>
+<p>You can't run QB together with non-QB probes in the same module.</p>
+<h2 id="plugs-in-startup">Plugs-in Startup</h2>
+<p>The following is only for PXI modules, not OneBox...</p>
+<p>The ports in a PXIe module undergo an initialization procedure at power-up of the chassis/module. This initialization cannot be repeated after the power is already on. Initialization won't work properly for QB without a cable present in the port...</p>
+<p>You must plug an imec cable of any type into each port that you intend to use for QB probes, <strong>before you power-on the chassis</strong>. It doesn't have to be a QB cable.</p>
+<p>Do this whenever you cycle power on the chassis.</p>
+<hr />
+<h1 id="configure-run">Configure Run</h1>
+<p>Think of a quad-probe as a 4-shank probe with more channels...but there are a few special considerations as follows.</p>
+<h2 id="two-consecutive-ports">Two Consecutive Ports</h2>
+<ul>
+<li><p>A QB cable has two USB-C port connectors. Plug them into a pair of consecutive ports, either (1,2) or (3,4). It doesn't matter if you are using both docks of the headstage, always <strong>plug in both connectors</strong>.</p></li>
+<li><p>In the SpikeGLX <code>Probe Table</code> on the <code>Devices</code> tab (where you <code>Detect</code>) you have to <strong>check both boxes</strong>, (1,2) or (3,4).</p></li>
+</ul>
+<h2 id="imro-table">IMRO Table</h2>
+<h3 id="channels">Channels</h3>
+<p>The IMRO editor for QB guides you to select 384 required channels for each of the four shanks.</p>
+<h3 id="references">References</h3>
+<p>QB offers {ext, gnd, tip}, where tip means the tip on the same shank as that electrode. There is no join tips option as the shanks are electrically separate.</p>
+<h2 id="savefile-channels">Save/File Channels</h2>
+<p>Per timepoint, the full channel set for QB includes 1536 full-band neural channels, followed by 4 SY channels, one from each shank.</p>
+<h2 id="catgt-splits-shanks">CatGT Splits Shanks</h2>
+<p>If you prefer to work with the shanks individually in post-processing, use the following CatGT option to save each shank in a separate file:</p>
+<pre><code>-sepShanks=ip-in,ip-out0,ip-out1,ip-out2,ip-out3</code></pre>
+<hr />
+<h1 id="run-instability">Run Instability</h1>
+<p>Quad-base require significant compute capacity to acquire data from four probes (shanks), pre-process those data and merge them together into one data stream. Most of the time this works just fine, but here we cover what happens when it fails, and what you can do to help avoid problems.</p>
+<h2 id="symptoms">Symptoms</h2>
+<p>If the worker thread that is handling the QB probe is unable to keep up with the required ~30kHz data rate, the hardware feels <code>backpressure</code>, and a characteristic sequence of pathologies ensue.</p>
+<p>When SpikeGLX detects certain performance issues, it now automatically opens the Metrics window (Ctrl+M). In this case, evidence of backpressure will be visible as follows...</p>
+<h3 id="worker-thread-activity">Worker-Thread Activity</h3>
+<p>The first thing to happen is the <code>worker-thread activity %</code> will increase dramatically. The processing thread that gets data from the probe will work much harder to keep up with a building backlog of data enqueued in the hardware buffer.</p>
+<h3 id="pop-errors">POP Errors</h3>
+<p>If the lag is too great, the hardware may detect overruns of its sample buffers and <code>POP</code> errors are reported. You can see this in the <code>Errors</code> section at the top of the Metrics window. These error flags are also recorded in your run's metadata.</p>
+<h3 id="missed-samples">Missed Samples</h3>
+<p>Usually, due to buffer overruns, data samples are lost before they can be delivered to the GUI. SpikeGLX detects such discontinuities and reports these events as <code>missed samples</code>. This is visible also in the <code>Errors</code> section of the Metrics window, in your metadata, and in logs that are named for your run and saved in the top level of your data directory. The logs detail where the missed sample segments are in the data and how long they are. In addition, SpikeGLX will replace runs of missed samples with zeros to maintain the true length of the data stream. That's also covered in the <code>Metadata_Help.html</code> document.</p>
+<h3 id="shank-disparity">Shank Disparity</h3>
+<p>Finally, due to missed samples, it may happen that the four shanks become out of phase with each other, that is, some shanks have a few more or fewer samples that others. We call this <code>shank disparity</code>. Disparity is constantly monitored in SpikeGLX and significant changes are reported in the Metrics and Log windows.</p>
+<p>A few samples of disparity are tolerable and can even self-heal if the backpressure is temporary. However, if the disparity between any two shanks grows beyond 10 samples, SpikeGLX will throw a 'Shanks Desynchronized' error and stop the run on that basis.</p>
+<h2 id="causessolutions">Causes/Solutions</h2>
+<p>Unfortunately there are several possible causes of backpressure that can lead to a dreaded shank disparity error, but the majority can be avoided by your deliberate care.</p>
+<h3 id="spikeglx-filtered-im-stream">SpikeGLX Filtered IM Stream</h3>
+<p>On the <code>IM Setup</code> tab of the <code>Configuration</code> dialog is a checkbox to enable the feature called <code>Filtered IM stream buffers</code>. When checked, each history stream for an imec probe gets a twin history stream in which the data are band-pass filtered and common average referenced. These data dramatically improve the quality/clarity of {Audio-out, ShankViewers, SpikeViewers}, but come at the cost of increased workload for the data acquisition worker threads. It's an especially high tax for high channel count probes.</p>
+<p>The feature includes some self-protection in that it temporarily disables if the number of pending samples in the probe's fifo buffers is growing. It resumes operation when backpressure subsides.</p>
+<p>Also, even when enabled on the <code>IM Setup</code> tab, the feature is inactive unless these data are being requested by at least one client, again, {Audio-out, ShankViewer, SpikeViewer, Remote SDK request}.</p>
+<p>Nevertheless, if you are running a large number of probes and/or taxing the machine with remote scripted operations that also need CPU time, then either disable this feature at the checkbox, or use it very judiciously, by limiting reference to your QB probes in audio, ShankViewer, SpikeViewer, etc.</p>
+<h3 id="matlab">MATLAB</h3>
+<p>MATLAB isn't too bad once it is up and running...</p>
+<p>But MATLAB tends to hog all the compute power on the machine to start up. Just be careful to start MATLAB first, and then start your acquisition run after the machine has settled back to normal work levels.</p>
+<p>MATLAB is a known offender, but there can be others having this same pattern wherein launching that service causes a large spike in CPU activity that starves our acquisition worker long enough to kill a run.</p>
+<h3 id="videos">Videos</h3>
+<p>Try to avoid watching videos or launching any content (Browser Window) that contains video because this can potentially eat compute resources. Again, this is a large activity spike problem.</p>
+<h3 id="ms-compatibility-appraiser">MS Compatibility Appraiser</h3>
+<p>There are innumerable tasks that run periodically on your machine. They are scheduled to run by the <code>Windows Task Service</code>. You can locate that as a subsection of the <code>Computer Management</code> control panel. Any of these tasks could be a problem, but the most glaring offender of all is <code>Microsoft Compatibility Appraiser</code> task which is typically scheduled to run once per day. When it runs it can push every core on the machine to 100% load for 15 to 30 seconds. It's trying to discover if your machine can be or should be upgraded to Windows 11.</p>
+<p>Find this task in the Window Task Scheduler GUI, under:</p>
+<pre><code>Microsoft/Windows/Application Experience</code></pre>
+<p>You can highlight this task, and on the far right-hand action panel you'll see a Disable button. You can disable this if it is proving to be a problem. It does not typically pose as much of a threat on machines that already have Windows 11.</p>
+<h3 id="hybrid-core-scheduling">Hybrid Core Scheduling</h3>
+<p>More and more modern computers are using hybrid processors with mixtures of high performance P-cores and high efficiency E-cores. SpikeGLX is already doing what it can to get itself to run on the available P-cores. However, if your machine has been aggressively tuned by the vendor to be maximally efficient (Lenovo to name one) it may still try to throttle core power or even switch our worker threads to E-cores if it is hitting temperature or voltage limiters. Be sure that your CPU management drivers are up-to-date and that all the throttling and tuning component services are running on your machine. Especially beware of IT departments that replace a working OS image from the vendor with their own suite that enhances their security at the cost of your tuned performance.</p>
+<hr />
+<h2 id="broken-shanks">Broken Shanks</h2>
+<p>Inevitably shanks &quot;break&quot; which usually means it looks intact externally but an internal trace has broken. And this may happen to just one shank of your very expensive quad-probe. Can you still get some use out of it?</p>
+<p>Not yet...</p>
+<p>There is an enhanced <code>Shift Register</code> BIST that now reports which shanks are good. That works for both QB and 2.0 4-shank probes.</p>
+<p>However, there is not yet a facility to program and run with the intact shanks. That will come soon, so do not discard your probe yet.</p>
+<p><em>fin</em></p>
+</body>
+</html>
