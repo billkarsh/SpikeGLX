@@ -2359,6 +2359,7 @@ guiBreathe();
         // @@@ Experiment to fix NXT timeouts
         // ----------------------------------
 
+#if 0
         if( T.slot2Vers[P.slot].bsctech == t_tech_nxt ) {
 
             HardwareID  H;
@@ -2372,6 +2373,7 @@ guiBreathe();
         //    Log()<<np_getProbeHardwareID(P.slot, P.port, 1, &H);
             Log()<<np_getFlexHardwareID(P.slot, P.port, 1, &H);
         }
+#endif
 
         // ----
         // isHS
