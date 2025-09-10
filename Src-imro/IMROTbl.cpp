@@ -1372,7 +1372,7 @@ QString IMROTbl::default_imroLE( int type )
 
 int IMROTbl::bscpnToTech( const QString &pn )
 {
-    if( pn.isEmpty() )
+    if( pn.isEmpty() || pn == "" || pn == "<empty>" )
         return t_tech_opto;
     else if( pn == "NPNXT_QBSC_01" )
         return t_tech_nxt;
@@ -1430,8 +1430,8 @@ QString IMROTbl::strTech( int tech )
 {
     switch( tech ) {
         case t_tech_sim:  return "sim";
-        case t_tech_std:
-        case t_tech_qb:   return "std";
+        case t_tech_std:  return "std";
+        case t_tech_qb:   return "qb";
         case t_tech_opto: return "opto";
         case t_tech_nxt:  return "nxt";
     }
@@ -1460,11 +1460,11 @@ void IMROTbl::bscReqVers( QString &bsreq, QString &bscreq, int bsctech )
 
 
 void IMROTbl::bscCheckTech(
-    QStringList bs_bsc,
-    QString     bsfw,
-    QString     bscfw,
-    int         bsctech,
-    int         slot )
+    QStringList     &bs_bsc,
+    const QString   &bsfw,
+    const QString   &bscfw,
+    int             bsctech,
+    int             slot )
 {
 #ifdef HAVE_IMEC
     if( bsctech == t_tech_sim )
@@ -1497,10 +1497,10 @@ void IMROTbl::bscCheckTech(
 
 
 QString IMROTbl::hsCompatTech(
-        int         hstech,
-        int         bsctech,
-        int         slot,
-        int         port )
+    int     hstech,
+    int     bsctech,
+    int     slot,
+    int     port )
 {
     QString msg;
 
@@ -1537,11 +1537,11 @@ QString IMROTbl::hsCompatTech(
 
 
 QString IMROTbl::prbCompatTech(
-        int         prbtech,
-        int         bsctech,
-        int         slot,
-        int         port,
-        int         dock )
+    int     prbtech,
+    int     bsctech,
+    int     slot,
+    int     port,
+    int     dock )
 {
     QString msg;
 

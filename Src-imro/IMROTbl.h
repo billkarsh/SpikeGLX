@@ -247,22 +247,22 @@ public:
     static QString strTech( int tech );
     static void bscReqVers( QString &bsreq, QString &bscreq, int bsctech );
     static void bscCheckTech(
-        QStringList bs_bsc,
-        QString     bsfw,
-        QString     bscfw,
-        int         bsctech,
-        int         slot );
+        QStringList     &bs_bsc,
+        const QString   &bsfw,
+        const QString   &bscfw,
+        int             bsctech,
+        int             slot );
     static QString hsCompatTech(
-        int         hstech,
-        int         bsctech,
-        int         slot,
-        int         port );
+        int     hstech,
+        int     bsctech,
+        int     slot,
+        int     port );
     static QString prbCompatTech(
-        int         prbtech,
-        int         bsctech,
-        int         slot,
-        int         port,
-        int         dock );
+        int     prbtech,
+        int     bsctech,
+        int     slot,
+        int     port,
+        int     dock );
 };
 
 #endif  // IMROTBL_H
