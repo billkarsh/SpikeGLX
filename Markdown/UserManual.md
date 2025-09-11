@@ -6,6 +6,7 @@
     + [Additional Guides](#additional-guides)
         + [PXIe](#pxie)
         + [OneBox](#onebox)
+        + [Quadbase Probes](#quadbase-probes)
         + [Help](#help)
     + [SpikeGLX Ecosystem](#spikeglx-ecosystem)
     + [Installation and Setup](#installation-and-setup)
@@ -48,6 +49,7 @@
 
 **Appendix:**
 
+* [SpikeGLX_Quadbase_Quickstart](SpikeGLX_Quadbase_Quickstart.html)
 * [SpikeGLX_OneBox_Quickstart](SpikeGLX_OneBox_Quickstart.html)
 * [Stimulus Waveform Planner](WavePlan_Help.html)
 * [SpikeGLX FAQ](SpikeGLX_FAQ.html)
@@ -67,6 +69,10 @@
 
 * [SpikeGLX_OneBox_Quickstart](SpikeGLX_OneBox_Quickstart.html).
 * [Stimulus Waveform Planner](WavePlan_Help.html).
+
+#### Quadbase Probes
+
+* [SpikeGLX_Quadbase_Quickstart](SpikeGLX_Quadbase_Quickstart.html)
 
 #### Help
 
