@@ -3367,8 +3367,17 @@ void FileViewerWindow::updateGraphs()
 // Filter setup
 // ------------
 
-    if( hipass ) hipass->clearMem();
-    if( lopass ) lopass->clearMem();
+    int bptrans = 0;
+
+    if( hipass ) {
+        hipass->clearMem();
+        bptrans = hipass->getTransWide();
+    }
+
+    if( lopass ) {
+        lopass->clearMem();
+        bptrans = qMax( bptrans, lopass->getTransWide() );
+    }
 
     // -<Tn>; not applied if AP filtered
 
@@ -3566,7 +3575,8 @@ qq=getTime();
                         vmax    = val,
                         vmin    = val;
 
-                    stat.add( val );
+                    if( ny > bptrans )
+                        stat.add( val );
                     d += dstep;
 
                     for( int it = binMax; it < ntpts; it += binMax, d += dstep ) {
@@ -3590,7 +3600,8 @@ qq=getTime();
                             // start new
                             vmax    = val;
                             vmin    = val;
-                            stat.add( val );
+                            if( ny > bptrans )
+                                stat.add( val );
                             binLim += dwnSmp;
                         }
                     }
@@ -3617,7 +3628,8 @@ qq=getTime();
 
                         int val = car.lcl_1( d, ig );
 
-                        stat.add( val );
+                        if( it > bptrans )
+                            stat.add( val );
                         ybuf[ny++] = val * ysc;
                     }
                 }
@@ -3640,7 +3652,8 @@ qq=getTime();
 draw_analog:
                 for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
-                    stat.add( *d );
+                    if( it > bptrans )
+                        stat.add( *d );
                     ybuf[ny++] = *d * ysc;
                 }
             }
