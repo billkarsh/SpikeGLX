@@ -31,6 +31,13 @@ static QString getNPErrorString()
     return buf;
 }
 
+
+static bool continueAnyway( NP_ErrorCode err )
+{
+    return err != NO_SLOT && err != NO_LOCK &&
+           err != NO_LINK && err != NO_HST;
+}
+
 /* ---------------------------------------------------------------- */
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
@@ -90,10 +97,17 @@ IMHSTCtl::~IMHSTCtl()
 
 void IMHSTCtl::go()
 {
+    int itest = hstUI->testCB->currentIndex();
+
+    QGuiApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+    guiBreathe();
+    guiBreathe();
+
     if( isHelloText )
         clear();
 
-    int itest = hstUI->testCB->currentIndex();
+    if( !okVersions() )
+        goto exit;
 
     if( !itest )
         test_runAll();
@@ -107,6 +121,9 @@ void IMHSTCtl::go()
             case 6: test_signalGenerator(); break;
         }
     }
+
+exit:
+    QGuiApplication::restoreOverrideCursor();
 }
 
 
@@ -254,9 +271,6 @@ void IMHSTCtl::_closeHST()
 
 bool IMHSTCtl::stdStart( int itest, int secs )
 {
-    if( !okVersions() )
-        return false;
-
     write( "-----------------------------------" );
     write( QString("Test %1").arg( hstUI->testCB->itemText( itest ) ) );
 
@@ -285,8 +299,8 @@ bool IMHSTCtl::stdTest( const QString &fun, NP_ErrorCode err )
         return true;
     }
 
-    write( QString("%1 result = FAIL: '%2'")
-        .arg( fun ).arg( getNPErrorString() ) );
+    write( QString("%1 result = FAIL: error %2 '%3.'")
+        .arg( fun ).arg( err ).arg( getNPErrorString() ) );
 
     _closeHST();
     return false;
@@ -295,22 +309,21 @@ bool IMHSTCtl::stdTest( const QString &fun, NP_ErrorCode err )
 
 void IMHSTCtl::test_runAll()
 {
-    if( !okVersions() )
-        return;
-
-    test_communication();
-    test_supplyVoltages();
-    test_controlSignals();
-    test_masterClock();
-    test_PSBDataBus();
-    test_signalGenerator();
+    if( test_communication() &&
+        test_supplyVoltages() &&
+        test_controlSignals() &&
+        test_masterClock() &&
+        test_PSBDataBus() &&
+        test_signalGenerator() ) {
+        ;
+    }
 }
 
 
-void IMHSTCtl::test_communication()
+bool IMHSTCtl::test_communication()
 {
     if( !stdStart( 1 ) )
-        return;
+        return false;
 
     int             slot = hstUI->slotSB->value(),
                     port = hstUI->portSB->value();
@@ -319,21 +332,22 @@ void IMHSTCtl::test_communication()
     err = np_HSTestPCLK( slot, port );
 
     if( !stdTest( "HSTestPCLK", err ) )
-        return;
+        return continueAnyway( err );
 
     err = np_HSTestI2C( slot, port );
 
     if( !stdTest( "HSTestI2C", err ) )
-        return;
+        return continueAnyway( err );
 
     _closeHST();
+    return true;
 }
 
 
-void IMHSTCtl::test_supplyVoltages()
+bool IMHSTCtl::test_supplyVoltages()
 {
     if( !stdStart( 2 ) )
-        return;
+        return false;
 
     int             slot = hstUI->slotSB->value(),
                     port = hstUI->portSB->value();
@@ -342,31 +356,32 @@ void IMHSTCtl::test_supplyVoltages()
     err = np_HSTestVDDA1V8( slot, port );
 
     if( !stdTest( "HSTestVDDDA1V8", err ) )
-        return;
+        return continueAnyway( err );
 
     err = np_HSTestVDDD1V8( slot, port );
 
     if( !stdTest( "HSTestVDDD1V8", err ) )
-        return;
+        return continueAnyway( err );
 
     err = np_HSTestVDDA1V2( slot, port );
 
     if( !stdTest( "HSTestVDDA1V2", err ) )
-        return;
+        return continueAnyway( err );
 
     err = np_HSTestVDDD1V2( slot, port );
 
     if( !stdTest( "HSTestVDDD1V2", err ) )
-        return;
+        return continueAnyway( err );
 
     _closeHST();
+    return true;
 }
 
 
-void IMHSTCtl::test_controlSignals()
+bool IMHSTCtl::test_controlSignals()
 {
     if( !stdStart( 3 ) )
-        return;
+        return false;
 
     int             slot = hstUI->slotSB->value(),
                     port = hstUI->portSB->value();
@@ -375,21 +390,22 @@ void IMHSTCtl::test_controlSignals()
     err = np_HSTestNRST( slot, port );
 
     if( !stdTest( "HSTestNRST", err ) )
-        return;
+        return continueAnyway( err );
 
     err = np_HSTestREC_NRESET( slot, port );
 
     if( !stdTest( "HSTestREC_NRESET", err ) )
-        return;
+        return continueAnyway( err );
 
     _closeHST();
+    return true;
 }
 
 
-void IMHSTCtl::test_masterClock()
+bool IMHSTCtl::test_masterClock()
 {
     if( !stdStart( 4 ) )
-        return;
+        return false;
 
     NP_ErrorCode    err;
 
@@ -398,16 +414,17 @@ void IMHSTCtl::test_masterClock()
             hstUI->portSB->value() );
 
     if( !stdTest( "HSTestMCLK", err ) )
-        return;
+        return continueAnyway( err );
 
     _closeHST();
+    return true;
 }
 
 
-void IMHSTCtl::test_PSBDataBus()
+bool IMHSTCtl::test_PSBDataBus()
 {
     if( !stdStart( 5 ) )
-        return;
+        return false;
 
     NP_ErrorCode    err;
 
@@ -416,16 +433,17 @@ void IMHSTCtl::test_PSBDataBus()
             hstUI->portSB->value() );
 
     if( !stdTest( "HSTestPSB", err ) )
-        return;
+        return continueAnyway( err );
 
     _closeHST();
+    return true;
 }
 
 
-void IMHSTCtl::test_signalGenerator()
+bool IMHSTCtl::test_signalGenerator()
 {
     if( !stdStart( 6 ) )
-        return;
+        return false;
 
     NP_ErrorCode    err;
 
@@ -434,9 +452,10 @@ void IMHSTCtl::test_signalGenerator()
             hstUI->portSB->value() );
 
     if( !stdTest( "HSTestOscillator", err ) )
-        return;
+        return continueAnyway( err );
 
     _closeHST();
+    return true;
 }
 
 #endif  // HAVE_IMEC

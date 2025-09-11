@@ -80,13 +80,17 @@ void IMBISTCtl::go()
 {
     int itest = bistUI->testCB->currentIndex();
 
+    QGuiApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+    guiBreathe();
+    guiBreathe();
+
+    if( !okVersions() || !probeType() )
+        goto exit;
+
+    if( !test_bistBS() )
+        goto exit;
+
     if( !itest ) {
-
-        if( !okVersions() || !probeType() )
-            return;
-
-        if( !test_bistBS() )
-            return;
 
         test_bistHB();
         test_bistPRBS();
@@ -96,6 +100,9 @@ void IMBISTCtl::go()
         test_bistPSB();
         test_bistSignal();
         test_bistNoise();
+
+        write( "" );
+        write( "If any tests failed, click Help button for assistance." );
     }
     else {
         switch( itest ) {
@@ -110,6 +117,9 @@ void IMBISTCtl::go()
             case 9: test_bistNoise(); break;
         }
     }
+
+exit:
+    QGuiApplication::restoreOverrideCursor();
 }
 
 

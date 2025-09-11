@@ -48,12 +48,12 @@ private:
     bool stdTest( const QString &fun, Neuropixels::NP_ErrorCode err );
 
     void test_runAll();
-    void test_communication();
-    void test_supplyVoltages();
-    void test_controlSignals();
-    void test_masterClock();
-    void test_PSBDataBus();
-    void test_signalGenerator();
+    bool test_communication();
+    bool test_supplyVoltages();
+    bool test_controlSignals();
+    bool test_masterClock();
+    bool test_PSBDataBus();
+    bool test_signalGenerator();
 };
 
 #endif  // HAVE_IMEC
