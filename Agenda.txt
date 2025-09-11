@@ -5,6 +5,7 @@
 --------
 + API 4.1.3.
 + Qt 6.9.1.
++ Tech detection and management.
 + Quad-base NP2020/1 probes fully supported.
 + Probe PRB_1_2_480_2 -> PRB_1_2_0480_2.
 + Extend survey transition by 0.5 second.

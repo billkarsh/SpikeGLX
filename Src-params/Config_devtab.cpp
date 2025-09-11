@@ -428,9 +428,10 @@ bool Config_devtab::imDetect()
     bool            availIM;
 
     imWrite( "\nConnecting...allow several seconds." );
-    guiBreathe();
 
     QGuiApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+    guiBreathe();
+    guiBreathe();
 
     availIM = CimCfg::detect(
                 slVers, slBIST, vHSpsv, vHS20, T,

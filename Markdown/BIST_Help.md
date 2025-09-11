@@ -1,9 +1,34 @@
-## Built-in Self Tests (BIST)
+# Built-in Self Tests (BIST)
 
-### Overview
+
+**Topics**:
+
+* [Overview](#overview)
+* [The Tests](#the-tests)
+    + [Base Station](#base-station)
+    + [Heartbeat](#heartbeat)
+    + [SerDes Link](#serdes-link)
+    + [I2C/Memmap](#i2cmemmap)
+    + [EEPROM](#eeprom)
+    + [Shift Registers](#shift-registers)
+    + [Parallel Serial Bus](#parallel-serial-bus)
+    + [Signal Path](#signal-path)
+    + [Noise Level](#noise-level)
+* [Critical Failures](#critical-failures)
+    + [Headstage Problems](#headstage-problems)
+    + [Shift Register Error](#shift-register-error)
+    + [Parallel Serial Bus Error](#parallel-serial-bus-error)
+* [Noncritical Failures](#noncritical-failures)
+    + [Signal Path Error / Noise Level Error](#signal-path-error-noise-level-error)
+    + [Bad Channels](#bad-channels)
+
+## Overview
 
 A number of self tests are implemented in the recording system to
 debug combinations of subsystems.
+
+The signal and noise tests are qualitative; see the 'Noncritical Failures'
+section for better ways to evaluate probe performance.
 
 | Test                  | Functional Area |
 | --------------------- | -------------------------------- |
@@ -17,63 +42,7 @@ debug combinations of subsystems.
 | *Signal Path*         | Signal fidelity check |
 | *Noise Level*         | Amplifier noise check |
 
-### IMPORTANT
-
-#### Shift Register Error
-
-A critical resource for programming the settings is broken. Depending upon
-how badly damaged the probe is, it might "run," but you have no way of
-knowing which electrodes are connected or which references are being used.
-
-#### Parallel Serial Bus Error
-
-This most commonly occurs when the probe flex is not seated well in the
-headstage. It will usually clear if you carefully close the clasp on the
-ZIF while pushing the flex squarely and firmly into the ZIF all the way.
-
-#### Signal Path Error / Noise Level Error
-
-These two BISTs are somewhat qualitative and oversensitive. If the only
-thing wrong is that one or both of these two tests fails, the probe may
-well be fine...
-
-Try running the probe in air if your lab isn't too noisy. If you need to,
-run in saline with external referencing selected and connected to the
-bath. Look at the traces. Is the noise level within expectation? Are the
-traces fairly homogeneous? The RMS value for the selected graph can be read
-off in the bottom of the Graphs window; 8 uV or lower is typical.
-
-Open the Graph window's online Shank Viewer. Colorize for AP or LFP. Does
-the probe activity look fairly uniform? These are reliable indicators that
-the probe is working.
-
-#### Bad Channels
-
-It is common that three or four channels on the probe have overly large
-noise or variation in amplitude. If a few channels look bad but the other
-channels look normal, then use the probe, but list its bad channels as
-such in the `Each probe` table on the `IM Setup` tab. This will mask them
-from use in CAR within SpikeGLX, CatGT and Jennifer Colonell's ecephys
-pipeline.
-
-#### Headstage Testing
-
-Bad headstages are exceedingly rare. If you are getting errors like:
-
-`Error 44 'NO_LINK: No headstage detected on port X'`
-
-It is probably a poor connection between the probe flex and headstage.
-Keep playing with that. Sometimes changing the pairing between probe and
-headstage will help because the tiny ZIF connectors are not manufactured
-to super tight tolerances and sometimes the ZIF clasp can weaken and fail
-to close tightly onto the flex.
-
-The next thing to suspect is a bad 5-meter cable. Sometimes the leads can
-wiggle loose inside the Omnetics connectors after many dis/connect cycles.
-
-Finally, while it is very unlikely that the headstage has an electronic
-issue, for a 1.0 headstage, you can try running the HST dialog with the
-headstage tester dongle.
+![](BIST.png)
 
 ```
 Terminology:
@@ -91,10 +60,14 @@ Terminology:
     SerDes = serializer/deserializer
 ```
 
+## The Tests
+
 ### Base Station
 
 This test checks the connectivity between PC and BS FPGA board over the
 PXIe interface.
+
+--------
 
 ### Heartbeat
 
@@ -108,10 +81,14 @@ presence of the master clock signal on the probe, the functionality of
 the clock divider on the probe, and basic communication over the
 SerDes link.
 
+--------
+
 ### SerDes Link
 
 The functionality of the SerDes link is quantitatively verified
 using the integrated PRBS test of the SerDes component pair.
+
+--------
 
 ### I2C/Memmap
 
@@ -122,6 +99,8 @@ again to restore the probe to its settings before test.
 
 The test is successful if the modified value can be read back, and if an
 ‘Ack’ byte has been received for each R/W operation.
+
+--------
 
 ### EEPROM
 
@@ -135,17 +114,20 @@ has been received for each R/W operation.
 The function tests the flex, HS and BSC EEPROM consecutively. The function
 returns an error after the first failed test.
 
+--------
+
 ### Shift Registers
 
-This test verifies the functionality of the shank and base shift registers
-(SR_CHAIN 1 to 3). The function configures the shift register two times
-with the same code. After the 2nd write cycle the SR_OUT_OK bit in the
-STATUS register is read. If OK, the shift register configuration was
-successful. The test is done for all 3 registers. The configuration
-code used for the test is a dedicated code (to make sure the bits
-are not all 0 or 1).
+This test verifies the functionality of the shank and base shift registers.
+The function configures the shift register two times with the same code.
+After the 2nd write cycle the SR_OUT_OK bit in the STATUS register is read.
+If OK, the shift register configuration was successful. The test is done
+for all registers. The configuration code used for the test is a dedicated
+code (to make sure the bits are not all 0 or 1).
 
-**If this test fails, the shank is likely broken.**
+**If this test fails, a shank is likely broken.**
+
+--------
 
 ### Parallel Serial Bus
 
@@ -155,6 +137,8 @@ set and verifies whether that matches the known data pattern.
 
 This way the PSB bus on the probe and all data lines between probe and
 serializer are verified.
+
+--------
 
 ### Signal Path
 
@@ -169,6 +153,8 @@ frequency and amplitude tolerance, the function returns a pass value.
 >
 > 2. This test and the noise test are somewhat qualitative. If all other
 tests besides {signal, noise} pass, the probe is probably alright.
+
+--------
 
 ### Noise Level
 
@@ -188,6 +174,149 @@ The function returns a pass/fail value.
 >
 > 2. This test and the signal path test are somewhat qualitative. If all
 other tests besides {signal, noise} pass, the probe is probably alright.
+
+--------
+
+## Critical Failures
+
+These hardware errors may be recoverable by reconnecting or replacing parts.
+
+### Headstage Problems
+
+Bad headstages are exceedingly rare. If you are getting errors like:
+
+```
+Error 44 'NO_LINK: No headstage detected on port X'
+```
+
+It is probably a poor connection between the probe flex and headstage.
+Keep playing with that. Sometimes changing the pairing between probe and
+headstage will help because the tiny ZIF connectors are not manufactured
+to super tight tolerances and sometimes the ZIF clasp can weaken and fail
+to close tightly onto the flex.
+
+The next thing to suspect is a bad 5-meter cable. Sometimes the leads can
+wiggle loose inside the Omnetics connectors after many dis/connect cycles.
+
+Finally, while it is very unlikely that the headstage has an electronic
+issue, for a 1.0 headstage, you can try running the HST dialog with the
+headstage tester dongle.
+
+### Shift Register Error
+
+You should verify the probe is actually broken by trying an alternate
+headstage and/or cable. If this problem won't go away...
+
+The shift registers are used to program settings into the probe. Depending
+upon how badly damaged the probe is, it might "run," but you have no way of
+knowing which electrodes are connected or which references are being used.
+
+Future versions of SpikeGLX/imec firmware may permit the use of a multishank
+probe that only has one or two broken shanks, but that is not possible yet.
+Do not throw such probes away.
+
+### Parallel Serial Bus Error
+
+This most commonly occurs when the probe flex is not seated well in the
+headstage. It will usually clear if you carefully close the clasp on the
+ZIF while pushing the flex squarely and firmly into the ZIF all the way.
+
+--------
+
+## Noncritical Failures
+
+### Signal Path Error / Noise Level Error
+
+These two BISTs are somewhat qualitative and oversensitive. If the only
+thing wrong is that one or both of these two tests fails, the probe may
+well be fine. We suggest manually surveying the probe which will give
+you much better information about both the probe and the environment.
+Do the following:
+
+**Common Setup**
+
+1. Run the probe in a saline bath with reference and ground connected
+together and to a wire placed in the solution with good conductance
+(Ag/AgCl, Pt). Immerse deeply so all electrodes are in solution. This
+is the same as the input-referred noise setup in the probe 'User Manual.'
+
+2. Select External referencing mode for the probe.
+
+**Assess Probe Internal Noise**
+
+>Do this by applying maximum environment noise filtering: 
+
+3. On the `IM Setup` tab, check `Filtered IM stream buffers`. This causes
+the ShankViewer to apply both band-pass filtering and CAR (Gbldmx).
+
+4. In the Graphs Window apply these Settings:
+
+* `Secs`: 0.1
+* `Band-pass`: 300-INF
+* `-<T>`: ON
+* `-<S>`: Gbl Dmx
+* `BinMax`: OFF
+
+As you hover the mouse over the traces, observe `stdv` readouts at the
+bottom of the Graphs Window (stdv is effectively RMS-offset). Depending
+upon probe model, the specs for this are 7-9 uV, but in practice, anything
+below 10 uV means the probe is ok. Remember there will always be a handful
+of outlier channels.
+
+5. Open the ShankViewer to look at the whole probe. Set the following:
+
+* `Colorize`: AP pk-pk
+* `Update`: 0.1 secs
+* `Scale`: 100
+
+The AP range should be ~50 uV on this scale. Look at the uniformity of
+the value over the probe. Hot (bad) channels will be bright yellow or
+white.
+
+You may also see some black (zero) channels. These could be dead, or they
+could be saturated. Check that by un/checking the `-<T>` filter as you
+observe the trace in the Graphs Window.
+
+In any case bad channels can be masked (see below).
+
+**Assess Environment Noise**
+
+>Do this by applying minimum filtering:
+
+3. On the `IM Setup` tab, un-check `Filtered IM stream buffers`. This causes
+the ShankViewer to apply only high-pass filtering.
+
+4. In the Graphs Window apply these Settings:
+
+* `Secs`: 0.1
+* `Band-pass`: AP Native (OFF)
+* `-<T>`: ON
+* `-<S>`: OFF
+* `BinMax`: OFF
+
+Now `stdv` readouts will be much larger but that's not a bad probe. It's
+your call how much noise pickup is OK. If the noise is greater than 15 uV
+you could have a poor connection in the ref or ground wire path. Check
+your solder joints.
+
+This is a good time to poke the probe wires with a stick. Also poke the
+flex connector. The signals should be quite steady under poking. If the
+noise bounces when you poke then something is too loose.
+
+Of course all environments will have their own noise sources. Very large
+environment noise could come from any equipment in your building. Try
+plugging your electronics into different wall sockets (maybe different
+building circuits). Note if it tracks the building air conditioning
+schedule. Is it worse at a certain time of day? Consider a Faraday cage.
+
+### Bad Channels
+
+It is common that three or four channels on the probe have overly large
+noise or variation in amplitude. If a few channels look bad but the other
+channels look normal, then use the probe, but list its bad channels as
+such in the `Each probe` table on the `IM Setup` tab. This will mask them
+from use in CAR within SpikeGLX, CatGT and Jennifer Colonell's ecephys
+pipeline.
 
 
 _fin_
