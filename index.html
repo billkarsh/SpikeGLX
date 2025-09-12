@@ -47,6 +47,10 @@
                                 <ul class="dropdown-menu">
                                     
 <li>
+    <a href="https://join.slack.com/t/neuropixelsgroup/shared_invite/zt-1jibcdbhe-uNyp8q522L4S0apVKwoC6A" class="dropdown-item">Neuropixels Slack Channel</a>
+</li>
+                                    
+<li>
     <a href="https://www.neuropixels.org/support" class="dropdown-item">Neuropixels Support Page</a>
 </li>
                                     
@@ -67,6 +71,10 @@
 </li>
                                     
 <li>
+    <a href="Sgl_help/SpikeGLX_Quadbase_Quickstart.html" class="dropdown-item">Quadbase Quickstart</a>
+</li>
+                                    
+<li>
     <a href="Sgl_help/UserManual.html" class="dropdown-item">SpikeGLX UserManual</a>
 </li>
                                     
@@ -80,6 +88,10 @@
                                     
 <li>
     <a href="Sgl_help/SpikeGLX_FAQ.html" class="dropdown-item">SpikeGLX FAQ</a>
+</li>
+                                    
+<li>
+    <a href="Sgl_help/Metadata_Help.html" class="dropdown-item">Metadata Help</a>
 </li>
                                     
 <li>
@@ -222,8 +234,8 @@
 <p>This site supports prototype and currently shipping commercial products.</BR>
 The latest commercial PXI-based components are:</p>
 <ul>
-<li>Hardware: <code>Neuropixels 1.0 probes</code> (also called phase3B2).</li>
-<li>Software: <code>SpikeGLX 3.0</code> (also called phase30).</li>
+<li>Hardware: <code>Neuropixels 1.0, 2.0, NHP, UHD, Quad-base</code>.</li>
+<li>Software: <code>SpikeGLX API4</code>.</li>
 </ul>
 </blockquote>
 <hr />
@@ -235,9 +247,12 @@ with numerous auxiliary analog and digital channels:</p>
 <li>Concurrent, synchronized acquisition from imec probes, OneBoxes and NI-DAQ devices.</li>
 <li>Supports all Neuropixels probe generations and types.</li>
 <li>Supports HHMI/Whisper system.</li>
+<li>Integration with live anatomical tracking:
+<a href="https://github.com/VirtualBrainLab/Pinpoint">Pinpoint</a>;
+<a href="https://github.com/petersaj/neuropixels_trajectory_explorer">Trajectory Explorer</a>.</li>
 <li>Flexible visualization, filtering and sorting tools.</li>
 <li>Programmable triggering.</li>
-<li>Remote control and extensibility via C++ or MATLAB.</li>
+<li>Remote control and extensibility via MATLAB, C++, C, C#, Python.</li>
 <li>Powerful offline viewing and editing.</li>
 </ul>
 <p>In addition to the SpikeGLX acquisition application, we provide a large
@@ -272,22 +287,22 @@ site's <a href="firmware/">Firmware tab</a>.</em></p>
 </blockquote>
 <hr />
 <h2 id="latest-application-downloads">Latest Application Downloads</h2>
-<p><strong>SpikeGLX 3.0 (PXI, OneBox, all probe types later than 3A)</strong>:</p>
+<p><strong>SpikeGLX API4 (PXI, OneBox, all probe types later than 3A)</strong>:</p>
 <p>Latest release highlights:</p>
 <ul>
 <li>Replaces all previous releases.</li>
 <li>Supports OneBox.</li>
-<li>Supports all probes.</li>
+<li>Supports all probes including Quadbase.</li>
 <li>Does whole probe activity surveys.</li>
 <li>Has newer graphical site selection tools.</li>
-<li>Supports the (now separate) MATLAB and C++ remote SDKs.</li>
+<li>Supports the (now separate) {MATLAB, C++, C, C#, Python} remote SDKs.</li>
 <li>Has many GUI enhancements and better help.</li>
 </ul>
 <blockquote>
-<p>Important: Please read the <code>README</code> file.</p>
+<p>Important: Please read the <code>README</code> file in your download.</p>
 </blockquote>
 <ul>
-<li><a href="App/Release_v20250325-phase30.zip">Release 20250325-phase30</a>...<a href="Readme/Readme_v20250325-phase30.txt">Readme</a> : Missing samples, better survey, imec v3.70.3</li>
+<li><a href="App/Release_v20250525-api4.zip">Release 20250525-api4</a>...<a href="Readme/Readme_v20250525-api4.txt">Readme</a> : Quadbase, API4, Qt6, api v4.1.3</li>
 </ul>
 <blockquote>
 <p><em>Release downloads come with two executables</em>:</p>
@@ -295,17 +310,18 @@ site's <a href="firmware/">Firmware tab</a>.</em></p>
 <li><strong>SpikeGLX.exe</strong>: <em>Runs {imec probes, OneBox, NI, FileViewer}, but you need
 to install NI drivers to run it</em>.</li>
 <li><strong>SpikeGLX_NISIM.exe</strong>: <em>Runs {imec probes, OneBox, FileViewer} but not NI
-hardware. Does not need NI drivers</em>.</li>
+hardware. Does not need NI drivers</em>. Use this on your laptop to review data
+and plan new runs.</li>
 </ul>
 <p>Suggested organization: Create folder 'SpikeGLX' on your desktop or <code>C:\</code>
 then download/unzip associated stuff into it. It's fine to have several
 versions there as long as you run one at a time:</p>
 </blockquote>
 <pre><code>SpikeGLX\
+    Release_v20250525-api4.zip
     Release_v20250325-phase30.zip
-    Release_v20200520-phase3B2.zip
+    Release_v20250525-api4\
     Release_v20250325-phase30\
-    Release_v20200520-phase3B2\
     Drivers\
         Enclustra_Windows_10&amp;11\
     Tools\
@@ -480,7 +496,7 @@ This helps remove artifacts that are too tricky for CatGT.</p>
 <h2 id="metadata-guides">Metadata Guides</h2>
 <p>Descriptions of metafile items for each phase:</p>
 <ul>
-<li><a href="Sgl_help/Metadata_30.html">Metadata_30</a></li>
+<li><a href="Sgl_help/Metadata_Help.html">Metadata_Help</a></li>
 <li><a href="Support/Metadata_20.html">Metadata_20</a></li>
 <li><a href="Support/Metadata_3B2.html">Metadata_3B2 (NP 1.0)</a></li>
 <li><a href="Support/Metadata_3B1.html">Metadata_3B1</a></li>
@@ -509,10 +525,12 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.</p>
 <li><a href="Support/NPix_sharpening.docx">Sharpening Apparatus (MS.Word.docx)</a></li>
 <li><a href="help/NIDriverInstall/NI_driver_installation/">Installing NI Drivers</a></li>
 <li><a href="Sgl_help/SpikeGLX_OneBox_Quickstart.html">OneBox Quickstart</a></li>
+<li><a href="Sgl_help/SpikeGLX_Quadbase_Quickstart.html">Quadbase Quickstart</a></li>
 <li><a href="Sgl_help/UserManual.html">SpikeGLX UserManual</a></li>
 <li><a href="Support/SGLX_QuickRef.zip">SpikeGLX QuickRef (MS.PowerPoint)</a></li>
 <li><a href="Support/UCL_Course_2024.zip">SpikeGLX UCL Course 2024 (MS.PowerPoint)</a></li>
 <li><a href="Sgl_help/SpikeGLX_FAQ.html">SpikeGLX FAQ</a></li>
+<li><a href="Sgl_help/Metadata_Help.html">Metadata Help</a></li>
 <li><a href="help/catgt_tshift/catgt_tshift/">CatGT: Tshift, CAR, Gfix</a></li>
 <li><a href="help/syncEdges/Sync_edges/">Sync: Aligning with Edges</a></li>
 <li><a href="help/parsing/">Parsing Data Files</a></li>
@@ -531,7 +549,7 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.</p>
 </ul>
 <hr />
 <h2 id="licensing">Licensing</h2>
-<p>Use is subject to Janelia Research Campus Software Copyright 1.2 license terms:
+<p>Use is subject to Janelia Research Campus Software Copyright terms:
 <a href="http://license.janelia.org/license">http://license.janelia.org/license</a>.</p>
 <p>QLed components are subject to GNU Library GPL v2.0 terms, which are described here:
 <a href="https://github.com/billkarsh/SpikeGLX/blob/master/QLed-LGPLv2-LICENSE.txt">https://github.com/billkarsh/SpikeGLX/blob/master/QLed-LGPLv2-LICENSE.txt</a>.</p>
@@ -619,5 +637,5 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.</p>
 
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2025-08-08 07:26:05.529793+00:00
+Build Date UTC : 2025-09-12 00:45:05.426522+00:00
 -->

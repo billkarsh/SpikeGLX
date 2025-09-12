@@ -4,15 +4,18 @@ nav:
     - Firmware: firmware.md
     - Legacy: legacy.md
     - Help:
+        - 'Neuropixels Slack Channel': 'https://join.slack.com/t/neuropixelsgroup/shared_invite/zt-1jibcdbhe-uNyp8q522L4S0apVKwoC6A'
         - 'Neuropixels Support Page': 'https://www.neuropixels.org/support'
         - 'Noise: Learn How To Solder': 'help/solder/solder.md'
         - 'Sharpening Apparatus (MS.Word.docx)': 'Support/NPix_sharpening.docx'
         - 'Installing NI Drivers': 'help/NIDriverInstall/NI_driver_installation.md'
         - 'OneBox Quickstart': 'Sgl_help/SpikeGLX_OneBox_Quickstart.html'
+        - 'Quadbase Quickstart': 'Sgl_help/SpikeGLX_Quadbase_Quickstart.html'
         - 'SpikeGLX UserManual': 'Sgl_help/UserManual.html'
         - 'SpikeGLX QuickRef (MS.PowerPoint)': 'Support/SGLX_QuickRef.zip'
         - 'SpikeGLX UCL Course 2024 (MS.PowerPoint)': 'Support/UCL_Course_2024.zip'
         - 'SpikeGLX FAQ': 'Sgl_help/SpikeGLX_FAQ.html'
+        - 'Metadata Help': 'Sgl_help/Metadata_Help.html'
         - 'CatGT: Tshift, CAR, Gfix': 'help/catgt_tshift/catgt_tshift.md'
         - 'Sync: Aligning with Edges': 'help/syncEdges/Sync_edges.md'
         - 'Parsing Data Files': 'help/parsing.md'

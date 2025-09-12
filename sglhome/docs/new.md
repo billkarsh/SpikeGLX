@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+September 11, 2025
+
+* SpikeGLX 20250525-api4 (Quadbase, API4, Qt6, api v4.1.3).
+
 August 8, 2025
 
 * CatGT 4.8 (Supercat support for -save and -sepShanks).

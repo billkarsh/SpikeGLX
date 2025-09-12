@@ -9,8 +9,8 @@
 >This site supports prototype and currently shipping commercial products.</BR>
 >The latest commercial PXI-based components are:
 >
->* Hardware: `Neuropixels 1.0 probes` (also called phase3B2).
->* Software: `SpikeGLX 3.0` (also called phase30).
+>* Hardware: `Neuropixels 1.0, 2.0, NHP, UHD, Quad-base`.
+>* Software: `SpikeGLX API4`.
 
 ------
 
@@ -23,9 +23,12 @@ with numerous auxiliary analog and digital channels:
 * Concurrent, synchronized acquisition from imec probes, OneBoxes and NI-DAQ devices.
 * Supports all Neuropixels probe generations and types.
 * Supports HHMI/Whisper system.
+* Integration with live anatomical tracking:
+[Pinpoint](https://github.com/VirtualBrainLab/Pinpoint);
+[Trajectory Explorer](https://github.com/petersaj/neuropixels_trajectory_explorer).
 * Flexible visualization, filtering and sorting tools.
 * Programmable triggering.
-* Remote control and extensibility via C++ or MATLAB.
+* Remote control and extensibility via MATLAB, C++, C, C#, Python.
 * Powerful offline viewing and editing.
 
 In addition to the SpikeGLX acquisition application, we provide a large
@@ -65,28 +68,29 @@ site's [Firmware tab](firmware.md).*
 
 ## Latest Application Downloads
 
-**SpikeGLX 3.0 (PXI, OneBox, all probe types later than 3A)**:
+**SpikeGLX API4 (PXI, OneBox, all probe types later than 3A)**:
 
 Latest release highlights:
 
 - Replaces all previous releases.
 - Supports OneBox.
-- Supports all probes.
+- Supports all probes including Quadbase.
 - Does whole probe activity surveys.
 - Has newer graphical site selection tools.
-- Supports the (now separate) MATLAB and C++ remote SDKs.
+- Supports the (now separate) {MATLAB, C++, C, C#, Python} remote SDKs.
 - Has many GUI enhancements and better help.
 
->Important: Please read the `README` file.
+>Important: Please read the `README` file in your download.
 
-* [Release 20250325-phase30](App/Release_v20250325-phase30.zip)...[Readme](Readme/Readme_v20250325-phase30.txt) : Missing samples, better survey, imec v3.70.3
+* [Release 20250525-api4](App/Release_v20250525-api4.zip)...[Readme](Readme/Readme_v20250525-api4.txt) : Quadbase, API4, Qt6, api v4.1.3
 
 >*Release downloads come with two executables*:
 >
 >- **SpikeGLX.exe**: *Runs {imec probes, OneBox, NI, FileViewer}, but you need
 to install NI drivers to run it*.
 >- **SpikeGLX_NISIM.exe**: *Runs {imec probes, OneBox, FileViewer} but not NI
->hardware. Does not need NI drivers*.
+>hardware. Does not need NI drivers*. Use this on your laptop to review data
+and plan new runs.
 
 > Suggested organization: Create folder 'SpikeGLX' on your desktop or `C:\`
 then download/unzip associated stuff into it. It's fine to have several
@@ -94,10 +98,10 @@ versions there as long as you run one at a time:
 
 ```
 SpikeGLX\
+    Release_v20250525-api4.zip
     Release_v20250325-phase30.zip
-    Release_v20200520-phase3B2.zip
+    Release_v20250525-api4\
     Release_v20250325-phase30\
-    Release_v20200520-phase3B2\
     Drivers\
         Enclustra_Windows_10&11\
     Tools\
@@ -281,7 +285,7 @@ Related help:
 
 Descriptions of metafile items for each phase:
 
-* [Metadata_30](Sgl_help/Metadata_30.html)
+* [Metadata_Help](Sgl_help/Metadata_Help.html)
 * [Metadata_20](Support/Metadata_20.html)
 * [Metadata_3B2 (NP 1.0)](Support/Metadata_3B2.html)
 * [Metadata_3B1](Support/Metadata_3B1.html)
@@ -316,10 +320,12 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.
 * [Sharpening Apparatus (MS.Word.docx)](Support/NPix_sharpening.docx)
 * [Installing NI Drivers](help/NIDriverInstall/NI_driver_installation.md)
 * [OneBox Quickstart](Sgl_help/SpikeGLX_OneBox_Quickstart.html)
+* [Quadbase Quickstart](Sgl_help/SpikeGLX_Quadbase_Quickstart.html)
 * [SpikeGLX UserManual](Sgl_help/UserManual.html)
 * [SpikeGLX QuickRef (MS.PowerPoint)](Support/SGLX_QuickRef.zip)
 * [SpikeGLX UCL Course 2024 (MS.PowerPoint)](Support/UCL_Course_2024.zip)
 * [SpikeGLX FAQ](Sgl_help/SpikeGLX_FAQ.html)
+* [Metadata Help](Sgl_help/Metadata_Help.html)
 * [CatGT: Tshift, CAR, Gfix](help/catgt_tshift/catgt_tshift.md)
 * [Sync: Aligning with Edges](help/syncEdges/Sync_edges.md)
 * [Parsing Data Files](help/parsing.md)
@@ -341,7 +347,7 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.
 
 ## Licensing
 
-Use is subject to Janelia Research Campus Software Copyright 1.2 license terms:
+Use is subject to Janelia Research Campus Software Copyright terms:
 [http://license.janelia.org/license](http://license.janelia.org/license).
 
 QLed components are subject to GNU Library GPL v2.0 terms, which are described here:

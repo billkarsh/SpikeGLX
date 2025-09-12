@@ -2,30 +2,36 @@
 
 ## Imec Project Phases
 
->This site supports prototype and currently shipping commercial products.</BR>
->The latest commercial PXI-based components are:
->
->* Hardware: `Neuropixels 1.0 probes` (also called phase3B2).
->* Software: `SpikeGLX 3.0` (also called phase30).
+>This site supports prototype and currently shipping commercial products.
 
-There are five branches in this repo separately supporting the five Imec
-Neuropixels project development phases. The five phases have mutually
-incompatible hardware and software, so obtain the appropriate materials
+There are several branches in this repo tracking major Imec Neuropixels
+project development phases. The various phases have involved both software
+and hardware evolution and redesign, so obtain the appropriate materials
 for your needs. Release software packages are labeled as phase3A, phase3B1,
-phase3B2, phase20, or phase30. All early releases having no phase label are
-actually phase3A. All releases support NI-DAQ based acquisition.
+phase3B2, phase20, phase30 or phase40. All early releases having no phase
+label are actually phase3A. All releases support NI-DAQ based acquisition.
 
-* **Phase3A**: Initially, 4 flavors of prototype probe (option 1, 2, 3, 4)
-were created enabling consortium members to choose the most useful
-architecture and feature set. Phase3A probes are connected one at a time to
-a Xilinx Kintex 7 FPGA board, and accessed via Ethernet. The probes, cables,
-HS and BSC parts are specific to phase3A.
+Summaries of development phases (newest to oldest):
 
-* **Phase3B1**: At this phase, option 3 probes had won and were further
-developed for commercial production. The same Xilinx board is retained for
-one at a time probe operation over Ethernet (but reprogrammed for 3B1).
-The cables, HS and BSC parts are all specific to 3B1. The 3B probes can be
-run with either 3B1 or 3B2 setups.
+* **API4**: (Main branch) In 2025 Imec introduced API 4.0, which extends
+support to three technologies (tech): {STD=NP1+NP2, OPTO, NXT=NP3}. There
+are three corresponding PXI basestation-module techs which will each need
+specific firmware. The SpikeGLX 'Upload Firmware' dialog will help manage
+this. OneBox is considered a STD-tech module. Existing modules and OneBox
+remain compatible with API4. There are rules about which probe-tech runs
+in which module-tech. SpikeGLX API4 supports all tech and will guide you
+accordingly. SpikeGLX now builds with Qt 6.9 rather than Qt 5.12, which
+slightly alters its appearance.
+
+* **Phase30**: This is unified software to support Neuropixels 1.0, 2.0 and
+all probe hardware produced through 8/1/2025. Again, the same base station
+modules can be used after updating their firmware, which can be done via
+SpikeGLX. This version also supports OneBox.
+
+* **Phase20**: A.k.a. Neuropixels 2.0, introduces specific probes and HS
+with a more compact design. The HS each support two probes. The same PXIe
+modules can be used with a firmware update. SpikeGLX for this phase is
+specific to 2.0 hardware.
 
 * **Phase3B2**: A.k.a. Neuropixels 1.0. This phase replaces the Xilinx
 board with PXIe based modules, each of which connects up to 4 probes.
@@ -33,14 +39,17 @@ Several modules can be operated together from one PXI chassis and one
 application. The probes are the same as phase3B1, but all other hardware
 parts are specific to the PXIe implementation.
 
-* **Phase20**: A.k.a. Neuropixels 2.0, introduces specific probes and HS
-with a more compact design. The HS each support two probes. The same PXIe
-modules can be used with a firmware update. SpikeGLX for this phase is
-specific to 2.0 hardware.
+* **Phase3B1**: At this phase, option 3 probes from phase3A were selected
+for further development and commercial production. The same Xilinx board
+is retained for one at a time probe operation over Ethernet (but reprogrammed
+for 3B1). The cables, HS and BSC parts are all specific to 3B1. The 3B probes
+can be run with either 3B1 or 3B2 setups.
 
-* **Phase30**: This is unified software to support Neuropixels 1.0, 2.0 and
-all other probe hardware going forward. Again, the same base station modules
-can be used after updating their firmware, which can be done via SpikeGLX.
+* **Phase3A**: Initially, 4 flavors of prototype probe (option 1, 2, 3, 4)
+were created enabling founding consortium members to choose the most useful
+architecture and feature set. Phase3A probes are connected one at a time to
+a Xilinx Kintex 7 FPGA board, and accessed via Ethernet. The probes, cables,
+HS and BSC parts are specific to phase3A.
 
 ------
 
@@ -48,6 +57,7 @@ can be used after updating their firmware, which can be done via SpikeGLX.
 
 **30**:
 
+* [Release 20250325-phase30](../App/Release_v20250325-phase30.zip)...[Readme](../Readme/Readme_v20250325-phase30.txt) : Missing samples, better survey, imec v3.70.3
 * [Release 20250201-phase30](../App/Release_v20250201-phase30.zip)...[Readme](../Readme/Readme_v20250201-phase30.txt) : Replace 20241215, Waveplayer, imec v3.70.3
 * [Release 20241001-phase30](../App/Release_v20241001-phase30.zip)...[Readme](../Readme/Readme_v20241001-phase30.txt) : Click and play, new probes, imec v3.70.3
 * [Release 20240620-phase30](../App/Release_v20240620-phase30.zip)...[Readme](../Readme/Readme_v20240620-phase30.txt) : OneBox, Quad-probes, imec v3.70.2
