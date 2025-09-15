@@ -16,6 +16,7 @@ nav:
         - 'SpikeGLX UCL Course 2024 (MS.PowerPoint)': 'Support/UCL_Course_2024.zip'
         - 'SpikeGLX FAQ': 'Sgl_help/SpikeGLX_FAQ.html'
         - 'Metadata Help': 'Sgl_help/Metadata_Help.html'
+        - 'CatGT ReadMe': 'CatGT_help/CatGT_ReadMe.html'
         - 'CatGT: Tshift, CAR, Gfix': 'help/catgt_tshift/catgt_tshift.md'
         - 'Sync: Aligning with Edges': 'help/syncEdges/Sync_edges.md'
         - 'Parsing Data Files': 'help/parsing.md'

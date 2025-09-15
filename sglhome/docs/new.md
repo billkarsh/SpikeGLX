@@ -1,5 +1,11 @@
 # What's New On The Site?
 
+September 15, 2025
+
+* SpikeGLX 20250915-api4 (Quadbase, API4, Qt6, api v4.1.3).
+(Patch that replaces 20250525).
+* Add CatGT ReadMe to help.
+
 September 11, 2025
 
 * SpikeGLX 20250525-api4 (Quadbase, API4, Qt6, api v4.1.3).

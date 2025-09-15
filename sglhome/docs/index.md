@@ -82,7 +82,7 @@ Latest release highlights:
 
 >Important: Please read the `README` file in your download.
 
-* [Release 20250525-api4](App/Release_v20250525-api4.zip)...[Readme](Readme/Readme_v20250525-api4.txt) : Quadbase, API4, Qt6, api v4.1.3
+* [Release 20250915-api4](App/Release_v20250915-api4.zip)...[Readme](Readme/Readme_v20250915-api4.txt) : Quadbase, API4, Qt6, api v4.1.3
 
 >*Release downloads come with two executables*:
 >
@@ -98,9 +98,9 @@ versions there as long as you run one at a time:
 
 ```
 SpikeGLX\
-    Release_v20250525-api4.zip
+    Release_v20250915-api4.zip
     Release_v20250325-phase30.zip
-    Release_v20250525-api4\
+    Release_v20250915-api4\
     Release_v20250325-phase30\
     Drivers\
         Enclustra_Windows_10&11\
@@ -202,6 +202,7 @@ on SpikeGLX output files (all probe types):
 
 * [CatGT 4.8 (Windows)](Support/CatGTWinApp.zip)
 * [CatGT 4.8 (Linux)](Support/CatGTLnxApp.zip)
+* [CatGT ReadMe](CatGT_help/CatGT_ReadMe.html)
 
 ------
 
@@ -326,6 +327,7 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.
 * [SpikeGLX UCL Course 2024 (MS.PowerPoint)](Support/UCL_Course_2024.zip)
 * [SpikeGLX FAQ](Sgl_help/SpikeGLX_FAQ.html)
 * [Metadata Help](Sgl_help/Metadata_Help.html)
+* [CatGT ReadMe](CatGT_help/CatGT_ReadMe.html)
 * [CatGT: Tshift, CAR, Gfix](help/catgt_tshift/catgt_tshift.md)
 * [Sync: Aligning with Edges](help/syncEdges/Sync_edges.md)
 * [Parsing Data Files](help/parsing.md)

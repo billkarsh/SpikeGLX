@@ -1,0 +1,1203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link href="data:text/css;charset=utf-8,body%20%7B%0Amargin%3A%20auto%3B%0Apadding%2Dright%3A%201em%3B%0Apadding%2Dleft%3A%201em%3B%0Amax%2Dwidth%3A%2068em%3B%20%0Aborder%2Dleft%3A%201px%20solid%20black%3B%0Aborder%2Dright%3A%201px%20solid%20black%3B%0Acolor%3A%20black%3B%0Afont%2Dfamily%3A%20Verdana%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%20100%25%3B%0Aline%2Dheight%3A%20140%25%3B%0Acolor%3A%20%23333%3B%0A%7D%0Ablockquote%20%7B%0Aborder%2Dleft%3A%205px%20solid%20%23cccccc%3B%0Amargin%2Dleft%3A%2020px%3B%0Apadding%3A%200%200%200%2015px%3B%0A%7D%0Apre%20%7B%0Aborder%3A%201px%20dotted%20gray%3B%0Aborder%2Dstyle%3A%20dotted%3B%0Abackground%2Dcolor%3A%20%23f5f5f5%3B%20%0Adisplay%3A%20block%3B%0Acolor%3A%20%23f5f5f5%3B%0Apadding%2Dtop%3A%200%3B%0Apadding%2Dbottom%3A%200%3B%0A%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20monospace%3B%0Afont%2Dsize%3A%20115%25%3B%0Abackground%2Dcolor%3A%20transparent%3B%0Acolor%3A%20%231d9d1d%3B%0A%7D%0Ah1%20a%2C%20h2%20a%2C%20h3%20a%2C%20h4%20a%2C%20h5%20a%20%7B%0Atext%2Ddecoration%3A%20none%3B%0Acolor%3A%20%237a5ada%3B%0A%7D%0Ah1%2C%20h2%2C%20h3%2C%20h4%2C%20h5%20%7B%0Afont%2Dfamily%3A%20verdana%3B%0Afont%2Dweight%3A%20bold%3B%0Aborder%2Dbottom%3A%20none%3B%20%0Acolor%3A%20%237a5ada%3B%20%7D%0Ah1%20%7B%0Afont%2Dsize%3A%20130%25%3B%0A%7D%0Ah2%20%7B%0Afont%2Dsize%3A%20110%25%3B%0A%7D%0Ah3%20%7B%0Afont%2Dsize%3A%2095%25%3B%0A%7D%0Ah4%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah5%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah1%2Etitle%20%7B%0Afont%2Dsize%3A%20200%25%3B%0Afont%2Dweight%3A%20bold%3B%0Apadding%2Dtop%3A%200%2E2em%3B%0Apadding%2Dbottom%3A%200%2E2em%3B%0Atext%2Dalign%3A%20left%3B%0Aborder%3A%20none%3B%0A%7D%0Adt%20code%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Add%20p%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0A%23footer%20%7B%0Apadding%2Dtop%3A%201em%3B%0Afont%2Dsize%3A%2070%25%3B%0Acolor%3A%20gray%3B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Atable%20%7B%0Amargin%2Dbottom%3A%202em%3B%0Aborder%2Dbottom%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dright%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dspacing%3A%200%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Apadding%3A%20%2E2em%201em%3B%0Abackground%2Dcolor%3A%20%23eee%3B%0Aborder%2Dtop%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dleft%3A%201px%20solid%20%23ddd%3B%0A%7D%0Atable%20td%20%7B%0Apadding%3A%20%2E2em%201em%3B%0Aborder%2Dtop%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dleft%3A%201px%20solid%20%23ddd%3B%0Avertical%2Dalign%3A%20top%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<h1 id="catgt-user-manual">CatGT User Manual</h1>
+<h2 id="purpose">Purpose</h2>
+<ul>
+<li>Optionally join trials with given run_name and index ranges [ga,gb] [ta,tb]...</li>
+<li>...Or run on any individual file.</li>
+<li>Optionally apply demultiplexing corrections.</li>
+<li>Optionally apply band-pass and global CAR filters.</li>
+<li>Optionally edit out saturation artifacts.</li>
+<li>By default extract tables of sync waveform edge times to drive TPrime.</li>
+<li>Optionally extract tables of other nonneural event times to be aligned with spikes.</li>
+<li>Optionally join the above outputs across different runs (supercat feature).</li>
+</ul>
+<p><strong>Topics</strong>:</p>
+<ul>
+<li><a href="#install">Install</a></li>
+<li><a href="#usage-quick-ref">Usage Quick Ref</a>
+<ul>
+<li><a href="#command-line-parameters">Command Line Parameters</a></li>
+<li><a href="#parameter-ordering">Parameter Ordering</a></li>
+<li><a href="#pass-1-and-pass-2">Pass-1 and Pass-2</a>
+<ul>
+<li><a href="#pass-1">Pass-1</a></li>
+<li><a href="#extraction-pass">Extraction pass</a></li>
+<li><a href="#pass-2">Pass-2</a></li>
+</ul></li>
+<li><a href="#sample-scripts">Sample scripts</a></li>
+</ul></li>
+<li><a href="#output">Output</a>
+<ul>
+<li><a href="#errors">Errors</a></li>
+<li><a href="#when-output-is-made">When output is made</a></li>
+<li><a href="#where-output-goes">Where output goes</a></li>
+<li><a href="#how-output-is-named">How output is named</a></li>
+<li><a href="#metadata-output-files">Metadata output files</a></li>
+<li><a href="#supplementary-output-files">Supplementary output files</a></li>
+</ul></li>
+<li><a href="#individual-parameter-notes">Individual Parameter Notes</a>
+<ul>
+<li><a href="#dir">dir</a></li>
+<li><a href="#run_name">run_name</a></li>
+<li><a href="#stream-identifiers--ni--ob--ap--lf">Stream identifiers <code>{-ni, -ob, -ap, -lf}</code></a></li>
+<li><a href="#obx-which-oneboxes">obx (which OneBox(es))</a></li>
+<li><a href="#prb_3a">prb_3A</a></li>
+<li><a href="#prb-which-probes">prb (which probe(s))</a></li>
+<li><a href="#index-range-g--t--concatenation">Index range (g-, t- concatenation)</a>
+<ul>
+<li><a href="#background">Background</a></li>
+<li><a href="#usage-notes">Usage notes</a></li>
+<li><a href="#using-catgt-output-files-as-input-for-an-extraction-pass">Using CatGT output files as input for an extraction pass</a></li>
+<li><a href="#running-catgt-on-nonstandard-file-names">Running CatGT on nonstandard file names</a></li>
+<li><a href="#missing-files-and-gap-zero-filling">Missing files and gap zero-filling</a></li>
+</ul></li>
+<li><a href="#gtlist-option">gtlist option</a></li>
+<li><a href="#no_linefill-option">no_linefill option</a></li>
+<li><a href="#startsecs-option">startsecs option</a></li>
+<li><a href="#apfilter-and-lffilter-options">apfilter and lffilter options</a></li>
+<li><a href="#no_tshift-option">no_tshift option</a></li>
+<li><a href="#loccar_umloccar-option">loccar_um/loccar option</a></li>
+<li><a href="#gblcar-option">gblcar option</a></li>
+<li><a href="#gbldmx-option">gbldmx option</a></li>
+<li><a href="#gfix-option">gfix option</a>
+<ul>
+<li><a href="#tuning-gfix-parameters">Tuning gfix parameters</a></li>
+</ul></li>
+<li><a href="#chnexcl-option">chnexcl option</a></li>
+<li><a href="#extractors">Extractors</a>
+<ul>
+<li><a href="#extractors-js-stream-type">Extractors js (stream-type)</a></li>
+<li><a href="#extractors-ip-stream-index">Extractors ip (stream-index)</a></li>
+<li><a href="#extractors-word">Extractors word</a></li>
+<li><a href="#extractors-positive-pulse">Extractors positive pulse</a></li>
+<li><a href="#extractors-xa">Extractors xa</a></li>
+<li><a href="#extractors-xd">Extractors xd</a></li>
+<li><a href="#extractors-both-xa-and-xd">Extractors both xa and xd</a></li>
+<li><a href="#extractors-inverted-pulse">Extractors inverted pulse</a></li>
+<li><a href="#extractors-bf-bit-field">Extractors bf (bit-field)</a></li>
+<li><a href="#extractors-inarow-option">Extractors inarow option</a></li>
+<li><a href="#extractors-no_auto_sync-option">Extractors no_auto_sync option</a></li>
+</ul></li>
+<li><a href="#tcat-defer-extraction-to-a-later-pass">-t=cat defer extraction to a later pass</a></li>
+<li><a href="#save-option">save option</a></li>
+<li><a href="#sepshanks-option">sepShanks option</a></li>
+<li><a href="#maxz-option">maxZ option</a></li>
+</ul></li>
+<li><a href="#supercat-multiple-runs">Supercat Multiple Runs</a>
+<ul>
+<li><a href="#building-the-supercat-command-line----">Building The Supercat Command Line</a></li>
+<li><a href="#supercat-option">supercat option</a></li>
+<li><a href="#supercat_trim_edges-option">supercat_trim_edges option</a></li>
+<li><a href="#supercat_skip_ni_ob_bin-option-pass1_force_ni_ob_bin">supercat_skip_ni_ob_bin option &amp; pass1_force_ni_ob_bin</a></li>
+<li><a href="#supercat-other-parameters">supercat (other parameters)</a></li>
+<li><a href="#zero-filling">Zero filling</a></li>
+</ul></li>
+<li><a href="#supercat-behaviors----">Supercat Behaviors</a>
+<ul>
+<li><a href="#zero-filling">Zero filling</a></li>
+<li><a href="#supercat-output">supercat output</a></li>
+</ul></li>
+<li><a href="#change-log">Change Log</a></li>
+</ul>
+<hr />
+<h2 id="install">Install</h2>
+<h3 id="windows">(Windows)</h3>
+<ol style="list-style-type: decimal">
+<li>Copy CatGT-win to your machine, cd into folder.</li>
+<li>Read this document and the notes in <code>runit.bat</code>.</li>
+</ol>
+<h3 id="linux">(Linux)</h3>
+<ol style="list-style-type: decimal">
+<li>Copy CatGT-linux to your machine, cd into folder.</li>
+<li>If needed, <code>&gt; chmod +x install.sh</code></li>
+<li><code>&gt; ./install.sh</code></li>
+<li>Read this document and the notes in <code>runit.sh</code> wrapper script (required).</li>
+</ol>
+<h3 id="compatibility-linux">Compatibility (Linux)</h3>
+<ul>
+<li>Included libraries are from Ubuntu 16.04 (Xenial).</li>
+<li>Tested with Ubuntu 20.04 and 20.10.</li>
+<li>Tested with Scientific Linux 7.3.</li>
+<li>Tested with Oracle Linux Server 8.3.</li>
+<li>Let me know if it runs on other distributions.</li>
+</ul>
+<hr />
+<h2 id="usage-quick-ref">Usage Quick Ref</h2>
+<h3 id="windows-1">(Windows)</h3>
+<p><code>&gt;runit.bat -dir=data_dir -run=run_name -g=ga,gb -t=ta,tb &lt;which streams&gt; [ options ]</code></p>
+<p>Notes:</p>
+<ul>
+<li>Runit.bat can, itself, take command-line parameters; you can still edit runit.bat directly if you prefer.</li>
+<li>It is easiest to learn by editing a copy of <code>runit.bat</code>. Double-click on a bat file to run it.</li>
+<li>Options must not have spaces, generally.</li>
+<li>File paths and names must not have spaces (a standard script file limitation).</li>
+<li>In *.bat files, continue long lines using [space][caret]. Like this: <code>continue this line ^</code>.</li>
+<li>Remove all white space at line ends, especially after a caret (^).</li>
+<li>Read CatGT.log. There is no interesting output in the command window.</li>
+</ul>
+<h3 id="windows-with-powershell">(Windows with PowerShell)</h3>
+<p>PowerShell 3.0 and later will parse your parameter list and may complain; it's especially sensitive about supercat command lines. You can prevent that with the &quot;stop-parsing&quot; symbol --%. Use it like this:</p>
+<p><code>&gt;runit.bat --% -dir=data_dir -run=run_name -g=ga,gb -t=ta,tb &lt;which streams&gt; [ options ]</code></p>
+<h3 id="linux-1">(Linux)</h3>
+<p><code>&gt;runit.sh '-dir=data_dir -run=run_name -g=ga,gb -t=ta,tb &lt;which streams&gt; [ options ]'</code></p>
+<p>Notes:</p>
+<ul>
+<li>Enclosing whole linux parameter list in quotes is recommended in general.</li>
+<li>Enclosing whole linux parameter list in quotes is required for curly brace options.</li>
+<li>Options must not have spaces, generally.</li>
+<li>File paths and names must not have spaces (a standard script file limitation).</li>
+<li>Read CatGT.log. There is no interesting output in the command window.</li>
+</ul>
+<h3 id="command-line-parameters">Command Line Parameters:</h3>
+<pre><code>Which streams:
+-ni                      ;required to process ni stream
+-ob                      ;required to process ob streams
+-ap                      ;required to process ap streams
+-lf                      ;required to process lf streams
+-obx=0,3:5               ;if -ob process these OneBoxes
+-prb_3A                  ;if -ap or -lf process 3A-style probe files, e.g., run_name_g0_t0.imec.ap.bin
+-prb=0,3:5               ;if -ap or -lf AND !prb_3A process these probes
+
+Options:
+-no_run_fld              ;older data, or data files relocated without a run folder
+-prb_fld                 ;input has folder-per-probe organization
+-prb_miss_ok             ;instead of stopping, silently skip missing probes
+-gtlist={gj,tja,tjb}     ;override {-g,-t} giving each listed g-index its own t-range
+-t=cat                   ;extract events from CatGT output files (instead of -t=ta,tb)
+-exported                ;apply FileViewer 'exported' tag to in/output filenames
+-t_miss_ok               ;instead of stopping, zero-fill if trial missing
+-zerofillmax=500         ;set a maximum zero-fill span (millisec)
+-no_linefill             ;disable overwriting zero fills with line fills
+-startsecs=120.0         ;skip this initial span of each input stream (float seconds)
+-maxsecs=7.5             ;set a maximum output file length (float seconds)
+-apfilter=Typ,N,Fhi,Flo  ;apply ap band-pass filter of given {type, order, corners(float Hz)}
+-lffilter=Typ,N,Fhi,Flo  ;apply lf band-pass filter of given {type, order, corners(float Hz)}
+-no_tshift               ;DO NOT time-align channels to account for ADC multiplexing
+-loccar_um=40,140        ;apply ap local CAR annulus (exclude radius, include radius)
+-loccar=2,8              ;apply ap local CAR annulus (exclude radius, include radius)
+-gblcar                  ;apply ap global CAR filter over all channels
+-gbldmx                  ;apply ap global demuxed CAR filter over channel groups
+-gfix=0.40,0.10,0.02     ;rmv ap artifacts: ||amp(mV)||, ||slope(mV/sample)||, ||noise(mV)||
+-chnexcl={prb;chans}     ;this probe, exclude listed chans from ap loccar, gblcar, gfix
+-xa=0,0,2,3.0,4.5,25     ;extract pulse signal from analog chan (js,ip,word,thresh1(V),thresh2(V),millisec)
+-xd=2,0,384,6,500        ;extract pulse signal from digital chan (js,ip,word,bit,millisec)
+-xia=0,0,2,3.0,4.5,2     ;inverted version of xa
+-xid=2,0,384,6,50        ;inverted version of xd
+-bf=0,0,8,2,4,3          ;extract numeric bit-field from digital chan (js,ip,word,startbit,nbits,inarow)
+-inarow=5                ;extractor {xa,xd,xia,xid} antibounce stay high/low sample count
+-no_auto_sync            ;disable the automatic extraction of sync edges in all streams
+-save=2,0,5,20:60        ;save subset of probe chans (js,ip1,ip2,chan-list)
+-sepShanks=0,0,1,2,-1    ;save each shank in sep file (ip,ip0,ip1,ip2,ip3)
+-maxZ=0,0,100            ;probe inserted to given depth (ip,depth-type,depth-value)
+-pass1_force_ni_ob_bin   ;write pass one ni/ob binary tcat file even if not changed
+-supercat={dir,run_ga}   ;concatenate existing output files across runs (see ReadMe)
+-supercat_trim_edges     ;supercat after trimming each stream to matched sync edges
+-supercat_skip_ni_ob_bin ;do not supercat ni/ob binary files
+-dest=path               ;alternate path for output files (must exist)
+-no_catgt_fld            ;if using -dest, do not create catgt_run subfolder
+-out_prb_fld             ;if using -dest, create output subfolder per probe</code></pre>
+<h3 id="parameter-ordering">Parameter Ordering</h3>
+<p>You can list parameters on the CatGT command line in any order. CatGT applies them in the logically necessary order. Of particular note, CatGT applies filter operations in this order:</p>
+<ul>
+<li>Load data</li>
+<li>Apply any specified biquad (time domain)</li>
+<li>Transform to frequency domain</li>
+<li>TShift</li>
+<li>Apply any specified Butterworth filtering</li>
+<li>Transform back to time domain</li>
+<li>Detect gfix transients for later file editing</li>
+<li>Loccar, gblcar, gbldmx (AP-band only)</li>
+<li>Write file</li>
+<li>Apply gfix transient edits to file</li>
+</ul>
+<h3 id="pass-1-and-pass-2">Pass-1 and Pass-2</h3>
+<p>This language helps discriminate &quot;regular&quot; CatGT runs <code>pass-1</code> from supercat runs <code>pass-2</code>, because you can run data though CatGT more than once to do additional processing. This section defines these terms.</p>
+<h4 id="pass-1">Pass-1</h4>
+<p>Generally, on the first pass you will <strong>alter</strong> the data using filters, time-shifts, artifact removal etc. Altering operations are only permitted in pass-1. You can also join g- and/or t-series together into a single output stream. All these operations are applied to data <strong>from a single SpikeGLX run</strong>.</p>
+<h4 id="extraction-pass">Extraction pass</h4>
+<p>This is covered more <a href="#using-catgt-output-files-as-input-for-an-extraction-pass">here</a> but briefly, you can operate the TTL edge extractors like {xd, xa, ...} in the same pass-1 command line with all other pass-1 operations, or you can do extraction as an afterthought in a lazy separate <code>extraction pass</code>.</p>
+<h4 id="pass-2">Pass-2</h4>
+<p>Pass-2 runs are <strong>supercat</strong> runs. In this case we do not alter the data. Rather, supercat joins (concatenates) data together from <strong>disparate SpikeGLX runs</strong>. It does this in a way that preserves temporal alignment across the streams within those runs. You might do this to find/apply a common set of spike templates from sessions that span days or months. Supercat can only be run on pass-1 output data.</p>
+<h3 id="sample-scripts">Sample scripts</h3>
+<p>The Windows version of CatGT includes folder <code>CatGT_std_scripts</code> with examples of typical command-lines you might use for both pass-1 and pass-2 runs.</p>
+<hr />
+<h2 id="output">Output</h2>
+<h3 id="errors">Errors</h3>
+<p>Errors and run messages are appended to <code>CatGT.log</code> in the current working directory.</p>
+<p>If CatGT.log does not exist it will be created automatically.</p>
+<p>Try deleting CatGT.log before a run to make it clear which messages apply to what you just did.</p>
+<h3 id="when-output-is-made">When output is made</h3>
+<ul>
+<li><p>Extractors always create output files.</p></li>
+<li>New .bin/.meta files are output only in these cases:
+<ol style="list-style-type: decimal">
+<li>A range of files is being concatenated, that is, (gb &gt; ga) or (tb &gt; ta).</li>
+<li>Filters, tshift or startsecs are applied, so the binary data are altered.</li>
+<li>A time range is exported: set both -startsecs &gt;= 0, and -maxsecs &gt; startsecs.</li>
+</ol></li>
+<li><p>In most cases, NI and OBX files are useful for extractions of non-neural signal events, but we don't alter these files per se. That is, the binaries would not be reproduced into the output because that's wasteful of space. However, you can force new binaries to be made using <code>-pass1_force_ni_ob_bin</code>. That will make sure supercat finds and joins the binaries just in case you want that.</p></li>
+</ul>
+<h3 id="where-output-goes">Where output goes</h3>
+<ul>
+<li><p>If you do not specify the <code>-dest</code> option, pass-1 output files are stored in the same folder as their input files.</p></li>
+<li><p>The <code>-dest=myPath</code> option will store the output in a destination folder of your choosing. If you do not specify the <code>-no_catgt_fld</code> option, it will further create an output subfolder for the run having a <code>catgt</code> tag: <code>myPath/catgt_run_name_ga</code>.</p></li>
+</ul>
+<h3 id="how-output-is-named">How output is named</h3>
+<ul>
+<li><p>Generally, pass-1 output files have the <code>tcat</code> label. For example, if an input file named <code>path/run_name_g5_t7.imec1.ap.bin</code> is band-pass filtered the output would be <code>path/run_name_g5_tcat.imec1.ap.bin</code>.</p></li>
+<li><p>If a range of g-indices and/or t-indices was specified <code>-g=ga,gb, -t=ta,tb</code> the concatenated output file is named using <code>ga and tcat</code>. For example, <code>-g=5,20 -t=3,67</code> creates file <code>path/run_name_g5_tcat.imec1.ap.bin</code>. This output is written to the <code>ga</code> folder. That is, the g-index is set to the lowest specified input g-index, and the t-index becomes <code>tcat</code> to indicate this file contains a range.</p></li>
+<li><p>The <code>tcat</code> naming convention is used even if a range in g is specified, e.g., <code>-g=0,100</code>, but there is just one t-index for each gate <code>t=0</code>.</p></li>
+</ul>
+<h3 id="metadata-output-files">Metadata output files</h3>
+<ul>
+<li><p>A meta file is also created for each output binary, e.g.: <code>path/run_name_g5_tcat.imec1.ap.meta</code>.</p></li>
+<li><p>The meta file also gets <code>catGTCmdlineN=&lt;command line string&gt;</code>.</p></li>
+<li><p>The meta item e.g., <code>catNFiles=1</code>, indicates count of concatenated files.</p></li>
+<li><p>The meta item e.g., <code>catGVals=0,1</code>, indicates range of g-indices used.</p></li>
+<li><p>The meta item e.g., <code>catTVals=0,20</code>, indicates range of t-indices used.</p></li>
+</ul>
+<h3 id="supplementary-output-files">Supplementary output files</h3>
+<ul>
+<li><p>CatGT creates a pass-1 output file: <code>output_path/run_ga_ct_offsets.txt</code>. This tabulates, for each stream, where the first sample of each input file is relative to the start of the concatenated output file. It records these offsets in units of samples, and again in units of seconds on that stream's clock.</p></li>
+<li><p>CatGT always creates output file: <code>output_path/run_ga_fyi.txt</code>. This lists key output paths and filenames you can use to build downstream command lines for supercat or TPrime.</p></li>
+</ul>
+<hr />
+<h2 id="individual-parameter-notes">Individual Parameter Notes</h2>
+<h3 id="dir">dir</h3>
+<p>The input files are expected to be organized into folders as SpikeGLX writes them. CatGT will use your hints {-no_run_fld, -prb_fld} to automatically generate a path from <code>data_dir</code> (the parent directory of several runs) to the files it needs from <code>run_name</code> (this run). Here are some examples:</p>
+<ul>
+<li><p>Use <code>-dir=data_dir -run=run_name -no_run_fld</code> if the data reside directly within data_dir without any run folder, as was true in early 3A software, or if you copied some of your run files without the enclosing run folder. That is, the data are organized like this: data_dir/run_name_g0_t0.imec0.ap.bin.</p></li>
+<li><p>Use <code>-dir=data_dir -run=run_name</code> if you did not select probe folders in SpikeGLX, that is, the probe data are all at the same level as the NI data without probe subfolders as in this example: data_dir/run_name_g0/run_name_g0_t0.imec0.ap.bin.</p></li>
+<li><p>Use <code>-dir=data_dir -run=run_name -prb_fld</code> if you did select probe folders in SpikeGLX so that the data from each probe lives in a separate folder inside the run folder as demonstrated here: data_dir/run_name_g0/run_name_g0_imec0/run_name_g0_t0.imec0.ap.bin.</p></li>
+</ul>
+<p>Use option <code>-prb_miss_ok</code> when run output is split across multiple drives.</p>
+<blockquote>
+<p>The recently added <strong>obx stream</strong> has small files: just a few analog and digital channels per file. Like NI files, obx files are always at the <strong>top level</strong> of the run folder, and are always in the <strong>main (dir-0) directory</strong> when multidirectory saving is enabled.</p>
+</blockquote>
+<h3 id="run_name">run_name</h3>
+<p>The input run_name is a base (undecorated) name without g- or t-indices.</p>
+<h3 id="stream-identifiers--ni--ob--ap--lf">Stream identifiers <code>{-ni, -ob, -ap, -lf}</code></h3>
+<p>In a given run you might have saved a variety of stream/file types {nidq.bin, obx.bin, ap.bin, lf.bin}. Use the <code>{-ni, -ob, -ap, -lf}</code> flags to indicate which streams within this run you wish to process.</p>
+<p>The -lf option can be used in two ways:</p>
+<ol style="list-style-type: decimal">
+<li><p>If there are .lf. files present in the run folder, which is usual for 1.0-like probes which have a separate LF band, then the {-lf, -lffilter} options will be applied to those files.</p></li>
+<li><p>If there are no .lf. files already present in the run, then the {-lf, -lffilter} options are used to generate a downsampled (2500 Hz) lf.bin/meta file set from the .ap. data if the following conditions are met:</p></li>
+</ol>
+<ul>
+<li>The .ap. data are full-band.</li>
+<li>-lf is set.</li>
+<li>-lffilter is set (include the low-pass corner!).</li>
+</ul>
+<p>The full-band test: A 2.0 probe is always full-band because it has no LF channel count. A 1.0 stream is full-band if at least one channel's AP filter is OFF in its IMRO table.</p>
+<p>Note that in SpikeGLX you can omit the saving of .lf. files by setting the <code>Save chans</code> string to exclude LF channels. For example, <code>0:383,768</code> with <code>Force LF</code> unchecked saves only AP and SY channels. If you've already saved .lf. files you will have to remove or rename them to allow the CatGT LF generation to work.</p>
+<h3 id="obx-which-oneboxes">obx (which OneBox(es))</h3>
+<p>This designates which OneBoxes to process. OneBox indices are assigned by SpikeGLX and always start at zero. Unlike probes, all obx files are at the top level of a run folder (like NI); there are no obx subfolders.</p>
+<p>Examples:</p>
+<ul>
+<li>Use <code>-obx=0</code> if your run contains one OneBox only.</li>
+<li>Use <code>-obx=2:4</code> to process OneBoxes {2,3,4}.</li>
+<li>Use <code>-obx=1,3:5</code> to do OneBoxes {1,3,4,5} (skip 2).</li>
+</ul>
+<h3 id="prb_3a">prb_3A</h3>
+<p>In the early 3A development era there was one and only one probe in a run, so run names looked like run_name_g0_t0.imec.ap.bin, where the <code>imec</code> part does not have an index. In the 3B phase simultaneous recording from multiple probes became possible, so the filenames carry an index, e.g., <code>imec0</code>, <code>imec7</code>, etc.</p>
+<h3 id="prb-which-probes">prb (which probe(s))</h3>
+<p>This designates which probes to process. Probe indices are assigned by SpikeGLX and always start at zero. Note that if you selected the probe folders box in SpikeGLX, the data for probe 7 would be output to a subfolder like this: data_dir/run_name_g0/run_name_g0_imec7.</p>
+<p>Examples:</p>
+<ul>
+<li>Use <code>-prb=0</code> if your run contains one probe only.</li>
+<li>Use <code>-prb=2:4</code> to process probes {2,3,4}.</li>
+<li>Use <code>-prb=1,3:5</code> to do probes {1,3,4,5} (skip 2).</li>
+</ul>
+<h3 id="index-range-g--t--concatenation">Index range (g-, t- concatenation)</h3>
+<h4 id="background">Background</h4>
+<p>During a SpikeGLX run the data samples from the hardware are enqueued into history streams, one stream for each probe and one for NI data. There are several options for writing data files while a run is in progress. For example, all of the data can be saved in a continuous manner, which would produce a single file named <code>run_name_g0_t0</code>. As another example, the <code>Enable/Disable Recording</code> (gate control) button might be pressed several times creating distinct file-writing epochs, each of which gets its own <code>g-index</code>, e.g., {<code>run_name_g0_t0</code>, <code>run_name_g1_t0</code>, <code>run_name_g3_t0</code>, ...}. Finally, within each open gate epoch, SpikeGLX can write a programmed sequence of triggered files, incrementing the <code>t-index</code> for each of these, e.g., {<code>run_name_g7_t0</code>, <code>run_name_g7_t1</code>, <code>run_name_g7_t2</code>, ...}. Note that triggered sequences share a common run_name and g-index. Note too that each time the gate reopens, the g-index is advanced and the selected trigger program will start over again beginning with index t0. In all of these examples the hardware remains in the running state and file data are being drawn from the shared underlying history streams. That allows files from the same run (run_name) to be sewn back together so as to preserve the timing in the original experiment.</p>
+<h4 id="usage-notes">Usage notes</h4>
+<p>CatGT can concatenate files together that come from the same run. That is, the files have the same base run_name, but may have differing g- and t-indices.</p>
+<ul>
+<li>Example <code>-g=0</code> (or <code>-g=0,0</code>): specifies the single g-index <code>0</code>.</li>
+<li>Example <code>-t=5</code> (or <code>-t=5,5</code>): specifies the single t-index <code>5</code>.</li>
+<li>Example <code>-g=1,4</code>: specifies g-index range <code>[1,4] inclusive</code>.</li>
+<li>Example <code>-t=0,100</code>: specifies t-index range <code>[0,100] inclusive</code>.</li>
+</ul>
+<p>When a g-range [ga,gb] and/or a t-range [ta,tb] are specified, concatenation proceeds like two nested loops:</p>
+<pre><code>    foreach g in range [ga,gb] {
+
+        // put all the t's together for this g...
+
+        foreach t in range [ta,tb] {
+
+            find input FILE with this g and t
+
+            if found {
+
+                // compare FILE 'firstSample' metadata item
+                // to the last sample index in the output...
+
+                if firstSample immediately follows the output
+                    append FILE to output
+                else if firstSample is larger (a gap)
+                    zero-fill gap, then append FILE to output
+                else if firstSample is smaller (overlap)
+                    move FILE pointer beyond overlap, then append remainder
+            }
+            else if option t_miss_ok is specified
+                fill gap with zeros
+            else
+                stop processing this stream
+        }
+    }</code></pre>
+<blockquote>
+<p>You can also concatenate different runs together. To do that, read the sections under <a href="#supercat-multiple-runs"><strong>Supercat Multiple Runs</strong></a>.</p>
+</blockquote>
+<blockquote>
+<p>As of version 4.4, all zero-filled regions are replaced with line fills. (See discussion under no_linefill option).</p>
+</blockquote>
+<h4 id="using-catgt-output-files-as-input-for-an-extraction-pass">Using CatGT output files as input for an extraction pass</h4>
+<p>Operate on CatGT output files (in order to do event extraction) by setting the -t parameter to: <code>-t=cat</code>. Note that you must specify the single <code>ga</code> that labels that tcat file. (More on this in the Extractor notes below).</p>
+<h4 id="running-catgt-on-nonstandard-file-names">Running CatGT on nonstandard file names</h4>
+<p>This can be done easily by creating symbolic file links that use the established SpikeGLX g/t naming conventions.</p>
+<h5 id="windows-2">(Windows)</h5>
+<ol style="list-style-type: decimal">
+<li>Create a folder, e.g., 'ZZZ', to hold your symlinks; it acts like a containing run folder. You can make either a flat folder organization or a standard SpikeGLX hierarchy; adjust the CatGT parameters accordingly.</li>
+<li>Create a .bat script file, e.g., 'makelinks.bat'.</li>
+<li>Edit makelinks.bat, adding entries for each bin/meta file pair like this:</li>
+</ol>
+<pre><code>mklink &lt;...ZZZ\goodname_g0_t0.imec0.ap.bin&gt; &lt;path\myoriginalname.bin&gt;
+mklink &lt;...ZZZ\goodname_g0_t0.imec0.ap.meta&gt; &lt;path\myoriginalname.meta&gt;</code></pre>
+<blockquote>
+<p>Set the g/t indices to describe the concatenation order you want.</p>
+</blockquote>
+<ol start="4" style="list-style-type: decimal">
+<li>Close makelinks.bat.</li>
+<li>Right-click on makelinks.bat and select <code>Run as administrator</code>.</li>
+</ol>
+<h5 id="linux-2">(Linux)</h5>
+<ol style="list-style-type: decimal">
+<li>Create a folder, e.g., 'ZZZ', to hold your symlinks; it acts like a containing run folder. You can make either a flat folder organization or a standard SpikeGLX hierarchy; adjust the CatGT parameters accordingly.</li>
+<li>Create a .sh script file, e.g., 'makelinks.sh'.</li>
+<li>Edit makelinks.sh, adding entries for each bin/meta file pair like this:</li>
+</ol>
+<pre><code>#!/bin/sh
+
+ls -s &lt;path/myoriginalname.bin&gt; &lt;...ZZZ/goodname_g0_t0.imec0.ap.bin&gt;
+ls -s &lt;path/myoriginalname.meta&gt; &lt;...ZZZ/goodname_g0_t0.imec0.ap.meta&gt;</code></pre>
+<blockquote>
+<p>Set the g/t indices to describe the concatenation order you want.</p>
+</blockquote>
+<ol start="4" style="list-style-type: decimal">
+<li>Close makelinks.sh, set its executable flag, run it.</li>
+</ol>
+<h4 id="missing-files-and-gap-zero-filling">Missing files and gap zero-filling</h4>
+<p>You can control how CatGT works during file concatenation when one or more of your input files is missing, or, if input file <code>N+1</code> starts later in time than the end of input file <code>N</code>; what we term a &quot;gap&quot; in the recording.</p>
+<p>If you do not use the <code>-t_miss_ok</code> option, the default behavior is to require all files in the series to be present. Processing of a stream will stop if a binary or meta file is not found. If the expected file set is found but there is a gap between the files, the gap is filled with zeros for all channels. If instead, adjacent files overlap in time, the overlap region is represented just once in the output file.</p>
+<p>If you include <code>-t_miss_ok</code> in the command line, then processing does not stop. Rather, the entire missing file (or run of consecutive missing files) is counted as an extended gap. The gap is replaced by zeros when a next expected file set is found.</p>
+<p>By default, CatGT zero-fills gaps so as to precisely preserve the real- world duration of the recording. This enables the spikes and other nonneural events that are present in the output file to be temporally aligned with other recorded data streams in the experiment.</p>
+<p>However, you might not be interested in aligning the data to other streams, so feel that zeros in the output are wasted space. Moreover, some spike sorting programs are known to crash because they cannot handle long spans of time with no detected spikes. Option <code>zerofillmax</code> allows you to set an upper limit on the span of zeros that can be inserted.</p>
+<p>For example, <code>zerofillmax=500</code> directs that gaps whose true length is &lt;= 500 ms are filled by the equivalent-length span of zeros, but longer spans are capped at 500 ms of zeros.</p>
+<p>Setting <code>zerofillmax=0</code> specifies that zero-filling is disabled.</p>
+<blockquote>
+<p>All detected gaps are noted in the CatGT log file. The log entries indicate the time (samples from file start) in the output file that the gap starts, the true length of the gap in the original file set, and the length of the zero-filled span in the output file.</p>
+</blockquote>
+<blockquote>
+<p>As of version 4.4, all zero-filled regions are replaced with line fills. (See discussion under no_linefill option).</p>
+</blockquote>
+<h3 id="gtlist-option">gtlist option</h3>
+<p>This option overrides the <code>-g=</code> and <code>-t=</code> options so that you can specify a separate t-range for each g-index. Specify the list like this:</p>
+<p><code>-gtlist={g0,t0a,t0b}{g1,t1a,t1b}...</code> <em>(include the curly braces)</em>.</p>
+<blockquote>
+<p>With this option the g- and t- values in each list element have to be integers &gt;= 0. You can't use <code>t=cat</code> here.</p>
+</blockquote>
+<h3 id="no_linefill-option">no_linefill option</h3>
+<p>As of version 4.4, CatGT replaces all zero-filled regions with line fills. This replacement is applied both to gaps between files and to gfix edits. Each zero-fill segment has real voltage value bounding it to the left (A) and a real voltage bound to the right (B). A line fill overwrites the zero voltage segment between A and B with a smoothly varying line segment that connects A to B. This smooths the voltage change through time and removes step-changes at A and B. Line-filling thereby suppresses the generation of artifacts that might occur if CatGT output is passed though additional downstream filters.</p>
+<p>Disable line-filling with the -no_linefill option, which instead, uses the zero-filling of previous versions.</p>
+<h3 id="startsecs-option">startsecs option</h3>
+<p>Use this to start reading each input stream after a specified offset from the stream's beginning (float seconds). Note that an error will be flagged if this value exceeds the length of the first file in a concatenation series.</p>
+<blockquote>
+<p>Note: When SpikeGLX writes data files all the streams (assuming sync is enabled) are precisely aligned at the first sample. Startsecs trimming is done using the estimated sample rate for each of the streams. Hence, any inaccuracy in these rates will lead to a small temporal misalignment of the file starts. This error is minimized by calibrating your sample clocks and using smaller values of startsecs.</p>
+</blockquote>
+<h3 id="apfilter-and-lffilter-options">apfilter and lffilter options</h3>
+<p>Digital filtering is separately specified for probe AP and LF bands. CatGT offers these filter options (xx = {ap, lf}):</p>
+<ul>
+<li>xxfilter=biquad,2,Fhi,Flo ; order-2 band-pass</li>
+<li>xxfilter=biquad,2,Fhi,0 ; order-2 high-pass</li>
+<li>xxfilter=biquad,2,0,Flo ; order-2 low-pass</li>
+</ul>
+<p>The biquad is a second order time-domain filter (the order parameter is actually ignored as it must be 2). Our biquad band-pass is implemented as a high-pass followed by a low-pass. We apply all biquads in the forward direction only, making this a causal filter. There is always some phase error associated with causal filtering. This shouldn't disrupt the ability to distinguish waveforms from one another in spike sorting, yet the shapes will differ somewhat from their unfiltered counterparts. This had been the default type of filtering applied in CatGT through version 2.1.</p>
+<ul>
+<li>xxfilter=butter,N,Fhi,Flo ; order-N band-pass</li>
+<li>xxfilter=butter,N,Fhi,0 ; order-N high-pass</li>
+<li>xxfilter=butter,N,0,Flo ; order-N low-pass</li>
+</ul>
+<p>Our Butterworth filters are implemented in the frequency domain. As such they are always acausal (zero phase error). The rate of roll-off of the FFT implementation is about a factor of two slower than in the time domain. For example, to match the result of a single pass (forward-only) order-3 Butterworth (as per MATLAB filter()), specify order 6 here. To match forward-backward time-domain filtering with an order-3 (as per MATLAB filtfilt()), which doubles the effective order, specify order 12 here.</p>
+<h3 id="no_tshift-option">no_tshift option</h3>
+<p>Imec probes digitize the voltages on all of their channels during each sample period (~ 1/(30kHz)). However, the converting circuits (ADCs) are expensive in power and real estate, so there are only a few dozen on the probe and they are shared by the ~384 channels. The channels are organized into multiplex channel groups that are digitized together, consequently each group's actual sampling time is slightly offset from that of other groups.</p>
+<p>CatGT automatically applies an operation we call <code>tshift</code> to undo the effects of multiplexing by temporally aligning channels to each other. Note that the &quot;shift&quot; is smaller than one sample so file sizes do not change. Rather, the amplitude is redistributed among existing samples. Tshift improves the results of operations that compare or combine different channels, such as global CAR filtering or whitening. The FFT-based correction method was proposed by Olivier Winter of the International Brain Laboratory.</p>
+<p>Note that tshift and band-pass filtering should always be done on Neuropixel probe data. The issue is only whether these are applied by CatGT or by some other component of your analysis pipeline.</p>
+<ul>
+<li>Use option <code>-no_tshift</code> to disable CatGT's automatic tshift.</li>
+</ul>
+<h3 id="loccar_umloccar-option">loccar_um/loccar option</h3>
+<ul>
+<li>Do CAR common average referencing on an annular area about each site.</li>
+<li>The average is shank-specific, including only channels/sites on the same shank as the center site.</li>
+<li>Specify an excluded inner radius and an outer averaging radius.</li>
+<li>Use a high-pass filter also, to remove DC offsets.</li>
+<li>You may select only one of {<code>-loccar</code>, <code>-gblcar</code>, <code>-gbldmx</code>}.</li>
+</ul>
+<p>Use option -loccar_um to specify the radii in microns. This requires the presence of <code>~snsGeomMap</code> in the metadata, which will be standard for SpikeGLX versions 20230202 and later. The inner radius must be at least 10 microns.</p>
+<p>Use option -loccar to specify the radii in numbers of rows/columns. This requires the presence of <code>~snsShankMap</code> in the metadata, which will be eliminated in SpikeGLX versions 20230202 and later. The inner radius must be at least 1.</p>
+<blockquote>
+<p><em>Use the SpikeGLX FileViewer to look at traces pre- and post-CAR to see if this filter option is working for your data. A danger of loccar is excessive reduction of the amplitude of large-footprint spikes.</em></p>
+</blockquote>
+<h3 id="gblcar-option">gblcar option</h3>
+<blockquote>
+<p><em>Note: Prior to CatGT version 3.6 the subtracted value had been the statistical average (mean) over all channels. Starting with version 3.6 the median value is used instead to reduce outlier bias.</em></p>
+</blockquote>
+<ul>
+<li>Do CAR common median referencing using all channels.</li>
+<li>The median is probe-wide, including channels/sites on all shanks.</li>
+<li>Unused channels are excluded, see <a href="#chnexcl-option">chnexcl option</a>.</li>
+<li>Note that <code>-gblcar</code> is never applied to the LFP band.</li>
+<li>Note that <code>-gblcar</code> assumes fairly uniform background across all channels.</li>
+<li>Use a high-pass filter also, to remove DC offsets.</li>
+<li>You may select only one of {<code>-loccar</code>, <code>-gblcar</code>, <code>-gbldmx</code>}.</li>
+</ul>
+<blockquote>
+<p><em>Use the SpikeGLX FileViewer to look at traces pre- and post-CAR to see if this filter option is working for your data. A danger of gblcar is that the probe is sampling tissue layers with two or more distinct backgrounds. That can create artifacts that look like small amplitude spikes. If that is happening, instead of <code>-gblcar</code>, try a more localized but still large averaging area using <code>-loccar_um=60,480</code> for example. Think of this geometry not as a small ring, but as a 960 um averaging block about each site. Choose a block size that works best for the layer thickness. Note too that we suggested an inner exclusion radius larger than 2 row-steps to avoid including the spike, itself, in the averaging block.</em></p>
+</blockquote>
+<h3 id="gbldmx-option">gbldmx option</h3>
+<ul>
+<li>Do demuxed CAR common average referencing, yes, average.</li>
+<li>This works on groups of channels that are digitized at the same time.</li>
+<li>All shanks are included in the groups.</li>
+<li>Unused channels are excluded, see <a href="#chnexcl-option">chnexcl option</a>.</li>
+<li>Note that <code>-gbldmx</code> is never applied to the LFP band.</li>
+<li>Note that <code>-gbldmx</code> assumes fairly uniform background across all channels.</li>
+<li>Use a high-pass filter also, to remove DC offsets.</li>
+<li>You may select only one of {<code>-loccar</code>, <code>-gblcar</code>, <code>-gbldmx</code>}.</li>
+</ul>
+<p>Generally we recommend gblcar which considers all channels together and is more robust against outlier values than gbldmx. However, for rare cases of high frequency noise (&gt;15kHz), gbldmx may do a better job. Because fewer channels are included (and averaged), larger correction factors may be subtracted, and that can produce overcorrection artifacts that look like small inverted spikes.</p>
+<h3 id="gfix-option">gfix option</h3>
+<p>Light or chewing artifacts often make large amplitude excursions on a majority of channels. This tool identifies them and cuts them out, replacing with zeros. You specify three things.</p>
+<ol style="list-style-type: decimal">
+<li>A minimum absolute amplitude in mV (zero ignores the amplitude test).</li>
+<li>A minimum absolute slope in mV/sample (zero ignores the slope test).</li>
+<li>A noise level in mV defining the end of the transient.</li>
+</ol>
+<ul>
+<li>Yes, <code>-gblcar</code> and <code>-gfix</code> make sense used together.</li>
+</ul>
+<blockquote>
+<p><em>You are strongly advised to apply high-pass filtering when using -gfix because the result of -gfix is to zero the output. This makes step transitions which will be smaller if the DC-component is removed.</em></p>
+</blockquote>
+<blockquote>
+<p>As of version 4.4, all zero-filled regions are replaced with line fills. (See discussion under no_linefill option).</p>
+</blockquote>
+<h4 id="tuning-gfix-parameters">Tuning gfix parameters</h4>
+<p>Use the SpikeGLX FileViewer to select appropriate amplitude and slope values for a given run. Be sure to turn high-pass filtering ON and spatial <code>&lt;S&gt;</code> filters OFF to match the conditions the CatGT artifact detector will use. Zoom the time scale (ctrl + click&amp;drag) to see the individual sample points and their connecting segments. Set the slope this way: Zoom in on the artifact initial peak, the points with greatest amplitude. Suppose consecutive points {A,B,C,D} make up the peak and {B,C,D} exceed the amplitude threshold. Then there are three slopes {B-A,C-B,D-C} connecting these points. Select the largest value. That is, set the slope to the fastest voltage change near the peak. An artifact will usually be several times faster than a neuronal spike.</p>
+<h3 id="chnexcl-option">chnexcl option</h3>
+<p>Use this option to prevent bad channels from corrupting calculations over mixtures of channels, such as the spatial filters {loccar, gblcar, gfix}.</p>
+<p>The option <code>-chnexcl={probe;chan_list}{probe;chan_list}...</code> takes a list of elements <em>(include the curly braces)</em> that specify a probe index; and a list of channels to exclude for that probe. Channel lists are specified like page lists in a printer dialog, <code>1,10,40:51</code> for example. Be careful to use a semicolon (;) between probe and channel list, and use only commas and colons (,:) within your channel lists. Include no more than one excluded channel list for a given probe index.</p>
+<p>Note that the CatGT spatial filters honor metadata items <code>~snsGeomMap</code> and <code>~snsShankMap</code>. The GeomMap replaces the ShankMap in metadata as of SpikeGLX version 20230202.</p>
+<p>A GeomMap has an entry for each saved channel that describes the (shank, x(um), z(um)) where its electrode resides on the shank, and a fourth 0/1 value, <code>use flag</code>, indicating if the channel should be used in spatial filtering. By default, SpikeGLX marks known on-shank reference channels with zeros. Your chnexcl data force the corresponding use flags to zero before the filters are applied, and the modified <code>~snsGeomMap</code>, if present, is written to the CatGT output metadata.</p>
+<p>A ShankMap has an entry for each saved channel that describes the (shank, col, row) where its electrode resides on the shank, and a fourth 0/1 value, <code>use flag</code>, indicating if the channel should be used in spatial filtering. By default, SpikeGLX marks known on-shank reference channels with zeros. Your chnexcl data force the corresponding use flags to zero before the filters are applied, and the modified <code>~snsShankMap</code>, if present, is written to the CatGT output metadata.</p>
+<h3 id="extractors">Extractors</h3>
+<blockquote>
+<p><em>Starting with version 3.0, CatGT extracts sync edges from all streams by default, unless you specify the <code>-no_auto_sync</code> option (see below).</em></p>
+</blockquote>
+<p>There are five extractors for scanning and decoding nonneural data channels in any data stream. They differ in the data types they operate upon:</p>
+<ul>
+<li>xa: Finds positive pulses in any analog channel.</li>
+<li>xd: Finds positive pulses in any digital channel.</li>
+<li>xia: Finds inverted pulses in any analog channel.</li>
+<li>xid: Finds inverted pulses in any digital channel.</li>
+<li>bf: Decodes positive bitfields in any digital channel.</li>
+</ul>
+<p>The first three parameters of any extractor specify the stream-type, stream-index and channel (16-bit word) to operate on, E.g.:</p>
+<p>-xa=<strong>js,ip,word</strong>, &lt;additional parameters&gt;</p>
+<h4 id="extractors-js-stream-type">Extractors js (stream-type):</h4>
+<ul>
+<li><strong>NI</strong>: js = 0 (any extractor).</li>
+<li><strong>OB</strong>: js = 1 (any extractor).</li>
+<li><strong>AP</strong>: js = 2 (only {xd, xid} are legal).</li>
+</ul>
+<blockquote>
+<p><em>Extractors do not work on LF files. Use the AP-band for sync and event extraction: the higher sample rate improves accuracy.</em></p>
+</blockquote>
+<h4 id="extractors-ip-stream-index">Extractors ip (stream-index)</h4>
+<ul>
+<li><strong>NI</strong>: ip = 0 (there is only one NI stream).</li>
+<li><strong>OB</strong>: ip = 0 selects obx0, ip = 7 selects obx7, etc.</li>
+<li><strong>AP</strong>: ip = 0 selects imec0, ip = 7 selects imec7, etc.</li>
+</ul>
+<h4 id="extractors-word">Extractors word</h4>
+<p>Word is a zero-based channel index. It selects the 16-bit data word to process.</p>
+<p>word = -1, selects the last word in that stream. That's especially useful to specify the SY word at the end of a OneBox or probe stream.</p>
+<blockquote>
+<p>It may be helpful to review the organization of words and bits in data streams in the <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md#channel-naming-and-ordering">SpikeGLX User Manual</a>.</p>
+</blockquote>
+<h4 id="extractors-positive-pulse">Extractors positive pulse</h4>
+<ol style="list-style-type: decimal">
+<li>starts at low baseline (below threshold)</li>
+<li>has a leading/rising edge (crosses above threshold)</li>
+<li>(optionally) stays high/deflected for a given duration</li>
+<li>has a trailing/falling edge (crosses below threshold)</li>
+</ol>
+<blockquote>
+<p>Digital TTL signals are in the range [0,5] V, so for the xd case, positive pulses are inherently non-negative.</p>
+</blockquote>
+<blockquote>
+<p>The xa extractor looks for rising edges and it works regardless of the baseline level of the pulse. The two threshold value can be positive or negative.</p>
+</blockquote>
+<p>The positive pulse extractors <strong>{xa, xd}</strong> make text files that report the times (seconds) of the leading edges of matched pulses.</p>
+<h4 id="extractors-xa">Extractors xa</h4>
+<p>Following <strong>-xa=js,ip,word</strong>, these parameters are required:</p>
+<ul>
+<li>Primary threshold-1 (V).</li>
+<li>Optional more stringent threshold-2 (V).</li>
+<li>Milliseconds duration.</li>
+</ul>
+<p>If your signal looks like clean square pulses, set threshold-2 to be closer to baseline than threshold-1 to ignore the threshold-2 level and run more efficiently. For noisy signals or for non-square pulses set threshold-2 to be farther from baseline than theshold-1 to ensure pulses attain a desired deflection amplitude. Using two separate threshold levels allows detecting the earliest time that pulse departs from baseline (threshold-1) and separately testing that the deflection is great enough to be considered a real event and not noise (threshold-2). See Fig. 1.</p>
+<div class="figure">
+<img src="data:image/png;base64,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" alt="Fig. 1: Dual Thresholds" />
+<p class="caption">Fig. 1: Dual Thresholds</p>
+</div>
+<h4 id="extractors-xd">Extractors xd</h4>
+<p>Following <strong>-xd=js,ip,word</strong>, these parameters are required:</p>
+<ul>
+<li>Index of the bit in the word.</li>
+<li>Milliseconds duration.</li>
+</ul>
+<h4 id="extractors-both-xa-and-xd">Extractors both xa and xd</h4>
+<ul>
+<li><p>All indexing is zero-based.</p></li>
+<li><p>Milliseconds duration means the signal must remain deflected from baseline for that long.</p></li>
+<li><p>Milliseconds duration can be zero to specify detection of all leading edges regardless of pulse duration.</p></li>
+<li>Milliseconds duration default precision (tolerance) is <strong>+/- 20%</strong>.
+<ul>
+<li>Default tolerance can be overridden by appending it in milliseconds as the last parameter for that extractor.</li>
+<li>Each extractor can have its own tolerance.</li>
+<li>E.g., -xd=js,ip,word,bit,100 seeks pulses with duration in default range [80,120] ms.</li>
+<li>E.g., -xd=js,ip,word,bit,100,2 seeks pulses with duration in specified range [98,102] ms.</li>
+</ul></li>
+<li><p>A given channel or even bit could encode two or more types of pulse that have different durations, e.g., <code>-xd=0,0,8,0,10 -xd=0,0,8,0,20</code> scans and reports both 10 and 20 ms pulses on the same line.</p></li>
+<li><p>Each option, say <code>-xd=2,0,384,6,500</code>, creates an output file whose name reflects the parameters, e.g., <code>run_name_g0_tcat.imec0.ap.xd_384_6_500.txt</code>.</p></li>
+<li><p>The threshold is not encoded in the <code>-xa</code> filename; just word and milliseconds.</p></li>
+<li><p>The <code>-save</code> and <code>-sepShanks</code> options can create new neural binaries derived from a parent probe with index ip1, and these new files are labeled by your provided ip2 indices. However, extraction of nonneural events is performed only on the parent ip1 files. For example, you might split a four-shank probe {0} into four separate shank files {1000,1001,1002,1003} using <code>-sepShanks=0,1000,1001,1002,1003</code>. The output will contain a single file of extracted sync edges, named for probe-0. The derived neural files all share the same nonneural data so the extractor output files are not replicated. Rather, the fyi file has path entries that connect each derived ip2 index with the parent ip1 extractor output file.</p></li>
+<li><p>The <code>run_ga_fyi.txt</code> file lists the full paths of generated extractor output files. It also lists which extractor files go with any derived (ip2) neural file indices.</p></li>
+<li><p>The files report the times (s) of leading edges of detected pulses; one time per line, <code>\n</code> line endings.</p></li>
+<li><p>The time is relative to the start of the stream in which the pulse is detected (native time).</p></li>
+</ul>
+<h4 id="extractors-inverted-pulse">Extractors inverted pulse</h4>
+<ol style="list-style-type: decimal">
+<li>starts at high baseline (above threshold)</li>
+<li>has a leading/falling edge (crosses below threshold)</li>
+<li>(optionally) stays low/deflected for a given duration</li>
+<li>has a trailing/rising edge (crosses above threshold)</li>
+</ol>
+<blockquote>
+<p>Digital TTL signals are in the range [0,5] V, so for the xid case, inverted pulses are still entiely non-negative.</p>
+</blockquote>
+<blockquote>
+<p>The xia extractor looks for falling edges and it works regardless of the baseline level of the pulse. The two threshold value can be positive or negative.</p>
+</blockquote>
+<p>The inverted pulse extractors <strong>{xia, xid}</strong> make text files that report the times (seconds) of the leading edges of matched pulses.</p>
+<p>The inverted pulse versions work exactly the same way as their positive counterparts. Just keep in mind that inverted pulses have a high baseline level and deflect toward lower values.</p>
+<h4 id="extractors-bf-bit-field">Extractors bf (bit-field)</h4>
+<p>The -xd and -xid options treat each bit of a digital word as an individual line. In contrast, the -bf option interprets a contiguous group of bits as a non-negative n-bit binary number. The -bf extractor reports value transitions: the newest value and the time it changed, in two separate files. Following <strong>-xa=js,ip,word</strong>, the parameters are:</p>
+<ul>
+<li><strong>startbit</strong>: lowest order bit included in group (range [0..15]),</li>
+<li><strong>nbits</strong>: how many bits belong to group (range [1..&lt;16-startbit&gt;]).</li>
+<li><strong>inarow</strong>: a real value has to persist this many samples in a row (1 or higher).</li>
+</ul>
+<p>In the following examples we set inarow=3:</p>
+<ul>
+<li><p>To interpret all 16 bits of NI word 5 as a number, set -bf=0,0,5,0,16,3.</p></li>
+<li><p>To interpret the high-byte as a number, set -bf=0,0,5,8,8,3.</p></li>
+<li><p>To interpret bits {3,4,5,6} as a four-bit value, set -bf=0,0,5,3,4,3.</p></li>
+</ul>
+<p>You can specify multiple -bf options on the same command line. The words and bits can overlap.</p>
+<p>Each -bf option generates two output files, named according to the parameters (excluding inarow), for example:</p>
+<ul>
+<li><code>run_name_g0_tcat.nidq.bfv_5_3_4.txt</code>.</li>
+<li><code>run_name_g0_tcat.nidq.bft_5_3_4.txt</code>,</li>
+</ul>
+<p>The two files have paired entries. The <code>bfv</code> file contains the decoded values, and the <code>bft</code> file contains the time (seconds from file start) that the field switched to that value.</p>
+<h4 id="extractors-inarow-option">Extractors inarow option</h4>
+<p>The pulse extractors <strong>{xa,xd,xia,xid}</strong> use edge detection. By default, when a signal crosses from low to high, it is required to stay high for at least 5 samples. Similarly, when crossing from high to low the signal is required to stay low for at least 5 samples. This requirement is applied even when specifying a pulse duration of zero, that is, it is applied to any edge. This is done to guard against noise.</p>
+<p>You can override the count giving any value &gt;= 1.</p>
+<h4 id="extractors-no_auto_sync-option">Extractors no_auto_sync option</h4>
+<p>Starting with version 3.0, CatGT automatically extracts sync edges from all streams unless you turn that off using <code>-no_auto_sync</code>.</p>
+<p>For an NI stream, CatGT reads the metadata to see which analog or digital word contains the sync waveform and builds the corresponding extractor for you, either <code>-xa=0,0,word,thresh,0,500</code> or <code>-xd=0,0,word,bit,500</code>.</p>
+<p>For OB and AP streams, CatGT seeks edges in bit #6 of the SY word, as if you had specified <code>-xd=1,ip,-1,6,500</code> and/or <code>-xd=2,ip,-1,6,500</code>.</p>
+<h3 id="tcat-defer-extraction-to-a-later-pass">-t=cat defer extraction to a later pass</h3>
+<p>You might want to concatenate/filter the data in a first pass, and later extract nonneural events from the ensuing output files which are now named <code>tcat</code>. Do that by specifying <code>-t=tcat</code> in the second pass.</p>
+<blockquote>
+<p>NOTE: If the files to operate on are now in an output folder named <code>catgt_run_name</code> then <em>DO PUT</em> tag <code>catgt_</code> in the <code>-run</code> parameter like example (2) below:</p>
+</blockquote>
+<blockquote>
+<p>NOTE: Second pass is restricted to event extraction. An error is flagged if the second pass specifies any concatenation or filter options. Extraction passes should always include -no_tshift.</p>
+</blockquote>
+<p><strong>Examples</strong></p>
+<ul>
+<li><ol style="list-style-type: decimal">
+<li>Saving to native folders --</li>
+</ol>
+<ul>
+<li>Pass 1: <code>&gt;CatGT -dir=aaa -run=bbb -g=ga,gb -t=ta,tb</code>.</li>
+<li>Pass 2: <code>&gt;CatGT -dir=aaa -run=bbb -g=ga -t=cat -no_tshift</code>.</li>
+</ul></li>
+<li><ol start="2" style="list-style-type: decimal">
+<li>Saving to dest folders --</li>
+</ol>
+<ul>
+<li>Pass 1: <code>&gt;CatGT -dir=aaa -run=bbb -g=ga,gb -t=ta,tb -dest=ccc</code>.</li>
+<li>Pass 2: <code>&gt;CatGT -dir=ccc -run=catgt_bbb -g=ga -t=cat -dest=ccc -no_tshift</code>.</li>
+</ul></li>
+</ul>
+<h3 id="save-option">save option</h3>
+<p>By default CatGT reads and writes all of the channels in a binary input file. However, for probe bin files, you can write out a subset of the channels. This is analogous to SpikeGLX selective channel saving, and to the FileViewer export feature. You might use this to eliminate noisy or uninteresting channels, or to split out the shanks of a multishank probe.</p>
+<p>-save=js,ip1,ip2,channel-list</p>
+<ul>
+<li><strong>js,ip1</strong>: Identify the input probe stream, where, js = input stream type = {2=AP, 3=LF}.</li>
+<li><strong>ip2</strong>: User-provided output stream number; a non-negative integer that can be the same as ip1 or not (see examples below).</li>
+<li><strong>channel-list</strong>: Standard SpikeGLX-type list of channels; these name originally acquired channels.</li>
+<li>You can enter as many -save options on one command line as needed, and several options can refer to the same input file if needed: <strong>One file in -&gt; many files out</strong>.</li>
+<li>Internally, the -sepShanks and -maxZ options automatically generate additional -save options.</li>
+<li>The <code>run_ga_fyi.txt</code> file gets an entry of the form <strong>ip2_ip1=(ip2,ip1)()...</strong> that lists the ip1 source index for each new ip2 file index.</li>
+<li>Extraction operations are performed only on the source ip1 file. However, the <code>run_ga_fyi.txt</code> file also gets entries that connect the new ip2-labeled output to its ip1-labeled digital extractions (see example 2).</li>
+<li>Output probe folders, when used, are named using ip1, though the individual filenames get the ip2 index. That is, all the ip2-files derived from a given ip1 probe are located together in a common folder, and that common folder is either the top-level run folder (not using out_prb_fld) or the probe folder named by ip1 (using out_prb_fld).</li>
+</ul>
+<blockquote>
+<p><em>Be sure to name the SYNC channel(s) or they will not be saved.</em></p>
+</blockquote>
+<blockquote>
+<p><em>If processing a 1.0 LF input file, use js = 3 to match the input file type, and use channel indices appropriate for the 1.0 LF-band, that is, values in range [384,768].</em></p>
+</blockquote>
+<blockquote>
+<p><em>If processing a 2.0 AP input file -&gt; LF output file, use js = 2 to match the input file type, and use channel indices appropriate for the 2.0 full-band, that is, values in range [0,383] and SY [384].</em></p>
+</blockquote>
+<blockquote>
+<p><em>If processing a quad-probe input file, in all cases use js = 2 to match the input file type, and use channel indices appropriate for the quad full-band, that is, values in range [0,1535] and SY [1536:1539].</em></p>
+</blockquote>
+<h4 id="example-1">Example 1</h4>
+<p>Remove the first ten channels [0..9] from NP 1.0 file imec0.ap.bin that was originally written with all AP channels saved.</p>
+<p>-save=2,0,0,10:383,768</p>
+<ul>
+<li>The input stream imec0.ap has (js,ip1) = (2,0).</li>
+<li>We will write it out also as imec0.ap, so ip2 = 0.</li>
+<li>There are 384 neural channels [0..383], and the final sync channel is 768.</li>
+</ul>
+<h4 id="example-2">Example 2</h4>
+<p>NP 2.0 single-shank file imec3.ap.bin was originally written with SpikeGLX selective saving enabled; omitting the first 100 channels because they were uninteresting. Hence, the input file to CatGT contains channels [100..384]. Here we will keep only the lowest ten channels and the sync channel, renaming it to imec5.ap.</p>
+<p>-save=2,3,5,100:109,384</p>
+<ul>
+<li>Notice that the channel indices are given with respect to the original data stream rather than the saved file.</li>
+</ul>
+<p><strong>Example 2 FYI Entries</strong></p>
+<p>The <code>fyi</code> file gets additional entries to help you connect renamed binary output files with the digital extractions (like sync edges) that they are paired with...</p>
+<p>Suppose auto-sync is in effect. With or without this -save option, the output fyi file for the run would point at the extracted sync edges using this entry:</p>
+<pre><code>sync_imec3=path/run_name_g0_tcat.imec3.ap.xd_384_6_500.txt</code></pre>
+<p>Because this -save option remaps ip=3 to ip=5, the fyi file also gets this entry:</p>
+<pre><code>sync_imec5=path/run_name_g0_tcat.imec3.ap.xd_384_6_500.txt</code></pre>
+<p>Likewise, any custom extraction for the input ip1 would generate entries like this:</p>
+<pre><code>times_imec3_0=path/extraction_output_file_3
+times_imec5_0=path/extraction_output_file_3</code></pre>
+<h4 id="example-3">Example 3</h4>
+<p>Split NP 2.0 4-shank stream imec0.ap (all channels saved) into four shanks, giving each a new stream number. The original imro selected the lowest (384/4 = 96) electrodes from each shank.</p>
+<p>-save=2,0,10,0:47,96:143,384 -save=2,0,11,48:95,144:191,384 -save=2,0,12,192:239,288:335,384 -save=2,0,13,240:287,336:384</p>
+<h3 id="sepshanks-option">sepShanks option</h3>
+<p>This is a convenient way to split a multishank probe (js=2) into its respective shanks.</p>
+<p>-sepShanks=ip,ip0,ip1,ip2,ip3</p>
+<ul>
+<li><strong>ip</strong>: Identifies the input probe stream.</li>
+<li><strong>ip0:ip3</strong>: User-provided output stream numbers, one for each of up to 4 shanks. Each ipj maps shank-j to a file index that you assign.</li>
+<li>Generally the ipj should be unique (separate files).</li>
+<li>One of the ipj can be the same as input stream: ip.</li>
+<li>One or more ipj can be -1 to omit that shank.</li>
+<li>If the imro selects no sites on a given shank, that shank is omitted.</li>
+<li>The SY channel(s) are automatically included.</li>
+<li>Include no more than one -sepShanks option for a given probe index.</li>
+<li>Internally, the -sepShanks option automatically generates additional -save options.</li>
+</ul>
+<h4 id="example-1-1">Example 1</h4>
+<p>(Same case as Example 3 under the -save option)</p>
+<p>Split NP 2.0 4-shank stream imec0.ap (all channels saved) into four shanks, giving each a new stream number.</p>
+<p>-sepShanks=0,10,11,12,13</p>
+<h4 id="example-2-1">Example 2</h4>
+<p>Save only the second shank for 4-shank stream imec5.ap.</p>
+<p>-sepShanks=5,-1,5,-1,-1</p>
+<h3 id="maxz-option">maxZ option</h3>
+<p>It's very common to insert a probe only partially into the brain. The electrodes that remain outside the brain see primarily environment noise. These channels pollute CAR operations unless they are excluded. Also, you can trim these channels out of your files to make them smaller.</p>
+<p>Use maxZ to specify an insertion depth for an imec probe (js=2). This will automatically create/adjust the -chnexcl option for the probe, and it will create a -save option (if you don't already have one) listing only the inserted channels. Existing -save options are also edited (see note below). Include no more than one -maxZ option for a given probe index.</p>
+<p>The parameters are -maxZ=ip,depth-type,depth-value.</p>
+<p>There are three convenient ways to specify the insertion depth:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Depth-type</th>
+<th align="left">Depth-value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">0</td>
+<td align="left">zero-based row index</td>
+</tr>
+<tr class="even">
+<td align="left">1</td>
+<td align="left">microns in geomMap (z=0 at center of bottom row)</td>
+</tr>
+<tr class="odd">
+<td align="left">2</td>
+<td align="left">microns from tip (z=0 at probe tip)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Note that you can specify your own -chnexcl entry and -maxZ for the same probe (ip); the result is the union: excluding everything you specified with -chnexcl AND excluding channels that are outside the brain via -maxZ.</p>
+</blockquote>
+<blockquote>
+<p>You can also specify your own (-save or -sepShanks) option and -maxZ for the same probe. In this case each (-save or -sepShanks) option is edited to produce the intersection: those channels you specified via (-save or -sepShanks) that are also within the brain via -maxZ.</p>
+</blockquote>
+<hr />
+<h2 id="supercat-multiple-runs">Supercat Multiple Runs</h2>
+<p>You may want to concatenate the output {bin, meta, extractor} files from two or more different CatGT runs, perhaps, to spike-sort them jointly and look for persistent units over several days. You can do that in a two-step process by (1) running CatGT normally, <code>&quot;pass 1&quot;</code>, for each of the separate runs to generate their tcat-tagged output files, and then (2) running CatGT on those tcat outputs <code>&quot;pass 2&quot;</code> using the <code>-supercat</code> option as described in this section.</p>
+<blockquote>
+<p>Do both the pass 1 and the pass 2 supercat runs with version 4.8 or later to correctly handle probe files with alternate probe indices. Alternate probe indices are used with -sepShanks to split a four-shank file into multiple new shank files, or with -save to create new files with channel subsets that are stored as new pseudo-probes. Simply list the new probe indices in the '-prb=' list for supercat. For example, if in pass 1 you split four-shank probe-0 into four new probes using '-sepShanks=0,1000,1001,1002,1003' then in the supercat command line you could use '-prb=1000:1003'.</p>
+</blockquote>
+<h2 id="building-the-supercat-command-line----">--- Building The Supercat Command Line ---</h2>
+<h3 id="supercat-option">supercat option</h3>
+<p>The new option <code>-supercat={dir,run_ga}{dir,run_ga}...</code> takes a list of elements <em>(include the curly braces)</em> that specify which runs to join and in what order (the order listed). Remember that CatGT lets you store run output either in the native input folders or in a separate dest folder.</p>
+<blockquote>
+<p>Each pass-1 run generates an output file: <code>output_path/run_ga_fyi.txt</code>, containing an entry: <code>supercat_element</code>. These entries make it much easier to construct your supercat command line.</p>
+</blockquote>
+<p>For deeper understanding and flexibility, here's how to interpret and set a supercat element depending on how you did the CatGT pass-1 run:</p>
+<p><strong>Example</strong></p>
+<ul>
+<li><ol style="list-style-type: decimal">
+<li>Saved to native folders <strong>with run folder</strong> --</li>
+</ol>
+<ul>
+<li>dir: The parent directory of the run folder.</li>
+<li>run_ga: The name of the run folder <strong>including g-index</strong>.</li>
+</ul></li>
+<li><ol start="2" style="list-style-type: decimal">
+<li>Saved to native folders <strong>without run folder (-no_run_fld option)</strong> --</li>
+</ol>
+<ul>
+<li>dir: The parent directory of the data files themselves.</li>
+<li>run_ga: The run_name and g-index parts of the tcat output files.</li>
+<li><em>You must use -no_run_fld for the supercat run</em>.</li>
+</ul></li>
+<li><ol start="3" style="list-style-type: decimal">
+<li>Saving to dest folders <strong>with catgt_ folder</strong> --</li>
+</ol>
+<ul>
+<li>dir: The parent directory of the catgt_run_ga folder.</li>
+<li>run_ga: 'catgt_' tagged folder name, e.g., <strong>catgt_myrun_g7</strong>.</li>
+</ul></li>
+<li><ol start="4" style="list-style-type: decimal">
+<li>Saving to dest folders <strong>without catgt_ folder (-no_catgt_fld option)</strong> --</li>
+</ol>
+<ul>
+<li>dir: The parent directory of the data files themselves.</li>
+<li>run_ga: The run_name and g-index parts of the tcat output files.</li>
+<li><em>You must use -no_run_fld for the supercat run</em>.</li>
+</ul></li>
+</ul>
+<blockquote>
+<p>Note that if <code>-no_run_fld</code> is used, it is applied to all elements.</p>
+</blockquote>
+<blockquote>
+<p>Note that if <code>-prb_fld</code> is used, it is applied to all elements. That is, you must use the same folder organization (probe folders or not) for each of the pass-1 runs you want to supercat together.</p>
+</blockquote>
+<blockquote>
+<p><strong>For a pass-1 run</strong>, option -prb_fld specifies that the <em>pass-1 input</em> has probe folder organization, while -out_prb_fld specifies that the <em>pass-1 output</em> has probe folder organization if using the -dest option.</p>
+</blockquote>
+<blockquote>
+<p><strong>For a pass-2 supercat run</strong>, option -prb_fld refers to <em>pass-2 input</em>. So if your pass-1 output used probe folders use -prb_fld for pass-2. To give the final <em>pass-2 output</em> probe folders, specify -out_prb_fld in the supecat command line.</p>
+</blockquote>
+<blockquote>
+<p>Note that in linux, curly braces will be misinterpreted, unless you enclose the whole parameter list in quotes:<br> <strong>&gt; runit.sh 'my_params'</strong></p>
+</blockquote>
+<h3 id="supercat_trim_edges-option">supercat_trim_edges option</h3>
+<p>When SpikeGLX writes files, the first samples written are aligned as closely as possible across each of the streams, either using elapsed time, or using sync if enabled for the run. However, the trailing edges of the files, that is, the last samples written, are not tightly controlled unless you selected a trigger mode that sets a fixed time span for the files. Said another way, the starts of files in a run are aligned, but the lengths of the files are ragged (differences of ~thousandth of a second).</p>
+<blockquote>
+<p>As of version 3.6 pass-1 CatGT runs trim any trailing ragged edges to even-up the stream lengths.</p>
+</blockquote>
+<p>By default, supercat just sews the files from different runs together end to end without regard for the differences in length of different streams. However, when the supercat_trim_edges option is enabled, supercat does more work to trim the files so that the different streams stay better aligned and closer to the same length. In particular, between each pair of adjacent runs (A) and (B):</p>
+<ul>
+<li><p>The trailing edge of each stream of (A) is cut at a sync edge (the same edge in each stream). The edge itself is kept in the output.</p></li>
+<li><p>The leading edge of each stream of (B) is cut at a sync edge (the same edge in each stream). The edge itself is omitted so that the output has one unambiguous edge at the boundary.</p></li>
+<li><p>Any/all extraction files for a given stream are edited/trimmed in tandem with the stream's binary files.</p></li>
+</ul>
+<blockquote>
+<p>This option requires:</p>
+<ul>
+<li>Sync was enabled in SpikeGLX for each run being supercatted.</li>
+<li>Sync edges are extracted from each stream during pass 1.</li>
+<li>Option zerofillmax should not be used during pass 1.</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>Note that to supercat lf files, we need their sync edges which can only be extracted/derived from their ap counterparts:</p>
+<ul>
+<li>During pass 1, specify (-ap); do not specify -no_auto_sync.</li>
+</ul>
+</blockquote>
+<h3 id="supercat_skip_ni_ob_bin-option-pass1_force_ni_ob_bin">supercat_skip_ni_ob_bin option &amp; pass1_force_ni_ob_bin</h3>
+<p>Your first-pass CatGT runs might have extracted edge files but produced no new binary NI or OB files (that happens if no trial range is specified in the g- or t-indices). The supercat_skip_ni_ob_bin option reminds supercat not to process the missing binary files.</p>
+<p>On the other hand, you might want to make a supercat of NI or OB binary files even though you aren't modifying those data in the first pass. In that case, do the first pass with <code>pass1_force_ni_ob_bin</code> which will ensure that the NI and OB binary files are made and tagged <code>tcat</code> so supercat can find them.</p>
+<blockquote>
+<p>Any operations on a stream always produce a new 'tcat' meta file so that supercat can later track file lengths.</p>
+</blockquote>
+<h3 id="supercat-other-parameters">supercat (other parameters)</h3>
+<p>Here's how all the other parameters work for a supercat session...</p>
+<blockquote>
+<p>Note that each option is global and will apply to all of the supercat elements.</p>
+</blockquote>
+<pre><code>Standard:
+-dir                     ;ignored (parsed from {dir,run_ga})
+-run                     ;ignored (parsed from {dir,run_ga})
+-g=ga,gb                 ;ignored (parsed from {dir,run_ga})
+-t=ta,tb                 ;ignored (assumed to be t=cat)
+
+Which streams:
+-ni                      ;required to supercat ni stream
+-ob                      ;required to supercat ob streams
+-ap                      ;required to supercat ap streams
+-lf                      ;required to supercat lf streams
+-obx=0,3:5               ;if -ob supercat these OneBoxes
+-prb_3A                  ;if -ap or -lf supercat 3A-style probe files, e.g., run_name_g0_tcat.imec.ap.bin
+-prb=0,3:5               ;if -ap or -lf AND !prb_3A supercat these probes
+
+Options:
+-no_run_fld              ;older data, or data files relocated without a run folder
+-prb_fld                 ;input to pass-2 has folder-per-probe organization
+-prb_miss_ok             ;instead of stopping, silently skip missing probes
+-gtlist={gj,tja,tjb}     ;ignored (parsed from {dir,run_ga})
+-exported                ;apply FileViewer 'exported' tag to in/output filenames
+-t_miss_ok               ;ignored
+-zerofillmax=500         ;ignored
+-no_linefill             ;ignored
+-startsecs=120.0         ;ignored
+-maxsecs=7.5             ;ignored
+-apfilter=Typ,N,Fhi,Flo  ;ignored
+-lffilter=Typ,N,Fhi,Flo  ;ignored
+-no_tshift               ;ignored
+-loccar_um=40,140        ;ignored
+-loccar=2,8              ;ignored
+-gblcar                  ;ignored
+-gbldmx                  ;ignored
+-gfix=0.40,0.10,0.02     ;ignored
+-chnexcl={prb;chans}     ;ignored
+-xa=0,0,2,3.0,4.5,25     ;required if joining this extractor type
+-xd=2,0,384,6,500        ;required if joining this extractor type
+-xia=0,0,2,3.0,4.5,25    ;required if joining this extractor type
+-xid=2,0,384,6,500       ;required if joining this extractor type
+-bf=0,0,8,2,4,3          ;required if joining this extractor type
+-inarow=5                ;ignored
+-no_auto_sync            ;forbidden with supercat_trim_edges
+-save=2,0,5,20:60        ;ignored
+-sepShanks=0,0,1,2,-1    ;ignored
+-maxZ=0,0,100            ;ignored
+-pass1_force_ni_ob_bin   ;ignored
+-dest=path               ;required
+-no_catgt_fld            ;ignored
+-out_prb_fld             ;create pass-2 output subfolder per probe</code></pre>
+<blockquote>
+<p>Note that you need to provide the same extractor parameters that were used for the individual runs. Although supercat doesn't do extraction, it needs the parameters to create filenames.</p>
+</blockquote>
+<h2 id="supercat-behaviors----">--- Supercat Behaviors ---</h2>
+<h3 id="zero-filling">Zero filling</h3>
+<p>There is no zero filling in supercat. Joining is done end-to-end. Missing files cause processing to stop, with one exception: You can legally skip probes using the <code>-prb_miss_ok</code> option. This allows the data to have been saved in a multidirectory fashion where not all probes will be in a given run folder.</p>
+<p>Otherwise:</p>
+<ul>
+<li>Every run specified in the supercat list is required to exist.</li>
+<li>Every file type {bin, meta, extractor} being joined must exist in each run.</li>
+</ul>
+<blockquote>
+<p>Note that supercat will check if the channel count matches from run to run and flag an error if not. However, beyond that, only you know if it makes any sense to join these runs together.</p>
+</blockquote>
+<h3 id="supercat-output">supercat output</h3>
+<p>You must provide an output directory using the <code>-dest</code> option. CatGT will use the <code>run_ga</code> parts of the first listed supercat element to create a subfolder in the dest directory named <code>supercat_run_ga</code> and place the results there.</p>
+<p>The output metadata will <strong>NOT</strong> contain any of these pass-1 tags:</p>
+<ul>
+<li><code>catGTCmdlineN : N in range [0..99]</code></li>
+<li><code>catNFiles</code></li>
+<li><code>catGVals</code></li>
+<li><code>catTVals</code></li>
+</ul>
+<p>The output metadata <strong>WILL</strong> contain these supercat tags:</p>
+<ul>
+<li><code>catGTCmdline</code></li>
+<li><code>catNRuns</code></li>
+</ul>
+<p>As runs are joined, supercat will automatically offset the times within extracted edge files. The offset for the k-th listed run is the sum of the file lengths for runs 0 through k-1.</p>
+<p>Supercat creates output file: <code>dest/supercat_run_ga/run_ga_sc_offsets.txt</code>. This tabulates, for each stream, where the first sample of each input &quot;tcat&quot; file is relative to the start of the concatenated output file. It records these offsets in units of samples, and again in units of seconds on that stream's clock.</p>
+<p>Supercat creates output file: <code>dest/supercat_run_ga/run_ga_fyi.txt</code>. This lists key output paths and filenames you can use to build downstream command lines for TPrime.</p>
+<hr />
+<h2 id="change-log">Change Log</h2>
+<p>Version 4.8</p>
+<ul>
+<li>Support NP1.0 probe PRB_1_2_0480_2.</li>
+<li>FirstSample meta updated according to -startsecs.</li>
+<li>Set -startsecs=0 &amp; maxsecs to export binary time range without filters.</li>
+<li>NXT voltage inversion cased out by API.</li>
+<li>Error flags reported to log.</li>
+<li>Handle supercat of probe ip2-files from -save or -sepShanks.</li>
+<li>Include folder CatGT_std_scripts with Windows version demos.</li>
+</ul>
+<p>Version 4.7</p>
+<ul>
+<li>Option -save writes correctly when no -dest folder.</li>
+</ul>
+<p>Version 4.6</p>
+<ul>
+<li>For AP-&gt;LF: -ap flag not needed.</li>
+</ul>
+<p>Version 4.5</p>
+<ul>
+<li>Support NP2021 quad-probes.</li>
+<li>Support NP1014, NP1033, NP2005, NP2006.</li>
+</ul>
+<p>Version 4.4</p>
+<ul>
+<li>Support NP1221 probes.</li>
+<li>Support NP2020 quad-probes.</li>
+<li>Support NXT probes.</li>
+<li>This version inverts NXT voltages.</li>
+<li>Fix overlap handling when zerofillmax applied.</li>
+<li>Smoother transitions at FFT boundaries.</li>
+<li>linefill is automatic; disable with -no_linefill.</li>
+<li>Allow -maxZ and -save options on same probe.</li>
+<li>Add -sepShanks option.</li>
+</ul>
+<p>Version 4.3</p>
+<ul>
+<li>Supercat can join runs with varied sample rates.</li>
+</ul>
+<p>Version 4.2</p>
+<ul>
+<li>Add -no_catgt_fld option.</li>
+</ul>
+<p>Version 4.1</p>
+<ul>
+<li>Add -maxZ option.</li>
+</ul>
+<p>Version 4.0</p>
+<ul>
+<li>Update probe support.</li>
+</ul>
+<p>Version 3.9</p>
+<ul>
+<li>Fix supercat of LF files.</li>
+</ul>
+<p>Version 3.8</p>
+<ul>
+<li>Fix crash when no CAR options specified.</li>
+<li>Restore option -gbldmx.</li>
+<li>Support probes {2003,2004,2013,2014}.</li>
+</ul>
+<p>Version 3.7</p>
+<ul>
+<li>Add ~snsGeomMap awareness.</li>
+<li>Add -loccar_um option.</li>
+</ul>
+<p>Version 3.6</p>
+<ul>
+<li>Option -gblcar uses median rather than mean.</li>
+<li>Trim pass-1 file sets to same length.</li>
+<li>Add option -save (selective channel saving).</li>
+</ul>
+<p>Version 3.5</p>
+<ul>
+<li>Support latest probes.</li>
+</ul>
+<p>Version 3.4</p>
+<ul>
+<li>Add option -startsecs.</li>
+<li>Fix -gfix on save channel subsets.</li>
+</ul>
+<p>Version 3.3</p>
+<ul>
+<li>Fix -maxsecs option.</li>
+</ul>
+<p>Version 3.2</p>
+<ul>
+<li>Stream option -lf creates .lf. from any full-band .ap.</li>
+</ul>
+<p>Version 3.1</p>
+<ul>
+<li>Fix loccar channel exclusion.</li>
+</ul>
+<p>Version 3.0</p>
+<ul>
+<li>Add obx file support.</li>
+<li>Add extractors {xa,xd,ixa,ixd,bf}.</li>
+<li>Retire extractors {SY,XA,XD,iSY,iXA,iXD,BF}.</li>
+<li>Sync extraction in all streams is automatic; disable with -no_auto_sync.</li>
+<li>Rename pass1_force_ni_ob_bin, supercat_skip_ni_ob_bin options.</li>
+<li>Add fyi file listing key output paths.</li>
+</ul>
+<p>Version 2.5</p>
+<ul>
+<li>Add pass-one ct_offsets file.</li>
+<li>Add supercat sc_offsets file.</li>
+</ul>
+<p>Version 2.4</p>
+<ul>
+<li>Add option -gtlist.</li>
+</ul>
+<p>Version 2.3</p>
+<ul>
+<li>Fix supercat parameter order dependency.</li>
+<li>Add option -pass1_force_ni_bin.</li>
+</ul>
+<p>Version 2.2</p>
+<ul>
+<li>Retire option -tshift (tshift on by default).</li>
+<li>Retire option -gbldmx, preferring tshifted -gblcar.</li>
+<li>Retire options {-aphipass, -aplopass, -lfhipass, -lflopass}.</li>
+<li>tshift is automatic; disable with -no_tshift.</li>
+<li>Add option -apfilter=Typ,N,Fhi,Flo.</li>
+<li>Add option -lffilter=Typ,N,Fhi,Flo.</li>
+</ul>
+<p>Version 2.1</p>
+<ul>
+<li>BF gets inarow parameter.</li>
+</ul>
+<p>Version 2.0</p>
+<ul>
+<li>XA seeks threshold-2 even if millisecs=0.</li>
+</ul>
+<p>Version 1.9</p>
+<ul>
+<li>Fix link to fftw3 library.</li>
+<li>Remove glitch at tshift block boundaries.</li>
+<li>Option -gfix now exploits -tshift.</li>
+<li>Option -chnexcl now specified per probe.</li>
+<li>Option -chnexcl now modifies shankMap in output metadata.</li>
+<li>Stream option -lf creates .lf. from .ap. for 2.0 probes.</li>
+<li>Fix supercat premature completion bug.</li>
+<li>Supercat observes -exported option.</li>
+<li>Pass-1 always writes new meta files for later supercat.</li>
+<li>Add option -supercat_trim_edges.</li>
+<li>Add option -supercat_skip_ni_bin.</li>
+<li>Add option -maxsecs.</li>
+<li>Add option -BF (bit-field decoder).</li>
+</ul>
+<p>Version 1.8</p>
+<ul>
+<li>Add option -tshift.</li>
+<li>Add option -gblcar.</li>
+</ul>
+<p>Version 1.7</p>
+<ul>
+<li>Suppress linux brace expansion.</li>
+</ul>
+<p>Version 1.6</p>
+<ul>
+<li>Fix bug in g-series concatenation.</li>
+</ul>
+<p>Version 1.5</p>
+<ul>
+<li>Improved calling scripts.</li>
+<li>Add option -supercat.</li>
+</ul>
+<p>Version 1.4.2</p>
+<ul>
+<li>Fix -zerofillmax size tracking.</li>
+<li>Add option -inarow.</li>
+</ul>
+<p>Version 1.4.1</p>
+<ul>
+<li>Working/calling dir can be different from installed dir.</li>
+<li>Log file written to working dir.</li>
+</ul>
+<p>Version 1.4.0</p>
+<ul>
+<li>Allow g-range concatenation.</li>
+<li>Add option -zerofillmax.</li>
+<li>Options -SY, -XD accept word=-1 (last word).</li>
+<li>SY output files include ap/lf stream identifier.</li>
+<li>Add options -iSY, -iXA, -iXD.</li>
+</ul>
+<p>Version 1.3.0</p>
+<ul>
+<li>Support NP1010 probe.</li>
+</ul>
+<p>Version 1.2.9</p>
+<ul>
+<li>Uses 3A imro classes.</li>
+<li>Support for UHD-1 and NHP.</li>
+</ul>
+<p>Version 1.2.8</p>
+<ul>
+<li>Add option -prb_miss_ok to skip missing probes.</li>
+</ul>
+<p>Version 1.2.7</p>
+<ul>
+<li>Fix reporting back of user -XA command line options.</li>
+<li>Add optional tolerance parameter to each extractor.</li>
+</ul>
+<p>Version 1.2.6</p>
+<ul>
+<li>CAR filters are applied whole-probe, not shank-by-shank.</li>
+<li>Better command line error messages.</li>
+</ul>
+<p>Version 1.2.5</p>
+<ul>
+<li>Fix option -gfix crash.</li>
+<li>Fix -gfix artifacts.</li>
+<li>More accurate -gfix spans.</li>
+<li>Log gfix/second average fix rate.</li>
+</ul>
+<p>Version 1.2.4</p>
+<ul>
+<li>New bin/meta output only if concatenating or filtering.</li>
+<li>Reuse output run folder if already exists.</li>
+<li>Add option -t=cat to allow event extraction as a second pass.</li>
+<li>Add option -exported to recognize FileViewer export files.</li>
+</ul>
+<p>Version 1.2.3</p>
+<ul>
+<li>Better error reporting.</li>
+<li>Add metadata tag catGTCmdlineN.</li>
+<li>Add option -loccar.</li>
+<li>Rename option -gblexcl to -chnexcl.</li>
+<li>More improvements to option -gfix.</li>
+<li>Event extractors handle smaller widths.</li>
+</ul>
+<p>Version 1.2.2</p>
+<ul>
+<li>Improvements to option -gfix.</li>
+</ul>
+<p>Version 1.2.1</p>
+<ul>
+<li>Fix option -out_prb_fld.</li>
+</ul>
+<p>Version 1.1</p>
+<ul>
+<li>Option -dest creates subfolder run_name_g0_tcat.</li>
+<li>Add option -out_prb_fld.</li>
+<li>Add tag 'fileCreateTime_original' to metadata.</li>
+</ul>
+<p>Version 1.0</p>
+<ul>
+<li>Initial release.</li>
+</ul>
+<p><em>fin</em></p>
+</body>
+</html>
