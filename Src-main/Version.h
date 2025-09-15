@@ -2,8 +2,8 @@
 #define VERSION_H
 
 #define APPNAME                 "SpikeGLX"
-#define VERS_SGLX               0x20250525
-#define VERS_SGLX_STR           "SpikeGLX v20250525 api v4.1.3"
+#define VERS_SGLX               0x20250915
+#define VERS_SGLX_STR           "SpikeGLX v20250915 api v4.1.3"
 
 #define VERS_PXI_STD_BS         "3.0.226"
 #define VERS_PXI_STD_BSC        "4.0.233"
