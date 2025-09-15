@@ -433,11 +433,14 @@ void IMFirmCtl::verEval()
 
 bool IMFirmCtl::paths( QString &bs, QString &bsc )
 {
+    QDir    targetdir( appPath() );
+    targetdir.cdUp();
+
     QString path =
         QFileDialog::getExistingDirectory(
             dlg,
             "Select SGLX_Firmware Directory",
-            QDir::rootPath(),
+            targetdir.absolutePath(),
             QFileDialog::DontResolveSymlinks
             | QFileDialog::ShowDirsOnly );
 
@@ -493,10 +496,10 @@ bool IMFirmCtl::paths( QString &bs, QString &bsc )
     }
 
     if( jobBits & 1 )
-        bs = _bs;
+        bs = path + _bs;
 
     if( jobBits & 2 )
-        bsc = _bsc;
+        bsc = path + _bsc;
 
     return true;
 }

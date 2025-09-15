@@ -4,7 +4,7 @@
 ######################################################################
 
 # Diagnostics
-#DEFINES += DO_SNAPSHOTS
+# DEFINES += DO_SNAPSHOTS
 
 # Select real or simulated {IM,NI}:
 DEFINES += HAVE_IMEC
