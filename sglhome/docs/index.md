@@ -286,7 +286,7 @@ Related help:
 
 Descriptions of metafile items for each phase:
 
-* [Metadata_Help](Sgl_help/Metadata_Help.html)
+* [Metadata_Help (latest)](Sgl_help/Metadata_Help.html)
 * [Metadata_20](Support/Metadata_20.html)
 * [Metadata_3B2 (NP 1.0)](Support/Metadata_3B2.html)
 * [Metadata_3B1](Support/Metadata_3B1.html)
@@ -319,7 +319,7 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.
 * [Neuropixels Support Page](https://www.neuropixels.org/support)
 * [Noise: Learn How To Solder](help/solder/solder.md)
 * [Sharpening Apparatus (MS.Word.docx)](Support/NPix_sharpening.docx)
-* [Installing NI Drivers](help/NIDriverInstall/NI_driver_installation.md)
+* [PXIe Quickstart](Sgl_help/SpikeGLX_PXIe_Quickstart.html)
 * [OneBox Quickstart](Sgl_help/SpikeGLX_OneBox_Quickstart.html)
 * [Quadbase Quickstart](Sgl_help/SpikeGLX_Quadbase_Quickstart.html)
 * [SpikeGLX UserManual](Sgl_help/UserManual.html)

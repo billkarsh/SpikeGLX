@@ -40,11 +40,25 @@
 <ul>
 <li><a href="#stream-length">Stream Length</a></li>
 </ul></li>
-<li><a href="#channel-naming-and-ordering">Channel Naming and Ordering</a></li>
+<li><a href="#channel-naming-and-ordering">Channel Naming and Ordering</a>
+<ul>
+<li><a href="#imec-channels">Imec Channels</a></li>
+<li><a href="#onebox-channels">OneBox Channels</a></li>
+<li><a href="#nidq-channels">NIDQ Channels</a></li>
+</ul></li>
 <li><a href="#shank-map">Shank Map</a></li>
 <li><a href="#channel-map">Channel Map</a></li>
-<li><a href="#save-channel-subset">Save Channel Subset</a></li>
-<li><a href="#output-file-format-and-tools">Output File Format and Tools</a></li>
+<li><a href="#file-format">File Format</a>
+<ul>
+<li><a href="#bin-files">Bin Files</a></li>
+<li><a href="#meta-files">Meta Files</a></li>
+<li><a href="#file-parsing-tools">File Parsing Tools</a></li>
+<li><a href="#save-channel-subset">Save Channel Subset</a>
+<ul>
+<li><a href="#imec-example">Imec Example</a></li>
+<li><a href="#ni-example">NI Example</a></li>
+</ul></li>
+</ul></li>
 <li><a href="#synchronization">Synchronization</a>
 <ul>
 <li><a href="#procedure-to-calibrate-sample-rates">Procedure to Calibrate Sample Rates</a></li>
@@ -451,24 +465,16 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <blockquote>
 <p>You can also change the channel map from the Graphs window by right-clicking on the graphs area and selecting <code>Edit Channel Order...</code>.</p>
 </blockquote>
-<hr />
-<h3 id="save-channel-subset">Save Channel Subset</h3>
-<p>Each hardware configuration tab determines which channels are acquired from that hardware and held in the central data stream. All acquired channels are shown in the Graphs window. However, you don't have to save all of the channels to your disk files.</p>
-<p>You can enter a print-page-range style string for the subset of channels that you want to save. This string is composed of index numbers in the range [0..N-1], where N is the total channel count. To save all channels you can use the shorthand string <code>all</code>, or just <code>*</code>.</p>
 <blockquote>
-<p>Notes:</p>
-<ol style="list-style-type: decimal">
-<li><p>You can also change this list from the Graphs window by right-clicking on the graphs area and selecting <code>Edit Saved Channels...</code>.</p></li>
-<li><p>Remember that digital lines are grouped into 16-bit words which are essentially pseudo-channels in your subset string. If you don't save a given word of digital line data, several lines will be affected.</p></li>
-</ol>
+<p>Channel maps order the visual Graphs window. They do not alter the order of run data saved in .bin/.meta files, which are instead, <strong>always</strong> in acquired-channel-order.</p>
 </blockquote>
 <hr />
-<h3 id="output-file-format-and-tools">Output File Format and Tools</h3>
-<p>Output data files are always paired; a <code>.bin</code> and a matching <code>.meta</code> file.</p>
-<ul>
-<li><p>The <code>.bin</code> file is the binary data. There is no header. The data are packed timepoints. Within each timepoint the 16-bit channels are packed and ordered exactly as described above in the section <a href="#channel-naming-and-ordering">Channel Naming and Ordering</a>. Note that a timepoint is always a whole number of 16-bit words. There is one 16-bit word per saved analog channel. At the rear of the timepoint are any saved digital lines, bundled together as the bits of 16-bit words as described in the notes above.</p></li>
-<li><p>The <code>.meta</code> data are text files in &quot;.ini&quot; file format. That is, every line has the pattern <code>tag=value</code>. All of the meta data entries are described in the document <code>Metadata.html</code> found at the top level of your release software download.</p></li>
-</ul>
+<h3 id="file-format">File Format</h3>
+<p>For <strong>ALL</strong> types of data stream {imec, obx, nidq}, output data files are always paired; a <code>.bin</code> and a matching <code>.meta</code> file. The internal structure of these files is similar for any stream type...</p>
+<h4 id="bin-files">Bin Files</h4>
+<p>The <code>.bin</code> file is the binary data. There is no header. The data are packed timepoints. Within each timepoint the 16-bit channels are packed and ordered exactly as described above in the section <a href="#channel-naming-and-ordering">Channel Naming and Ordering</a>. Note that a timepoint is always a whole number of 16-bit words. There is one 16-bit word per saved analog channel. At the rear of the timepoint are any saved digital lines, bundled together as the bits of 16-bit words as described in the notes above.</p>
+<h4 id="meta-files">Meta Files</h4>
+<p>The <code>.meta</code> data are text files in &quot;.ini&quot; file format. That is, every line has the pattern <code>tag=value</code>. All of the meta data entries are described in the document <a href="Metadata_Help.html"><code>Metadata_Help.html</code></a>.</p>
 <blockquote>
 <p>Each metadata file is written three times:</p>
 <ol style="list-style-type: decimal">
@@ -478,9 +484,71 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 </ol>
 <p>fileTimeSecs = (<code>fileSizeBytes</code>/2/<code>nSavedChans</code>) / <code>xxSampRate</code>, xx={im,ob,ni}.</p>
 </blockquote>
+<h4 id="file-parsing-tools">File Parsing Tools</h4>
 <blockquote>
 <p>The SpikeGLX <a href="https://billkarsh.github.io/SpikeGLX/#post-processing-tools"><code>Downloads Page</code></a> has simple tools (MATLAB and python) demonstrating how to parse the binary and metadata files.</p>
 </blockquote>
+<h4 id="save-channel-subset">Save Channel Subset</h4>
+<p>Each hardware configuration tab determines which channels are acquired from that hardware and held in the central data stream. All acquired channels are shown in the Graphs window. However, you don't have to save all of the channels to your disk files.</p>
+<p>You can enter a print-page-range style string for the subset of channels that you want to save. This string is composed of index numbers in the range [0..N-1], where N is the total channel count. To save all channels you can use the shorthand string <code>all</code>, or <code>*</code>.</p>
+<blockquote>
+<p>Notes:</p>
+<ol style="list-style-type: decimal">
+<li><p>You can also change this list from the Graphs window by right-clicking on the graphs area and selecting <code>Edit Saved Channels...</code>.</p></li>
+<li><p>In the <code>Imro Editor Edit</code> tab you can graphically select which channels to save with the <code>Boxes =&gt; file chans</code> button..</p></li>
+<li><p>Remember that digital lines are grouped into 16-bit words which are essentially pseudo-channels in your subset string. If you don't save a given word of digital line data, several lines will be affected.</p></li>
+</ol>
+</blockquote>
+<h5 id="imec-example">Imec Example</h5>
+<p>Suppose you are running an NP 1.0 probe.</p>
+<p>Online, the probe stream consists of (769) 16-bit words: the (384) neural AP channels followed by (384) neural LF channels, and a 16-bit SY word that contains sync and flag bits. In the SpikeGLX interface you generally refer to these data words by their logical index numbers, which are 0-768 in this case. The AP-channels have logical index range [0:383], the LF have range [384:767] and the SY channel is 768.</p>
+<p><strong>Saving All</strong></p>
+<p>Note that NP1.0-like probes save AP-band and LF-band data in separate data files tagged as <code>xxx.ap.yyy</code> and <code>xxx.lf.yyy</code>, while NP2.0 probes, which are full-band, save a single file using the <code>xxx.ap.yyy</code> name type.</p>
+<p>If we were saving all channels, then each timepoint of our ap.bin file would have 385 words = 384 neural + SY. The ap.meta would contain these entries about file format:</p>
+<pre><code>acqApLfSy=384,384,1         // count of channel types being acquired
+nSavedChans=385             // total channel count saved to this file
+snsApLfSy=384,0,1           // count of channel types saved in this file
+snsSaveChanSubset=0:383,768 // saved-channel-i maps to acquired-channel-j</code></pre>
+<p>The lf.bin likewise has 385 words per timepoint, and the lf.meta entries are:</p>
+<pre><code>acqApLfSy=384,384,1         // same as AP: count of channel types acquired
+nSavedChans=385             // complement: count saved to this file
+snsApLfSy=384,0,1           // complement: LF + SY, but not AP
+snsSaveChanSubset=384:768   // saved-channel-i maps to acquired-channel-j</code></pre>
+<p>Note that the common SY channel is stored in both files.</p>
+<p><strong>Saving Subset</strong></p>
+<p>Suppose on the <code>IM Setup</code> tab we enter <code>100:383,484:768</code> which means we are not saving AP 0-99, nor LF 384-483, so omitting the first 100 channels of each band. Then each .bin file will have 285 words per timepoint. These are the ap.meta entries:</p>
+<pre><code>acqApLfSy=384,384,1           // same: acquiring same channels
+nSavedChans=285               // diff: now only 285 saved to file
+snsApLfSy=284,0,1             // diff: count of channel types saved in this file
+snsSaveChanSubset=100:383,768 // diff: note lowest channel is 100</code></pre>
+<p>The lf.bin in this example also have 285 words per timepoint and these lf.meta:</p>
+<pre><code>acqApLfSy=384,384,1           // same: acquiring same channels
+nSavedChans=285               // diff: now only 285 saved to file
+snsApLfSy=0,284,1             // diff: complement of AP set
+snsSaveChanSubset=484:768     // diff: note lowest channel is 484</code></pre>
+<p>These mapping data are crucial to understanding the significance of the saved words.</p>
+<p>Note that you can save any arbitrary subset of the 768 neural NP1.0 channels. You don't have to make LF mirror the AP, but it makes a simpler example.</p>
+<h5 id="ni-example">NI Example</h5>
+<p>Suppose you configured your NI device to acquire analog (XA) channels 3:6 and digital lines 0,1.</p>
+<p>Online, your NI stream consists of (5) 16-bit words: the (4) analog channels followed by a 16-bit word that contains lines 0,1 as bit-# 0,1 of that word. In the SpikeGLX interface you generally refer to these data words by their logical index numbers, which are 0-4 in this case. Let's say you were recording sync in NI channel-5. Then on the Sync tab, for example, you would configure sync input as analog channel 2 (the third word in the stream).</p>
+<p><strong>Saving All</strong></p>
+<p>If we were saving all channels, then each timepoint of our .bin file would have 5 words. The metadata would contain these entries about file format:</p>
+<pre><code>acqMnMaXaDw=0,0,4,1   // count of channel types being acquired
+nSavedChans=5         // total channel count saved to file
+niXAChans1=3:6        // original XA channel hardware identities
+niXDBytes1=1          // digital lines fit in 1 byte (but extended to 16-bits)
+niXDChans1=0:1        // original digital line hardware identities
+snsMnMaXaDw=0,0,4,1   // count of channel types saved in file
+snsSaveChanSubset=all // saved-channel-i maps to acquired-channel-j (1:1)</code></pre>
+<p><strong>Saving Subset</strong></p>
+<p>Suppose on the <code>NI Setup</code> tab we enter <code>2:4</code> as the <code>Save channel subset</code>. These are logical indices. That means we will not save the first two analog channels 3,4. Rather, we will save analog 5,6 and the digital word, so we will save (3) of the (5) acquired channels. Now, each timepoint of the .bin file will have 3 words, and the new metadata look like this:</p>
+<pre><code>acqMnMaXaDw=0,0,4,1   // same: acquiring same channels
+nSavedChans=3         // diff: now only 3 saved to file
+niXAChans1=3:6        // same: original XA channel hardware identities
+niXDBytes1=1          // same: digital lines fit in 1 byte (but extended to 16-bits)
+niXDChans1=0:1        // same: original digital line hardware identities
+snsMnMaXaDw=0,0,2,1   // diff: count of channel types saved in file
+snsSaveChanSubset=2:4 // diff: file-index 0,1,2 maps to acquired 2,3,4</code></pre>
 <hr />
 <h3 id="synchronization">Synchronization</h3>
 <p>Each stream has its own asynchronous hardware clock, hence, its own <strong>start time</strong> and <strong>sample rate</strong>. The time at which an event occurs, for example a spike or a TTL trigger, can be accurately mapped from one stream to another if we can accurately measure the stream timing parameters. SpikeGLX has several tools for that purpose:</p>

@@ -8,7 +8,7 @@ nav:
         - 'Neuropixels Support Page': 'https://www.neuropixels.org/support'
         - 'Noise: Learn How To Solder': 'help/solder/solder.md'
         - 'Sharpening Apparatus (MS.Word.docx)': 'Support/NPix_sharpening.docx'
-        - 'Installing NI Drivers': 'help/NIDriverInstall/NI_driver_installation.md'
+        - 'PXIe Quickstart': 'Sgl_help/SpikeGLX_PXIe_Quickstart.html'
         - 'OneBox Quickstart': 'Sgl_help/SpikeGLX_OneBox_Quickstart.html'
         - 'Quadbase Quickstart': 'Sgl_help/SpikeGLX_Quadbase_Quickstart.html'
         - 'SpikeGLX UserManual': 'Sgl_help/UserManual.html'
