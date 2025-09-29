@@ -216,7 +216,7 @@ void AppData::loadDataDir( QSettings &S )
 /* Ctor ----------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-//#define NPDEBUG
+// #define NPDEBUG
 
 #ifdef NPDEBUG
 using namespace Neuropixels;

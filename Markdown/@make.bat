@@ -21,6 +21,7 @@ pandoc -s -c pandoc.css --self-contained SimProbes_Help.md -o ../_Help/SimProbes
 pandoc -s -c pandoc.css --self-contained Slot_Help.md -o ../_Help/Slot_Help.html
 pandoc -s -c pandoc.css --self-contained SpikeGLX_FAQ.md -o ../_Help/SpikeGLX_FAQ.html
 pandoc -s -c pandoc.css --self-contained SpikeGLX_OneBox_Quickstart.md -o ../_Help/SpikeGLX_OneBox_Quickstart.html
+pandoc -s -c pandoc.css --self-contained SpikeGLX_PXIe_Quickstart.md -o ../_Help/SpikeGLX_PXIe_Quickstart.html
 pandoc -s -c pandoc.css --self-contained SpikeGLX_Quadbase_Quickstart.md -o ../_Help/SpikeGLX_Quadbase_Quickstart.html
 pandoc -s -c pandoc.css --self-contained SpikeView_Help.md -o ../_Help/SpikeView_Help.html
 pandoc -s -c pandoc.css --self-contained SyncTab_Help.md -o ../_Help/SyncTab_Help.html

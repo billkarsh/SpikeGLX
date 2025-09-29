@@ -103,6 +103,8 @@ Sync in SpikeGLX works by sending a single common 1 Hz square wave to one
 channel of each recording data stream. The rising edges of this wave can
 then be matched across streams, and paired edge offsets can be used to map
 event times from one stream to another (our TPrime tool does this mapping).
+We discuss how this works in detail
+[here.](https://billkarsh.github.io/SpikeGLX/help/syncEdges/Sync_edges/)
 
 Quick notes about OneBox:
 
@@ -116,6 +118,12 @@ Quick notes about OneBox:
 **SMA 1** on the back panel is the OneBox SYNC port. It uses 0-5V TTL
 (digital) signals. This functions like the SMA connector labeled **TRIG**
 on the front of a PXI basestation, which also uses 0-5V TTL signals.
+
+>Note: The OneBox 'SMA 1' and PXIe 'TRIG' are each in parallel with a
+1 KOhm pull-up resistor. If that's too low an impedance for your signal
+source, then you can add a 100 Ohm pull-down resistor to your output
+line to compensate (add a BNC T with a 100 Ohm resistor on the unused
+branch between signal and shell).
 
 #### Sync output
 
@@ -150,9 +158,10 @@ connect wires to **SMA 1**.
 
 #### Non-sync input
 
-Even when Sync is disabled, OneBoxes (and PXI modules) are programmed for
-input at their Sync SMA. This allows you to record whatever 5V TTL signal
-you wish in the SY channels of each of the recorded data streams.
+When Sync is disabled on the `Sync` tab, imec PXIe modules and OneBoxes are
+programmed for input at their Sync SMA. This allows you to record whatever
+5V TTL signal you wish in the SY channels (bit #6) of each of the recorded
+data streams.
 
 ## Front Panel
 
@@ -296,7 +305,7 @@ vanish. That's normal.
 Release downloads come with two executables:
 
 - **SpikeGLX.exe**: Runs {imec probes, OneBox, NI, FileViewer}, but you need
-to install NI drivers to run it.
+to install NI DAQmx drivers to run it.
 - **SpikeGLX_NISIM.exe**: Runs {imec probes, OneBox, FileViewer} but not NI
 hardware. Does not need NI drivers.
 
@@ -359,7 +368,7 @@ Please read the User Manual, but at least read these sections:
 * [Data Stream](UserManual.html#data-stream)
 * [Supported Streams](UserManual.html#supported-streams)
 * [Channel Naming and Ordering](UserManual.html#channel-naming-and-ordering)
-* [Output File Format and Tools](UserManual.html#output-file-format-and-tools)
+* [File Format](UserManual.html#file-format)
 
 The reading will explain in general how output files are named and their
 data formats. Here we follow that up with an illustrative example.
@@ -384,7 +393,7 @@ in a PXI module:
 * The file name reflects your chosen run name `AAA`.
 * The name encodes the gate and trigger program indices `g0_t0`.
 * The name encodes the logical probe index in the `Probes` table `imec0`.
-* For our NP 2.0 probe, the `ap` indicates these are full-band data. Note
+* For our NP 2.0 probe, the `ap` files contain full-band data. Note
 that dual-band probes (such as NP 1.0) can generate both `ap` and `lf` files.
 * Each timepoint (sample) of the binary data contains 385 16-bit words:
 the 384 neural `AP` channels, followed by one `SY` word containing error
@@ -484,6 +493,8 @@ Detailed instructions for the `Obx Setup` tab are [here](OBXTab_Help.html).
 > - Name the run on the `Save` tab
 
 > Set DAC voltages during a run using the **SDK remote interface** functions.
+ That's a separate add-on package you
+can learn about [here.](https://billkarsh.github.io/SpikeGLX/#remote-controlscripting-sdk)
 
 > Learn about using the **WavePlayer** features [here](WavePlan_Help.html).
 

@@ -24,10 +24,18 @@
     + [Supported Streams](#supported-streams)
         + [Stream Length](#stream-length)
     + [Channel Naming and Ordering](#channel-naming-and-ordering)
+        + [Imec Channels](#imec-channels)
+        + [OneBox Channels](#onebox-channels)
+        + [NIDQ Channels](#nidq-channels)
     + [Shank Map](#shank-map)
     + [Channel Map](#channel-map)
-    + [Save Channel Subset](#save-channel-subset)
-    + [Output File Format and Tools](#output-file-format-and-tools)
+    + [File Format](#file-format)
+        + [Bin Files](#bin-files)
+        + [Meta Files](#meta-files)
+        + [File Parsing Tools](#file-parsing-tools)
+        + [Save Channel Subset](#save-channel-subset)
+            + [Imec Example](#imec-example)
+            + [NI Example](#ni-example)
     + [Synchronization](#synchronization)
         + [Procedure to Calibrate Sample Rates](#procedure-to-calibrate-sample-rates)
         + [Running Without a Generator](#running-without-a-generator)
@@ -741,36 +749,21 @@ change channel name strings too (shh).
 > You can also change the channel map from the Graphs window by right-clicking
 on the graphs area and selecting `Edit Channel Order...`.
 
---------
-
-### Save Channel Subset
-
-Each hardware configuration tab determines which channels are acquired from
-that hardware and held in the central data stream. All acquired channels
-are shown in the Graphs window. However, you don't have to save all of the
-channels to your disk files.
-
-You can enter a print-page-range style string for the subset of channels
-that you want to save. This string is composed of index numbers in the
-range [0..N-1], where N is the total channel count. To save all channels
-you can use the shorthand string `all`, or just `*`.
-
->Notes:
->
-> 1. You can also change this list from the Graphs window by right-clicking
->   on the graphs area and selecting `Edit Saved Channels...`.
->
-> 2. Remember that digital lines are grouped into 16-bit words which are
->   essentially pseudo-channels in your subset string. If you don't save
->   a given word of digital line data, several lines will be affected.
+> Channel maps order the visual Graphs window. They do not alter the order
+of run data saved in .bin/.meta files, which are instead, **always** in
+acquired-channel-order.
 
 --------
 
-### Output File Format and Tools
+### File Format
 
-Output data files are always paired; a `.bin` and a matching `.meta` file.
+For **ALL** types of data stream {imec, obx, nidq}, output data files are
+always paired; a `.bin` and a matching `.meta` file. The internal structure
+of these files is similar for any stream type...
 
-* The `.bin` file is the binary data. There is no header. The data are
+#### Bin Files
+
+The `.bin` file is the binary data. There is no header. The data are
 packed timepoints. Within each timepoint the 16-bit channels are packed
 and ordered exactly as described above in the section
 [Channel Naming and Ordering](#channel-naming-and-ordering). Note that a
@@ -779,10 +772,11 @@ word per saved analog channel. At the rear of the timepoint are any saved
 digital lines, bundled together as the bits of 16-bit words as described
 in the notes above.
 
-* The `.meta` data are text files in ".ini" file format. That is, every
+#### Meta Files
+
+The `.meta` data are text files in ".ini" file format. That is, every
 line has the pattern `tag=value`. All of the meta data entries are described
-in the document `Metadata.html` found at the top level of your release
-software download.
+in the document [`Metadata_Help.html`](Metadata_Help.html).
 
 >Each metadata file is written three times:
 >
@@ -792,10 +786,149 @@ software download.
 >
 > fileTimeSecs = (`fileSizeBytes`/2/`nSavedChans`) / `xxSampRate`, xx={im,ob,ni}.
 
+#### File Parsing Tools
+
 >The SpikeGLX
 [`Downloads Page`](https://billkarsh.github.io/SpikeGLX/#post-processing-tools)
 has simple tools (MATLAB and python) demonstrating how to parse the binary
 and metadata files.
+
+#### Save Channel Subset
+
+Each hardware configuration tab determines which channels are acquired from
+that hardware and held in the central data stream. All acquired channels
+are shown in the Graphs window. However, you don't have to save all of the
+channels to your disk files.
+
+You can enter a print-page-range style string for the subset of channels
+that you want to save. This string is composed of index numbers in the
+range [0..N-1], where N is the total channel count. To save all channels
+you can use the shorthand string `all`, or `*`.
+
+>Notes:
+>
+> 1. You can also change this list from the Graphs window by right-clicking
+>   on the graphs area and selecting `Edit Saved Channels...`.
+>
+> 2. In the `Imro Editor Edit` tab you can graphically select which channels
+>   to save with the `Boxes => file chans` button..
+>
+> 3. Remember that digital lines are grouped into 16-bit words which are
+>   essentially pseudo-channels in your subset string. If you don't save
+>   a given word of digital line data, several lines will be affected.
+
+##### Imec Example
+
+Suppose you are running an NP 1.0 probe.
+
+Online, the probe stream consists of (769) 16-bit words: the (384) neural
+AP channels followed by (384) neural LF channels, and a 16-bit SY word that
+contains sync and flag bits. In the SpikeGLX interface you generally refer
+to these data words by their logical index numbers, which are 0-768 in this
+case. The AP-channels have logical index range [0:383], the LF have range
+[384:767] and the SY channel is 768.
+
+**Saving All**
+
+Note that NP1.0-like probes save AP-band and LF-band data in separate data
+files tagged as `xxx.ap.yyy` and `xxx.lf.yyy`, while NP2.0 probes, which
+are full-band, save a single file using the `xxx.ap.yyy` name type.
+
+If we were saving all channels, then each timepoint of our ap.bin file would
+have 385 words = 384 neural + SY. The ap.meta would contain these entries
+about file format:
+
+```
+acqApLfSy=384,384,1         // count of channel types being acquired
+nSavedChans=385             // total channel count saved to this file
+snsApLfSy=384,0,1           // count of channel types saved in this file
+snsSaveChanSubset=0:383,768 // saved-channel-i maps to acquired-channel-j
+```
+
+The lf.bin likewise has 385 words per timepoint, and the lf.meta entries are:
+
+```
+acqApLfSy=384,384,1         // same as AP: count of channel types acquired
+nSavedChans=385             // complement: count saved to this file
+snsApLfSy=384,0,1           // complement: LF + SY, but not AP
+snsSaveChanSubset=384:768   // saved-channel-i maps to acquired-channel-j
+```
+
+Note that the common SY channel is stored in both files.
+
+**Saving Subset**
+
+Suppose on the `IM Setup` tab we enter `100:383,484:768` which means we are
+not saving AP 0-99, nor LF 384-483, so omitting the first 100 channels of
+each band. Then each .bin file will have 285 words per timepoint. These are
+the ap.meta entries:
+
+```
+acqApLfSy=384,384,1           // same: acquiring same channels
+nSavedChans=285               // diff: now only 285 saved to file
+snsApLfSy=284,0,1             // diff: count of channel types saved in this file
+snsSaveChanSubset=100:383,768 // diff: note lowest channel is 100
+```
+
+The lf.bin in this example also have 285 words per timepoint and these lf.meta:
+
+```
+acqApLfSy=384,384,1           // same: acquiring same channels
+nSavedChans=285               // diff: now only 285 saved to file
+snsApLfSy=0,284,1             // diff: complement of AP set
+snsSaveChanSubset=484:768     // diff: note lowest channel is 484
+```
+
+These mapping data are crucial to understanding the significance of the
+saved words.
+
+Note that you can save any arbitrary subset of the 768 neural NP1.0 channels.
+You don't have to make LF mirror the AP, but it makes a simpler example.
+
+##### NI Example
+
+Suppose you configured your NI device to acquire analog (XA) channels 3:6
+and digital lines 0,1.
+
+Online, your NI stream consists of (5) 16-bit words: the (4) analog channels
+followed by a 16-bit word that contains lines 0,1 as bit-# 0,1 of that word.
+In the SpikeGLX interface you generally refer to these data words by their
+logical index numbers, which are 0-4 in this case. Let's say you were
+recording sync in NI channel-5. Then on the Sync tab, for example, you
+would configure sync input as analog channel 2 (the third word in the stream).
+
+**Saving All**
+
+If we were saving all channels, then each timepoint of our .bin file would
+have 5 words. The metadata would contain these entries about file format:
+
+```
+acqMnMaXaDw=0,0,4,1   // count of channel types being acquired
+nSavedChans=5         // total channel count saved to file
+niXAChans1=3:6        // original XA channel hardware identities
+niXDBytes1=1          // digital lines fit in 1 byte (but extended to 16-bits)
+niXDChans1=0:1        // original digital line hardware identities
+snsMnMaXaDw=0,0,4,1   // count of channel types saved in file
+snsSaveChanSubset=all // saved-channel-i maps to acquired-channel-j (1:1)
+```
+
+**Saving Subset**
+
+Suppose on the `NI Setup` tab we enter `2:4` as the `Save channel subset`.
+These are logical indices. That means we will not save the first two analog
+channels 3,4. Rather, we will save analog 5,6 and the digital word, so we
+will save (3) of the (5) acquired channels. Now, each timepoint of the .bin
+file will have 3 words, and the new metadata look like this:
+
+```
+acqMnMaXaDw=0,0,4,1   // same: acquiring same channels
+nSavedChans=3         // diff: now only 3 saved to file
+niXAChans1=3:6        // same: original XA channel hardware identities
+niXDBytes1=1          // same: digital lines fit in 1 byte (but extended to 16-bits)
+niXDChans1=0:1        // same: original digital line hardware identities
+snsMnMaXaDw=0,0,2,1   // diff: count of channel types saved in file
+snsSaveChanSubset=2:4 // diff: file-index 0,1,2 maps to acquired 2,3,4
+```
 
 --------
 
