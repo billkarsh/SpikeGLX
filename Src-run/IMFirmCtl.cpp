@@ -185,7 +185,7 @@ void IMFirmCtl::update()
             Error() <<
                 QString("IMEC np_bs_getFirmwareSize(slot %1)%2")
                 .arg( slot ).arg( makeErrorString( err ) );
-            firmUI->statusLbl->setText( "Error updating BS" );
+            beep( "Error updating BS" );
             goto exit;
         }
         bsBytes = bytes;
@@ -206,7 +206,7 @@ void IMFirmCtl::update()
             Error() <<
                 QString("IMEC np_bsc_getFirmwareSize(slot %1)%2")
                 .arg( slot ).arg( makeErrorString( err ) );
-            firmUI->statusLbl->setText( "Error updating BSC" );
+            beep( "Error updating BSC" );
             goto exit;
         }
         bscBytes = bytes;
@@ -230,7 +230,7 @@ void IMFirmCtl::update()
             Error() <<
                 QString("IMEC bs_updateFirmware(slot %1)%2")
                 .arg( slot ).arg( makeErrorString( err ) );
-            firmUI->statusLbl->setText( "Error updating BS" );
+            beep( "Error updating BS" );
             goto close;
         }
 #else
@@ -239,7 +239,7 @@ void IMFirmCtl::update()
             Error() <<
                 QString("IMEC bs_resetFirmware(slot %1)%2")
                 .arg( slot ).arg( makeErrorString( err ) );
-            firmUI->statusLbl->setText( "Error updating BS" );
+            beep( "Error updating BS" );
             goto close;
         }
 #endif
@@ -263,7 +263,7 @@ void IMFirmCtl::update()
             Error() <<
                 QString("IMEC bsc_updateFirmware(slot %1)%2")
                 .arg( slot ).arg( makeErrorString( err ) );
-            firmUI->statusLbl->setText( "Error updating BSC" );
+            beep( "Error updating BSC" );
             goto close;
         }
 #else
@@ -272,7 +272,7 @@ void IMFirmCtl::update()
             Error() <<
                 QString("IMEC bsc_resetFirmware(slot %1)%2")
                 .arg( slot ).arg( makeErrorString( err ) );
-            firmUI->statusLbl->setText( "Error updating BSC" );
+            beep( "Error updating BSC" );
             goto close;
         }
 #endif
@@ -317,6 +317,15 @@ void IMFirmCtl::helpBut()
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+void IMFirmCtl::beep( const QString &msg )
+{
+    firmUI->statusLbl->setText( msg );
+
+    if( !msg.isEmpty() )
+        ::Beep( 440, 200 );
+}
+
+
 void IMFirmCtl::write( const QString &s )
 {
     QTextEdit   *te = firmUI->actionTE;
@@ -357,7 +366,7 @@ bool IMFirmCtl::verGet( int slot )
         Error() <<
             QString("IMEC getBSCHardwareID(slot %1)%2")
             .arg( slot ).arg( makeErrorString( err ) );
-        firmUI->statusLbl->setText( "Error identifying BSC" );
+        beep( "Error identifying BSC" );
         return false;
     }
     tech = IMROTbl::bscpnToTech( hID.ProductNumber );
@@ -374,7 +383,7 @@ bool IMFirmCtl::verGet( int slot )
         Error() <<
             QString("IMEC bs_getFirmwareInfo(slot %1)%2")
             .arg( slot ).arg( makeErrorString( err ) );
-        firmUI->statusLbl->setText( "Error reading BS version" );
+        beep( "Error reading BS version" );
         return false;
     }
     bs = QString("%1.%2.%3")
@@ -386,7 +395,7 @@ bool IMFirmCtl::verGet( int slot )
         Error() <<
             QString("IMEC bsc_getFirmwareInfo(slot %1)%2")
             .arg( slot ).arg( makeErrorString( err ) );
-        firmUI->statusLbl->setText( "Error reading BSC version" );
+        beep( "Error reading BSC version" );
         return false;
     }
     bsc = QString("%1.%2.%3")
@@ -450,7 +459,7 @@ bool IMFirmCtl::paths( QString &bs, QString &bsc )
     }
 
     if( QDir( path ).dirName() != "SGLX_Firmware" ) {
-        firmUI->statusLbl->setText( "Select 'SGLX_Firmware' in your SpikeGLX download" );
+        beep( "Select 'SGLX_Firmware' in your SpikeGLX download" );
         return false;
     }
 
@@ -491,7 +500,7 @@ bool IMFirmCtl::paths( QString &bs, QString &bsc )
     }
 
     if( _bs.isEmpty() || _bsc.isEmpty() ) {
-        firmUI->statusLbl->setText( "Selected folder has wrong version" );
+        beep( "Selected folder has wrong version" );
         return false;
     }
 

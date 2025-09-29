@@ -38,6 +38,7 @@ private slots:
     void helpBut();
 
 private:
+    void beep( const QString &msg );
     void write( const QString &s );
     void verInit( const QString &s );
     bool verGet( int slot );
