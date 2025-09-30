@@ -903,18 +903,25 @@ void CalSRRun::finish_cleanup()
     ConfigCtl           *cfg = app->cfgCtl();
     const DAQ::Params   &p   = cfg->acceptedParams;
     QString             msg;
+    int                 ans;
 
     fmtResults( msg, vIM, vOB, vNI );
     msg += "\nDo you wish to apply all numeric measurements?";
 
-    int yesNo = QMessageBox::question(
-        0,
-        "Verify New Sample Rates",
-        msg,
-        QMessageBox::Yes | QMessageBox::No,
-        QMessageBox::No );
+    for(;;) {
+        ans = QMessageBox::question(
+                0,
+                "Verify New Sample Rates",
+                msg,
+                QMessageBox::Yes | QMessageBox::No | QMessageBox::Help,
+                QMessageBox::No );
+        if( ans == QMessageBox::Help )
+            showHelp( "SyncTab_Help" );
+        else
+            break;
+    }
 
-    if( yesNo == QMessageBox::Yes ) {
+    if( ans == QMessageBox::Yes ) {
 
         // ----
         // Imec
