@@ -1,10 +1,10 @@
 ## System Requirements for Neuropixels
 
-**>> Updated: July, 2025 <<**
+**>> Updated: October, 2025 <<**
 
 What's new:
 
-* Expanded acquisition computer specs.
+* Chassis notes, tested NI-1090.
 
 --------
 
@@ -196,9 +196,18 @@ PCIe Gen 2 x8 slots.
 we've tested and works fine for at most 8 probes. You can't (and don't need
 to) buy any other controller. This requires at least a PCIe Gen 1 x1 slot.
 
-* The 1083 chassis has a built-in Thunderbolt 3 remote controller (link)
-which we've tested and works fine at 32 probes. You can't (and don't
-need to) buy any other controller.
+* The 1083 (5-slot) chassis has a built-in Thunderbolt 3 remote controller
+(link) which we've tested and works fine at 32 probes as far as bandwidth
+is concerned. Note that to really do 32 probes you should use a workstation
+plus a controller that is more stable than Thunderbolt. On this chassis
+you can't (and don't need to) buy any other controller.
+
+* The 1090 (2-slot) chassis has a built-in Thunderbolt 3 remote controller
+(link) which we've tested and works fine. You can't (and don't need to)
+buy any other controller. If you configure this with one imec module and
+one NI 6341 I/O module, you've got a setup that is about twice as big as
+a OneBox but with twice the channel count. This is a bit more flexible
+than a OneBox.
 
 ### PXI: Simplified Shopping List
 
@@ -219,7 +228,7 @@ based options were more readily available than other controller types.
 | SHC68-68-EPM shielded cable 2m         | [192061-02](https://www.ni.com/en-us/support/model.shc68-68-epm.html)     | 190.00 |
 
 * Available (but we haven't tested): [ADLink 4-slot integrated Thunderbolt 3 chassis](https://www.adlinktech.com/Products/PXI_PXIe_platform/PXIChassis/PXES-2314T?lang=en).
-* Available (but we haven't tested): [NI 1090 2-slot integrated Thunderbolt 3 chassis ~$1700US](https://www.ni.com/en-us/shop/model/pxie-1090.html?srsltid=AfmBOooAtkrHkpBzqG9WcCe0kjUhZbP_4M_zso3lJKJXQxH8iK-tv6uy).
+* Available (tested): [NI 1090 2-slot integrated Thunderbolt 3 chassis ~$1700US](https://www.ni.com/en-us/shop/model/pxie-1090.html?srsltid=AfmBOooAtkrHkpBzqG9WcCe0kjUhZbP_4M_zso3lJKJXQxH8iK-tv6uy).
 * You can buy the Thunderbolt 3 cable and power cord anywhere; they're not special.
 * Prices do not include service contracts.
 * All required software is free.
