@@ -1,23 +1,58 @@
-# Parsing Data Files
+# SpikeGLX Output Directories and Files
 
-## Directory and file names
+## Filenames
 
-### Imec probe filenames
+Filenames are decorated with several indices.
+
+### Gate and trigger indices
+
+All files are created under the control of SpikeGLX gate and trigger
+modes, which determine when to start writing files. When file writing
+starts, all files for all streams will get tagged by the current g- and
+t-indices so you know they go together as a set. They will also be grouped
+together inside a folder that is named with the run name and the current
+g-index.
+
+An important characteristic of all of the files in the same `Run_g*` folder
+is that they start writing at the same time. Said another way, they are
+time-aligned at their starts if you had sync enabled.
+
+All of the files from the same run have a special relationship to each other.
+During a run the settings are held constant and the data continue to stream.
+The files that are written are just snapshots from the continuous stream.
+The files contain a metadata item `firstSample` that identifies where in
+that continuum this file was snapped. This allow the files saved from the
+same run to be concatenated in a way that reconstructs the true timeline.
+The [CatGT](https://billkarsh.github.io/SpikeGLX/#catgt) tool can perform
+time-preserving join operations.
+
+### Probe index
 
 * 3A probe filename has no index number after `.imec.`, e.g. `myrun_g0_t0.imec.ap.meta`.
 * All later phases have a probe index, e.g. `myrun_g0_t0.imec0.ap.meta`.
 
 ***CatGT Tip**: Use option `-prb_3A` for 3A data, and DON'T use `-prb=list`!*
 
-### Run folder
+## Directories
 
-* Prior to SpikeGLX version `20190214` there were no run folders. Rather,
-all datafiles output from a run were placed directly into the current
-`Data Directory`.
+### Data directory
+
+At the highest level is the `data directory` which you set in SpikeGLX
+using menu item `Options::Choose Data Directory`. All output data will
+be stored into this directory.
+
+>Note: You can split data into several top-level directories using the
+[`Multidrive Feature`.](#multidrive-output)
+
+### Run folder
 
 * Version `20190214` and later first create a `Run Folder` within the
 data directory. The run folder holds all output from that run, and is
 named with a g-index, e.g. `myrun_g0`.
+
+* Prior to SpikeGLX version `20190214` there were no run folders. Rather,
+all datafiles output from a run were placed directly into the current
+`Data Directory`.
 
 ***CatGT Tip**: Use option `-no_run_fld` for runs before version 20190214.*
 
@@ -27,16 +62,16 @@ named with a g-index, e.g. `myrun_g0`.
 
 These phases are single-probe. No option for probe folders is provided.
 
-**PXI-based 3B2, 2.0**
+**Everything else (3B2, 1.0, 2.0, ...)**
 
 Version `20190214` and later provide a `Folder per probe` option on the
 `Save` tab:
 
 * If not selected, no probe folders are created. Rather, all output files
-for a run are saved into its `Run Folder`.
+for a run are saved into the `Run Folder`.
 
 * If selected (checked):
-    + All nidq datafiles are saved directly into the `Run Folder`.
+    + All nidq and obx datafiles are saved directly into the `Run Folder`.
     + A separate `Probe Folder` for each imec probe is first created
     in the run folder. The probe folder holds all output from that probe,
     and is named with both g- and probe-indices, e.g. `myrun_g0_imec6`.
@@ -44,8 +79,6 @@ for a run are saved into its `Run Folder`.
 ***CatGT Tip**: Use option `-prb_fld` if option selected.*
 
 ## Multidrive output
-
-### PXI-based 3B2, 2.0
 
 Before the `multidrive` option was introduced SpikeGLX let you specify
 at most one `data directory` to hold all your run output folders and files.
@@ -61,7 +94,7 @@ The rule for distributing run output into several data directories is this:
 * As always, the (N) probes have logical indices `[0..N-1]`.
 * The main data directory is `dir-0`.
 * The set of all (M) directories, including the main one are enumerated `[dir-0..dir-M-1]`.
-* NI output is always sent to dir-0.
+* NI and obx output is always sent to dir-0.
 * Probe-j output is sent to `dir-(j modulo M)`.
 * Within each dir-k SpikeGLX will create a `run folder` and applicable `probe folders`
 according to the same rules that apply for a single main data directory.
@@ -80,10 +113,16 @@ For example, suppose these parameters:
 Example output would go here:
 
 * NI: `D:\Data\myrun\myrun_g0_t0.ni.bin(.meta)`
+* obx0: `D:\Data\myrun\myrun_g0_t0.obx0.obx.bin(.meta)`
+* obx1: `D:\Data\myrun\myrun_g0_t0.obx1.obx.bin(.meta)`
 * Imec0: `D:\Data\myrun\myrun_g0_imec0\myrun_g0_t0.imec0.ap.bin(.meta)`
 * Imec3: `D:\Data\myrun\myrun_g0_imec3\myrun_g0_t0.imec3.ap.bin(.meta)`
 * Imec4: `E:\DataB\myrun\myrun_g0_imec4\myrun_g0_t0.imec4.ap.bin(.meta)`
 * Imec8: `G:\DataC\myrun\myrun_g0_imec8\myrun_g0_t0.imec8.ap.bin(.meta)`
+
+>Note: You can run several OneBox ADC streams, which would be named 'obx0,'
+'obx1,' etc. All obx\* data are tiny so we put all obx files in the main
+dir-0 directory.
 
 ### New offline behaviors
 
@@ -124,41 +163,20 @@ each directory.
 Unaffected. All of the input and outfile files {tostream, fromstream, events}
 already have independently specified paths.
 
-## Metadata differences by phase
+## Parsing data by probe
 
-> This isn't an exhaustive list of differences. Rather, this is what
-we parse in our own code.
+The safest and most reliable way to process your data is to use our tools:
 
-### Phase 3A vs later:
+* [CatGT](https://billkarsh.github.io/SpikeGLX/#catgt)
+* [Other post-processing tools](https://billkarsh.github.io/SpikeGLX/#post-processing-tools)
 
-**Filename**
+If you are determined to roll your own parsing code, you will need to
+identify the type of probe used. Once identified, you can look up probe
+characteristics and parameters in the published
+[**probe table**](https://github.com/billkarsh/ProbeTable).
 
-* 3A probe filename has no index number after `.imec.`, e.g. `myrun_g0_t0.imec.ap.meta`.
-* All later phases have a probe index, e.g. `myrun_g0_t0.imec0.ap.meta`.
-
-**Metadata**
-
-* 3A contains key `typeEnabled` with string values from list `{imec, nidq}`.
-* All later phases instead contain keys `{typeIMEnabled, typeNIEnabled}` with
-integer counts of those streams.
-
-### Phase 3B1 vs later:
-
-**Metadata**
-
-* 3B1 does not have keys `{imDatPrb_port, imDatPrb_slot, syncImInputSlot}`.
-
-### Phase 2.0:
-
-**Metadata**
-
-* 2.0 introduces keys `{imDatPrb_dock, imMaxInt}`
-
-## Probe type
-
-* 3A contains key `imProbeOpt`, an integer prototype probe `option code {1,2,3,4}`.
-* All later phases instead contain key `imDatPrb_type`, an integer
-encoding a production probe's unique feature set.
+The metadata key that identifies a probe is its part number `imDatPrb_pn`.
+Virtually all meta files later than phase 3A will contain this value.
 
 
 _fin_
