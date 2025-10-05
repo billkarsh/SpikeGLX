@@ -50,6 +50,7 @@
 <li><a href="#dir">dir</a></li>
 <li><a href="#run_name">run_name</a></li>
 <li><a href="#stream-identifiers--ni--ob--ap--lf">Stream identifiers <code>{-ni, -ob, -ap, -lf}</code></a></li>
+<li><a href="#converting-ap-to-lf-files">Converting AP to LF files</a></li>
 <li><a href="#obx-which-oneboxes">obx (which OneBox(es))</a></li>
 <li><a href="#prb_3a">prb_3A</a></li>
 <li><a href="#prb-which-probes">prb (which probe(s))</a></li>
@@ -182,6 +183,7 @@ Options:
 -maxsecs=7.5             ;set a maximum output file length (float seconds)
 -apfilter=Typ,N,Fhi,Flo  ;apply ap band-pass filter of given {type, order, corners(float Hz)}
 -lffilter=Typ,N,Fhi,Flo  ;apply lf band-pass filter of given {type, order, corners(float Hz)}
+-ap2lf_dwnsmp=12         ;down-sample factor when converting ap to lf file
 -no_tshift               ;DO NOT time-align channels to account for ADC multiplexing
 -loccar_um=40,140        ;apply ap local CAR annulus (exclude radius, include radius)
 -loccar=2,8              ;apply ap local CAR annulus (exclude radius, include radius)
@@ -242,6 +244,7 @@ Options:
 <li>New .bin/.meta files are output only in these cases:
 <ol style="list-style-type: decimal">
 <li>A range of files is being concatenated, that is, (gb &gt; ga) or (tb &gt; ta).</li>
+<li>A -save, -sepShanks, or -maxZ directive alters the channel list.</li>
 <li>Filters, tshift or startsecs are applied, so the binary data are altered.</li>
 <li>A time range is exported: set both -startsecs &gt;= 0, and -maxsecs &gt; startsecs.</li>
 </ol></li>
@@ -288,10 +291,11 @@ Options:
 <p>The input run_name is a base (undecorated) name without g- or t-indices.</p>
 <h3 id="stream-identifiers--ni--ob--ap--lf">Stream identifiers <code>{-ni, -ob, -ap, -lf}</code></h3>
 <p>In a given run you might have saved a variety of stream/file types {nidq.bin, obx.bin, ap.bin, lf.bin}. Use the <code>{-ni, -ob, -ap, -lf}</code> flags to indicate which streams within this run you wish to process.</p>
+<h3 id="converting-ap-to-lf-files">Converting AP to LF files</h3>
 <p>The -lf option can be used in two ways:</p>
 <ol style="list-style-type: decimal">
 <li><p>If there are .lf. files present in the run folder, which is usual for 1.0-like probes which have a separate LF band, then the {-lf, -lffilter} options will be applied to those files.</p></li>
-<li><p>If there are no .lf. files already present in the run, then the {-lf, -lffilter} options are used to generate a downsampled (2500 Hz) lf.bin/meta file set from the .ap. data if the following conditions are met:</p></li>
+<li><p>If there are no .lf. files already present in the run, then the {-lf, -lffilter, -ap2lf_dwnsmp} options are used to generate a downsampled lf.bin/meta file set from the .ap. data if the following conditions are met:</p></li>
 </ol>
 <ul>
 <li>The .ap. data are full-band.</li>
@@ -300,6 +304,8 @@ Options:
 </ul>
 <p>The full-band test: A 2.0 probe is always full-band because it has no LF channel count. A 1.0 stream is full-band if at least one channel's AP filter is OFF in its IMRO table.</p>
 <p>Note that in SpikeGLX you can omit the saving of .lf. files by setting the <code>Save chans</code> string to exclude LF channels. For example, <code>0:383,768</code> with <code>Force LF</code> unchecked saves only AP and SY channels. If you've already saved .lf. files you will have to remove or rename them to allow the CatGT LF generation to work.</p>
+<p>Parameter -ap2lf_dwnsmp sets the down-sample factor for the conversion. The value must be in range [2,30] and it must evenly divide 30000 with no remainder. We choose 30 as the limit, which produces a 1 KHz rate, because that's the minimum needed to sample 500 Hz, considered to be the top of the LF band.</p>
+<p>If you omit parameter -ap2lf_dwnsmp the default value is 12. That produces sample rate 30000/12 = 2500 Hz to match NP 1.0.</p>
 <h3 id="obx-which-oneboxes">obx (which OneBox(es))</h3>
 <p>This designates which OneBoxes to process. OneBox indices are assigned by SpikeGLX and always start at zero. Unlike probes, all obx files are at the top level of a run folder (like NI); there are no obx subfolders.</p>
 <p>Examples:</p>
@@ -542,7 +548,7 @@ ls -s &lt;path/myoriginalname.meta&gt; &lt;...ZZZ/goodname_g0_t0.imec0.ap.meta&g
 </ul>
 <h4 id="extractors-word">Extractors word</h4>
 <p>Word is a zero-based channel index. It selects the 16-bit data word to process.</p>
-<p>word = -1, selects the last word in that stream. That's especially useful to specify the SY word at the end of a OneBox or probe stream.</p>
+<p>word = -1, selects the last word in that stream. That's especially useful to specify the SY word at the end of a OneBox or probe stream. It can also be used for NI streams as shorthand for a trailing digital word.</p>
 <blockquote>
 <p>It may be helpful to review the organization of words and bits in data streams in the <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md#channel-naming-and-ordering">SpikeGLX User Manual</a>.</p>
 </blockquote>
@@ -895,6 +901,7 @@ Options:
 -maxsecs=7.5             ;ignored
 -apfilter=Typ,N,Fhi,Flo  ;ignored
 -lffilter=Typ,N,Fhi,Flo  ;ignored
+-ap2lf_dwnsmp=12         ;ignored
 -no_tshift               ;ignored
 -loccar_um=40,140        ;ignored
 -loccar=2,8              ;ignored
@@ -949,6 +956,12 @@ Options:
 <p>Supercat creates output file: <code>dest/supercat_run_ga/run_ga_fyi.txt</code>. This lists key output paths and filenames you can use to build downstream command lines for TPrime.</p>
 <hr />
 <h2 id="change-log">Change Log</h2>
+<p>Version 4.9</p>
+<ul>
+<li>Fix -sepShanks: allow multiple ipj=-1.</li>
+<li>Write bin if -save, -sepShanks, -maxZ directives.</li>
+<li>Add -ap2lf_dwnsmp factor range [2,30]; default 12.</li>
+</ul>
 <p>Version 4.8</p>
 <ul>
 <li>Support NP1.0 probe PRB_1_2_0480_2.</li>

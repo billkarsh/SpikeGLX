@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+October 4, 2025
+
+* CatGT 4.9 (Better multishank support, AP2LF down-sample parameter).
+
 September 15, 2025
 
 * SpikeGLX 20250915-api4 (Quadbase, API4, Qt6, api v4.1.3).
