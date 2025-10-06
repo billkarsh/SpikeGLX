@@ -1588,14 +1588,20 @@ void FileViewerWindow::file_Link()
     L.runTag.load_mip2ip1();
 
     for( int ib = 0, nb = L.apBits.size(); ib < nb; ++ib ) {
-        if( L.apBits.testBit( ib ) && L.runTag.mip2ip1.contains( ib ) ) {
+        if( L.apBits.testBit( ib ) &&
+            (L.runTag.mip2ip1.isEmpty() ||
+             L.runTag.mip2ip1.contains( ib )) ) {
+
             if( !linkFindName( L.runTag, ib, 0 ) )
                 linkOpenName( L.runTag, ib, 0, corner );
         }
     }
 
     for( int ib = 0, nb = L.lfBits.size(); ib < nb; ++ib ) {
-        if( L.lfBits.testBit( ib ) && L.runTag.mip2ip1.contains( ib ) ) {
+        if( L.lfBits.testBit( ib ) &&
+            (L.runTag.mip2ip1.isEmpty() ||
+             L.runTag.mip2ip1.contains( ib )) ) {
+
             if( !linkFindName( L.runTag, ib, 1 ) )
                 linkOpenName( L.runTag, ib, 1, corner );
         }
