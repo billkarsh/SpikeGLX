@@ -360,15 +360,9 @@ exactly 1/12 the AP rate.</p>
 <p>Specify a source/generator of the common sync waveform. You have several
 options:</p>
 <ul>
-<li>
-<p>Select any one of the imec slots.</p>
-</li>
-<li>
-<p>Select your NI multifunction I/O device (SpikeGLX programs its output).</p>
-</li>
-<li>
-<p>Use your own signal generator. Set it for 1 Hz and 50% duty cycle.</p>
-</li>
+<li>Select any one of the imec slots.</li>
+<li>Select your NI multifunction I/O device (SpikeGLX programs its output).</li>
+<li>Use your own signal generator. Set it for 1 Hz and 50% duty cycle.</li>
 </ul>
 </li>
 <li>
@@ -454,9 +448,9 @@ stream-index and channel (16-bit word) to operate on, E.g.:</p>
 <li><strong>AP</strong>: js = 2 (only {xd, xid} are legal).</li>
 </ul>
 <blockquote>
-<p>*Extractors do not work on LF files. Use the AP-band for sync and event</p>
+<p><em>Extractors do not work on LF files. Use the AP-band for sync and event
+extraction: the higher sample rate improves accuracy.</em></p>
 </blockquote>
-<p>extraction: the higher sample rate improves accuracy.*</p>
 <h4 id="extractors-ip-stream-index">Extractors ip (stream-index)</h4>
 <ul>
 <li><strong>NI</strong>: ip = 0 (there is only one NI stream).</li>
@@ -467,8 +461,8 @@ stream-index and channel (16-bit word) to operate on, E.g.:</p>
 <p>Word is a zero-based channel index. It selects the 16-bit data word to
 process.</p>
 <p>word = -1, selects the last word in that stream. That's especially useful
-to specify the SY word at the end of a OneBox or probe stream. It can also</p>
-<p>be used for NI streams as shorthand for a trailing digital word.</p>
+to specify the SY word at the end of a OneBox or probe stream. It can also
+be used for NI streams as shorthand for a trailing digital word.</p>
 <blockquote>
 <p>It may be helpful to review the organization of words and bits in data
 streams in the
@@ -476,24 +470,18 @@ streams in the
 </blockquote>
 <h4 id="extractors-positive-pulse">Extractors positive pulse</h4>
 <ol>
-<li>
-<p>starts at low baseline (below threshold)</p>
-</li>
-<li>
-<p>has a leading/rising edge (crosses above threshold)</p>
-</li>
+<li>starts at low baseline (below threshold)</li>
+<li>has a leading/rising edge (crosses above threshold)</li>
 <li>(optionally) stays high/deflected for a given duration</li>
 <li>has a trailing/falling edge (crosses below threshold)</li>
 </ol>
 <blockquote>
-<p>Digital TTL signals are in the range [0,5] V, so for the xd case,</p>
+<p>Digital TTL signals are in the range [0,5] V, so for the xd case,
+positive pulses are inherently non-negative.</p>
+<p>The xa extractor looks for rising edges and it works regardless of
+the baseline level of the pulse. The two threshold value can be positive
+or negative.</p>
 </blockquote>
-<p>positive pulses are inherently non-negative.</p>
-<blockquote>
-<p>The xa extractor looks for rising edges and it works regardless of</p>
-</blockquote>
-<p>the baseline level of the pulse. The two threshold value can be positive</p>
-<p>or negative.</p>
 <p>The positive pulse extractors <strong>{xa, xd}</strong> make text files that report
 the times (seconds) of the leading edges of matched pulses.</p>
 <h4 id="extractors-xa">Extractors xa</h4>
@@ -537,19 +525,17 @@ edges regardless of pulse duration.</p>
 <li>Default tolerance can be overridden by appending it in milliseconds
 as the last parameter for that extractor.</li>
 <li>Each extractor can have its own tolerance.</li>
-<li>E.g., -xd=js,ip,word,bit,100   seeks pulses with duration in default</li>
+<li>E.g., -xd=js,ip,word,bit,100   seeks pulses with duration in default
+range [80,120] ms.</li>
+<li>E.g., -xd=js,ip,word,bit,100,2 seeks pulses with duration in specified
+range [98,102] ms.</li>
 </ul>
-<p>range [80,120] ms.
-* E.g., -xd=js,ip,word,bit,100,2 seeks pulses with duration in specified</p>
-<p>range [98,102] ms.</p>
 </li>
 <li>
 <p>A given channel or even bit could encode two or more types of pulse that
-have different durations, e.g., <code>-xd=0,0,8,0,10 -xd=0,0,8,0,20</code> scans and</p>
+have different durations, e.g., <code>-xd=0,0,8,0,10 -xd=0,0,8,0,20</code> scans and
+reports both 10 and 20 ms pulses on the same line.</p>
 </li>
-</ul>
-<p>reports both 10 and 20 ms pulses on the same line.</p>
-<ul>
 <li>
 <p>Each option, say <code>-xd=2,0,384,6,500</code>, creates an output file whose name
 reflects the parameters, e.g., <code>run_name_g0_tcat.imec0.ap.xd_384_6_500.txt</code>.</p>
@@ -559,25 +545,23 @@ reflects the parameters, e.g., <code>run_name_g0_tcat.imec0.ap.xd_384_6_500.txt<
 milliseconds.</p>
 </li>
 <li>
-<p>The <code>-save</code> and <code>-sepShanks</code> options can create new neural binaries</p>
+<p>The <code>-save</code> and <code>-sepShanks</code> options can create new neural binaries
+derived from a parent probe with index ip1, and these new files are
+labeled by your provided ip2 indices. However, extraction of nonneural
+events is performed only on the parent ip1 files. For example, you
+might split a four-shank probe {0} into four separate shank files
+{1000,1001,1002,1003} using <code>-sepShanks=0,1000,1001,1002,1003</code>. The
+output will contain a single file of extracted sync edges, named for
+probe-0. The derived neural files all share the same nonneural data
+so the extractor output files are not replicated. Rather, the fyi file
+has path entries that connect each derived ip2 index with the parent
+ip1 extractor output file.</p>
 </li>
-</ul>
-<p>derived from a parent probe with index ip1, and these new files are</p>
-<p>labeled by your provided ip2 indices. However, extraction of nonneural</p>
-<p>events is performed only on the parent ip1 files. For example, you</p>
-<p>might split a four-shank probe {0} into four separate shank files</p>
-<p>{1000,1001,1002,1003} using <code>-sepShanks=0,1000,1001,1002,1003</code>. The</p>
-<p>output will contain a single file of extracted sync edges, named for</p>
-<p>probe-0. The derived neural files all share the same nonneural data</p>
-<p>so the extractor output files are not replicated. Rather, the fyi file</p>
-<p>has path entries that connect each derived ip2 index with the parent</p>
-<p>ip1 extractor output file.</p>
-<ul>
-<li>The <code>run_ga_fyi.txt</code> file lists the full paths of generated</li>
-</ul>
-<p>extractor output files. It also lists which extractor files go</p>
-<p>with any derived (ip2) neural file indices.</p>
-<ul>
+<li>
+<p>The <code>run_ga_fyi.txt</code> file lists the full paths of generated
+extractor output files. It also lists which extractor files go
+with any derived (ip2) neural file indices.</p>
+</li>
 <li>
 <p>The files report the times (s) of leading edges of detected pulses;
 one time per line, <code>\n</code> line endings.</p>
@@ -589,24 +573,18 @@ detected (native time).</p>
 </ul>
 <h4 id="extractors-inverted-pulse">Extractors inverted pulse</h4>
 <ol>
-<li>
-<p>starts at high baseline (above threshold)</p>
-</li>
-<li>
-<p>has a leading/falling edge (crosses below threshold)</p>
-</li>
+<li>starts at high baseline (above threshold)</li>
+<li>has a leading/falling edge (crosses below threshold)</li>
 <li>(optionally) stays low/deflected for a given duration</li>
 <li>has a trailing/rising edge (crosses above threshold)</li>
 </ol>
 <blockquote>
-<p>Digital TTL signals are in the range [0,5] V, so for the xid case,</p>
+<p>Digital TTL signals are in the range [0,5] V, so for the xid case,
+inverted pulses are still entiely non-negative.</p>
+<p>The xia extractor looks for falling edges and it works regardless of
+the baseline level of the pulse. The two threshold value can be positive
+or negative.</p>
 </blockquote>
-<p>inverted pulses are still entiely non-negative.</p>
-<blockquote>
-<p>The xia extractor looks for falling edges and it works regardless of</p>
-</blockquote>
-<p>the baseline level of the pulse. The two threshold value can be positive</p>
-<p>or negative.</p>
 <p>The inverted pulse extractors <strong>{xia, xid}</strong> make text files that report
 the times (seconds) of the leading edges of matched pulses.</p>
 <p>The inverted pulse versions work exactly the same way as their positive
@@ -648,12 +626,12 @@ parameters (excluding inarow), for example:</p>
 values, and the <code>bft</code> file contains the time (seconds from file start)
 that the field switched to that value.</p>
 <h4 id="extractors-inarow-option">Extractors inarow option</h4>
-<p>The pulse extractors <strong>{xa,xd,xia,xid}</strong> use edge detection. By default,</p>
-<p>when a signal crosses from low to high, it is required to stay high for</p>
-<p>at least 5 samples. Similarly, when crossing from high to low the signal</p>
-<p>is required to stay low for at least 5 samples. This requirement is applied</p>
-<p>even when specifying a pulse duration of zero, that is, it is applied to</p>
-<p>any edge. This is done to guard against noise.</p>
+<p>The pulse extractors <strong>{xa,xd,xia,xid}</strong> use edge detection. By default,
+when a signal crosses from low to high, it is required to stay high for
+at least 5 samples. Similarly, when crossing from high to low the signal
+is required to stay low for at least 5 samples. This requirement is applied
+even when specifying a pulse duration of zero, that is, it is applied to
+any edge. This is done to guard against noise.</p>
 <p>You can override the count giving any value &gt;= 1.</p>
 <h4 id="extractors-no_auto_sync-option">Extractors no_auto_sync option</h4>
 <p>Starting with version 3.0, CatGT automatically extracts sync edges
