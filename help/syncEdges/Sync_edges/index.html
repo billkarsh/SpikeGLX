@@ -42,7 +42,7 @@
                             <li class="navitem">
                                 <a href="../../../legacy/" class="nav-link">Legacy</a>
                             </li>
-                            <li class="dropdown active">
+                            <li class="dropdown">
                                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Help <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     
@@ -55,7 +55,7 @@
 </li>
                                     
 <li>
-    <a href="../../solder/solder/" class="dropdown-item">Noise: Learn How To Solder</a>
+    <a href="../../../help/solder/solder.md" class="dropdown-item">Noise: Learn How To Solder</a>
 </li>
                                     
 <li>
@@ -79,7 +79,7 @@
 </li>
                                     
 <li>
-    <a href="../../SpikeGLX_dirs_files/" class="dropdown-item">SpikeGLX Dirs and Files</a>
+    <a href="../../../help/SpikeGLX_dirs_files.md" class="dropdown-item">SpikeGLX Dirs and Files</a>
 </li>
                                     
 <li>
@@ -103,15 +103,15 @@
 </li>
                                     
 <li>
-    <a href="../../catgt_tshift/catgt_tshift/" class="dropdown-item">CatGT: Tshift, CAR, Gfix</a>
+    <a href="../../../help/catgt_tshift/catgt_tshift.md" class="dropdown-item">CatGT: Tshift, CAR, Gfix</a>
 </li>
                                     
 <li>
-    <a href="./" class="dropdown-item active">Sync: Aligning with Edges</a>
+    <a href="../../../help/syncEdges/Sync_edges.md" class="dropdown-item">Sync: Aligning with Edges</a>
 </li>
                                     
 <li>
-    <a href="../../imroTables/" class="dropdown-item">IMRO Table Anatomy</a>
+    <a href="../../../help/imroTables.md" class="dropdown-item">IMRO Table Anatomy</a>
 </li>
                                 </ul>
                             </li>
@@ -126,16 +126,6 @@
                                 <i class="fa fa-search"></i> Search
                             </a>
                         </li>
-                            <li class="nav-item">
-                                <a rel="prev" href="../../catgt_tshift/catgt_tshift/" class="nav-link">
-                                    <i class="fa fa-arrow-left"></i> Previous
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a rel="next" href="../../imroTables/" class="nav-link">
-                                    Next <i class="fa fa-arrow-right"></i>
-                                </a>
-                            </li>
                     </ul>
                 </div>
             </div>
@@ -226,7 +216,7 @@ probe, really each headstage, is a separate stream.</p>
 <li>
 <p><strong>Onebox ADC channels</strong>: An imec Onebox can record from several probes,
 each of which is a stream, and it can record several analog and digital
-non-neural channels at ~30kHz, which we also regard as a stream. This gets
+non-neural channels at ~30303Hz, which we also regard as a stream. This gets
 its own <strong>obx</strong> file type.</p>
 </li>
 <li>
@@ -273,30 +263,22 @@ are typically smaller than 0.1ms.</p>
 <p>Briefly, the sync-related roles of various components are the
 following, listed in the order you would organize your workflow:</p>
 <ol>
-<li>
-<p><strong>SpikeGLX</strong>:</p>
-<ul>
+<li><strong>SpikeGLX</strong>:<ul>
 <li><strong>Calibrate sample rates</strong></li>
 <li><strong>Recalibrate rates from run</strong></li>
 <li><strong>Generate and record runtime sync wave</strong></li>
 </ul>
 </li>
-<li>
-<p><strong>CatGT</strong>:</p>
-<ul>
+<li><strong>CatGT</strong>:<ul>
 <li><strong>Extract tables of sync wave edges</strong></li>
 <li><strong>Extract tables of non-neural event times</strong></li>
 </ul>
 </li>
-<li>
-<p><strong>Your_favorite_spike_sorter</strong>:</p>
-<ul>
+<li><strong>Your_favorite_spike_sorter</strong>:<ul>
 <li><strong>Extract tables of spike times</strong></li>
 </ul>
 </li>
-<li>
-<p><strong>TPrime</strong>:</p>
-<ul>
+<li><strong>TPrime</strong>:<ul>
 <li><strong>Remap all tables of times to reference stream coordinates</strong></li>
 </ul>
 </li>
@@ -472,8 +454,9 @@ stream-index and channel (16-bit word) to operate on, E.g.:</p>
 <li><strong>AP</strong>: js = 2 (only {xd, xid} are legal).</li>
 </ul>
 <blockquote>
-<p><em>Extractors do not work on LF files.</em></p>
+<p>*Extractors do not work on LF files. Use the AP-band for sync and event</p>
 </blockquote>
+<p>extraction: the higher sample rate improves accuracy.*</p>
 <h4 id="extractors-ip-stream-index">Extractors ip (stream-index)</h4>
 <ul>
 <li><strong>NI</strong>: ip = 0 (there is only one NI stream).</li>
@@ -484,19 +467,33 @@ stream-index and channel (16-bit word) to operate on, E.g.:</p>
 <p>Word is a zero-based channel index. It selects the 16-bit data word to
 process.</p>
 <p>word = -1, selects the last word in that stream. That's especially useful
-to specify the SY word at the end of a Onebox or probe stream.</p>
+to specify the SY word at the end of a OneBox or probe stream. It can also</p>
+<p>be used for NI streams as shorthand for a trailing digital word.</p>
 <blockquote>
 <p>It may be helpful to review the organization of words and bits in data
 streams in the
-<a href="../../../Sgl_help/UserManual.html#channel-naming-and-ordering">SpikeGLX User Manual</a>.</p>
+<a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md#channel-naming-and-ordering">SpikeGLX User Manual</a>.</p>
 </blockquote>
 <h4 id="extractors-positive-pulse">Extractors positive pulse</h4>
 <ol>
-<li>starts at low <strong>non-negative</strong> baseline (below threshold)</li>
-<li>has a leading/rising edge (crosses above threshold)</li>
+<li>
+<p>starts at low baseline (below threshold)</p>
+</li>
+<li>
+<p>has a leading/rising edge (crosses above threshold)</p>
+</li>
 <li>(optionally) stays high/deflected for a given duration</li>
 <li>has a trailing/falling edge (crosses below threshold)</li>
 </ol>
+<blockquote>
+<p>Digital TTL signals are in the range [0,5] V, so for the xd case,</p>
+</blockquote>
+<p>positive pulses are inherently non-negative.</p>
+<blockquote>
+<p>The xa extractor looks for rising edges and it works regardless of</p>
+</blockquote>
+<p>the baseline level of the pulse. The two threshold value can be positive</p>
+<p>or negative.</p>
 <p>The positive pulse extractors <strong>{xa, xd}</strong> make text files that report
 the times (seconds) of the leading edges of matched pulses.</p>
 <h4 id="extractors-xa">Extractors xa</h4>
@@ -513,7 +510,8 @@ be farther from baseline than theshold-1 to ensure pulses attain a desired
 deflection amplitude. Using two separate threshold levels allows detecting
 the earliest time that pulse departs from baseline (threshold-1) and
 separately testing that the deflection is great enough to be considered a
-real event and not noise (threshold-2).</p>
+real event and not noise (threshold-2). See Fig. 1.</p>
+<p><img alt="Fig. 1: Dual Thresholds" src="../catgt_analog_extract.png" /></p>
 <h4 id="extractors-xd">Extractors xd</h4>
 <p>Following <strong>-xd=js,ip,word</strong>, these parameters are required:</p>
 <ul>
@@ -539,17 +537,19 @@ edges regardless of pulse duration.</p>
 <li>Default tolerance can be overridden by appending it in milliseconds
 as the last parameter for that extractor.</li>
 <li>Each extractor can have its own tolerance.</li>
-<li>E.g. -xd=js,ip,word,bit,100   seeks pulses with duration in default
-range [80,120] ms.</li>
-<li>E.g. -xd=js,ip,word,bit,100,2 seeks pulses with duration in specified
-range [98,102] ms.</li>
+<li>E.g., -xd=js,ip,word,bit,100   seeks pulses with duration in default</li>
 </ul>
+<p>range [80,120] ms.
+* E.g., -xd=js,ip,word,bit,100,2 seeks pulses with duration in specified</p>
+<p>range [98,102] ms.</p>
 </li>
 <li>
 <p>A given channel or even bit could encode two or more types of pulse that
-have different durations, E.g. <code>-xd=0,0,8,0,10 -xd=0,0,8,0,20</code> scans and
-reports both 10 and 20 ms pulses on the same line.</p>
+have different durations, e.g., <code>-xd=0,0,8,0,10 -xd=0,0,8,0,20</code> scans and</p>
 </li>
+</ul>
+<p>reports both 10 and 20 ms pulses on the same line.</p>
+<ul>
 <li>
 <p>Each option, say <code>-xd=2,0,384,6,500</code>, creates an output file whose name
 reflects the parameters, e.g., <code>run_name_g0_tcat.imec0.ap.xd_384_6_500.txt</code>.</p>
@@ -559,9 +559,25 @@ reflects the parameters, e.g., <code>run_name_g0_tcat.imec0.ap.xd_384_6_500.txt<
 milliseconds.</p>
 </li>
 <li>
-<p>The <code>run_name_g0_fyi.txt</code> file lists the full paths of all generated
-extraction files.</p>
+<p>The <code>-save</code> and <code>-sepShanks</code> options can create new neural binaries</p>
 </li>
+</ul>
+<p>derived from a parent probe with index ip1, and these new files are</p>
+<p>labeled by your provided ip2 indices. However, extraction of nonneural</p>
+<p>events is performed only on the parent ip1 files. For example, you</p>
+<p>might split a four-shank probe {0} into four separate shank files</p>
+<p>{1000,1001,1002,1003} using <code>-sepShanks=0,1000,1001,1002,1003</code>. The</p>
+<p>output will contain a single file of extracted sync edges, named for</p>
+<p>probe-0. The derived neural files all share the same nonneural data</p>
+<p>so the extractor output files are not replicated. Rather, the fyi file</p>
+<p>has path entries that connect each derived ip2 index with the parent</p>
+<p>ip1 extractor output file.</p>
+<ul>
+<li>The <code>run_ga_fyi.txt</code> file lists the full paths of generated</li>
+</ul>
+<p>extractor output files. It also lists which extractor files go</p>
+<p>with any derived (ip2) neural file indices.</p>
+<ul>
 <li>
 <p>The files report the times (s) of leading edges of detected pulses;
 one time per line, <code>\n</code> line endings.</p>
@@ -573,15 +589,24 @@ detected (native time).</p>
 </ul>
 <h4 id="extractors-inverted-pulse">Extractors inverted pulse</h4>
 <ol>
-<li>starts at high <strong>positive</strong> baseline (above threshold)</li>
-<li>has a leading/falling edge (crosses below threshold)</li>
+<li>
+<p>starts at high baseline (above threshold)</p>
+</li>
+<li>
+<p>has a leading/falling edge (crosses below threshold)</p>
+</li>
 <li>(optionally) stays low/deflected for a given duration</li>
 <li>has a trailing/rising edge (crosses above threshold)</li>
 </ol>
 <blockquote>
-<p><em>Although the shape is "inverted," these pulses are nevertheless entirely
-non-negative.</em></p>
+<p>Digital TTL signals are in the range [0,5] V, so for the xid case,</p>
 </blockquote>
+<p>inverted pulses are still entiely non-negative.</p>
+<blockquote>
+<p>The xia extractor looks for falling edges and it works regardless of</p>
+</blockquote>
+<p>the baseline level of the pulse. The two threshold value can be positive</p>
+<p>or negative.</p>
 <p>The inverted pulse extractors <strong>{xia, xid}</strong> make text files that report
 the times (seconds) of the leading edges of matched pulses.</p>
 <p>The inverted pulse versions work exactly the same way as their positive
@@ -622,6 +647,14 @@ parameters (excluding inarow), for example:</p>
 <p>The two files have paired entries. The <code>bfv</code> file contains the decoded
 values, and the <code>bft</code> file contains the time (seconds from file start)
 that the field switched to that value.</p>
+<h4 id="extractors-inarow-option">Extractors inarow option</h4>
+<p>The pulse extractors <strong>{xa,xd,xia,xid}</strong> use edge detection. By default,</p>
+<p>when a signal crosses from low to high, it is required to stay high for</p>
+<p>at least 5 samples. Similarly, when crossing from high to low the signal</p>
+<p>is required to stay low for at least 5 samples. This requirement is applied</p>
+<p>even when specifying a pulse duration of zero, that is, it is applied to</p>
+<p>any edge. This is done to guard against noise.</p>
+<p>You can override the count giving any value &gt;= 1.</p>
 <h4 id="extractors-no_auto_sync-option">Extractors no_auto_sync option</h4>
 <p>Starting with version 3.0, CatGT automatically extracts sync edges
 from all streams unless you turn that off using <code>-no_auto_sync</code>.</p>
