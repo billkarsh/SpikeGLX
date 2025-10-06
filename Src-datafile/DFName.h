@@ -10,18 +10,20 @@
 class DFRunTag
 {
 public:
-    QString runDir,         // path/run_gN/ (term slash)
-            runName,        // run          (undecorated)
-            t;              // numeral or 'cat'
-    int     g;
-    bool    exported,
-            fldPerPrb,
-            is3A,
-            reserved;
+    QMap<int,int>   mip2ip1;    // CatGT ip2->ip1 map
+    QString         runDir,     // path/run_gN/ (term slash)
+                    runName,    // run          (undecorated)
+                    t;          // numeral or 'cat'
+    int             g;
+    bool            exported,
+                    fldPerPrb,
+                    is3A,
+                    reserved;
 public:
     DFRunTag() : g(-1), exported(false), fldPerPrb(false), is3A(false)  {}
     DFRunTag( const QString &dataDir, const QString &runName );
     DFRunTag( const QString &filePath );
+    void load_mip2ip1();
     QString run_g_t() const;
     QString brevname( int fType, int ip, const QString &suffix ) const;
     QString filename( int fType, int ip, const QString &suffix ) const;

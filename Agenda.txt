@@ -3,6 +3,7 @@
 
 20250930
 --------
+- FileViewer::Link parses split shanks.
 
 20250915
 --------

@@ -1534,6 +1534,8 @@ void FileViewerWindow::file_Link()
     if( !linkShowDialog( L ) )
         return;
 
+    QGuiApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+
     linkStaticSave();
 
 // -----
@@ -1583,15 +1585,17 @@ void FileViewerWindow::file_Link()
 
     QPoint  corner( 0, 0 );
 
+    L.runTag.load_mip2ip1();
+
     for( int ib = 0, nb = L.apBits.size(); ib < nb; ++ib ) {
-        if( L.apBits.testBit( ib ) ) {
+        if( L.apBits.testBit( ib ) && L.runTag.mip2ip1.contains( ib ) ) {
             if( !linkFindName( L.runTag, ib, 0 ) )
                 linkOpenName( L.runTag, ib, 0, corner );
         }
     }
 
     for( int ib = 0, nb = L.lfBits.size(); ib < nb; ++ib ) {
-        if( L.lfBits.testBit( ib ) ) {
+        if( L.lfBits.testBit( ib ) && L.runTag.mip2ip1.contains( ib ) ) {
             if( !linkFindName( L.runTag, ib, 1 ) )
                 linkOpenName( L.runTag, ib, 1, corner );
         }
@@ -1621,6 +1625,8 @@ void FileViewerWindow::file_Link()
 // ----
 
     linkStaticRestore( L.runTag );
+
+    QGuiApplication::restoreOverrideCursor();
 }
 
 

@@ -109,6 +109,43 @@ DFRunTag::DFRunTag( const QString &filePath )
 }
 
 
+// Load if able.
+// Array of (ip2,ip1)()...
+//
+void DFRunTag::load_mip2ip1()
+{
+    if( 0 != t.compare( "cat", Qt::CaseInsensitive ) )
+        return;
+
+    QString fyi = QString("%1%2_g%3_fyi.txt")
+                    .arg( runDir ).arg( runName ).arg( g );
+    if( !QFile( fyi ).exists() )
+        return;
+
+    KVParams    kvp;
+    kvp.fromMetaFile( fyi );
+    KVParams::const_iterator    it = kvp.find( "ip2_ip1" );
+    if( it == kvp.end() )
+        return;
+
+    QString     smap    = it.value().toString();
+    QStringList pr      = smap.split(
+                        QRegularExpression("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
+                        Qt::SkipEmptyParts );
+    int         n       = pr.size();
+    if( !n )
+        return;
+
+    for( int i = 0; i < n; ++i ) {
+
+        QStringList vv = pr[i].split(
+                            QRegularExpression("^\\s+|\\s*,\\s*"),
+                            Qt::SkipEmptyParts );
+        mip2ip1[vv[0].toInt()] = vv[1].toInt();
+    }
+}
+
+
 QString DFRunTag::run_g_t() const
 {
     return QString("%1_g%2_t%3%4")
@@ -169,10 +206,11 @@ QString DFRunTag::filename( int fType, int ip, const QString &suffix ) const
                 .arg( suffix );
     }
     else if( fldPerPrb ) {
-        return QString("%1%2_g%3_imec%5/%4.imec%5.%6")
+        return QString("%1%2_g%3_imec%4/%5.imec%6.%7")
                 .arg( runDir )
                 .arg( runName )
                 .arg( g )
+                .arg( mip2ip1.value( ip, ip ) )
                 .arg( run_g_t() )
                 .arg( ip ).arg( suffix );
     }
