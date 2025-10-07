@@ -331,7 +331,7 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.
 * [CatGT ReadMe](CatGT_help/CatGT_ReadMe.html)
 * [CatGT: Tshift, CAR, Gfix](help/catgt_tshift/catgt_tshift.md)
 * [Sync: Aligning with Edges](help/syncEdges/Sync_edges.md)
-* [IMRO Table Anatomy](help/imroTables.md)
+* [IMRO Table Anatomy](help/imroTables/)
 
 ------
 
