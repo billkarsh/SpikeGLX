@@ -3,7 +3,7 @@
 **Synchronized acquisition from imec neural probes and NI-DAQ devices.**
 
 * Get compiled apps, support and help stuff on this page.
-* See what's new on the site [here](new.md).
+* See what's new on the site [here](new/).
 * The source code repo is [here](https://github.com/billkarsh).
 
 >This site supports prototype and currently shipping commercial products.</BR>
@@ -62,7 +62,7 @@ using Intel CPUs and chipsets.*
 
 >*Important!: Older imec modules (shipped before Q2 2023) are programmed to
 work only in X4 and higher chassis slots. Learn more about this issue on the
-site's [Firmware tab](firmware.md).*
+site's [Firmware tab](firmware/).*
 
 ------
 
@@ -198,7 +198,7 @@ on SpikeGLX output files (all probe types):
 >+ By default extract tables of sync waveform edge times to drive TPrime.
 >+ Optionally extract tables of other nonneural event times to be aligned with spikes.
 >+ Optionally join the above outputs across different runs (supercat feature).
->+ [CatGT: Tshift, CAR, Gfix](help/catgt_tshift/catgt_tshift.md)
+>+ [CatGT: Tshift, CAR, Gfix](help/catgt_tshift/catgt_tshift/)
 
 * [CatGT 4.9 (Windows)](Support/CatGTWinApp.zip)
 * [CatGT 4.9 (Linux)](Support/CatGTLnxApp.zip)
@@ -215,7 +215,7 @@ TPrime is a command-line tool that maps event times (all probe types):
 >+ Uses sync edges to achieve 1 to 2 sample accuracy.
 >+ Maps TTL events extracted using CatGT.
 >+ Maps spike times from any sorter.
->+ [Sync: Aligning with Edges.](help/syncEdges/Sync_edges.md)
+>+ [Sync: Aligning with Edges.](help/syncEdges/Sync_edges/)
 
 * [TPrime 1.8 (Windows)](Support/TPrimeWinApp.zip)
 * [TPrime 1.8 (Linux)](Support/TPrimeLnxApp.zip)
@@ -278,7 +278,7 @@ This helps remove artifacts that are too tricky for CatGT.
 
 Related help:
 
-* [IMRO Table Anatomy](help/imroTables.md)
+* [IMRO Table Anatomy](help/imroTables/)
 
 ------
 
@@ -317,20 +317,20 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.
 
 * [Neuropixels Slack Channel](https://join.slack.com/t/neuropixelsgroup/shared_invite/zt-1jibcdbhe-uNyp8q522L4S0apVKwoC6A)
 * [Neuropixels Support Page](https://www.neuropixels.org/support)
-* [Noise: Learn How To Solder](help/solder/solder.md)
+* [Noise: Learn How To Solder](help/solder/solder/)
 * [Sharpening Apparatus (MS.Word.docx)](Support/NPix_sharpening.docx)
 * [PXIe Quickstart](Sgl_help/SpikeGLX_PXIe_Quickstart.html)
 * [OneBox Quickstart](Sgl_help/SpikeGLX_OneBox_Quickstart.html)
 * [Quadbase Quickstart](Sgl_help/SpikeGLX_Quadbase_Quickstart.html)
 * [SpikeGLX UserManual](Sgl_help/UserManual.html)
-* [SpikeGLX Dirs and Files](help/SpikeGLX_dirs_files.md)
+* [SpikeGLX Dirs and Files](help/SpikeGLX_dirs_files/)
 * [SpikeGLX QuickRef (MS.PowerPoint)](Support/SGLX_QuickRef.zip)
 * [SpikeGLX UCL Course 2024 (MS.PowerPoint)](Support/UCL_Course_2024.zip)
 * [SpikeGLX FAQ](Sgl_help/SpikeGLX_FAQ.html)
 * [Metadata Help](Sgl_help/Metadata_Help.html)
 * [CatGT ReadMe](CatGT_help/CatGT_ReadMe.html)
-* [CatGT: Tshift, CAR, Gfix](help/catgt_tshift/catgt_tshift.md)
-* [Sync: Aligning with Edges](help/syncEdges/Sync_edges.md)
+* [CatGT: Tshift, CAR, Gfix](help/catgt_tshift/catgt_tshift/)
+* [Sync: Aligning with Edges](help/syncEdges/Sync_edges/)
 * [IMRO Table Anatomy](help/imroTables/)
 
 ------

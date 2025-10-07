@@ -277,7 +277,7 @@ be used for NI streams as shorthand for a trailing digital word.
 
 >It may be helpful to review the organization of words and bits in data
 streams in the
-[SpikeGLX User Manual](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md#channel-naming-and-ordering).
+[SpikeGLX User Manual](https://billkarsh.github.io/SpikeGLX/Sgl_help/UserManual.html#channel-naming-and-ordering).
 
 #### Extractors positive pulse
 

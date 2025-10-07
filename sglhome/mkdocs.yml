@@ -1,25 +1,25 @@
 site_name: SpikeGLX
 nav:
-    - Home: index.md
-    - Firmware: firmware.md
-    - Legacy: legacy.md
+    - Home: ./
+    - Firmware: firmware/
+    - Legacy: legacy/
     - Help:
         - 'Neuropixels Slack Channel': 'https://join.slack.com/t/neuropixelsgroup/shared_invite/zt-1jibcdbhe-uNyp8q522L4S0apVKwoC6A'
         - 'Neuropixels Support Page': 'https://www.neuropixels.org/support'
-        - 'Noise: Learn How To Solder': 'help/solder/solder.md'
+        - 'Noise: Learn How To Solder': 'help/solder/solder/'
         - 'Sharpening Apparatus (MS.Word.docx)': 'Support/NPix_sharpening.docx'
         - 'PXIe Quickstart': 'Sgl_help/SpikeGLX_PXIe_Quickstart.html'
         - 'OneBox Quickstart': 'Sgl_help/SpikeGLX_OneBox_Quickstart.html'
         - 'Quadbase Quickstart': 'Sgl_help/SpikeGLX_Quadbase_Quickstart.html'
         - 'SpikeGLX UserManual': 'Sgl_help/UserManual.html'
-        - 'SpikeGLX Dirs and Files': 'help/SpikeGLX_dirs_files.md'
+        - 'SpikeGLX Dirs and Files': 'help/SpikeGLX_dirs_files/'
         - 'SpikeGLX QuickRef (MS.PowerPoint)': 'Support/SGLX_QuickRef.zip'
         - 'SpikeGLX UCL Course 2024 (MS.PowerPoint)': 'Support/UCL_Course_2024.zip'
         - 'SpikeGLX FAQ': 'Sgl_help/SpikeGLX_FAQ.html'
         - 'Metadata Help': 'Sgl_help/Metadata_Help.html'
         - 'CatGT ReadMe': 'CatGT_help/CatGT_ReadMe.html'
-        - 'CatGT: Tshift, CAR, Gfix': 'help/catgt_tshift/catgt_tshift.md'
-        - 'Sync: Aligning with Edges': 'help/syncEdges/Sync_edges.md'
+        - 'CatGT: Tshift, CAR, Gfix': 'help/catgt_tshift/catgt_tshift/'
+        - 'Sync: Aligning with Edges': 'help/syncEdges/Sync_edges/'
         - 'IMRO Table Anatomy': 'help/imroTables/'
-    - New: new.md
+    - New: new/
 theme: mkdocs
