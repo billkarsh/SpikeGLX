@@ -2888,12 +2888,17 @@ guiBreathe();
             if( err != SUCCESS ) {
                 if( err == TIMEOUT ) {
                     slVers.append(
-                        QString("Shift register BIST(slot %1, port %2, dock %3)"
+                        QString("Error: Shift register BIST(slot %1, port %2, dock %3)"
                         " not conclusive due to a timeout error.")
                         .arg( P.slot ).arg( P.port ).arg( P.dock ) );
                     slVers.append("Check connections and try again.");
-                    slVers.append("Use BIST dialog for comprehensive checking.");
                 }
+                else {
+                    slVers.append(
+                        QString("Error: Shift register BIST(slot %1, port %2, dock %3).")
+                        .arg( P.slot ).arg( P.port ).arg( P.dock ) );
+                }
+                slVers.append("Use BIST dialog for comprehensive checking.");
                 slBIST.append(
                     QString("slot %1, port %2, dock %3: Shift Register")
                     .arg( P.slot ).arg( P.port ).arg( P.dock ) );
@@ -2913,6 +2918,9 @@ guiBreathe();
         err = np_bistPSB( P.slot, P.port, P.dock );
 
         if( err != SUCCESS ) {
+            slVers.append(
+                QString("Error: Parallel Serial Bus(slot %1, port %2, dock %3).")
+                .arg( P.slot ).arg( P.port ).arg( P.dock ) );
             slBIST.append(
                 QString("slot %1, port %2, dock %3: Parallel Serial Bus")
                 .arg( P.slot ).arg( P.port ).arg( P.dock ) );
