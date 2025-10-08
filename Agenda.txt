@@ -7,6 +7,8 @@
 - FileViewer::Gain box always disabled.
 - FileViewer::YScale applies to all.
 - FileViewer::Apply-all removed.
+- Graphs::YScale applies to all.
+- Graphs::Apply-all removed.
 
 20250915
 --------

@@ -363,17 +363,21 @@ void SVGrafsM::graphSecsChanged( double d )
 
 void SVGrafsM::graphYScaleChanged( double d )
 {
-    MGraphY &Y = ic2Y[selected];
-
     drawMtx.lock();
     theX->dataMtx.lock();
 
-    Y.yscl = d;
+    ic2Y[selected].yscl = d;
 
     theX->dataMtx.unlock();
     drawMtx.unlock();
 
+#if 1
+// new
+    applyAll();
+#else
+// old
     theM->update();
+#endif
 }
 
 
@@ -405,10 +409,10 @@ void SVGrafsM::applyAll()
 {
 // Copy settings to like usrType.
 
-    const MGraphY   &Y = ic2Y[selected];
-
     drawMtx.lock();
     theX->dataMtx.lock();
+
+    const MGraphY   &Y = ic2Y[selected];
 
     for( int ic = 0, nC = ic2Y.size(); ic < nC; ++ic ) {
 

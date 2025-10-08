@@ -110,11 +110,14 @@ void SVToolsM::init()
     addWidget( B );
 
 // Apply all
+// Retired October 2025 v 20250930
 
+#if 0
     addAction(
         *applyAllIcon,
         "Apply Yscl to all graphs of like type",
         gr, SLOT(applyAll()) );
+#endif
 
 // ----------------
 // Neural filtering
