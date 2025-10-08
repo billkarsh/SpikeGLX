@@ -1119,7 +1119,14 @@ void FileViewerWindow::tbSetYScale( double d )
     grfY[igSelected].yscl = d;
 
     updateNDivText();
+
+#if 1
+// new
+    tbApplyAll();
+#else
+// old
     mscroll->theM->update();
+#endif
 }
 
 
@@ -1293,8 +1300,10 @@ void FileViewerWindow::tbApplyAll()
         }
     }
 
-    if( didLayout )
-        updateGraphs();
+    if( didLayout ) {
+        // updateGraphs();
+        mscroll->theM->update();
+    }
 }
 
 /* ---------------------------------------------------------------- */

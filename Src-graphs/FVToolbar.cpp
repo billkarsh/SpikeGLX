@@ -233,13 +233,16 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
     }
 
 // Apply all
+// Retired October 2025 v 20250930
 
+#if 0
     addSeparator();
 
     addAction(
         QIcon( QPixmap( apply_all_xpm ) ),
         "Apply selected graph settings to all graphs of like type",
         fv, SLOT(tbApplyAll()) );
+#endif
 }
 
 
