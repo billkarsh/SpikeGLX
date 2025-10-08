@@ -111,6 +111,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
     S = new QDoubleSpinBox( this );
     S->setObjectName( "gainsb" );
     S->setToolTip( "Amplifier gain (sel graph)" );
+    S->setEnabled( false );
     S->setDecimals( 3 );
     S->setRange( 0.001, 1e6 );
     ConnectUI( S, SIGNAL(valueChanged(double)), fv, SLOT(tbSetMuxGain(double)) );
@@ -295,7 +296,7 @@ void FVToolbar::setYSclAndGain( double yScl, double gain, bool enabled )
     GN->setValue( gain );
 
     YS->setEnabled( enabled );
-    GN->setEnabled( enabled );
+//    GN->setEnabled( enabled );
 }
 
 

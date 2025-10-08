@@ -4,6 +4,7 @@
 20250930
 --------
 - FileViewer::Link parses split shanks.
+- FileViewer::Gain box always disabled.
 
 20250915
 --------
