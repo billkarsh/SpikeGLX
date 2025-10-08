@@ -41,6 +41,10 @@
 <li>Select '0' to enable the right popup and set only lowpass filtering.</li>
 </ul>
 <p>Remember that DC offset in the signal can be removed by applying at least a <strong>0.1 Hz</strong> filter. DC may cause clipping, which manifests as distortion and artifacts.</p>
+<h3 id="im-filtered-stream">IM filtered stream</h3>
+<p>If checked, data are pulled from the <a href="IMTab_Help.html#filtered-streams"><code>IM filtered streams</code></a> that you configure on the Configuration dialog <code>IM Setup</code> tab. These streams apply band-pass filtering and global demux CAR which reduces noise significantly.</p>
+<p>If <strong>not</strong> checked, or if <code>IM filtered streams</code> are disabed, the data are pulled from the raw streams.</p>
+<p>In either case, the data are further subject to the band-pass filter defined in the 'Audio Settings' dialog.</p>
 <hr />
 <h2 id="volume">Volume</h2>
 <p>Be careful not to boost volume too much. As amplitude grows, transitions in frequency are faster and may be harder for you to hear. For example, a ramp becomes more like a pulse edge and will contain less audible detail.</p>

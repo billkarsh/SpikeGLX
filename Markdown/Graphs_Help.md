@@ -50,15 +50,12 @@ to select it and expand/contract it.
 
 * `Sec`: Enter a value in range [0.001..30.0] seconds to set the time span.
 
-* `Yscl`: Enter a value in range [0.0..9999.0] to set a vertical magnification
-for the selected graph.
+* `Yscl`: Enter a value in range [0.0..9999.0] to set a vertical graph
+magnification.
 
 * `Clr`: Click this button to get a Color picking dialog whereby you can
 define an alternate color for the **data trace** in the selected graph.
 This only works for analog channels; digital traces are auto-colored.
-
-* `Apply All`: Copies Yscl from the selected graph to all other graphs
-of the same category.
 
 #### Filters Applied Only to Neural Channels
 

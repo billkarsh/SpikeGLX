@@ -822,6 +822,8 @@ second value is the number of inserted zeros. Each inserted sample is all
 zeros except for the status word(s) which set bit 11 and extend the flags
 from the neighbor status words.
 
+>Each missed_samples file is capped at 30000 entries.
+
 >It is possible to see which region of recorded data experienced these
 errors if you see blips on those bits.
 
@@ -1199,6 +1201,8 @@ zeros are inserted (measured from the start of the acquisition run) and the
 second value is the number of inserted zeros. Each inserted sample is all
 zeros except for the status word(s) which set bit 11 and extend the flags
 from the neighbor status words.
+
+>Each missed_samples file is capped at 30000 entries.
 
 >It is possible to see which region of recorded data experienced these
 errors if you see blips on those bits.

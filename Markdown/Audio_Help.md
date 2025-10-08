@@ -74,6 +74,18 @@ Remember that DC offset in the signal can be removed by applying at least
 a **0.1 Hz** filter. DC may cause clipping, which manifests as distortion
 and artifacts.
 
+### IM filtered stream
+
+If checked, data are pulled from the [`IM filtered streams`](IMTab_Help.html#filtered-streams)
+that you configure on the Configuration dialog `IM Setup` tab. These streams
+apply band-pass filtering and global demux CAR which reduces noise significantly.
+
+If **not** checked, or if `IM filtered streams` are disabed, the data are
+pulled from the raw streams.
+
+In either case, the data are further subject to the band-pass filter defined
+in the 'Audio Settings' dialog.
+
 --------
 
 ## Volume
