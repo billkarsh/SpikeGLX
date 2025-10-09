@@ -19,6 +19,7 @@
         + [ADC connector](#adc-connector)
         + [Voltage levels](#voltage-levels)
 * [Driver Installation](#driver-installation)
+    + [Oops I Installed 1.4.0.x](#oops-i-installed-1.4.0.x)
 * [SpikeGLX_NISIM](#spikeglx_nisim)
 * [Assign a Slot](#assign-a-slot)
 * [Data Streams, Files, Formats](#data-streams-files-formats)
@@ -253,6 +254,9 @@ channel or by putting a 50-ohm terminator on it.*
 You need the proper FTDI driver (**1.3.0.10**) for the FT601 chip in
 the OneBox...
 
+>Note that this is **not the newest**. The 1.4.0 series drivers do not yet
+work with OneBox!
+
 >Note that the OneBox does not use enclustra drivers. Those are only
 needed for PXIe basestations.
 
@@ -283,20 +287,48 @@ Manager.*
 ## Getting the New Driver
 
 1. Go to the [FTDI D3XX driver download site](https://ftdichip.com/drivers/d3xx-drivers/).
-2. Select the latest Windows X64 driver as shown.
+2. Select the Windows X64 driver as shown.
 
 ![*Fig 3. Select X64 Version*](ObxFTDISelect.png)
 
 The downloaded file looks like "FTD3XXDriver_WHQLCertified_v1.3.0.10.zip."
 
-3. Unzip the download.
+3. Unzip the download into a folder.
 4. In the Device Manager, update whichever entry you saw before: Right-click
 >> Update driver >> Browse my computer for drivers >>
-select your folder >> Next.
+select your extracted folder >> Next.
 5. Check for success: Entry in Device Manager now looks like Fig 2.
 
 >Note: Once a driver is installed, the Device Manager entry like Fig 1. will
 vanish. That's normal.
+
+## Oops I Installed 1.4.0.x
+
+The newest drivers, e.g. {1.4.0.0, 1.4.0.1} do not work with OneBox. If you
+installed those, you will see the following in the Device Manager:
+
+![*Fig 4. 1.4.0 Series Driver*](FTDI_1401_dev_mgr.png)
+
+Follow these steps to recover:
+
+1. Power the OneBox off.
+2. Unplug all USB devices from the PC.
+3. Open a Windows 'Command Prompt' as administrator.
+4. At command prompt, type
+```
+dism /online /get-drivers /format:table | findstr /i ftdi
+```
+
+The output should include a field like `oem4.inf`. Take note of that value
+for the next step.
+
+5. At the command prompt, type (replace oem4.inf with value from step (4)).
+```
+pnputil /delete-driver oem4.inf /uninstall /force
+```
+
+That should have removed the 1.4.0.x driver. You can now install 1.3.0.10
+according to the [previous section](#getting-the-new-driver).
 
 --------
 
