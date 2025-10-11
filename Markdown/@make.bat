@@ -26,6 +26,7 @@ pandoc -s -c pandoc.css --self-contained SpikeGLX_Quadbase_Quickstart.md -o ../_
 pandoc -s -c pandoc.css --self-contained SpikeView_Help.md -o ../_Help/SpikeView_Help.html
 pandoc -s -c pandoc.css --self-contained SyncTab_Help.md -o ../_Help/SyncTab_Help.html
 pandoc -s -c pandoc.css --self-contained TrigTab_Help.md -o ../_Help/TrigTab_Help.html
+pandoc -s -c pandoc.css --self-contained tutorial_toc.md -o ../_Help/Tutorials/tutorial_toc.html
 pandoc -s -c pandoc.css --self-contained UserManual.md -o ../_Help/UserManual.html
 pandoc -s -c pandoc.css --self-contained WavePlan_Help.md -o ../_Help/WavePlan_Help.html
 
