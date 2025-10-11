@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+October 10, 2025
+
+* CatGT 5.0 (Fix supercat database lookup bug).
+
 October 4, 2025
 
 * CatGT 4.9 (Better multishank support, AP2LF down-sample parameter).
