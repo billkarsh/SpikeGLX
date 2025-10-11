@@ -11,6 +11,7 @@ nav:
         - 'PXIe Quickstart': 'Sgl_help/SpikeGLX_PXIe_Quickstart.html'
         - 'OneBox Quickstart': 'Sgl_help/SpikeGLX_OneBox_Quickstart.html'
         - 'Quadbase Quickstart': 'Sgl_help/SpikeGLX_Quadbase_Quickstart.html'
+        - 'SpikeGLX Tutorials': 'Sgl_help/Tutorials/tutorial_toc.html'
         - 'SpikeGLX UserManual': 'Sgl_help/UserManual.html'
         - 'SpikeGLX Dirs and Files': 'help/SpikeGLX_dirs_files/'
         - 'SpikeGLX QuickRef (MS.PowerPoint)': 'Support/SGLX_QuickRef.zip'

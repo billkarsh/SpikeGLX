@@ -3,6 +3,8 @@
 October 10, 2025
 
 * CatGT 5.0 (Fix supercat database lookup bug).
+* Add tutorials under the Help section and Help menu.
+(Will add tutorial content over time).
 
 October 4, 2025
 
