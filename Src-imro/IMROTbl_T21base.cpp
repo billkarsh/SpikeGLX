@@ -110,10 +110,8 @@ bool T21Key::operator<( const T21Key &rhs ) const
 {
     if( c < rhs.c )
         return true;
-
     if( c > rhs.c )
         return false;
-
     return m < rhs.m;
 }
 

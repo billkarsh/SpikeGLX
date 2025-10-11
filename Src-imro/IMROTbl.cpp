@@ -40,16 +40,12 @@ bool IMRO_Site::operator<( const IMRO_Site &rhs ) const
 {
     if( s < rhs.s )
         return true;
-
     if( s > rhs.s )
         return false;
-
     if( r < rhs.r )
         return true;
-
     if( r > rhs.r )
         return false;
-
     return c < rhs.c;
 }
 
@@ -87,19 +83,14 @@ bool IMRO_ROI::operator<( const IMRO_ROI &rhs ) const
 {
     if( s < rhs.s )
         return true;
-
     if( s > rhs.s )
         return false;
-
     if( r0 < rhs.r0 )
         return true;
-
     if( r0 > rhs.r0 )
         return false;
-
     if( rLim < rhs.rLim )
         return true;
-
     if( rLim > rhs.rLim )
         return false;
 
@@ -108,7 +99,6 @@ bool IMRO_ROI::operator<( const IMRO_ROI &rhs ) const
 
     if( cme < crh )
         return true;
-
     if( cme > crh )
         return false;
 

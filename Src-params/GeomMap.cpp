@@ -14,22 +14,16 @@ bool GeomMapDesc::operator<( const GeomMapDesc &rhs ) const
 {
     if( s < rhs.s )
         return true;
-
     if( s > rhs.s )
         return false;
-
     if( z < rhs.z )
         return true;
-
     if( z > rhs.z )
         return false;
-
     if( x < rhs.x )
         return true;
-
     if( x > rhs.x )
         return false;
-
     return u < rhs.u;
 }
 

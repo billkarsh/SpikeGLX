@@ -79,17 +79,15 @@ public:
                 if( slot == imSlotNone ) {
                     if( rhs.slot != imSlotNone )
                         return false;
-                    else
-                        return ID < rhs.ID;
-                }
-                else if( rhs.slot == imSlotNone )
-                    return true;
-                else if( slot < rhs.slot )
-                    return true;
-                else if( slot == rhs.slot )
                     return ID < rhs.ID;
-                else
+                }
+                if( rhs.slot == imSlotNone )
+                    return true;
+                if( slot < rhs.slot )
+                    return true;
+                if( slot > rhs.slot )
                     return false;
+                return ID < rhs.ID;
             }
     };
 
@@ -143,17 +141,13 @@ public:
             {
                 if( slot < rhs.slot )
                     return true;
-                else if( slot == rhs.slot ) {
-
-                    if( port < rhs.port )
-                        return true;
-                    else if( port == rhs.port )
-                        return dock < rhs.dock;
-                    else
-                        return false;
-                }
-                else
+                if( slot > rhs.slot )
                     return false;
+                if( port < rhs.port )
+                    return true;
+                if( port > rhs.port )
+                    return false;
+                return dock < rhs.dock;
             }
 
         bool isProbe() const    {return port != 9;}

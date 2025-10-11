@@ -14,22 +14,16 @@ bool SPAddr::operator<( const SPAddr &rhs ) const
 {
     if( s < rhs.s )
         return true;
-
     if( s > rhs.s )
         return false;
-
     if( p < rhs.p )
         return true;
-
     if( p > rhs.p )
         return false;
-
     if( d < rhs.d )
         return true;
-
     if( d > rhs.d )
         return false;
-
     return e < rhs.e;
 }
 

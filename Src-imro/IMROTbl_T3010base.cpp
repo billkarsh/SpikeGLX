@@ -62,10 +62,8 @@ bool T3010Key::operator<( const T3010Key &rhs ) const
 {
     if( c < rhs.c )
         return true;
-
     if( c > rhs.c )
         return false;
-
     return b < rhs.b;
 }
 

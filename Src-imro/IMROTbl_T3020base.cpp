@@ -82,16 +82,12 @@ bool T3020Key::operator<( const T3020Key &rhs ) const
 {
     if( c < rhs.c )
         return true;
-
     if( c > rhs.c )
         return false;
-
     if( s < rhs.s )
         return true;
-
     if( s > rhs.s )
         return false;
-
     return b < rhs.b;
 }
 

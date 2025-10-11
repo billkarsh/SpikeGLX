@@ -14,22 +14,16 @@ bool ShankMapDesc::operator<( const ShankMapDesc &rhs ) const
 {
     if( s < rhs.s )
         return true;
-
     if( s > rhs.s )
         return false;
-
     if( r < rhs.r )
         return true;
-
     if( r > rhs.r )
         return false;
-
     if( c < rhs.c )
         return true;
-
     if( c > rhs.c )
         return false;
-
     return u < rhs.u;
 }
 

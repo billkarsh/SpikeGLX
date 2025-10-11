@@ -56,10 +56,8 @@ bool T1110Key::operator<( const T1110Key &rhs ) const
 {
     if( c < rhs.c )
         return true;
-
     if( c > rhs.c )
         return false;
-
     return b < rhs.b;
 }
 
