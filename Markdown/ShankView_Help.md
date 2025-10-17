@@ -118,17 +118,14 @@ each does its own filtering/processing.
 Note that clicking `Pause` in the Graphs window pauses/resumes both the
 graphs and the shank activity mapping.
 
-By default, both the online and offline Shank Viewers apply a
-`300Hz high-pass` and `global CAR` filter to AP-band channels and a
-`0.2Hz - 300Hz bandpass` filter to the LFP channels. These filters
-reduce out-of-band electrical noise, including DC offsets, which allows
-better comparison to your requested spike threshold voltage.
+When data are drawn from the raw streams, the Shank Viewers apply a 
+`300Hz high-pass` filter to AP-band data, and a `0.2Hz - 300Hz bandpass`
+to LF-band data. No CAR filtering is done on raw online streams.
 
-As of SpikeGLX version 20230425, the Configuration dialog/IM Setup tab has
-a box to set up a filtered probe AP-band stream that runs in parallel with
-the raw stream. You can set the bandpass edges for this stream, and the
-stream automatically gets global `demux` CAR. These data, when present,
-are used to improve signal-to-background in both audio output and Shank
+Use the `Configuration dialog/IM Setup tab` to enable prefiltered AP-band
+streams that run in parallel with the raw streams. You can select the
+AP-bandpass edges. Global demux is always applied. Using this filtered
+stream improves signal-to-background in both audio output and Shank
 Viewers (for {spike, AP pk-pk} calculations). There is a checkbox to disable
 this feature just in case you are running out of RAM or CPU, but we don't
 think this will be necessary unless you are running 12 probes or more at the
