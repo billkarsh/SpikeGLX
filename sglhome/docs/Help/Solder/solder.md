@@ -47,14 +47,14 @@ you are. Make them do it. Buy them a beer after.
 * **Use the right wire**: Use wire with adequate conductivity like copper or
 silver. Stainless steel, for example, does not conduct heat very well making
 it hard to wet with solder. Solder won't stick to it. Validate your choice
-using a scrap of that wire to see if heats and melts solder.
+using a scrap of that wire to see if it heats and melts solder.
 
 * **Use the right solder**: Lead is nasty, but quite honestly, you want to
 use solder with about a 60/40 ratio of tin/lead because it melts and flows
 at a low enough temperature to prevent damaging the probe.
 
 * **Use the right iron**: Use an iron with settable temperature so you can
-get the joint hot enough but overheat it. Set it to about 700 F.
+get the joint hot enough but not overheat it. Set it to about 700 F.
 
 * **Make sure the parts are clean**: The pad, wire and tip of the iron should
 be free of oils, plastics or other contaminants.

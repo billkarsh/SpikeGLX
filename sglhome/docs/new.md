@@ -1,5 +1,10 @@
 # What's New On The Site?
 
+October 22, 2025
+
+* Add UCL 2025 course slides (html).
+* Convert {UCL 2024 course, QuickRef} (pptx -> html).
+
 October 10, 2025
 
 * CatGT 5.0 (Fix supercat database lookup bug).
