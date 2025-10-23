@@ -3596,7 +3596,7 @@ qq=getTime();
                         vmax    = val,
                         vmin    = val;
 
-                    if( ny > bptrans )
+                    if( bptrans-- <= 0 )
                         stat.add( val );
                     d += dstep;
 
@@ -3621,7 +3621,7 @@ qq=getTime();
                             // start new
                             vmax    = val;
                             vmin    = val;
-                            if( ny > bptrans )
+                            if( bptrans-- <= 0 )
                                 stat.add( val );
                             binLim += dwnSmp;
                         }
@@ -3649,7 +3649,7 @@ qq=getTime();
 
                         int val = car.lcl_1( d, ig );
 
-                        if( it > bptrans )
+                        if( bptrans-- <= 0 )
                             stat.add( val );
                         ybuf[ny++] = val * ysc;
                     }
@@ -3673,7 +3673,7 @@ qq=getTime();
 draw_analog:
                 for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
-                    if( it > bptrans )
+                    if( bptrans-- <= 0 )
                         stat.add( *d );
                     ybuf[ny++] = *d * ysc;
                 }
