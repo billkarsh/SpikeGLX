@@ -1082,13 +1082,7 @@ static void test1()
 #include "ProbeTable.h"
 static void test1()
 {
-    CProbeTbl::ss2ini();
-    CProbeTbl::extini();
-    CProbeTbl::sortini();
-    CProbeTbl::ini2json();
-    CProbeTbl::json2ini();
-    CProbeTbl::sortjson2ini();
-    CProbeTbl::parsejson();
+    CProbeTbl::driver();
 }
 #endif
 //=================================================================

@@ -12,7 +12,7 @@
 #define FSRT    "C:/Users/labadmin/Desktop/ProbeTable/probe_features_srt.ini"
 #define FJ2I    "C:/Users/labadmin/Desktop/ProbeTable/probe_features_j2i.ini"
 #define FJSN    "C:/Users/labadmin/Desktop/ProbeTable/probe_features.json"
-#define VERS    "1.3"
+#define VERS    "1.4"
 
 /* ---------------------------------------------------------------- */
 /* CProbeTbl ------------------------------------------------------ */
@@ -20,7 +20,7 @@
 
 void CProbeTbl::ss2ini()
 {
-// Original saved as tab-sep txt
+// Original imec xlsx -> exported as tab-sep txt
     QFile   fi( FTAB );
     fi.open( QIODevice::ReadOnly | QIODevice::Text );
 
@@ -94,21 +94,80 @@ void CProbeTbl::extini()
 {
     QSettings   S( FINI, QSettings::IniFormat );
 
-// Duplicate group: [PRB_1_4_0480_1] -> [PRB_1_2_0480_2]
+    {
+        // Duplicate group: [PRB_1_4_0480_1] -> [PRB_1_2_0480_2]
+        // Duplicate group: [PRB_1_4_0480_1] -> [NP1000]
 
-    QMap<QString,QVariant>  P;
+        QMap<QString,QVariant>  P;
 
-    S.beginGroup( "PRB_1_4_0480_1" );
-        foreach( const QString &key, S.childKeys() )
-            P[key] = S.value( key );
-    S.endGroup();
+        S.beginGroup( "PRB_1_4_0480_1" );
+            foreach( const QString &key, S.childKeys() )
+                P[key] = S.value( key );
+        S.endGroup();
 
-    S.beginGroup( "PRB_1_2_0480_2" );
         QMap<QString,QVariant>::const_iterator
-            it = P.begin(), end = P.end();
-        for( ; it != end; ++it )
-            S.setValue( it.key(), it.value() );
-    S.endGroup();
+            it, end = P.end();
+
+        S.beginGroup( "PRB_1_2_0480_2" );
+            for( it = P.begin(); it != end; ++it )
+                S.setValue( it.key(), it.value() );
+        S.endGroup();
+
+        S.beginGroup( "NP1000" );
+            for( it = P.begin(); it != end; ++it )
+                S.setValue( it.key(), it.value() );
+        S.endGroup();
+    }
+
+    {
+        // Duplicate group: [PRB_1_4_0480_1_C] -> [NP1001]
+
+        QMap<QString,QVariant>  P;
+
+        S.beginGroup( "PRB_1_4_0480_1_C" );
+            foreach( const QString &key, S.childKeys() )
+                P[key] = S.value( key );
+        S.endGroup();
+
+        QMap<QString,QVariant>::const_iterator
+            it, end = P.end();
+
+        S.beginGroup( "NP1001" );
+            for( it = P.begin(); it != end; ++it )
+                S.setValue( it.key(), it.value() );
+        S.endGroup();
+    }
+
+    {
+        // Duplicate group: [NP3021] -> [NP3022]
+
+        QMap<QString,QVariant>  P;
+
+        S.beginGroup( "NP3021" );
+            foreach( const QString &key, S.childKeys() )
+                P[key] = S.value( key );
+        S.endGroup();
+
+        QMap<QString,QVariant>::const_iterator
+            it, end = P.end();
+
+        S.beginGroup( "NP3022" );
+            for( it = P.begin(); it != end; ++it )
+                S.setValue( it.key(), it.value() );
+            S.setValue( "description", "Neuropixels NXT pre-alpha multishank metal cap" );
+        S.endGroup();
+    }
+
+// Insert lf_sample_frequency_hz
+
+    foreach( const QString &grp, S.childGroups() ) {
+        S.beginGroup( grp );
+        int lf_frq = 2500;
+        if( S.value( "lf_gain_list" ).toString() == "1" )
+            lf_frq = 0;
+        S.setValue( "lf_sample_frequency_hz", lf_frq );
+        S.endGroup();
+    }
 
 // Insert imro type column
 
@@ -125,7 +184,7 @@ void CProbeTbl::extini()
             val = "imro_np3020";
         else if( S.value( "has_ap_bandpass" ).toString().toUpper() == "N" ) {
             bool proto = S.value( "on_shank_ref_chan" ).toInt() == 127;
-            if( S.value( "num_shanks" ) == 4 )
+            if( S.value( "num_shanks" ).toInt() == 4 )
                 val = (proto? "imro_np2010" : "imro_np2013");
             else
                 val = (proto? "imro_np2000" : "imro_np2003");
@@ -568,6 +627,18 @@ void CProbeTbl::parsejson()
     QJsonObject tbl = vtbl.toObject();
     foreach( const QString &type, tbl.keys() )
         Log()<<type;
+}
+
+
+void CProbeTbl::driver()
+{
+    ss2ini();
+    extini();
+    sortini();
+    ini2json();
+    json2ini();
+    sortjson2ini();
+    parsejson();
 }
 
 /* ---------------------------------------------------------------- */
