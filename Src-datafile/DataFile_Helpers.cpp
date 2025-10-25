@@ -18,8 +18,10 @@ void DFWriterWorker::run()
 
         vec_i16 buf;
 
-        if( dequeue( buf, waitData() ) )
-            write( buf );
+        if( dequeue( buf, waitData() ) ) {
+            if( !write( buf ) )
+                break;
+        }
         else if( isStopped() )
             break;
     }

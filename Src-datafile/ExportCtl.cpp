@@ -715,14 +715,14 @@ bool ExportCtl::exportAsBinary(
 
         i += nread;
 
-        out->writeAndInvalSamps( data );
+        ok = out->writeAndInvalSamps( data );
 
         int progPerCent = int( 100 * i / nsamps );
 
         if( progPerCent > prevPerCent )
             progress.setValue( prevPerCent = progPerCent );
 
-        if( progress.wasCanceled() ) {
+        if( !ok || progress.wasCanceled() ) {
 
             QString f = out->binFileName(),
                     m = out->metaFileName();
@@ -730,6 +730,7 @@ bool ExportCtl::exportAsBinary(
             out->closeAndFinalize();
             QFile::remove( f );
             QFile::remove( m );
+            ok = false;
             goto exit;
         }
 

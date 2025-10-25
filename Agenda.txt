@@ -9,6 +9,7 @@
 - FileViewer::Apply-all removed.
 - Graphs::YScale applies to all.
 - Graphs::Apply-all removed.
+- Stop run on any disk error.
 
 20250915
 --------
