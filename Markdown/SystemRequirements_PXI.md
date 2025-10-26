@@ -5,7 +5,7 @@
 What's new:
 
 * Chassis notes, tested NI-1090.
-* Avoid Core Ultra 9 (Meteor Lake) CPU.
+* Avoid Core Ultra (Meteor Lake) CPU.
 
 --------
 
@@ -33,7 +33,7 @@ What's new:
         * [Acquisition CPU](#acquisition-cpu)
             * [For 384-channel probes](#for-384-channel-probes)
             * [For 1536-channel probes](#for-1536-channel-probes)
-            * [Skip Core Ultra 9](#skip-core-ultra-9)
+            * [Skip Core Ultra](#skip-core-ultra)
         * [Acquisition GPU](#acquisition-gpu)
         * [Drive](#drive)
         * [Slots and Ports](#slots-and-ports)
@@ -488,14 +488,14 @@ easily cause the run to quit. We are more comfortable recommending 8 cores
 to run 4 probes. For 8 probes, you will be safe with a
 [PassMark Multi-thread](https://www.cpubenchmark.net/multithread/) score >= 50000.*
 
-#### Skip Core Ultra 9
+#### Skip Core Ultra
 
 For robust real-time data acquisition we want sustained high performance.
 
 However, Intel's 14th generation 'Meteor Lake' CPU architecture (also
-branded as 'Core Ultra 9') is highly optimized for energy efficiency as
+branded as 'Core Ultra') is highly optimized for energy efficiency as
 opposed to high performance. We have confirmed this. We bought a Lenovo P16
-laptop with Intel Core Ultra 9 185H CPU. Although it has impressive looking
+laptop with Intel 'Core Ultra 9 185H CPU.' Although it has impressive looking
 clock rates, core count and PassMark specs, it's a poor performer for SpikeGLX.
 It can just barely run (2) quad-probes. Almost any additional activity while
 running, like opening a text document, will trigger core power throttling
@@ -504,7 +504,7 @@ drivers, tune power plan settings..., yet nothing can convince this CPU
 to give SpikeGLX sustained CPU performance. Avoid this processor family.
 
 On the other hand, Intel's 14th generation includes another family called
-'Refreshed Raptor Lake' with CPUs labeled by 'HX' such as the i9-14900HX.
+'Refreshed Raptor Lake' (or 'Core HX') with examples such as the 'i9-14900HX.'
 These are performance oriented CPUs that should be fine. We have tested
 13th generation 'Raptor Lake' CPUs such as the 'Core 5 210H' and the
 'i7-13700H' which are actually less expensive than the Core Ultras yet
