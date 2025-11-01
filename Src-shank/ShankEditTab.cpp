@@ -1222,11 +1222,10 @@ QLabel *ShankEditTab::getRqdObj( int s )
 
 void ShankEditTab::color()
 {
-    SC->drawMtx.lock();
-        SC->view()->setExcludes( vX );
-        SC->view()->setROI( vR );
-        SC->update();
-    SC->drawMtx.unlock();
+    QMutexLocker    ml( &SC->drawMtx );
+    SC->view()->setExcludes( vX );
+    SC->view()->setROI( vR );
+    SC->update();
 }
 
 

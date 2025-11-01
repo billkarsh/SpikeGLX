@@ -87,7 +87,7 @@ class DSWorker : public QObject
     Q_OBJECT
 private:
     DataSource  &DS;
-    qint64     smp0;
+    qint64      smp0;
 public:
     DSWorker( DataSource &DS, qint64 smp0 )
         :   QObject(0), DS(DS), smp0(smp0)  {}

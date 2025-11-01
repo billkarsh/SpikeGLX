@@ -14,7 +14,7 @@
 
 void Anatomy::parse( const QString &elems, const IMROTbl *roTbl, int sk )
 {
-    rgnMtx.lock();
+    QMutexLocker    ml( &rgnMtx );
 
 // Remove entries for this shank
 
@@ -65,8 +65,6 @@ void Anatomy::parse( const QString &elems, const IMROTbl *roTbl, int sk )
         R.b     = slp[4].toInt();
         rgn.push_back( R );
     }
-
-    rgnMtx.unlock();
 }
 
 
@@ -100,10 +98,9 @@ void Anatomy::colorShanks( ShankView *view, bool on ) const
     std::vector<SVAnaRgn>   vA;
 
     if( on ) {
-        rgnMtx.lock();
-            for( const AnatomyRgn &R : rgn )
-                vA.push_back( SVAnaRgn( R.row0, R.rowN, R.shank, R.r, R.g, R.b ) );
-        rgnMtx.unlock();
+        QMutexLocker    ml( &rgnMtx );
+        for( const AnatomyRgn &R : rgn )
+            vA.push_back( SVAnaRgn( R.row0, R.rowN, R.shank, R.r, R.g, R.b ) );
     }
 
     view->setAnatomy( vA );
@@ -114,7 +111,7 @@ void Anatomy::colorShanks( ShankView *view, bool on ) const
 void Anatomy::colorTraces( MGraphX *theX, std::vector<MGraphY> &vY, bool on )
 {
     if( on ) {
-        rgnMtx.lock();
+        QMutexLocker    ml( &rgnMtx );
 
         // Push unique rgn colors onto theX->yColor.
         // Assign anaclr to each rgn.
@@ -154,8 +151,6 @@ next_rgn:;
                 }
             }
         }
-
-        rgnMtx.unlock();
     }
     else {
         for( int iy = 0, ny = vY.size(); iy < ny; ++iy )

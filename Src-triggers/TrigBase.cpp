@@ -128,9 +128,8 @@ quint64 TrigBase::curFileStart( int js, int ip ) const
 
 void TrigBase::setStartT()
 {
-    startTMtx.lock();
+    QMutexLocker    ml( &startTMtx );
     startT = nowCalibrated();
-    startTMtx.unlock();
 }
 
 
@@ -206,10 +205,9 @@ void TrigBase::setGate( bool hi )
 
 void TrigBase::forceGTCounters( int g, int t )
 {
-    runMtx.lock();
+    QMutexLocker    ml( &runMtx );
     ovr.set( g, t );
     forceName.clear();  // GUI overrules remote script
-    runMtx.unlock();
 }
 
 

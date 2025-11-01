@@ -83,7 +83,7 @@ void MGraphX::attach( MGraph *newG )
     G       = newG;
     isXsel  = false;
 
-    dataMtx.lock();
+    QMutexLocker    ml( &dataMtx );
 
     for( MGraphY *y : Y )
         y->erase();
@@ -92,8 +92,6 @@ void MGraphX::attach( MGraph *newG )
         initVerts( Y[0]->yval.capacity() );
     else
         initVerts( 0 );
-
-    dataMtx.unlock();
 }
 
 
@@ -486,10 +484,10 @@ void MGraph::paintGL()
 // Setup
 // -----
 
+    QMutexLocker    ml( &X->dataMtx );
+
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
-
-    X->dataMtx.lock();
 
 // ----
 // Draw
@@ -513,12 +511,6 @@ void MGraph::paintGL()
 
     drawLabels();
     drawYSel();
-
-// -------
-// Restore
-// -------
-
-    X->dataMtx.unlock();
 }
 
 

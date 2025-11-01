@@ -76,7 +76,6 @@ void ShankView::setShankMap( const ShankMap *map )
             vis_evn.assign( map->nc, 1 );
             vis_odd.assign( map->nc, 1 );
         }
-
     dataMtx.unlock();
 
     resizePads();

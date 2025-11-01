@@ -372,8 +372,8 @@ putData:
 
 void SVGrafsM_Ni::updateRHSFlags()
 {
-    drawMtx.lock();
-    theX->dataMtx.lock();
+    QMutexLocker    ml( &drawMtx );
+    QMutexLocker    ml2( &theX->dataMtx );
 
 // First consider only save flags for all channels
 
@@ -405,9 +405,6 @@ void SVGrafsM_Ni::updateRHSFlags()
                 Y.rhsLabel = "A  ";
         }
     }
-
-    theX->dataMtx.unlock();
-    drawMtx.unlock();
 }
 
 
@@ -502,11 +499,10 @@ void SVGrafsM_Ni::bandSelChanged( int sel )
 
 void SVGrafsM_Ni::sAveSelChanged( int sel )
 {
-    drawMtx.lock();
+    QMutexLocker    ml( &drawMtx );
     set.sAveSel = sel;
     sAveTable( p.ni.sns.shankMap, neurChanCount(), sel );
     saveSettings();
-    drawMtx.unlock();
 }
 
 /* ---------------------------------------------------------------- */

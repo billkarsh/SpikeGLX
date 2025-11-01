@@ -272,7 +272,7 @@ void Par2Worker::processID()
 {
     pid = 0;
 
-    procMtx.lock();
+    QMutexLocker    ml( &procMtx );
 
     if( process ) {
 #if QT_VERSION >= 0x050300
@@ -286,8 +286,6 @@ void Par2Worker::processID()
         pid = process->pid();
 #endif
     }
-
-    procMtx.unlock();
 }
 
 

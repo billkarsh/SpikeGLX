@@ -169,33 +169,32 @@ void SVShankViewTab::selChan( int ic, const QString &name )
 
 void SVShankViewTab::putSamps( const vec_i16 &_data, quint64 headCt )
 {
-    vec_i16 data;
-    bool    done = ++chunksDone >= chunksReqd;
+    vec_i16         data;
+    bool            done = ++chunksDone >= chunksReqd;
+    QMutexLocker    ml( &SC->drawMtx );
 
-    SC->drawMtx.lock();
-        switch( set.what ) {
-            case 0:
-                heat.apFilter( data, _data, headCt );
-                heat.accumSpikes( data, set.thresh, set.inarow );
-                if( done ) heat.normSpikes();
-                break;
-            case 1:
-                heat.apFilter( data, _data, headCt );
-                heat.accumPkPk( data );
-                if( done ) heat.normPkPk( 1 );
-                break;
-            default:
-                heat.lfFilter( data, _data );
-                heat.accumPkPk( data );
-                if( done ) heat.normPkPk( 2 );
-                break;
-        }
+    switch( set.what ) {
+        case 0:
+            heat.apFilter( data, _data, headCt );
+            heat.accumSpikes( data, set.thresh, set.inarow );
+            if( done ) heat.normSpikes();
+            break;
+        case 1:
+            heat.apFilter( data, _data, headCt );
+            heat.accumPkPk( data );
+            if( done ) heat.normPkPk( 1 );
+            break;
+        default:
+            heat.lfFilter( data, _data );
+            heat.accumPkPk( data );
+            if( done ) heat.normPkPk( 2 );
+            break;
+    }
 
-        if( done ) {
-            color();
-            resetAccum( false );
-        }
-    SC->drawMtx.unlock();
+    if( done ) {
+        color();
+        resetAccum( false );
+    }
 }
 
 
@@ -290,9 +289,8 @@ void SVShankViewTab::rangeChanged( int r )
 
 void SVShankViewTab::chanBut()
 {
-    SC->drawMtx.lock();
-        SC->scroll()->scrollToSelected();
-    SC->drawMtx.unlock();
+    QMutexLocker    ml( &SC->drawMtx );
+    SC->scroll()->scrollToSelected();
 }
 
 

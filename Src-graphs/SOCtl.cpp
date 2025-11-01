@@ -67,10 +67,10 @@ void SOWorker::run()
 
         if( !isPaused() ) {
 
-            grpMtx.lock();
-                for( int i = 0; i < 4; ++i )
-                    scan( grp[i], str[i] );
-            grpMtx.unlock();
+            QMutexLocker    ml( &grpMtx );
+
+            for( int i = 0; i < 4; ++i )
+                scan( grp[i], str[i] );
         }
 
         // Fetch no more often than every loopPeriod_us

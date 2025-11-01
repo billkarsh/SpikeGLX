@@ -371,10 +371,9 @@ bool ImSimDat::init( QString &err, const QString &pfName )
 void ImSimDat::loadToN( qint64 N )
 {
     while( AP.tstamp < N ) {
-        bufMtx->lock();
-            if( AP.load1() )
-                LF.load1();
-        bufMtx->unlock();
+        QMutexLocker    ml( bufMtx );
+        if( AP.load1() )
+            LF.load1();
     }
 }
 
@@ -665,9 +664,8 @@ ImAcqQFlt::~ImAcqQFlt()
 
 void ImAcqQFlt::mapChanged( const DAQ::Params &p, int ip )
 {
-    carMtx.lock();
-        car.setSU( &p.im.prbj[ip].sns.shankMap );
-    carMtx.unlock();
+    QMutexLocker    ml( &carMtx );
+    car.setSU( &p.im.prbj[ip].sns.shankMap );
 }
 
 

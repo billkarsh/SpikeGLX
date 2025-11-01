@@ -128,9 +128,8 @@ struct ImCfgShared {
 
     void seterror( QString e )
     {
-        runMtx.lock();
-            error.push_back( e );
-        runMtx.unlock();
+        QMutexLocker    ml( &runMtx );
+        error.push_back( e );
     }
 };
 
@@ -217,18 +216,14 @@ struct ImAcqShared {
 
     void updateCAR( int ip )
     {
-        carMtx.lock();
-            ip_CAR = ip;
-        carMtx.unlock();
+        QMutexLocker    ml( &carMtx );
+        ip_CAR = ip;
     }
 
     int checkCAR()
     {
-        int ip;
-        carMtx.lock();
-            ip = ip_CAR;
-        carMtx.unlock();
-        return ip;
+        QMutexLocker    ml( &carMtx );
+        return ip_CAR;
     }
 
     bool wait()
@@ -245,11 +240,8 @@ struct ImAcqShared {
 
     bool stopping()
     {
-        bool    _stop;
-        runMtx.lock();
-            _stop = stop;
-        runMtx.unlock();
-        return _stop;
+        QMutexLocker    ml( &runMtx );
+        return stop;
     }
 
     void kill()

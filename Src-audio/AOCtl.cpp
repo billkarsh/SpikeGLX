@@ -274,16 +274,13 @@ bool AOCtl::uniqueAIs( std::vector<int> &vAI, const QString &stream ) const
 
     if( aoDev->readyForScans() ) {
 
-        aoMtx.lock();
+        QMutexLocker        ml( &aoMtx );
+        const EachStream    &E = usr.each[p.stream2iq( stream )];
 
-            const EachStream    &E = usr.each[p.stream2iq( stream )];
+        vAI.push_back( E.left );
 
-            vAI.push_back( E.left );
-
-            if( nDevChans > 1 && E.right != E.left )
-                vAI.push_back( E.right );
-
-        aoMtx.unlock();
+        if( nDevChans > 1 && E.right != E.left )
+            vAI.push_back( E.right );
     }
 
     return true;

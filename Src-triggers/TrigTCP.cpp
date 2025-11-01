@@ -127,7 +127,7 @@ TrTCPThread::~TrTCPThread()
 
 void TrigTCP::rgtSetTrig( bool hi )
 {
-    runMtx.lock();
+    QMutexLocker    ml( &runMtx );
 
     if( hi ) {
 
@@ -144,8 +144,6 @@ void TrigTCP::rgtSetTrig( bool hi )
     }
 
     _trigHi = hi;
-
-    runMtx.unlock();
 }
 
 

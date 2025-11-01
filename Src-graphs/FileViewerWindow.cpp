@@ -329,10 +329,9 @@ void DataSource::load( qint64 newbuf0 )
     f.seek( S2B(newbuf0) );
     f.read( (char*)&buff[0], bytes );
 
-    bmMtx.lock();
-        memcpy( &bufm[0], &buff[0], bytes );
-        buf0 = newbuf0;
-    bmMtx.unlock();
+    QMutexLocker    ml( &bmMtx );
+    memcpy( &bufm[0], &buff[0], bytes );
+    buf0 = newbuf0;
 }
 #endif
 

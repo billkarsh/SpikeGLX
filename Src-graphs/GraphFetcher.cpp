@@ -40,12 +40,10 @@ void GFWorker::run()
 
         if( !isPaused() ) {
 
-            gfsMtx.lock();
+            QMutexLocker    ml( &gfsMtx );
 
             for( int is = 0, ns = gfs.size(); is < ns; ++is )
                 fetch( gfs[is] );
-
-            gfsMtx.unlock();
         }
 
         // Fetch no more often than every loopPeriod_us

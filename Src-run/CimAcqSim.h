@@ -33,11 +33,8 @@ struct ImSimAcqShared {
 
     bool stopping()
     {
-        bool    _stop;
-        runMtx.lock();
-            _stop = stop;
-        runMtx.unlock();
-        return _stop;
+        QMutexLocker    ml( &runMtx );
+        return stop;
     }
 
     void kill()

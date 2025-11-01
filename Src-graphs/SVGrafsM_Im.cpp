@@ -427,8 +427,8 @@ putData:
 
 void SVGrafsM_Im::updateRHSFlags()
 {
-    drawMtx.lock();
-    theX->dataMtx.lock();
+    QMutexLocker    ml( &drawMtx );
+    QMutexLocker    ml2( &theX->dataMtx );
 
 // First consider only save flags for all channels
 
@@ -460,9 +460,6 @@ void SVGrafsM_Im::updateRHSFlags()
                 Y.rhsLabel = "A  ";
         }
     }
-
-    theX->dataMtx.unlock();
-    drawMtx.unlock();
 }
 
 
@@ -573,12 +570,11 @@ void SVGrafsM_Im::bandSelChanged( int sel )
 void SVGrafsM_Im::sAveSelChanged( int sel )
 {
     const CimCfg::PrbEach   &E = p.im.prbj[ip];
+    QMutexLocker            ml( &drawMtx );
 
-    drawMtx.lock();
     set.sAveSel = sel;
     sAveTable( E.sns.shankMap, E.imCumTypCnt[CimCfg::imSumAP], sel );
     saveSettings();
-    drawMtx.unlock();
 }
 
 /* ---------------------------------------------------------------- */
@@ -705,11 +701,9 @@ void SVGrafsM_Im::externSelectChan( int ic, bool shift )
 
 void SVGrafsM_Im::colorTraces()
 {
-    drawMtx.lock();
-    theX->dataMtx.lock();
-        shankCtl->colorTraces( theX, ic2Y );
-    theX->dataMtx.unlock();
-    drawMtx.unlock();
+    QMutexLocker    ml( &drawMtx );
+    QMutexLocker    ml2( &theX->dataMtx );
+    shankCtl->colorTraces( theX, ic2Y );
 }
 
 

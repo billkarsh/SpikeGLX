@@ -178,10 +178,9 @@ QString FVShankViewTab::getLbl( int s, int r ) const
 void FVShankViewTab::mapChanged( const ShankMap *map )
 {
     if( !fvTabUI->howCB->currentIndex() ) {
-        SC->drawMtx.lock();
-            heat.updateMap( map, set.maxrow );
-            SC->view()->setShankMap( map );
-        SC->drawMtx.unlock();
+        QMutexLocker    ml( &SC->drawMtx );
+        heat.updateMap( map, set.maxrow );
+        SC->view()->setShankMap( map );
     }
 }
 
@@ -216,9 +215,8 @@ void FVShankViewTab::putInit()
     if( fvTabUI->howCB->currentIndex() )
         return;
 
-    SC->drawMtx.lock();
-        heat.accumReset( true, set.what );
-    SC->drawMtx.unlock();
+    QMutexLocker    ml( &SC->drawMtx );
+    heat.accumReset( true, set.what );
 }
 
 
@@ -227,24 +225,23 @@ void FVShankViewTab::putSamps( const vec_i16 &_data )
     if( fvTabUI->howCB->currentIndex() )
         return;
 
-    vec_i16 data;
+    vec_i16         data;
+    QMutexLocker    ml( &SC->drawMtx );
 
-    SC->drawMtx.lock();
-        switch( set.what ) {
-            case 0:
-                heat.apFilter( data, _data, 0, set.gbldmx );
-                heat.accumSpikes( data, set.thresh, set.inarow );
-                break;
-            case 1:
-                heat.apFilter( data, _data, 0, set.gbldmx );
-                heat.accumPkPk( data );
-                break;
-            default:
-                heat.lfFilter( data, _data );
-                heat.accumPkPk( data );
-                break;
-        }
-    SC->drawMtx.unlock();
+    switch( set.what ) {
+        case 0:
+            heat.apFilter( data, _data, 0, set.gbldmx );
+            heat.accumSpikes( data, set.thresh, set.inarow );
+            break;
+        case 1:
+            heat.apFilter( data, _data, 0, set.gbldmx );
+            heat.accumPkPk( data );
+            break;
+        default:
+            heat.lfFilter( data, _data );
+            heat.accumPkPk( data );
+            break;
+    }
 }
 
 
@@ -253,13 +250,13 @@ void FVShankViewTab::putDone()
     if( fvTabUI->howCB->currentIndex() )
         return;
 
-    SC->drawMtx.lock();
-        if( set.what == 0 )
-            heat.normSpikes();
-        else if( !heat.normPkPk( set.what ) )
-            SC->setStatus( "Set LFP time span > 2 seconds" );
-        color();
-    SC->drawMtx.unlock();
+    QMutexLocker    ml( &SC->drawMtx );
+
+    if( set.what == 0 )
+        heat.normSpikes();
+    else if( !heat.normPkPk( set.what ) )
+        SC->setStatus( "Set LFP time span > 2 seconds" );
+    color();
 }
 
 

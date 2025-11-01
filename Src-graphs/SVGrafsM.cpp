@@ -229,12 +229,12 @@ SVGrafsM::~SVGrafsM()
 
 // OK to destroy
 
-    fltMtx.lock();
-        if( hipass )
-            delete hipass;
-        if( lopass )
-            delete lopass;
-    fltMtx.unlock();
+    QMutexLocker    ml( &fltMtx );
+
+    if( hipass )
+        delete hipass;
+    if( lopass )
+        delete lopass;
 }
 
 /* ---------------------------------------------------------------- */
@@ -243,14 +243,11 @@ SVGrafsM::~SVGrafsM()
 
 void SVGrafsM::eraseGraphs()
 {
-    drawMtx.lock();
-    theX->dataMtx.lock();
+    QMutexLocker    ml( &drawMtx );
+    QMutexLocker    ml2( &theX->dataMtx );
 
     for( int ic = 0, nC = chanCount(); ic < nC; ++ic )
         ic2Y[ic].erase();
-
-    theX->dataMtx.unlock();
-    drawMtx.unlock();
 }
 
 
@@ -363,13 +360,11 @@ void SVGrafsM::graphSecsChanged( double d )
 
 void SVGrafsM::graphYScaleChanged( double d )
 {
-    drawMtx.lock();
-    theX->dataMtx.lock();
-
-    ic2Y[selected].yscl = d;
-
-    theX->dataMtx.unlock();
-    drawMtx.unlock();
+    {
+        QMutexLocker    ml( &drawMtx );
+        QMutexLocker    ml2( &theX->dataMtx );
+        ic2Y[selected].yscl = d;
+    }
 
 #if 1
 // new
@@ -448,11 +443,10 @@ void SVGrafsM::tnChkClicked( bool checked )
 
 void SVGrafsM::txChkClicked( bool checked )
 {
-    drawMtx.lock();
+    QMutexLocker    ml( &drawMtx );
     set.txChkOn = checked;
     Tx.setChecked( checked );
     saveSettings();
-    drawMtx.unlock();
 }
 
 

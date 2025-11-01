@@ -219,8 +219,8 @@ void SVGrafsM_Ob::putSamps( vec_i16 &data, quint64 headCt )
 
 void SVGrafsM_Ob::updateRHSFlags()
 {
-    drawMtx.lock();
-    theX->dataMtx.lock();
+    QMutexLocker    ml( &drawMtx );
+    QMutexLocker    ml2( &theX->dataMtx );
 
 // First consider only save flags for all channels
 
@@ -252,9 +252,6 @@ void SVGrafsM_Ob::updateRHSFlags()
                 Y.rhsLabel = "A  ";
         }
     }
-
-    theX->dataMtx.unlock();
-    drawMtx.unlock();
 }
 
 

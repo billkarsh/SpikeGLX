@@ -1029,14 +1029,12 @@ double DataFile::writtenBytes() const
 {
     double  sum = 0;
 
-    statsMtx.lock();
+    QMutexLocker    ml( &statsMtx );
 
     foreach( uint bytes, statsBytes )
         sum += bytes;
 
     statsBytes.clear();
-
-    statsMtx.unlock();
 
     return sum;
 }

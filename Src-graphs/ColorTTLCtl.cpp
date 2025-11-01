@@ -416,11 +416,10 @@ void ColorTTLCtl::setClients(
     const AIQ   *Qb,
     MGraphX     *Xb )
 {
-    setMtx.lock();
-        resetState();
-        A.init( Xa, Qa, jsa, ipa, p );
-        B.init( Xb, Qb, jsb, ipb, p );
-    setMtx.unlock();
+    QMutexLocker    ml( &setMtx );
+    resetState();
+    A.init( Xa, Qa, jsa, ipa, p );
+    B.init( Xb, Qb, jsb, ipb, p );
 }
 
 
@@ -496,13 +495,10 @@ void ColorTTLCtl::scanBlock(
     int             ip )
 {
     std::vector<int>    vClr;
-
-    setMtx.lock();
+    QMutexLocker        ml( &setMtx );
 
     if( eventsScanningThisStream( X, vClr, js, ip ) )
         processEvents( data, headCt, nC, vClr, js, ip );
-
-    setMtx.unlock();
 }
 
 
@@ -1009,10 +1005,9 @@ void ColorTTLCtl::processEvents(
 
                     if( dst ) {
                         start = DST_TREL( ct );
-                        dst->X->spanMtx.lock();
+                        QMutexLocker    ml( &dst->X->spanMtx );
                         dst->X->evQ[clr].push_back(
                             EvtSpan( start, start + set.minSecs ) );
-                        dst->X->spanMtx.unlock();
                     }
                 }
                 else
@@ -1043,9 +1038,8 @@ void ColorTTLCtl::processEvents(
 
             if( dst ) {
                 end = DST_TREL( ct );
-                dst->X->spanMtx.lock();
+                QMutexLocker    ml( &dst->X->spanMtx );
                 dst->X->evQExtendLast( end, set.minSecs, clr );
-                dst->X->spanMtx.unlock();
             }
 
             if( found ) {
