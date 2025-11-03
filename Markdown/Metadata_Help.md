@@ -807,6 +807,23 @@ bit 7: SYNC error (unrelated to sync waveform)
 bit 11: MISS missed sample
 ```
 
+To give a little insight into these flags:
+
+* COUNT and SYNC errors (bits 2, 7): These are communication problems.
+You can provoke these errors by wiggling the probe flex in the headstage
+ZIF connector, though that isn't the only possible cause.
+
+* SERDES error (bit 3): This is also a communication issue and is often
+seen when using commutators spliced into the 5-meter cable, though that
+isn't the only possible cause.
+
+* POP error (bit 5): This is an internal buffer overflow problem caused
+by "back pressure," meaning the data acquisition is not keeping up with
+the sample generation rate. Basically the computer is either running too
+slowly, or it is distracted by high levels of activity from other tasks
+running on the machine {system updates, background maintenance, browsers,
+starting big programs,...}.
+
 The MISS field counts the total number of samples that the hardware has
 missed due to any of the other error types. SpikeGLX inserts zeros into
 the stream to replace missed samples, and each of those samples has the
@@ -1186,6 +1203,23 @@ bit 6: Synchronization waveform
 bit 7: SYNC error (unrelated to sync waveform)
 bit 11: MISS missed sample
 ```
+
+To give a little insight into these flags:
+
+* COUNT and SYNC errors (bits 2, 7): These are communication problems.
+You can provoke these errors by wiggling the probe flex in the headstage
+ZIF connector, though that isn't the only possible cause.
+
+* SERDES error (bit 3): This is also a communication issue and is often
+seen when using commutators spliced into the 5-meter cable, though that
+isn't the only possible cause.
+
+* POP error (bit 5): This is an internal buffer overflow problem caused
+by "back pressure," meaning the data acquisition is not keeping up with
+the sample generation rate. Basically the computer is either running too
+slowly, or it is distracted by high levels of activity from other tasks
+running on the machine {system updates, background maintenance, browsers,
+starting big programs,...}.
 
 The MISS field counts the total number of samples that the hardware has
 missed due to any of the other error types. SpikeGLX inserts zeros into
