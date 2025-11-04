@@ -57,17 +57,18 @@ to the animal**.
 The system supports a variety of reference configurations to meet your needs:
 
 * **External**: Select `External` in software (in the `IMRO editor`), and
-connect the probe's reference terminal to any desired point in the lab.
-That could be ground. However, it might be a wire in the brain, far from
-the imec probe. **BTW, external is the default option**.
+connect the probe's reference terminal to any desired point. That could be
+the bath in a noise measurement setup, the animal CSF, or a second wire in
+the brain, far from the imec probe. **BTW, external is the default option**.
 
 * **Ground**: Some probes (mainly 2.0) offer a software option for `Ground`
 referencing. This internally connects the (-) amplifier inputs to circuit
 ground. Using this mode, you can make measurements relative to ground
-without soldering a wire to the probe's reference terminal. *BTW, EE's
-call this a "single-ended measurement," as opposed to a differential one*.
-If your probe doesn't support the software `Ground` option, you can select
-`External` and solder a wire from the reference terminal to a ground point.
+without soldering a wire to the probe's reference terminal. If your probe
+doesn't support the software `Ground` option, you can select `External` and
+solder a wire from the reference terminal to the animal as above. *BTW,
+because the ground line is connected to the animal, this mode is still a
+differential measurement retaining a useful degree of common mode rejection*.
 
 * **Tip**: This internally connects the given shank tip electrode to the (-)
 inputs. As with the `Ground` option, this does not require any wire to be
