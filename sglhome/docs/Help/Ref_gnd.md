@@ -5,7 +5,7 @@
 Imec probes have two solder connections: reference and ground.
 This note covers what they are and how to use them.
 
-### The Ground Line
+## The Ground Line
 
 **Always Connect To CSF.**
 
@@ -44,7 +44,7 @@ animal ground configuration. It is highly recommended to do self-referenced
 noise measurements **one-probe-at-a-time** to prevent any possibility of
 multiple probes interacting with each other.
 
-### The Reference Line
+## The Reference Line
 
 **Flexibility: Depends On Needs.**
 
@@ -82,7 +82,7 @@ entirely to minimize crosstalk from that terminal, across the switch. The
 worst thing is to connect a long free wire to the reference terminal, making
 a noise antenna.
 
-### Standard Practice For Spikes
+## Standard Practice For Spikes
 
 The most important thing for referencing in spike measurement is low noise.
 There isn't a rule about what reference to use or where to put wires.
@@ -108,7 +108,7 @@ just switch to `Tip` referencing in software without changing any wires. That
 may look better. So with this setup you get two chances to get data today,
 and you can try to get rid of the noise in your lab tomorrow.
 
-### LFP Measurements
+## LFP Measurements
 
 **Use External or Ground Modes.**
 
@@ -118,7 +118,7 @@ will cancel signal as well as background, and at the other end of the probe
 measurements contain (local LFP - tip LFP), so the referencing is inconsistent.
 Moreover, you'd rather have a larger area electrode for better averaging.
 
-### Noise
+## Noise
 
 To minimize noise use low impedance paths for reference and ground:
 

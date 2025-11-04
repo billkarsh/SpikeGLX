@@ -162,6 +162,26 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#the-ground-line" class="nav-link">The Ground Line</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#the-reference-line" class="nav-link">The Reference Line</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#standard-practice-for-spikes" class="nav-link">Standard Practice For Spikes</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#lfp-measurements" class="nav-link">LFP Measurements</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#noise" class="nav-link">Noise</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -173,7 +193,7 @@
 <h2 id="overview">Overview</h2>
 <p>Imec probes have two solder connections: reference and ground.
 This note covers what they are and how to use them.</p>
-<h3 id="the-ground-line">The Ground Line</h3>
+<h2 id="the-ground-line">The Ground Line</h2>
 <p><strong>Always Connect To CSF.</strong></p>
 <p>This is an extension of the basestation's wall ground. However, because the
 ground runs through a 5-meter, thin wire, the probe ground is about +650 mV
@@ -212,7 +232,7 @@ of the probe's own internal electronics noise. It's also more similar to an
 animal ground configuration. It is highly recommended to do self-referenced
 noise measurements <strong>one-probe-at-a-time</strong> to prevent any possibility of
 multiple probes interacting with each other.</p>
-<h3 id="the-reference-line">The Reference Line</h3>
+<h2 id="the-reference-line">The Reference Line</h2>
 <p><strong>Flexibility: Depends On Needs.</strong></p>
 <p>All imec probes are designed for differential measurements. The electrode
 sites connect to (+) amplifier inputs, and the selected reference level
@@ -252,7 +272,7 @@ entirely to minimize crosstalk from that terminal, across the switch. The
 worst thing is to connect a long free wire to the reference terminal, making
 a noise antenna.</p>
 </blockquote>
-<h3 id="standard-practice-for-spikes">Standard Practice For Spikes</h3>
+<h2 id="standard-practice-for-spikes">Standard Practice For Spikes</h2>
 <p>The most important thing for referencing in spike measurement is low noise.
 There isn't a rule about what reference to use or where to put wires.</p>
 <p>For AP band it probably doesn't make a lot of difference where you reference.
@@ -277,14 +297,14 @@ you're all set. If it's too noisy, you may have a contaminated ground, so
 just switch to <code>Tip</code> referencing in software without changing any wires. That
 may look better. So with this setup you get two chances to get data today,
 and you can try to get rid of the noise in your lab tomorrow.</p>
-<h3 id="lfp-measurements">LFP Measurements</h3>
+<h2 id="lfp-measurements">LFP Measurements</h2>
 <p><strong>Use External or Ground Modes.</strong></p>
 <p>LFP tends to vary slowly over large areas. Tip referencing may be an
 especially bad choice: for sites near the tip the differential measurement
 will cancel signal as well as background, and at the other end of the probe
 measurements contain (local LFP - tip LFP), so the referencing is inconsistent.
 Moreover, you'd rather have a larger area electrode for better averaging.</p>
-<h3 id="noise">Noise</h3>
+<h2 id="noise">Noise</h2>
 <p>To minimize noise use low impedance paths for reference and ground:</p>
 <ul>
 <li><a href="https://billkarsh.github.io/SpikeGLX/help/solder/solder/">Do a good job with soldering</a> any and all the wires.</li>
