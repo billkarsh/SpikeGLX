@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Noise: Reference and Ground - SpikeGLX</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">SpikeGLX</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="navitem">
+                                <a href="../../" class="nav-link">Home</a>
+                            </li>
+                            <li class="navitem">
+                                <a href="../../firmware/" class="nav-link">Firmware</a>
+                            </li>
+                            <li class="navitem">
+                                <a href="../../legacy/" class="nav-link">Legacy</a>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Help <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="https://join.slack.com/t/neuropixelsgroup/shared_invite/zt-1jibcdbhe-uNyp8q522L4S0apVKwoC6A" class="dropdown-item">Neuropixels Slack Channel</a>
+</li>
+                                    
+<li>
+    <a href="https://www.neuropixels.org/support" class="dropdown-item">Neuropixels Support Page</a>
+</li>
+                                    
+<li>
+    <a href="../../help/Ref_gnd/" class="dropdown-item">Noise: Reference and Ground</a>
+</li>
+                                    
+<li>
+    <a href="../../help/solder/solder/" class="dropdown-item">Noise: Learn How To Solder</a>
+</li>
+                                    
+<li>
+    <a href="../../Support/NPix_sharpening.docx" class="dropdown-item">Sharpening Apparatus (MS.Word.docx)</a>
+</li>
+                                    
+<li>
+    <a href="../../Sgl_help/SpikeGLX_PXIe_Quickstart.html" class="dropdown-item">PXIe Quickstart</a>
+</li>
+                                    
+<li>
+    <a href="../../Sgl_help/SpikeGLX_OneBox_Quickstart.html" class="dropdown-item">OneBox Quickstart</a>
+</li>
+                                    
+<li>
+    <a href="../../Sgl_help/SpikeGLX_Quadbase_Quickstart.html" class="dropdown-item">Quadbase Quickstart</a>
+</li>
+                                    
+<li>
+    <a href="../../Sgl_help/Tutorials/tutorial_toc.html" class="dropdown-item">SpikeGLX Tutorials</a>
+</li>
+                                    
+<li>
+    <a href="../../Sgl_help/UserManual.html" class="dropdown-item">SpikeGLX UserManual</a>
+</li>
+                                    
+<li>
+    <a href="../../help/SpikeGLX_dirs_files/" class="dropdown-item">SpikeGLX Dirs and Files</a>
+</li>
+                                    
+<li>
+    <a href="../../Support/SpikeGLX_QuickRef.html" class="dropdown-item">SpikeGLX QuickRef</a>
+</li>
+                                    
+<li>
+    <a href="../../Support/UCL-Course-BillKarsh-2025.html" class="dropdown-item">SpikeGLX UCL Course 2025</a>
+</li>
+                                    
+<li>
+    <a href="../../Support/UCL-Course-BillKarsh-2024.html" class="dropdown-item">SpikeGLX UCL Course 2024</a>
+</li>
+                                    
+<li>
+    <a href="../../Sgl_help/SpikeGLX_FAQ.html" class="dropdown-item">SpikeGLX FAQ</a>
+</li>
+                                    
+<li>
+    <a href="../../Sgl_help/Metadata_Help.html" class="dropdown-item">Metadata Help</a>
+</li>
+                                    
+<li>
+    <a href="../../CatGT_help/CatGT_ReadMe.html" class="dropdown-item">CatGT ReadMe</a>
+</li>
+                                    
+<li>
+    <a href="../../help/catgt_tshift/catgt_tshift/" class="dropdown-item">CatGT: Tshift, CAR, Gfix</a>
+</li>
+                                    
+<li>
+    <a href="../../help/syncEdges/Sync_edges/" class="dropdown-item">Sync: Aligning with Edges</a>
+</li>
+                                    
+<li>
+    <a href="../../help/imroTables/" class="dropdown-item">IMRO Table Anatomy</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="navitem">
+                                <a href="../../new/" class="nav-link">New</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#noise-reference-and-ground" class="nav-link">Noise: Reference and Ground</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#overview" class="nav-link">Overview</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="noise-reference-and-ground">Noise: Reference and Ground</h1>
+<h2 id="overview">Overview</h2>
+<p>Imec probes have two solder connections: reference and ground.
+This note covers what they are and how to use them.</p>
+<h3 id="the-ground-line">The Ground Line</h3>
+<p><strong>Always Connect To CSF.</strong></p>
+<p>This is an extension of the basestation's wall ground. However, because the
+ground runs through a 5-meter, thin wire, the probe ground is about +650 mV
+higher than wall ground. This sets the ground level for the probe's base
+circuits that sample, amplify, filter, digitize and transmit neural signals.</p>
+<p>Generally the subject should be grounded, whether an animal or buffer, for
+these reasons:</p>
+<ul>
+<li>
+<p><strong>Damage</strong>: If the subject is floating and holding a static charge, the
+probe could get zapped and damaged.</p>
+</li>
+<li>
+<p><strong>Saturation</strong>: If subject potential is far from that of the electronics,
+the amplifiers can saturate. The reading are then unusable. Moreover, the
+amplifiers can sometimes lock into saturation until restarted, which wastes
+time.</p>
+</li>
+<li>
+<p><strong>Noise reduction</strong>: Connecting the subject to ground reduces its ability
+to act as an antenna. Although the differential nature of the measurements
+acts to cancel common noise, it's better to drain the noise to ground before
+it ever gets to the amplifiers.</p>
+</li>
+</ul>
+<p>In summary, always ground the animal: run a wire from the ground terminal
+of the probe flex to the animal CSF, either via a pin through the skull
+into CSF, or placed in the saline in the craniotomy.</p>
+<blockquote>
+<p>IMPORTANT: The probe ground should be the <strong>ONLY</strong> ground connection to
+the animal. Otherwise you'll make ground loops which are noise antennas.</p>
+</blockquote>
+<p>For self-referenced noise measurements in a bath, we also recommend connecting
+probe ground to the bath to act as a noise drain. This is a better measurement
+of the probe's own internal electronics noise. It's also more similar to an
+animal ground configuration. It is highly recommended to do self-referenced
+noise measurements <strong>one-probe-at-a-time</strong> to prevent any possibility of
+multiple probes interacting with each other.</p>
+<h3 id="the-reference-line">The Reference Line</h3>
+<p><strong>Flexibility: Depends On Needs.</strong></p>
+<p>All imec probes are designed for differential measurements. The electrode
+sites connect to (+) amplifier inputs, and the selected reference level
+connects to the (-) inputs. The benefit of differential measurement is
+common mode noise rejection. <strong>This only works if the reference is connected
+to the animal</strong>.</p>
+<p>The system supports a variety of reference configurations to meet your needs:</p>
+<ul>
+<li>
+<p><strong>External</strong>: Select <code>External</code> in software (in the <code>IMRO editor</code>), and
+connect the probe's reference terminal to any desired point in the lab.
+That could be ground. However, it might be a wire in the brain, far from
+the imec probe. <strong>BTW, external is the default option</strong>.</p>
+</li>
+<li>
+<p><strong>Ground</strong>: Some probes (mainly 2.0) offer a software option for <code>Ground</code>
+referencing. This internally connects the (-) amplifier inputs to circuit
+ground. Using this mode, you can make measurements relative to ground
+without soldering a wire to the probe's reference terminal. <em>BTW, EE's
+call this a "single-ended measurement," as opposed to a differential one</em>.
+If your probe doesn't support the software <code>Ground</code> option, you can select
+<code>External</code> and solder a wire from the reference terminal to a ground point.</p>
+</li>
+<li>
+<p><strong>Tip</strong>: This internally connects the given shank tip electrode to the (-)
+inputs. As with the <code>Ground</code> option, this does not require any wire to be
+connected to the reference terminal on the flex.</p>
+</li>
+</ul>
+<blockquote>
+<p><strong>Pro tip</strong>: A tiny internal switch is used to connect the (-) amplifier
+input to the selected reference. Only the <code>External</code> mode <strong>requires</strong> a
+wire from the reference terminal on the flex to some point in the brain.
+In any other mode, having a reference wire connected is OK, but it isn't
+doing anything valuable. The <em>ideal practice</em> is to omit the reference wire
+entirely to minimize crosstalk from that terminal, across the switch. The
+worst thing is to connect a long free wire to the reference terminal, making
+a noise antenna.</p>
+</blockquote>
+<h3 id="standard-practice-for-spikes">Standard Practice For Spikes</h3>
+<p>The most important thing for referencing in spike measurement is low noise.
+There isn't a rule about what reference to use or where to put wires.</p>
+<p>For AP band it probably doesn't make a lot of difference where you reference.
+Different choices will differ from each other primarily in DC offset, and
+hopefully lowish frequencies, and that will be removed by the band-pass
+and CAR filters you'll use in postprocessing.</p>
+<p>So what does everyone else do? It's helpful to allow a main and a backup
+option, and have the convenience of a single extra wire coming off the
+probe. The wiring part of the strategy depends on probe model:</p>
+<ul>
+<li>
+<p><strong>2.0 with <code>Ground</code> Option</strong>: Connect one wire from the flex ground
+terminal to the CSF.</p>
+</li>
+<li>
+<p><strong>{1.0, NHP, Ultra} w/o <code>Ground</code> Option</strong>: Solder the reference and ground
+terminals together at the flex and run a single wire from there to the CSF.</p>
+</li>
+</ul>
+<p>This way you can start with ground referencing, and if the noise is small,
+you're all set. If it's too noisy, you may have a contaminated ground, so
+just switch to <code>Tip</code> referencing in software without changing any wires. That
+may look better. So with this setup you get two chances to get data today,
+and you can try to get rid of the noise in your lab tomorrow.</p>
+<h3 id="lfp-measurements">LFP Measurements</h3>
+<p><strong>Use External or Ground Modes.</strong></p>
+<p>LFP tends to vary slowly over large areas. Tip referencing may be an
+especially bad choice: for sites near the tip the differential measurement
+will cancel signal as well as background, and at the other end of the probe
+measurements contain (local LFP - tip LFP), so the referencing is inconsistent.
+Moreover, you'd rather have a larger area electrode for better averaging.</p>
+<h3 id="noise">Noise</h3>
+<p>To minimize noise use low impedance paths for reference and ground:</p>
+<ul>
+<li><a href="https://billkarsh.github.io/SpikeGLX/help/solder/solder/">Do a good job with soldering</a> any and all the wires.</li>
+<li>Use beefy wires and ground straps where you can.</li>
+<li>Don't use hacks like alligator clips to connect things.</li>
+</ul>
+<p><em>fin</em></p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

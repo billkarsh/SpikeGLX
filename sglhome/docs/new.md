@@ -1,5 +1,10 @@
 # What's New On The Site?
 
+November 4, 2025
+
+* Update solder help doc.
+* Add reference and ground help doc.
+
 October 22, 2025
 
 * Add UCL 2025 course slides (html).

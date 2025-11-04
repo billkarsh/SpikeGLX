@@ -2,7 +2,7 @@
 
 ## Overview
 
-Imec probes as shipped to you generally meet their noise specs: `6 uV RMS`.
+Imec probes as shipped to you generally meet their noise specs: `6-8 uV RMS`.
 
 
 Noise above that is in your own setup/environment. There are many possible
@@ -36,6 +36,12 @@ We've added some emphasis and a few extra tips below.
 
 ## Tips
 
+* **Spread the flex arms**: The biggest risk to the probe is touching the
+iron directly to the leads in the central part of the flex. Avoid that by
+speading the target arm away from the center. Securely hold the flex so it
+won't shift while trying to solder. Keep the hot iron away from the center
+by approaching from the exterior side of the cable.
+
 * **Practice first**: If you're at all nervous about doing this right, and
 who isn't?, then by all means practice soldering some wires or inexpensive
 resistors onto an old printed circuit board. Next extend your soldering
@@ -54,7 +60,10 @@ use solder with about a 60/40 ratio of tin/lead because it melts and flows
 at a low enough temperature to prevent damaging the probe.
 
 * **Use the right iron**: Use an iron with settable temperature so you can
-get the joint hot enough but not overheat it. Set it to about 700 F.
+get the joint hot enough but not overheat it. Set it to about 700 F. Also
+use an iron with switchable tips. You want a tip that is both clean, and
+appropriately sized to adequately heat the target wire and pad, but nothing
+else.
 
 * **Make sure the parts are clean**: The pad, wire and tip of the iron should
 be free of oils, plastics or other contaminants.

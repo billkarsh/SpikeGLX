@@ -317,6 +317,7 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.
 
 * [Neuropixels Slack Channel](https://join.slack.com/t/neuropixelsgroup/shared_invite/zt-1jibcdbhe-uNyp8q522L4S0apVKwoC6A)
 * [Neuropixels Support Page](https://www.neuropixels.org/support)
+* [Noise: Reference and Ground](help/Ref_gnd/)
 * [Noise: Learn How To Solder](help/solder/solder/)
 * [Sharpening Apparatus (MS.Word.docx)](Support/NPix_sharpening.docx)
 * [PXIe Quickstart](Sgl_help/SpikeGLX_PXIe_Quickstart.html)
