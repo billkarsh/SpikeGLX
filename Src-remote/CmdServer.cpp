@@ -374,6 +374,20 @@ void CmdWorker::getImecChanGains( QString &resp, const QStringList &toks )
 }
 
 
+void CmdWorker::getLastGT( QString &resp )
+{
+    ConfigCtl   *C = okCfgValidated( "GETLASTGT" );
+
+    if( !C )
+        return;
+
+    int g, t;
+    mainApp()->getRun()->dfGetLastGT( g, t );
+
+    resp = QString("%1 %2\n").arg( g ).arg( t );
+}
+
+
 void CmdWorker::getParams( QString &resp )
 {
     ConfigCtl   *C = okCfgValidated( "GETPARAMS" );
@@ -2171,6 +2185,8 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
         getGeomMap( resp, toks );
     else if( cmd == "GETIMECCHANGAINS" )
         getImecChanGains( resp, toks );
+    else if( cmd == "GETLASTGT" )
+        getLastGT( resp );
     else if( cmd == "GETPARAMS" )
         getParams( resp );
     else if( cmd == "GETPARAMSIMALL" )

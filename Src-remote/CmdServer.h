@@ -91,6 +91,7 @@ private:
     Run* okRunStarted( const QString &cmd );
     void getGeomMap( QString &resp, const QStringList &toks );
     void getImecChanGains( QString &resp, const QStringList &toks );
+    void getLastGT( QString &resp );
     void getParams( QString &resp );
     void getParamsImAll( QString &resp );
     void getParamsImProbe( QString &resp, const QStringList &toks );

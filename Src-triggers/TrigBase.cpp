@@ -34,8 +34,8 @@ TrigBase::TrigBase(
         ovr(p), startT(-1), gateHiT(-1), gateLoT(-1), trigHiT(-1),
         firstCtNi(0), offHertz(0), offmsec(0), onHertz(0), onmsec(0),
         nImQ(imQ.size()), nObQ(obQ.size()), nNiQ(niQ != 0),
-        iGate(-1), iTrig(-1), gateHi(false), pleaseStop(false),
-        p(p), gw(gw), statusT(-1)
+        iGate(-1), iTrig(-1), g_reported(-1), t_reported(-1),
+        gateHi(false), pleaseStop(false), p(p), gw(gw), statusT(-1)
 {
     int nq = 0;
 
@@ -377,6 +377,9 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 
     if( !ok )
         return false;
+
+    g_reported = ig;
+    t_reported = it;
 
 // Reset state tracking
 

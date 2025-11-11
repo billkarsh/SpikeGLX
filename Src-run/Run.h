@@ -113,6 +113,7 @@ public slots:
     bool dfIsRecordingEnabled();
     void dfHaltiq( int iq );
     void dfForceGTCounters( int g, int t );
+    void dfGetLastGT( int &g, int &t ) const;
     QString dfGetCurNiName() const;
     quint64 dfGetFileStart( int js, int ip ) const;
 

@@ -944,6 +944,8 @@ bool Run::dfIsRecordingEnabled()
 
 void Run::dfHaltiq( int iq )
 {
+    QMutexLocker    ml( &runMtx );
+
     if( trg )
         trg->worker->haltiq( iq );
 }
@@ -955,6 +957,18 @@ void Run::dfForceGTCounters( int g, int t )
 
     if( trg )
         trg->worker->forceGTCounters( g, t );
+}
+
+
+void Run::dfGetLastGT( int &g, int &t ) const
+{
+    QMutexLocker    ml( &runMtx );
+
+    g = -1;
+    t = -1;
+
+    if( trg )
+        trg->worker->getReportedGT( g, t );
 }
 
 

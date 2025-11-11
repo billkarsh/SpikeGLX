@@ -70,6 +70,8 @@ private:
                                 nNiQ,
                                 iGate,
                                 iTrig,
+                                g_reported,
+                                t_reported,
                                 loopPeriod_us;
     volatile bool               gateHi,
                                 pleaseStop;
@@ -118,6 +120,8 @@ public:
 
     void setGate( bool hi );
     void forceGTCounters( int g, int t );
+    void getReportedGT( int &g, int &t ) const
+        {QMutexLocker ml( &runMtx ); g = g_reported; t = t_reported;}
 
 signals:
     void daqError( const QString &s );
