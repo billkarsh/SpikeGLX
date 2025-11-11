@@ -408,7 +408,7 @@ QString WaveMeta::parseText( vec_i16 &buf, const QString &text, int testMax )
             }
 
             QRegularExpressionMatch match = reDo.match( token );
-            Lstk.push( LOOP( match.captured(1).toInt(), 0 ) );
+            Lstk.push( LOOP( match.captured(1).toInt(), offset ) );
             ++nlbrace;
             state = inNone;
         }

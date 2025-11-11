@@ -3,6 +3,7 @@
 
 20250930
 --------
+- Fix waveplan loop error.
 - FileViewer::Link parses split shanks.
 - FileViewer::Gain box always disabled.
 - FileViewer::YScale applies to all.
