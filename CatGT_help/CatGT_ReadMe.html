@@ -26,14 +26,15 @@
 <li><a href="#install">Install</a></li>
 <li><a href="#usage-quick-ref">Usage Quick Ref</a>
 <ul>
-<li><a href="#command-line-parameters">Command Line Parameters</a></li>
-<li><a href="#parameter-ordering">Parameter Ordering</a></li>
+<li><a href="#command-line-parameters">Command line parameters</a></li>
+<li><a href="#parameter-ordering">Parameter ordering</a></li>
 <li><a href="#pass-1-and-pass-2">Pass-1 and Pass-2</a>
 <ul>
 <li><a href="#pass-1">Pass-1</a></li>
 <li><a href="#extraction-pass">Extraction pass</a></li>
 <li><a href="#pass-2">Pass-2</a></li>
 </ul></li>
+<li><a href="#parallel-processing">Parallel processing</a></li>
 <li><a href="#sample-scripts">Sample scripts</a></li>
 </ul></li>
 <li><a href="#output">Output</a>
@@ -50,6 +51,7 @@
 <li><a href="#dir">dir</a></li>
 <li><a href="#run_name">run_name</a></li>
 <li><a href="#stream-identifiers--ni--ob--ap--lf">Stream identifiers <code>{-ni, -ob, -ap, -lf}</code></a></li>
+<li><a href="#js-and-ip-indices">js and ip indices</a></li>
 <li><a href="#converting-ap-to-lf-files">Converting AP to LF files</a></li>
 <li><a href="#obx-which-oneboxes">obx (which OneBox(es))</a></li>
 <li><a href="#prb_3a">prb_3A</a></li>
@@ -159,7 +161,7 @@
 <li>File paths and names must not have spaces (a standard script file limitation).</li>
 <li>Read CatGT.log. There is no interesting output in the command window.</li>
 </ul>
-<h3 id="command-line-parameters">Command Line Parameters:</h3>
+<h3 id="command-line-parameters">Command line parameters:</h3>
 <pre><code>Which streams:
 -ni                      ;required to process ni stream
 -ob                      ;required to process ob streams
@@ -190,7 +192,7 @@ Options:
 -gblcar                  ;apply ap global CAR filter over all channels
 -gbldmx                  ;apply ap global demuxed CAR filter over channel groups
 -gfix=0.40,0.10,0.02     ;rmv ap artifacts: ||amp(mV)||, ||slope(mV/sample)||, ||noise(mV)||
--chnexcl={prb;chans}     ;this probe, exclude listed chans from ap loccar, gblcar, gfix
+-chnexcl={prb;chans}     ;this probe, exclude listed acq chans from ap loccar, gblcar, gfix
 -xa=0,0,2,3.0,4.5,25     ;extract pulse signal from analog chan (js,ip,word,thresh1(V),thresh2(V),millisec)
 -xd=2,0,384,6,500        ;extract pulse signal from digital chan (js,ip,word,bit,millisec)
 -xia=0,0,2,3.0,4.5,2     ;inverted version of xa
@@ -208,7 +210,7 @@ Options:
 -dest=path               ;alternate path for output files (must exist)
 -no_catgt_fld            ;if using -dest, do not create catgt_run subfolder
 -out_prb_fld             ;if using -dest, create output subfolder per probe</code></pre>
-<h3 id="parameter-ordering">Parameter Ordering</h3>
+<h3 id="parameter-ordering">Parameter ordering</h3>
 <p>You can list parameters on the CatGT command line in any order. CatGT applies them in the logically necessary order. Of particular note, CatGT applies filter operations in this order:</p>
 <ul>
 <li>Load data</li>
@@ -230,6 +232,16 @@ Options:
 <p>This is covered more <a href="#using-catgt-output-files-as-input-for-an-extraction-pass">here</a> but briefly, you can operate the TTL edge extractors like {xd, xa, ...} in the same pass-1 command line with all other pass-1 operations, or you can do extraction as an afterthought in a lazy separate <code>extraction pass</code>.</p>
 <h4 id="pass-2">Pass-2</h4>
 <p>Pass-2 runs are <strong>supercat</strong> runs. In this case we do not alter the data. Rather, supercat joins (concatenates) data together from <strong>disparate SpikeGLX runs</strong>. It does this in a way that preserves temporal alignment across the streams within those runs. You might do this to find/apply a common set of spike templates from sessions that span days or months. Supercat can only be run on pass-1 output data.</p>
+<h3 id="parallel-processing">Parallel processing</h3>
+<p>As of version 5.1, pass-1 and pass-2 (supercat) each execute listed streams in parallel. For example, if you list four probes <code>-prb=0:3</code> they are each run in a separate thread and ought to take the same total time as running just one probe. This is realized in practice if the computer has the needed resources:</p>
+<ul>
+<li>Number of threads &gt;= number of streams</li>
+<li>Fast RAM: higher DIMM channel count is better</li>
+<li>Fast RAM: higher access speed (MT/s) is better</li>
+<li>High sustained disk write rate</li>
+</ul>
+<p>If you don't have a pretty high-performance machine, the time to do (N) probes will fall somewhere between 1X and NX the time for one probe.</p>
+<p>Note that you can manually make CatGT go faster by dividing the work onto several machines, for example, the several nodes of a cluster. All you have to do is make several scripts that differ only in which streams/probes are being handled on that machine.</p>
 <h3 id="sample-scripts">Sample scripts</h3>
 <p>The Windows version of CatGT includes folder <code>CatGT_std_scripts</code> with examples of typical command-lines you might use for both pass-1 and pass-2 runs.</p>
 <hr />
@@ -246,7 +258,7 @@ Options:
 <li>A range of files is being concatenated, that is, (gb &gt; ga) or (tb &gt; ta).</li>
 <li>A -save, -sepShanks, or -maxZ directive alters the channel list.</li>
 <li>Filters, tshift or startsecs are applied, so the binary data are altered.</li>
-<li>A time range is exported: set both -startsecs &gt;= 0, and -maxsecs &gt; startsecs.</li>
+<li>A time range is exported: set -startsecs &gt;= 0.</li>
 </ol></li>
 <li><p>In most cases, NI and OBX files are useful for extractions of non-neural signal events, but we don't alter these files per se. That is, the binaries would not be reproduced into the output because that's wasteful of space. However, you can force new binaries to be made using <code>-pass1_force_ni_ob_bin</code>. That will make sure supercat finds and joins the binaries just in case you want that.</p></li>
 </ul>
@@ -296,6 +308,16 @@ Options:
 <p>The input run_name is a base (undecorated) name without g- or t-indices.</p>
 <h3 id="stream-identifiers--ni--ob--ap--lf">Stream identifiers <code>{-ni, -ob, -ap, -lf}</code></h3>
 <p>In a given run you might have saved a variety of stream/file types {nidq.bin, obx.bin, ap.bin, lf.bin}. Use the <code>{-ni, -ob, -ap, -lf}</code> flags to indicate which streams within this run you wish to process.</p>
+<h3 id="js-and-ip-indices">js and ip indices</h3>
+<p>Several commands {extractors, -save, -sepShanks} target a given stream according to its {js, ip} parameters.</p>
+<p><strong>js</strong>:</p>
+<p>(0=NI), (1=OB), (2=AP), (3=LF).</p>
+<p><strong>ip</strong>:</p>
+<ul>
+<li>NI: There is at most one NI stream in a run, and its ip-value is zero.</li>
+<li>OB: You can run several OnBoxes at once, each OneBox XIO stream gets its own zero-based ip-index.</li>
+<li>AP, LF: You can run several probes at once, each probe stream gets its own zero-based ip-index.</li>
+</ul>
 <h3 id="converting-ap-to-lf-files">Converting AP to LF files</h3>
 <p>The -lf option can be used in two ways:</p>
 <ol style="list-style-type: decimal">
@@ -518,7 +540,10 @@ ls -s &lt;path/myoriginalname.meta&gt; &lt;...ZZZ/goodname_g0_t0.imec0.ap.meta&g
 <p>Use the SpikeGLX FileViewer to select appropriate amplitude and slope values for a given run. Be sure to turn high-pass filtering ON and spatial <code>&lt;S&gt;</code> filters OFF to match the conditions the CatGT artifact detector will use. Zoom the time scale (ctrl + click&amp;drag) to see the individual sample points and their connecting segments. Set the slope this way: Zoom in on the artifact initial peak, the points with greatest amplitude. Suppose consecutive points {A,B,C,D} make up the peak and {B,C,D} exceed the amplitude threshold. Then there are three slopes {B-A,C-B,D-C} connecting these points. Select the largest value. That is, set the slope to the fastest voltage change near the peak. An artifact will usually be several times faster than a neuronal spike.</p>
 <h3 id="chnexcl-option">chnexcl option</h3>
 <p>Use this option to prevent bad channels from corrupting calculations over mixtures of channels, such as the spatial filters {loccar, gblcar, gfix}.</p>
-<p>The option <code>-chnexcl={probe;chan_list}{probe;chan_list}...</code> takes a list of elements <em>(include the curly braces)</em> that specify a probe index; and a list of channels to exclude for that probe. Channel lists are specified like page lists in a printer dialog, <code>1,10,40:51</code> for example. Be careful to use a semicolon (;) between probe and channel list, and use only commas and colons (,:) within your channel lists. Include no more than one excluded channel list for a given probe index.</p>
+<p>The option <code>-chnexcl={probe;chan_list}{probe;chan_list}...</code> takes a list of elements <em>(include the curly braces)</em> that specify a probe index; and a list of <em>acquisition</em> channels to exclude for that probe. Channel lists are specified like page lists in a printer dialog, <code>1,10,40:51</code> for example. Be careful to use a semicolon (;) between probe and channel list, and use only commas and colons (,:) within your channel lists. Include no more than one excluded channel list for a given probe index.</p>
+<blockquote>
+<p>Acquisition channel naming. Suppose your probe has 384 neural channels. These channels are always acquired from the hardware and would have indices [0,383] inclusive. A confusion comes with the selective save feature in SpikeGLX wherein you might save only ten channels to your data files, say, acquired channels [200,209]. Suppose you determine that channel 202 is noisy and you want to mask it out. This is the third channel in each timepoint of the file. Nevertheless, in the chnexcl option reference it as '202,' its original acquisition index.</p>
+</blockquote>
 <p>Note that the CatGT spatial filters honor metadata items <code>~snsGeomMap</code> and <code>~snsShankMap</code>. The GeomMap replaces the ShankMap in metadata as of SpikeGLX version 20230202.</p>
 <p>A GeomMap has an entry for each saved channel that describes the (shank, x(um), z(um)) where its electrode resides on the shank, and a fourth 0/1 value, <code>use flag</code>, indicating if the channel should be used in spatial filtering. By default, SpikeGLX marks known on-shank reference channels with zeros. Your chnexcl data force the corresponding use flags to zero before the filters are applied, and the modified <code>~snsGeomMap</code>, if present, is written to the CatGT output metadata.</p>
 <p>A ShankMap has an entry for each saved channel that describes the (shank, col, row) where its electrode resides on the shank, and a fourth 0/1 value, <code>use flag</code>, indicating if the channel should be used in spatial filtering. By default, SpikeGLX marks known on-shank reference channels with zeros. Your chnexcl data force the corresponding use flags to zero before the filters are applied, and the modified <code>~snsShankMap</code>, if present, is written to the CatGT output metadata.</p>
@@ -728,8 +753,8 @@ times_imec5_0=path/extraction_output_file_3</code></pre>
 <p>Split NP 2.0 4-shank stream imec0.ap (all channels saved) into four shanks, giving each a new stream number. The original imro selected the lowest (384/4 = 96) electrodes from each shank.</p>
 <p>-save=2,0,10,0:47,96:143,384 -save=2,0,11,48:95,144:191,384 -save=2,0,12,192:239,288:335,384 -save=2,0,13,240:287,336:384</p>
 <h3 id="sepshanks-option">sepShanks option</h3>
-<p>This is a convenient way to split a multishank probe (js=2) into its respective shanks.</p>
-<p>-sepShanks=ip,ip0,ip1,ip2,ip3</p>
+<p>This is a convenient way to split a multishank probe's output (both AP- and LF-band) into its respective shanks.</p>
+<p>-sepShanks=ip,ip0,ip1,ip2,ip3 (implicitly js=2)</p>
 <ul>
 <li><strong>ip</strong>: Identifies the input probe stream.</li>
 <li><strong>ip0:ip3</strong>: User-provided output stream numbers, one for each of up to 4 shanks. Each ipj maps shank-j to a file index that you assign.</li>
@@ -750,8 +775,8 @@ times_imec5_0=path/extraction_output_file_3</code></pre>
 <p>-sepShanks=5,-1,5,-1,-1</p>
 <h3 id="maxz-option">maxZ option</h3>
 <p>It's very common to insert a probe only partially into the brain. The electrodes that remain outside the brain see primarily environment noise. These channels pollute CAR operations unless they are excluded. Also, you can trim these channels out of your files to make them smaller.</p>
-<p>Use maxZ to specify an insertion depth for an imec probe (js=2). This will automatically create/adjust the -chnexcl option for the probe, and it will create a -save option (if you don't already have one) listing only the inserted channels. Existing -save options are also edited (see note below). Include no more than one -maxZ option for a given probe index.</p>
-<p>The parameters are -maxZ=ip,depth-type,depth-value.</p>
+<p>Use maxZ to specify an insertion depth for an imec probe. This operation affects both AP- and LF-band output from the specified probe (ip). For the AP-band, it automatically creates/adjusts the -chnexcl option. For both bands it creates a -save option (if you don't already have one) listing only the implanted channels. Existing -save options are also edited (see note below). Include no more than one -maxZ option for a given probe ip-index.</p>
+<p>The parameters are -maxZ=ip,depth-type,depth-value (implicitly js=2).</p>
 <p>There are three convenient ways to specify the insertion depth:</p>
 <table>
 <thead>
@@ -812,14 +837,14 @@ times_imec5_0=path/extraction_output_file_3</code></pre>
 <li><em>You must use -no_run_fld for the supercat run</em>.</li>
 </ul></li>
 <li><ol start="3" style="list-style-type: decimal">
-<li>Saving to dest folders <strong>with catgt_ folder</strong> --</li>
+<li>Saved to dest folders <strong>with catgt_ folder</strong> --</li>
 </ol>
 <ul>
 <li>dir: The parent directory of the catgt_run_ga folder.</li>
 <li>run_ga: 'catgt_' tagged folder name, e.g., <strong>catgt_myrun_g7</strong>.</li>
 </ul></li>
 <li><ol start="4" style="list-style-type: decimal">
-<li>Saving to dest folders <strong>without catgt_ folder (-no_catgt_fld option)</strong> --</li>
+<li>Saved to dest folders <strong>without catgt_ folder (-no_catgt_fld option)</strong> --</li>
 </ol>
 <ul>
 <li>dir: The parent directory of the data files themselves.</li>
@@ -967,6 +992,13 @@ Options:
 <p>Supercat creates output file: <code>dest/supercat_run_ga/run_ga_fyi.txt</code>. This lists key output paths and filenames you can use to build downstream command lines for TPrime.</p>
 <hr />
 <h2 id="change-log">Change Log</h2>
+<p>Version 5.1</p>
+<ul>
+<li>Updated command line logging.</li>
+<li>Option -sepShanks splits both AP &amp; LF.</li>
+<li>Option -maxZ preserves SY channels.</li>
+<li>Streams execute in parallel.</li>
+</ul>
 <p>Version 5.0</p>
 <ul>
 <li>Fix supercat database lookup.</li>

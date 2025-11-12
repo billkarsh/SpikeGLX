@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+November 11, 2025
+
+* CatGT 5.1 (Fixes, multithreaded streams).
+
 November 4, 2025
 
 * Update solder help doc.
