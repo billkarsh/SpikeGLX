@@ -87,10 +87,10 @@ void IMBISTCtl::go()
     if( !okVersions() || !probeType() )
         goto exit;
 
-    if( !test_bistBS() )
-        goto exit;
-
     if( !itest ) {
+
+        if( !test_bistBS() )
+            goto exit;
 
         test_bistHB();
         test_bistPRBS();
