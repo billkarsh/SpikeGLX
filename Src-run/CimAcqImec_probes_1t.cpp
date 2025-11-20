@@ -56,6 +56,10 @@ bool CimAcqImec::_1t_openProbe( const CimCfg::ImProbeDat &P )
             }
             break;
         }
+        else if( err == ERROR_SR_CHAIN ) {
+            if( p.im.prbAll.srAtDetect && !P.srDoCheck() )
+                return true;
+        }
 
         QThread::msleep( 100 );
     }
@@ -366,10 +370,11 @@ bool CimAcqImec::_1t_setStandby( const CimCfg::ImProbeDat &P )
 bool CimAcqImec::_1t_writeProbe( const CimCfg::ImProbeDat &P )
 {
     NP_ErrorCode    err;
+    bool            check = !p.im.prbAll.srAtDetect || P.srDoCheck();
 
     for( int itry = 1; itry <= 10; ++itry ) {
 
-        err = np_writeProbeConfiguration( P.slot, P.port, P.dock, true );
+        err = np_writeProbeConfiguration( P.slot, P.port, P.dock, check );
 
         if( err == SUCCESS ) {
             if( itry > 1 ) {

@@ -14,6 +14,7 @@
 - Stop run on any disk error.
 - Remote::GetLastGT.
 - Broken shanks assessed at detect.
+- Broken shanks affect probe configuration.
 - Metadata ~svySBTT gets run-start entry.
 
 20250915
