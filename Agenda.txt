@@ -3,6 +3,7 @@
 
 20250930
 --------
+- Can read out of order IMRO files.
 - Fix waveplan loop error.
 - FileViewer::Link parses split shanks.
 - FileViewer::Gain box always disabled.

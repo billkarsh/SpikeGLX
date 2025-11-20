@@ -42,7 +42,7 @@ struct IMRODesc_T1110
     bool operator==( const IMRODesc_T1110 &rhs ) const
         {return bankA==rhs.bankA && bankB==rhs.bankB;}
     QString toString( int grp ) const;
-    static IMRODesc_T1110 fromString( const QString &s );
+    int fromString( QString *msg, const QString &s );
 };
 
 

@@ -29,25 +29,27 @@ QString IMRODesc_T0base::toString( int chn ) const
 
 // Pattern: "chn bank refid apgn lfgn apflt"
 //
-// Note: The chn field is discarded.
+// Note: chn (or -1) is returned.
 //
-bool IMRODesc_T0base::fromString( QString *msg, const QString &s )
+int IMRODesc_T0base::fromString( QString *msg, const QString &s )
 {
     const QStringList   sl = s.split(
                                 QRegularExpression("\\s+"),
                                 Qt::SkipEmptyParts );
+    int                 chn;
     bool                ok;
 
     if( sl.size() != 6 )
         goto fail;
 
+    chn     = sl.at( 0 ).toInt( &ok ); if( !ok ) goto fail;
     bank    = sl.at( 1 ).toInt( &ok ); if( !ok ) goto fail;
     refid   = sl.at( 2 ).toInt( &ok ); if( !ok ) goto fail;
     apgn    = sl.at( 3 ).toInt( &ok ); if( !ok ) goto fail;
     lfgn    = sl.at( 4 ).toInt( &ok ); if( !ok ) goto fail;
     apflt   = sl.at( 5 ).toInt( &ok ); if( !ok ) goto fail;
 
-    return true;
+    return chn;
 
 fail:
     if( msg ) {
@@ -56,7 +58,7 @@ fail:
         .arg( s );
     }
 
-    return false;
+    return -1;
 }
 
 /* ---------------------------------------------------------------- */
@@ -161,21 +163,34 @@ bool IMROTbl_T0base::fromString( QString *msg, const QString &s )
 
 // Entries
 
+    int nC = 0,
+        nN = nAP();
+
     e.clear();
-    e.reserve( n - 1 );
+    e.resize( nN );
 
     for( int i = 1; i < n; ++i ) {
         IMRODesc_T0base D;
-        if( D.fromString( msg, sl[i] ) )
-            e.push_back( D );
+        int             C = D.fromString( msg, sl[i] );
+        if( C >= nN ) {
+            if( msg ) {
+                *msg = QString("Channel index <%1> exceeds %2")
+                        .arg( C ).arg( nN - 1 );
+            }
+            return false;
+        }
+        else if( C >= 0 ) {
+            e[C] = D;
+            ++nC;
+        }
         else
             return false;
     }
 
-    if( e.size() != nAP() ) {
+    if( nC != nN ) {
         if( msg ) {
             *msg = QString("Wrong imro entry count [%1] (should be %2)")
-                    .arg( e.size() ).arg( nAP() );
+                    .arg( nC ).arg( nN );
         }
         return false;
     }

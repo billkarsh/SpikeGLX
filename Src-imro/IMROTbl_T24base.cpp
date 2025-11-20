@@ -45,23 +45,25 @@ QString IMRODesc_T24base::toString( int chn ) const
 
 // Pattern: "chn shnk bank refid elec"
 //
-// Note: The chn field is discarded and elec is recalculated by caller.
+// Note: chn (or -1) is returned; elec is recalculated by caller.
 //
-bool IMRODesc_T24base::fromString( QString *msg, const QString &s )
+int IMRODesc_T24base::fromString( QString *msg, const QString &s )
 {
     const QStringList   sl = s.split(
                                 QRegularExpression("\\s+"),
                                 Qt::SkipEmptyParts );
+    int                 chn;
     bool                ok;
 
     if( sl.size() != 5 )
         goto fail;
 
+    chn     = sl.at( 0 ).toInt( &ok ); if( !ok ) goto fail;
     shnk    = sl.at( 1 ).toInt( &ok ); if( !ok ) goto fail;
     bank    = sl.at( 2 ).toInt( &ok ); if( !ok ) goto fail;
     refid   = sl.at( 3 ).toInt( &ok ); if( !ok ) goto fail;
 
-    return true;
+    return chn;
 
 fail:
     if( msg ) {
@@ -70,7 +72,7 @@ fail:
         .arg( s );
     }
 
-    return false;
+    return -1;
 }
 
 /* ---------------------------------------------------------------- */
@@ -190,21 +192,34 @@ bool IMROTbl_T24base::fromString( QString *msg, const QString &s )
 
 // Entries
 
+    int nC = 0,
+        nN = nAP();
+
     e.clear();
-    e.reserve( n - 1 );
+    e.resize( nN );
 
     for( int i = 1; i < n; ++i ) {
         IMRODesc_T24base    D;
-        if( D.fromString( msg, sl[i] ) )
-            e.push_back( D );
+        int                 C = D.fromString( msg, sl[i] );
+        if( C >= nN ) {
+            if( msg ) {
+                *msg = QString("Channel index <%1> exceeds %2")
+                        .arg( C ).arg( nN - 1 );
+            }
+            return false;
+        }
+        else if( C >= 0 ) {
+            e[C] = D;
+            ++nC;
+        }
         else
             return false;
     }
 
-    if( e.size() != nAP() ) {
+    if( nC != nN ) {
         if( msg ) {
             *msg = QString("Wrong imro entry count [%1] (should be %2)")
-                    .arg( e.size() ).arg( nAP() );
+                    .arg( nC ).arg( nN );
         }
         return false;
     }

@@ -45,9 +45,9 @@ QString IMRODesc_T3020base::toString( int chn ) const
 
 // Pattern: "chn shnk bank refid elec"
 //
-// Note: elec is recalculated by caller.
+// Note: chan (or -1) is returned; elec is recalculated by caller.
 //
-bool IMRODesc_T3020base::fromString( QString *msg, const QString &s )
+int IMRODesc_T3020base::fromString( QString *msg, const QString &s )
 {
     const QStringList   sl = s.split(
                                 QRegularExpression("\\s+"),
@@ -62,7 +62,7 @@ bool IMRODesc_T3020base::fromString( QString *msg, const QString &s )
     bank    = sl.at( 2 ).toInt( &ok ); if( !ok ) goto fail;
     refid   = sl.at( 3 ).toInt( &ok ); if( !ok ) goto fail;
 
-    return true;
+    return chan;
 
 fail:
     if( msg ) {
@@ -71,7 +71,7 @@ fail:
         .arg( s );
     }
 
-    return false;
+    return -1;
 }
 
 /* ---------------------------------------------------------------- */
@@ -260,31 +260,42 @@ bool IMROTbl_T3020base::fromString( QString *msg, const QString &s )
 
 // Entries
 
+    int nC = 0,
+        nN = nAP();
+
     e.clear();
-    e.reserve( n - 1 );
+    e.resize( nN );
 
     for( int i = 1; i < n; ++i ) {
 
         IMRODesc_T3020base  D;
-        if( D.fromString( msg, sl[i] ) )
-            e.push_back( D );
-        else
-            return false;
-
-        const IMRODesc_T3020base    &E = e[i-1];
-        if( blockMap[E.shnk][E.chan/48] == 99 ) {
+        int                 C = D.fromString( msg, sl[i] );
+        if( C >= nN ) {
             if( msg ) {
-                *msg = QString("Illegal 3020 mapping for channel [%1]")
-                        .arg( E.chan );
+                *msg = QString("Channel index <%1> exceeds %2")
+                        .arg( C ).arg( nN - 1 );
             }
             return false;
         }
+        else if( C >= 0 ) {
+            if( blockMap[D.shnk][C/48] == 99 ) {
+                if( msg ) {
+                    *msg = QString("Illegal 3020 mapping for channel [%1]")
+                            .arg( C );
+                }
+                return false;
+            }
+            e[C] = D;
+            ++nC;
+        }
+        else
+            return false;
     }
 
-    if( e.size() != nAP() ) {
+    if( nC != nN ) {
         if( msg ) {
             *msg = QString("Wrong imro entry count [%1] (should be %2)")
-                    .arg( e.size() ).arg( nAP() );
+                    .arg( nC ).arg( nN );
         }
         return false;
     }

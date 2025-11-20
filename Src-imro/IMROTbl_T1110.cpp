@@ -37,15 +37,33 @@ QString IMRODesc_T1110::toString( int grp ) const
 
 // Pattern: "grp bankA bankB"
 //
-// Note: The grp field is discarded.
+// Note: grp (or -1) is returned.
 //
-IMRODesc_T1110 IMRODesc_T1110::fromString( const QString &s )
+int IMRODesc_T1110::fromString( QString *msg, const QString &s )
 {
     const QStringList   sl = s.split(
                                 QRegularExpression("\\s+"),
                                 Qt::SkipEmptyParts );
+    int                 grp;
+    bool                ok;
 
-    return IMRODesc_T1110( sl.at( 1 ).toInt(), sl.at( 2 ).toInt() );
+    if( sl.size() != 3 )
+        goto fail;
+
+    grp     = sl.at( 0 ).toInt( &ok ); if( !ok ) goto fail;
+    bankA   = sl.at( 1 ).toInt( &ok ); if( !ok ) goto fail;
+    bankB   = sl.at( 2 ).toInt( &ok ); if( !ok ) goto fail;
+
+    return grp;
+
+fail:
+    if( msg ) {
+        *msg =
+        QString("Bad IMRO element format (%1), expected (grp bankA bankB)")
+        .arg( s );
+    }
+
+    return -1;
 }
 
 /* ---------------------------------------------------------------- */
@@ -152,40 +170,53 @@ bool IMROTbl_T1110::fromString( QString *msg, const QString &s )
 
 // Entries
 
+    int nG = 0;
+
     e.clear();
-    e.reserve( n - 1 );
+    e.resize( imType1110Groups );
 
     for( int i = 1; i < n; ++i ) {
 
-        IMRODesc_T1110  E = IMRODesc_T1110::fromString( sl[i] );
+        IMRODesc_T1110  D;
+        int             G = D.fromString( msg, sl[i] );
 
-        if( ehdr.colmode == 2 ) {
-            if( E.bankA != E.bankB ) {
-                if( msg )
-                    *msg = "In 'ALL' col mode bankA must equal bankB";
-                return false;
+        if( G >= imType1110Groups ) {
+            if( msg ) {
+                *msg = QString("Group index <%1> exceeds %2")
+                        .arg( G ).arg( imType1110Groups - 1 );
             }
+            return false;
         }
-        else {
-            bool aColCrossed = (E.bankA/4) & 1,
-                 bColCrossed = (E.bankB/4) & 1;
-
-            if( aColCrossed == bColCrossed ) {
-                if( msg ) {
-                    *msg =  "In 'INNER' (or 'OUTER') col mode, one bank"
-                            " must be col-crossed and the other not";
+        else if( G >= 0 ) {
+            if( ehdr.colmode == 2 ) {
+                if( D.bankA != D.bankB ) {
+                    if( msg )
+                        *msg = "In 'ALL' col mode bankA must equal bankB";
+                    return false;
                 }
-                return false;
             }
+            else {
+                bool aColCrossed = (D.bankA/4) & 1,
+                     bColCrossed = (D.bankB/4) & 1;
+                if( aColCrossed == bColCrossed ) {
+                    if( msg ) {
+                        *msg =  "In 'INNER' (or 'OUTER') col mode, one bank"
+                                " must be col-crossed and the other not";
+                    }
+                    return false;
+                }
+            }
+            e[G] = D;
+            ++nG;
         }
-
-        e.push_back( E );
+        else
+            return false;
     }
 
-    if( e.size() != imType1110Groups ) {
+    if( nG != imType1110Groups ) {
         if( msg ) {
             *msg = QString("Wrong imro entry count [%1] (should be %2)")
-                    .arg( e.size() ).arg( imType1110Groups );
+                    .arg( nG ).arg( imType1110Groups );
         }
         return false;
     }
