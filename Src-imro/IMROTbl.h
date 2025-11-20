@@ -208,7 +208,12 @@ public:
 
 // Hardware
 
-    virtual int selectSites( int slot, int port, int dock, bool write ) const;
+    virtual int selectSites(
+        int     slot,
+        int     port,
+        int     dock,
+        bool    write,
+        bool    check ) const;
     virtual int selectRefs( int slot, int port, int dock ) const;
     virtual int selectGains( int slot, int port, int dock ) const;
     virtual int selectAPFlts( int slot, int port, int dock ) const;

@@ -267,7 +267,7 @@ bool CimAcqImec::_1t_setLEDs( const CimCfg::ImProbeDat &P )
 bool CimAcqImec::_1t_selectElectrodes( const CimCfg::ImProbeDat &P )
 {
     NP_ErrorCode    err = NP_ErrorCode(p.im.prbj[P.ip].roTbl->
-                            selectSites( P.slot, P.port, P.dock, false ));
+                            selectSites( P.slot, P.port, P.dock, false, true ));
 
     if( err != SUCCESS ) {
         runError(

@@ -36,7 +36,7 @@ struct IMROTbl_T1200 : public IMROTbl_T0base
 
 // Hardware
 
-    virtual int selectSites( int, int, int, bool ) const    {return 0;}
+    virtual int selectSites( int, int, int, bool, bool ) const  {return 0;}
 };
 
 #endif  // IMROTBL_T1200_H

@@ -331,7 +331,12 @@ void IMROTbl_T21base::muxTable( int &nADC, int &nGrp, std::vector<int> &T ) cons
 
 // This method connects multiple electrodes per channel.
 //
-int IMROTbl_T21base::selectSites( int slot, int port, int dock, bool write ) const
+int IMROTbl_T21base::selectSites(
+    int     slot,
+    int     port,
+    int     dock,
+    bool    write,
+    bool    check ) const
 {
 #ifdef HAVE_IMEC
 // ------------------------------------
@@ -356,7 +361,7 @@ int IMROTbl_T21base::selectSites( int slot, int port, int dock, bool write ) con
     }
 
     if( write )
-        np_writeProbeConfiguration( slot, port, dock, true );
+        np_writeProbeConfiguration( slot, port, dock, check );
 #endif
 
     return 0;

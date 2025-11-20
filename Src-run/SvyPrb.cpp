@@ -200,7 +200,7 @@ bool SvyPrbRun::nextBank()
         run->grfWaitPaused();
 
         E.roTbl->fillShankAndBank( S, B );
-        E.roTbl->selectSites( P.slot, P.port, P.dock, true );
+        E.roTbl->selectSites( P.slot, P.port, P.dock, true, true );
         E.sns.chanMapFile.clear();
         cfg->validImMaps( err, E, ip );
         run->grfUpdateProbe( ip, true, true );

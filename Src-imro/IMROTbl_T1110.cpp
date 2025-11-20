@@ -442,7 +442,12 @@ void IMROTbl_T1110::muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const
 /* Hardware ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-int IMROTbl_T1110::selectSites( int slot, int port, int dock, bool write ) const
+int IMROTbl_T1110::selectSites(
+    int     slot,
+    int     port,
+    int     dock,
+    bool    write,
+    bool    check ) const
 {
 #ifdef HAVE_IMEC
 
@@ -478,7 +483,7 @@ int IMROTbl_T1110::selectSites( int slot, int port, int dock, bool write ) const
     }
 
     if( write )
-        np_writeProbeConfiguration( slot, port, dock, true );
+        np_writeProbeConfiguration( slot, port, dock, check );
 #endif
 
     return 0;

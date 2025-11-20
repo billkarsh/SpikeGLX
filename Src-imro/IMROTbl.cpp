@@ -766,7 +766,12 @@ QString IMROTbl::muxTable_toString() const
 
 // This method connects one electrode per channel.
 //
-int IMROTbl::selectSites( int slot, int port, int dock, bool write ) const
+int IMROTbl::selectSites(
+    int     slot,
+    int     port,
+    int     dock,
+    bool    write,
+    bool    check ) const
 {
 #ifdef HAVE_IMEC
 // ------------------------------------
@@ -794,13 +799,13 @@ int IMROTbl::selectSites( int slot, int port, int dock, bool write ) const
 
         for( int itry = 1; itry <= 10; ++itry ) {
 
-            err = np_writeProbeConfiguration( slot, port, dock, true );
+            err = np_writeProbeConfiguration( slot, port, dock, check );
 
             if( err == SUCCESS ) {
                 if( itry > 1 ) {
                     Warning() <<
                     QString("Probe (slot %1, port %2, dock %3): writeConfig() took %4 tries.")
-                    .arg( slot ).arg( port ).arg( dock).arg( itry );
+                    .arg( slot ).arg( port ).arg( dock ).arg( itry );
                 }
                 break;
             }

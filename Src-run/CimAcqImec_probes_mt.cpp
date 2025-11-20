@@ -356,7 +356,7 @@ bool ImCfgWorker::_mt_setLEDs( const CimCfg::ImProbeDat &P )
 bool ImCfgWorker::_mt_selectElectrodes( const CimCfg::ImProbeDat &P )
 {
     NP_ErrorCode    err = NP_ErrorCode(acq->p.im.prbj[P.ip].roTbl->
-                            selectSites( P.slot, P.port, P.dock, false ));
+                            selectSites( P.slot, P.port, P.dock, false, true ));
 
     if( err != SUCCESS ) {
         shr.seterror(
