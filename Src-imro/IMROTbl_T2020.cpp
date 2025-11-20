@@ -287,16 +287,16 @@ void IMROTbl_T2020::eaChansOrder( QVector<int> &v ) const
 }
 
 
-// refid [0]    ext, shank=s, bank=b.
-// refid [1]    gnd, shank=s, bank=b.
-// refid [2]    tip, shank=s, bank=b.
+// refid [0]    ext, shank=s, bank=0.
+// refid [1]    gnd, shank=s, bank=0.
+// refid [2]    tip, shank=s, bank=0.
 //
 int IMROTbl_T2020::refTypeAndFields( int &shank, int &bank, int ch ) const
 {
     const IMRODesc_T2020    &E = e[ch];
 
     shank = E.shnk;
-    bank  = E.bank;
+    bank  = 0;
 
     if( E.refid == 0 )
         return 0;

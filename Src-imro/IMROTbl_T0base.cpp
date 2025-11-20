@@ -255,16 +255,13 @@ int IMROTbl_T0base::refTypeAndFields( int &shank, int &bank, int ch ) const
 {
     int rid = e[ch].refid;
 
-    shank = 0;
+    shank   = 0;
+    bank    = 0;
 
-    if( rid == 0 ) {
-        bank = 0;
+    if( rid == 0 )
         return 0;
-    }
-    else if( rid == 1 ) {
-        bank = 0;
+    else if( rid == 1 )
         return 1;
-    }
 
     bank = rid - 2;
     return 2;

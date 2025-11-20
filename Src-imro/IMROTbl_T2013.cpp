@@ -5,7 +5,7 @@
 /* struct IMROTbl ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// refid [0]      ext, shank=0,    bank=0.
+// refid [0]      ext, shank=s,    bank=0.
 // refid [1]      gnd, shank=0,    bank=0.
 // refid [2..5]   tip, shank=id-2, bank=0.
 //
@@ -16,7 +16,7 @@ int IMROTbl_T2013::refTypeAndFields( int &shank, int &bank, int ch ) const
     bank = 0;
 
     if( rid == 0 ) {
-        shank = (ch < 4 ? ch : 0);
+        shank = e[ch].shnk;
         return 0;
     }
     else if( rid == 1 ) {

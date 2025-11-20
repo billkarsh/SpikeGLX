@@ -9,7 +9,7 @@
 static int refs[4] = {127,511,895,1279};
 
 
-// refid [0]      ext, shank=0,    bank=0.
+// refid [0]      ext, shank=s,    bank=0.
 // refid [1..4]   tip, shank=id-1, bank=0.
 // refid [5..8]   int, shank=0,    bank=id-5.
 // refid [9..12]  int, shank=1,    bank=id-9.
@@ -21,7 +21,7 @@ int IMROTbl_T24::refTypeAndFields( int &shank, int &bank, int ch ) const
     int rid = e[ch].refid;
 
     if( rid == 0 ) {
-        shank   = (ch < 4 ? ch : 0);
+        shank   = e[ch].shnk;
         bank    = 0;
         return 0;
     }
