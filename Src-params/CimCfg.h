@@ -111,6 +111,9 @@ public:
                     ip,         // calc     {-1=unset}
                     prbtech,    // detect   {-1=unset}
                     cal;        // detect   {-1=unset,0=N,1=Y}
+        uint8_t     sr_mask,    // detect
+                    sr_nok,     // detect
+                    sr_nshk;    // detect
         bool        enab;       // ini
 
         ImProbeDat( int slot, int port, int dock, bool enab )
@@ -135,6 +138,9 @@ public:
                 ip      = -1;
                 prbtech = -1;
                 cal     = -1;
+                sr_mask = 1;
+                sr_nok  = 1;
+                sr_nshk = 1;
             }
 
         bool operator<( const ImProbeDat &rhs ) const
@@ -155,6 +161,9 @@ public:
         bool setProbeType();
         int nHSDocks() const;
         quint64 calSN() const   {return (type == 1200 ? hssn : sn);}
+        bool srDoCheck() const  {return sr_nok >= sr_nshk;}
+        int srFirstOK() const;
+        int srNextOK( int is ) const;
 
         void loadSettings( QSettings &S, int i );
         void saveSettings( QSettings &S, int i ) const;

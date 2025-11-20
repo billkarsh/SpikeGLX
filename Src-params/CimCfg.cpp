@@ -70,6 +70,28 @@ int CimCfg::ImProbeDat::nHSDocks() const
 }
 
 
+int CimCfg::ImProbeDat::srFirstOK() const
+{
+    for( int is = 0; is < sr_nshk; ++is ) {
+        if( sr_mask & (1 << is) )
+            return is;
+    }
+
+    return 0;
+}
+
+
+int CimCfg::ImProbeDat::srNextOK( int is ) const
+{
+    while( ++is < sr_nshk ) {
+        if( sr_mask & (1 << is) )
+            return is;
+    }
+
+    return sr_nshk;
+}
+
+
 void CimCfg::ImProbeDat::loadSettings( QSettings &S, int i )
 {
     QString defRow =
@@ -2882,35 +2904,66 @@ guiBreathe();
 #endif
             IMROTbl *R      = IMROTbl::alloc( P.pn );
             bool    testSR  = (R->nBanks() > 1);
+            P.sr_nshk       = R->nShank();
             delete R;
 
             if( testSR ) {
-                err = np_bistSR( P.slot, P.port, P.dock );
+                P.sr_mask = 0;
+                err = np_bistSR( P.slot, P.port, P.dock, &P.sr_mask );
 
                 if( err != SUCCESS ) {
                     if( err == TIMEOUT ) {
+                        slBIST.append(
+                            QString(
+                            "SR: (%1,%2,%3) sn=%4 pn=%5 shanks=%6 ok={ ? }")
+                            .arg( P.slot ).arg( P.port ).arg( P.dock )
+                            .arg( P.sn ).arg( P.pn ).arg( P.sr_nshk ) );
                         slVers.append(
-                            QString("Error: Shift register BIST(slot %1, port %2, dock %3)"
+                            QString("Error: BIST Shift Register(slot %1, port %2, dock %3)"
                             " not conclusive due to a timeout error.")
                             .arg( P.slot ).arg( P.port ).arg( P.dock ) );
                         slVers.append("Check connections and try again.");
+                        goto setsrok;
                     }
                     else {
+                        QString s;
+                        P.sr_nok = 0;
+                        for( int is = 0; is < P.sr_nshk; ++is ) {
+                            if( P.sr_mask & (1<<is) ) {
+                                s += QString(" %1").arg( is );
+                                ++P.sr_nok;
+                            }
+                        }
+                        slBIST.append(
+                            QString(
+                            "SR: (%1,%2,%3) sn=%4 pn=%5 shanks=%6 ok={ %7 }")
+                            .arg( P.slot ).arg( P.port ).arg( P.dock )
+                            .arg( P.sn ).arg( P.pn ).arg( P.sr_nshk ).arg( s.trimmed() ) );
                         slVers.append(
-                            QString("Error: Shift register BIST(slot %1, port %2, dock %3).")
+                            QString("Error: BIST Shift Register(slot %1, port %2, dock %3).")
                             .arg( P.slot ).arg( P.port ).arg( P.dock ) );
                     }
-                    slVers.append("Use BIST dialog for comprehensive checking.");
-                    slBIST.append(
-                        QString("slot %1, port %2, dock %3: Shift Register")
-                        .arg( P.slot ).arg( P.port ).arg( P.dock ) );
                 }
+                else
+                    goto setsrok;
+            }
+            else {
+setsrok:
+                P.sr_nok    = P.sr_nshk;
+                P.sr_mask   = (P.sr_nshk == 4 ? 0xF : 1);
             }
 #if DBG
 Log()<<"  probe: SR done";
 guiBreathe();
 #endif
 #endif  // HAVE_IMEC
+        }
+        else {
+            IMROTbl *R  = IMROTbl::alloc( P.pn );
+            P.sr_nshk   = R->nShank();
+            delete R;
+            P.sr_nok    = P.sr_nshk;
+            P.sr_mask   = (P.sr_nshk == 4 ? 0xF : 1);
         }
 
         // ------------------------------

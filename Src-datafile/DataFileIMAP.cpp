@@ -252,6 +252,8 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imDatPrb_port"]    = P.port;
     kvp["imDatPrb_slot"]    = P.slot;
     kvp["imDatPrb_sn"]      = P.sn;
+    kvp["imDatPrb_sr_nok"]  = P.sr_nok;
+    kvp["imDatPrb_sr_mask"] = P.sr_mask;
     kvp["imDatPrb_tech"]    = IMROTbl::strTech( P.prbtech );
     kvp["imDatPrb_type"]    = E.roTbl->type;
 
