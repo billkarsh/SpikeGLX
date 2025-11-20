@@ -65,8 +65,8 @@ void Config_devtab::toGUI( const DAQ::Params &p, bool loadProbes )
     devTabUI->imecGB->setChecked( p.im.enabled );
     devTabUI->nidqGB->setChecked( p.ni.enabled );
 
-    devTabUI->bistChk->setChecked( p.im.prbAll.bistAtDetect );
-    devTabUI->bistChk->setEnabled( p.im.enabled );
+    devTabUI->psbChk->setChecked( p.im.prbAll.psbAtDetect );
+    devTabUI->psbChk->setEnabled( p.im.enabled );
 
     if( loadProbes )
         prbTabToGUI();
@@ -79,7 +79,7 @@ void Config_devtab::toGUI( const DAQ::Params &p, bool loadProbes )
 
 void Config_devtab::fromGUI( DAQ::Params &q )
 {
-    q.im.prbAll.bistAtDetect = devTabUI->bistChk->isChecked();
+    q.im.prbAll.psbAtDetect = devTabUI->psbChk->isChecked();
 }
 
 
@@ -110,7 +110,7 @@ void Config_devtab::setNoDialogAccess( bool clearNi )
 
 // BIST at detect
 
-    devTabUI->bistChk->setEnabled( devTabUI->imecGB->isChecked() );
+    devTabUI->psbChk->setEnabled( devTabUI->imecGB->isChecked() );
 
 // Highlight Detect button
 
@@ -435,7 +435,8 @@ bool Config_devtab::imDetect()
 
     availIM = CimCfg::detect(
                 slVers, slBIST, vHSpsv, vHS20, T,
-                devTabUI->bistChk->isChecked() );
+                cfg->acceptedParams.im.prbAll.srAtDetect,
+                devTabUI->psbChk->isChecked() );
 
     QGuiApplication::restoreOverrideCursor();
 

@@ -94,8 +94,6 @@ public:
     // One per probe (port != 9) or OneBox (port == 9)
     //
     struct ImProbeDat {
-        quint16     slot,       // ini
-                    port;       // ini
         QString     hspn,       // detect
                     hshw,       // detect
                     hsfw,       // detect
@@ -106,11 +104,13 @@ public:
         quint64     hssn,       // detect   {UNSET64=unset}
                     sn;         // detect   {UNSET64=unset}
         int         obsn,       // detect   {-1=unset}
-                    type,       // detect   {-1=unset}
-                    prbtech;    // detect   {-1=unset}
-        quint16     dock,       // ini
-                    cal,        // detect   {-1=unset,0=N,1=Y}
-                    ip;         // calc     {-1=unset}
+                    type;       // detect   {-1=unset}
+        qint16      slot,       // ini
+                    port,       // ini
+                    dock,       // ini
+                    ip,         // calc     {-1=unset}
+                    prbtech,    // detect   {-1=unset}
+                    cal;        // detect   {-1=unset,0=N,1=Y}
         bool        enab;       // ini
 
         ImProbeDat( int slot, int port, int dock, bool enab )
@@ -132,9 +132,9 @@ public:
                 sn      = UNSET64;
                 obsn    = -1;
                 type    = -1;
+                ip      = -1;
                 prbtech = -1;
                 cal     = -1;
-                ip      = -1;
             }
 
         bool operator<( const ImProbeDat &rhs ) const
@@ -297,17 +297,18 @@ public:
                 trgSource,  // {0=software,1=SMA}
                 svySettleSec,
                 svySecPerBnk;
-        bool    lowLatency,
+        bool    srAtDetect,
+                psbAtDetect,
+                lowLatency,
                 trgRising,
-                bistAtDetect,
                 isSvyRun,
                 qf_on;
 
         PrbAll()
         :   qf_secsStr( ".5" ), qf_loCutStr( "300" ), qf_hiCutStr( "9000" ),
             calPolicy(0), trgSource(0), svySettleSec(2), svySecPerBnk(35),
-            lowLatency(false), trgRising(true), bistAtDetect(true),
-            isSvyRun(false), qf_on(true)    {}
+            srAtDetect(true), psbAtDetect(true), lowLatency(false),
+            trgRising(true), isSvyRun(false), qf_on(true)   {}
 
         void loadSettings( QSettings &S );
         void saveSettings( QSettings &S ) const;
@@ -507,7 +508,8 @@ public:
         QVector<int>            &vHSpsv,
         QVector<int>            &vHS20,
         ImProbeTable            &T,
-        bool                    doBIST );
+        bool                    srCheck,
+        bool                    psbCheck );
     static void detect_API(
         QStringList             &slVers,
         ImProbeTable            &T );
@@ -550,7 +552,8 @@ public:
         const QMap<int,QString> &qbMap,
         const QVector<int>      &vHSpsv,
         ImProbeTable            &T,
-        bool                    doBIST );
+        bool                    srCheck,
+        bool                    psbCheck );
     static bool detect_simProbe(
         QStringList             &slVers,
         ImProbeTable            &T,

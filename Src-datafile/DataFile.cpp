@@ -292,6 +292,7 @@ bool DataFile::openForWrite(
 //    niAiRangeMin=-2.5
 //    niAiRangeMax=2.5
 //    niSampRate=19737
+//    niSettle=7
 //    niMNGain=200
 //    niMAGain=1
 //    niDev1=Dev1
@@ -322,6 +323,7 @@ bool DataFile::openForWrite(
 //    syncImInputSlot=2
 //    syncNiChanType=1
 //    syncNiChan=224
+//    syncCalMins=30
 //    trgTimTL0=10
 //    trgTimTH=10
 //    trgTimTL=1
@@ -351,20 +353,26 @@ bool DataFile::openForWrite(
 //    gateMode=0
 //    trigMode=0
 //    manOvShowBut=false
+//    manOvConfirm=false
 //    manOvInitOff=false
 //    snsNotes=
 //    snsRunName=myRun
 //    snsReqMins=10
+//    snsPairChk=true
+//    snsFldPerProbe=true
 //
 //  [DAQ_Imec_All]
 //    imQfSecs=.5
-//    imQfLoCut=0
-//    imQfHiCut=INF
+//    imQfLoCut=300
+//    imQfHiCut=9000
 //    imCalPolicy=0
 //    imTrgSource=0
+//    imSvySettleSec=2
 //    imSvySecPerBnk=35
+//    imSRAtDetect=true
+//    imPSBAtDetect=true
+//    imLowLatency=false
 //    imTrgRising=true
-//    imBistAtDetect=true
 //    imQfOn=true
 //    imNProbes=1
 //    obNOneBox=0

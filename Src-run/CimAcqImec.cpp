@@ -989,7 +989,7 @@ void ImAcqStream::checkErrs_PInfo( PacketInfo* H, int nT, int shank )
 #ifdef TSTAMPCHECKS
             Log() <<
             QString("~~ CROSS-FETCH GAP %1 %2  val %3")
-            .arg(js==jsIM?"IM":"OB")
+            .arg( js==jsIM ? "IM" : "OB" )
             .arg( ip ).arg( tsfirst - tStampLastFetch );
 #endif
         }

@@ -940,7 +940,7 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
         }
 
         if( P.isProbe() ) {
-            if( P.cal == quint16(-1) )
+            if( P.cal == -1 )
                 ti->setText( "???" );
             else
                 ti->setText( P.cal > 0 ? "Y" : "N" );
@@ -956,7 +956,7 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
             ti->setFlags( Qt::NoItemFlags );
         }
 
-        if( P.ip == quint16(-1) ) {
+        if( P.ip == -1 ) {
             if( P.enab && P.isOneBox() && mainApp()->cfgCtl()->validated )
                 ti->setText( "DAC" );
             else
@@ -1201,9 +1201,10 @@ void CimCfg::PrbAll::loadSettings( QSettings &S )
     trgSource       = S.value( "imTrgSource", 0 ).toInt();
     svySettleSec    = S.value( "imSvySettleSec", 2 ).toInt();
     svySecPerBnk    = S.value( "imSvySecPerBnk", 35 ).toInt();
+    srAtDetect      = S.value( "imSRAtDetect", true ).toBool();
+    psbAtDetect     = S.value( "imPSBAtDetect", true ).toBool();
     lowLatency      = S.value( "imLowLatency", false ).toBool();
     trgRising       = S.value( "imTrgRising", true ).toBool();
-    bistAtDetect    = S.value( "imBistAtDetect", true ).toBool();
     isSvyRun        = false;
     qf_on           = S.value( "imQfOn", true ).toBool();
 }
@@ -1218,9 +1219,10 @@ void CimCfg::PrbAll::saveSettings( QSettings &S ) const
     S.setValue( "imTrgSource", trgSource );
     S.setValue( "imSvySettleSec", svySettleSec );
     S.setValue( "imSvySecPerBnk", svySecPerBnk );
+    S.setValue( "imSRAtDetect", srAtDetect );
+    S.setValue( "imPSBAtDetect", psbAtDetect );
     S.setValue( "imLowLatency", lowLatency );
     S.setValue( "imTrgRising", trgRising );
-    S.setValue( "imBistAtDetect", bistAtDetect );
     S.setValue( "imQfOn", qf_on );
 }
 
@@ -1807,7 +1809,8 @@ bool CimCfg::detect(
     QVector<int>            &vHSpsv,
     QVector<int>            &vHS20,
     ImProbeTable            &T,
-    bool                    doBIST )
+    bool                    srCheck,
+    bool                    psbCheck )
 {
 // @@@ FIX closeAllBS is preferred but disrupts OneBox mapping
 //    closeAllBS( false );
@@ -1891,7 +1894,7 @@ Log()<<"[ Start detect_Probes";
 guiBreathe();
 #endif
     if( ok )
-        ok = detect_probes( slVers, slBIST, qbMap, vHSpsv, T, doBIST );
+        ok = detect_probes( slVers, slBIST, qbMap, vHSpsv, T, srCheck, psbCheck );
 #if DBG
 Log()<<"End detect_Probes ]";
 guiBreathe();
@@ -2633,7 +2636,8 @@ bool CimCfg::detect_probes(
     const QMap<int,QString> &qbMap,
     const QVector<int>      &vHSpsv,
     ImProbeTable            &T,
-    bool                    doBIST )
+    bool                    srCheck,
+    bool                    psbCheck )
 {
 #ifdef HAVE_IMEC
     NP_ErrorCode    err;
@@ -2870,66 +2874,71 @@ guiBreathe();
         // BIST SR (shift register)
         // ------------------------
 
-#if DBG
-Log()<<"probe: BIST checks "<<doBIST;
-guiBreathe();
-#endif
+        if( srCheck ) {
 #ifdef HAVE_IMEC
-        if( !doBIST )
-            continue;
-
-        IMROTbl *R      = IMROTbl::alloc( P.pn );
-        bool    testSR  = (R->nBanks() > 1);
-        delete R;
-
-        if( testSR ) {
-            err = np_bistSR( P.slot, P.port, P.dock );
-
-            if( err != SUCCESS ) {
-                if( err == TIMEOUT ) {
-                    slVers.append(
-                        QString("Error: Shift register BIST(slot %1, port %2, dock %3)"
-                        " not conclusive due to a timeout error.")
-                        .arg( P.slot ).arg( P.port ).arg( P.dock ) );
-                    slVers.append("Check connections and try again.");
-                }
-                else {
-                    slVers.append(
-                        QString("Error: Shift register BIST(slot %1, port %2, dock %3).")
-                        .arg( P.slot ).arg( P.port ).arg( P.dock ) );
-                }
-                slVers.append("Use BIST dialog for comprehensive checking.");
-                slBIST.append(
-                    QString("slot %1, port %2, dock %3: Shift Register")
-                    .arg( P.slot ).arg( P.port ).arg( P.dock ) );
-            }
-        }
 #if DBG
-Log()<<"  probe: np_bistSR done";
+Log()<<"probe: SR check";
 guiBreathe();
 #endif
+            IMROTbl *R      = IMROTbl::alloc( P.pn );
+            bool    testSR  = (R->nBanks() > 1);
+            delete R;
+
+            if( testSR ) {
+                err = np_bistSR( P.slot, P.port, P.dock );
+
+                if( err != SUCCESS ) {
+                    if( err == TIMEOUT ) {
+                        slVers.append(
+                            QString("Error: Shift register BIST(slot %1, port %2, dock %3)"
+                            " not conclusive due to a timeout error.")
+                            .arg( P.slot ).arg( P.port ).arg( P.dock ) );
+                        slVers.append("Check connections and try again.");
+                    }
+                    else {
+                        slVers.append(
+                            QString("Error: Shift register BIST(slot %1, port %2, dock %3).")
+                            .arg( P.slot ).arg( P.port ).arg( P.dock ) );
+                    }
+                    slVers.append("Use BIST dialog for comprehensive checking.");
+                    slBIST.append(
+                        QString("slot %1, port %2, dock %3: Shift Register")
+                        .arg( P.slot ).arg( P.port ).arg( P.dock ) );
+                }
+            }
+#if DBG
+Log()<<"  probe: SR done";
+guiBreathe();
 #endif
+#endif  // HAVE_IMEC
+        }
 
         // ------------------------------
         // BIST PSB (parallel serial bus)
         // ------------------------------
 
+        if( psbCheck ) {
 #ifdef HAVE_IMEC
-        err = np_bistPSB( P.slot, P.port, P.dock );
-
-        if( err != SUCCESS ) {
-            slVers.append(
-                QString("Error: Parallel Serial Bus(slot %1, port %2, dock %3).")
-                .arg( P.slot ).arg( P.port ).arg( P.dock ) );
-            slBIST.append(
-                QString("slot %1, port %2, dock %3: Parallel Serial Bus")
-                .arg( P.slot ).arg( P.port ).arg( P.dock ) );
-        }
 #if DBG
-Log()<<"  probe: np_bistPSB done";
+Log()<<"probe: PSB check";
 guiBreathe();
 #endif
+            err = np_bistPSB( P.slot, P.port, P.dock );
+
+            if( err != SUCCESS ) {
+                slBIST.append(
+                    QString("PSB: (%1,%2,%3)")
+                    .arg( P.slot ).arg( P.port ).arg( P.dock ) );
+                slVers.append(
+                    QString("Error: BIST Parallel Serial Bus(slot %1, port %2, dock %3).")
+                    .arg( P.slot ).arg( P.port ).arg( P.dock ) );
+            }
+#if DBG
+Log()<<"  probe: PSB done";
+guiBreathe();
 #endif
+#endif  // HAVE_IMEC
+        }
     }
 
     return true;

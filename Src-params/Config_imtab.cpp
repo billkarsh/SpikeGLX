@@ -73,6 +73,8 @@ void Config_imtab::toGUI( const DAQ::Params &p )
 // All
 // ---
 
+    srAtDetect = p.im.prbAll.srAtDetect;    // edit from remote SDK
+
     imTabUI->calCB->setCurrentIndex( p.im.prbAll.calPolicy );
     imTabUI->lowLatChk->setChecked( p.im.prbAll.lowLatency );
     imTabUI->trgSrcCB->setCurrentIndex( p.im.prbAll.trgSource );
@@ -128,6 +130,8 @@ void Config_imtab::toGUI( const DAQ::Params &p )
 
 void Config_imtab::fromGUI( DAQ::Params &q )
 {
+    q.im.prbAll.srAtDetect      = srAtDetect;    // edit from remote SDK
+
     q.im.prbAll.qf_secsStr      = imTabUI->qfSecsCB->currentText();
     q.im.prbAll.qf_loCutStr     = imTabUI->qfLoCB->currentText();
     q.im.prbAll.qf_hiCutStr     = imTabUI->qfHiCB->currentText();

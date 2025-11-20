@@ -32,7 +32,7 @@
       <item row="0" column="0">
        <widget class="QTextEdit" name="niTE">
         <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
+         <enum>Qt::FocusPolicy::NoFocus</enum>
         </property>
         <property name="acceptDrops">
          <bool>false</bool>
@@ -41,7 +41,7 @@
          <bool>false</bool>
         </property>
         <property name="lineWrapMode">
-         <enum>QTextEdit::NoWrap</enum>
+         <enum>QTextEdit::LineWrapMode::NoWrap</enum>
         </property>
         <property name="readOnly">
          <bool>true</bool>
@@ -85,7 +85,7 @@
       <item row="2" column="0" colspan="6">
        <widget class="QTextEdit" name="imTE">
         <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
+         <enum>Qt::FocusPolicy::NoFocus</enum>
         </property>
         <property name="acceptDrops">
          <bool>false</bool>
@@ -94,7 +94,7 @@
          <bool>false</bool>
         </property>
         <property name="lineWrapMode">
-         <enum>QTextEdit::NoWrap</enum>
+         <enum>QTextEdit::LineWrapMode::NoWrap</enum>
         </property>
         <property name="readOnly">
          <bool>true</bool>
@@ -123,7 +123,7 @@
          </sizepolicy>
         </property>
         <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
+         <enum>Qt::FocusPolicy::NoFocus</enum>
         </property>
         <property name="text">
          <string>  Configure Slots   </string>
@@ -133,10 +133,10 @@
       <item row="1" column="0" colspan="6">
        <widget class="QTableWidget" name="imPrbTbl">
         <property name="focusPolicy">
-         <enum>Qt::ClickFocus</enum>
+         <enum>Qt::FocusPolicy::ClickFocus</enum>
         </property>
         <property name="selectionMode">
-         <enum>QAbstractItemView::ExtendedSelection</enum>
+         <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
         </property>
         <property name="rowCount">
          <number>4</number>
@@ -144,17 +144,17 @@
         <attribute name="horizontalHeaderVisible">
          <bool>true</bool>
         </attribute>
-        <attribute name="horizontalHeaderDefaultSectionSize">
-         <number>61</number>
-        </attribute>
         <attribute name="horizontalHeaderMinimumSectionSize">
          <number>35</number>
         </attribute>
-        <attribute name="verticalHeaderDefaultSectionSize">
-         <number>32</number>
+        <attribute name="horizontalHeaderDefaultSectionSize">
+         <number>61</number>
         </attribute>
         <attribute name="verticalHeaderMinimumSectionSize">
          <number>25</number>
+        </attribute>
+        <attribute name="verticalHeaderDefaultSectionSize">
+         <number>32</number>
         </attribute>
         <row/>
         <row/>
@@ -215,7 +215,7 @@
       <item row="0" column="5">
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -234,7 +234,7 @@
          </sizepolicy>
         </property>
         <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
+         <enum>Qt::FocusPolicy::NoFocus</enum>
         </property>
         <property name="text">
          <string>  Sim Probes  </string>
@@ -260,7 +260,7 @@
    <item row="2" column="1">
     <spacer name="horizontalSpacer">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
@@ -271,15 +271,18 @@
     </spacer>
    </item>
    <item row="2" column="2">
-    <widget class="QCheckBox" name="bistChk">
+    <widget class="QCheckBox" name="psbChk">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="toolTip">
+      <string>Test for good contact between flex and headstage</string>
+     </property>
      <property name="text">
-      <string>Include probe checks</string>
+      <string>BIST PSB checks</string>
      </property>
     </widget>
    </item>
@@ -288,7 +291,7 @@
  <tabstops>
   <tabstop>imecGB</tabstop>
   <tabstop>nidqGB</tabstop>
-  <tabstop>bistChk</tabstop>
+  <tabstop>psbChk</tabstop>
   <tabstop>detectBut</tabstop>
  </tabstops>
  <resources/>

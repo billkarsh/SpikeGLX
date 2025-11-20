@@ -18,7 +18,7 @@ public:
 
     virtual QString subtypeFromObj() const  {return "obx";}
     virtual QString streamFromObj() const   {return DAQ::Params::jsip2stream( jsOB, ip );}
-    virtual QString fileLblFromObj() const  {return QString("obx%1.obx").arg(ip);}
+    virtual QString fileLblFromObj() const  {return QString("obx%1.obx").arg( ip );}
 
     // --------
     // Metadata
