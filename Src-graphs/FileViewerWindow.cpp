@@ -870,20 +870,21 @@ const double* FileViewerWindow::svyAllBanks(
     vec_i16         idata,
                     odata;
     const double    *sums;
-    const IMROTbl   *R = df->imro();
-    const ShankMap  *m = df->shankMap_svy( 0, 0 );
+    const IMROTbl   *R  = df->imro();
+    const SvySBTT   &M0 = SVY.e[0];
+    const ShankMap  *m  = df->shankMap_svy( M0.s, M0.b );
                     // f0 = file pos, where to read, at least 2 seconds in
-                    // fL = limit for this bank (transition start, or EOF)
+                    // fL = limit for this bank (next transition start, or EOF)
                     // fr = read length = 0.5 seconds AP, 3.0 seconds LF
                     // fd = delta, step to next read
                     // fn = number of reads per bank (4 max)
-    qint64          f0 = int(df->svySettleSecs()*df->samplingRateHz()),
-                    fL = (SVY.nmaps > 1 ? SVY.e[0].t1 : qint64(df->sampCount()));
+    qint64          f0 = M0.t2,
+                    fL = (1 < SVY.nmaps ? SVY.e[1].t1 : qint64(df->sampCount()));
     int             fr = int((what == 2 ? 3.0 : 0.5)*df->samplingRateHz()),
                     fd = fr + (what == 2 ? fr/2 : 2*fr),
                     fn = 0,
-                    is = 0,
-                    ib = 0,
+                    is = M0.s,
+                    ib = M0.b,
                     nC = R->nAP(),
                     R0;
 
@@ -925,14 +926,12 @@ const double* FileViewerWindow::svyAllBanks(
 
             // new bank
 
-            const SvySBTT   &M = SVY.e[im - 1];
+            const SvySBTT   &M = SVY.e[im];
             f0  = M.t2 + (what == 2 ? int(1.5*df->samplingRateHz()) : 0);
-            fL  = (im < SVY.nmaps - 1 ? SVY.e[im].t1 : qint64(df->sampCount()));
+            fL  = (im+1 < SVY.nmaps ? SVY.e[im+1].t1 : qint64(df->sampCount()));
             fn  = 0;
+            is  = M.s;
             ib  = M.b;
-
-            if( M.s != is )
-                is  = M.s;
 
             if( m )
                 delete m;
@@ -1008,18 +1007,12 @@ void FileViewerWindow::svyScrollToShankBank( int shank, int bank )
 
 // Which map?
 
-    if( !shank && !bank ) {
-        if( curSMap )
-            scanGrp->guiSetPos( 0 );
-        return;
-    }
-
-    for( int im = 0; im < SVY.nmaps - 1; ++im ) {
+    for( int im = 0; im < SVY.nmaps; ++im ) {
 
         const SvySBTT   &M = SVY.e[im];
 
         if( M.s == shank && M.b == bank ) {
-            if( im + 1 != curSMap )
+            if( curSMap != im )
                 scanGrp->guiSetPos( M.t2 );
             return;
         }
@@ -3079,14 +3072,8 @@ void FileViewerWindow::showGraph( int ig )
 void FileViewerWindow::selectGraph( int ig, bool updateGraph )
 {
     if( shankCtl && ig >= 0 ) {
-        int sh = 0,
-            bk = 0;
-        if( curSMap ) {
-            const SvySBTT   &M = SVY.e[curSMap - 1];
-            sh = M.s;
-            bk = M.b;
-        }
-        shankCtl->selChan( sh, bk, ig );
+        const SvySBTT   &M = SVY.e[curSMap];
+        shankCtl->selChan( M.s, M.b, ig );
     }
 
     if( igSelected == ig )
@@ -3129,10 +3116,10 @@ void FileViewerWindow::selectShankMap( qint64 pos )
     qint64  mid = pos + scanGrp->posFromTime( sav.all.xSpan / 2 );
     int     sel = 0;
 
-    for( int im = SVY.nmaps - 2; im >= 0; --im ) {
+    for( int im = SVY.nmaps - 1; im >= 0; --im ) {
 
         if( SVY.e[im].t2 <= mid ) {
-            sel = im + 1;
+            sel = im;
             break;
         }
     }
@@ -3142,16 +3129,7 @@ void FileViewerWindow::selectShankMap( qint64 pos )
 
 // Build selected map
 
-    ShankMap    *SM;
-    int         s = 0,
-                b = 0;
-
-    if( sel >= 1 ) {
-        s = SVY.e[sel - 1].s;
-        b = SVY.e[sel - 1].b;
-    }
-
-    SM = df->shankMap_svy( s, b );
+    ShankMap    *SM = df->shankMap_svy( SVY.e[sel].s, SVY.e[sel].b );
 
 // Copy u-flags
 

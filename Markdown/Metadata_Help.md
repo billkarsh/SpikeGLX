@@ -1143,13 +1143,19 @@ its own shank (with tips pointing down, shank-0 is left-most).
 >Note: There are electrode entries only for saved channels.
 
 ```
-~svySBTT=(0 1 312963 360017)(0 2 644811 692174)
+~svySBTT=(0 0 0 60000)(0 1 312963 360017)(0 2 644811 692174)
 ```
 
-The list of survey transitions:
+The list of survey transition events:
 (shank, bank, start-time(samples), end-time(samples)).
 
 The end-times indicate when the amplifiers have settled (more or less).
+
+> As of version 20250930, an additional element is prepended representing
+run startup. That element, when present, represents: the starting shank and
+bank, start-time=0, and end-time=IM setup tab's settle value. This is done
+as part of broken shank handling wherein the starting shank could differ
+from zero.
 
 --------
 

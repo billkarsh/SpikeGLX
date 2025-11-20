@@ -13,6 +13,7 @@
 - Graphs::Apply-all removed.
 - Stop run on any disk error.
 - Remote::GetLastGT.
+- Metadata ~svySBTT gets run-start entry.
 
 20250915
 --------

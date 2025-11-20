@@ -37,30 +37,23 @@ SvySBTT SvySBTT::fromString( const QString &s_in )
 //
 void SvyVSBTT::fromMeta( const DataFile *df )
 {
-    QVariant    qv = df->getParam( "imSvyMaxBnk" );
-
     maxbank = 0;
-
-    if( qv.isValid() )
-        maxbank = qv.toInt();
-
+    nmaps   = 0;
     e.clear();
 
 // Any banks?
 
+    QVariant    qv = df->getParam( "imSvyMaxBnk" );
+    if( qv.isValid() )
+        maxbank = qv.toInt();
+
     qv = df->getParam( "imIsSvyRun" );
-
-    if( !qv.isValid() || !qv.toBool() ) {
-        nmaps = 0;
+    if( !qv.isValid() || !qv.toBool() )
         return;
-    }
-
-    nmaps = 1;
 
 // SBTT
 
     qv = df->getParam( "~svySBTT" );
-
     if( !qv.isValid() )
         return;
 
@@ -69,14 +62,35 @@ void SvyVSBTT::fromMeta( const DataFile *df )
                         Qt::SkipEmptyParts );
     int         n  = sl.size();
 
-// Entries
+ // See if first elem has t1 == 0 (new data)...
+ // If not, create it (old data)
 
-    nmaps += n;
+    SvySBTT E0 = SvySBTT::fromString( sl[0] );
 
-    e.reserve( n );
-
-    for( int i = 0; i < n; ++i )
-        e.push_back( SvySBTT::fromString( sl[i] ) );
+    if( E0.t1 == 0 ) {
+        // NEW: all elements are present
+        e.reserve( nmaps = n );
+        // elem-0
+        e.push_back( E0 );
+        // elem-1...
+        for( int i = 1; i < n; ++i )
+            e.push_back( SvySBTT::fromString( sl[i] ) );
+    }
+    else {
+        // OLD: prepend elem-0
+        e.reserve( nmaps = n + 1 );
+        // elem-0
+        qint64 t2 = 2 * 30000;
+        qv = df->getParam( "imSvySettleSec" );
+        if( qv.isValid() )
+            t2 = qv.toLongLong() * 30000;
+        e.push_back( SvySBTT( 0, 0, 0, t2 ) );
+        // elem-1
+        e.push_back( E0 );
+        // elem-2...
+        for( int i = 1; i < n; ++i )
+            e.push_back( SvySBTT::fromString( sl[i] ) );
+    }
 
     if( df->subtypeFromObj() == "imec.lf" ) {
 
@@ -85,8 +99,6 @@ void SvyVSBTT::fromMeta( const DataFile *df )
             e[i].t2 /= 12;
         }
     }
-
-    return;
 }
 
 /* ---------------------------------------------------------------- */
@@ -134,6 +146,10 @@ void SvyPrbRun::initRun()
             p.jsip2stream( jsIM, ip ),
             p.stream_nChans( jsIM, ip ) );
 
+        vSBTT[ip] =
+        QString("(0 0 0 %4)")
+        .arg( p.im.prbAll.svySettleSec * E.srate );
+
         if( nB > nrunbank )
             nrunbank = nB;
     }
@@ -163,13 +179,26 @@ int SvyPrbRun::msPerBnk( bool first )
 
 bool SvyPrbRun::nextBank()
 {
+    ConfigCtl   *cfg    = mainApp()->cfgCtl();
+    Run         *run    = mainApp()->getRun();
+    DAQ::Params &p      = cfg->acceptedParams;
+
+// After run starts, write the run-start (first) transition,
+// in case that's the only one
+
+    if( !irunbank ) {
+        for( int ip = 0, np = p.stream_nIM(); ip < np; ++ip )
+            run->dfSetSBTT( ip, vSBTT[ip] );
+    }
+
+// All probes done?
+
     if( ++irunbank >= nrunbank )
         return false;
 
-    ConfigCtl                   *cfg    = mainApp()->cfgCtl();
-    Run                         *run    = mainApp()->getRun();
-    DAQ::Params                 &p      = cfg->acceptedParams;
-    const CimCfg::ImProbeTable  &T      = cfg->prbTab;
+// Advance each probe
+
+    const CimCfg::ImProbeTable  &T = cfg->prbTab;
 
     for( int ip = 0, np = p.stream_nIM(); ip < np; ++ip ) {
 
@@ -178,7 +207,7 @@ bool SvyPrbRun::nextBank()
                         &B = vCurBank[ip];
 
         if( S >= E.roTbl->nSvyShank() )
-            continue;
+            continue;   // already done
 
         if( ++B > E.svyMaxBnk ) {
 
@@ -213,7 +242,7 @@ bool SvyPrbRun::nextBank()
         t2 = run->getQ( jsIM, ip )->endCount() + qint64(1.5 * E.srate) - t0;
 
         vSBTT[ip] +=
-            QString("(%1 %2 %3 %4)").arg( S ).arg( B ).arg( t1 ).arg( t2 );
+        QString("(%1 %2 %3 %4)").arg( S ).arg( B ).arg( t1 ).arg( t2 );
 
         run->dfSetSBTT( ip, vSBTT[ip] );
     }

@@ -29,7 +29,7 @@ struct SvyVSBTT
                             nmaps;
     std::vector<SvySBTT>    e;
 
-    SvyVSBTT() : nmaps(0)   {}
+    SvyVSBTT() : maxbank(0), nmaps(0)   {}
     void fromMeta( const DataFile *df );
 };
 
