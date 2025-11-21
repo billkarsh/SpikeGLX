@@ -2929,7 +2929,7 @@ guiBreathe();
                         QString s;
                         P.sr_nok = 0;
                         for( int is = 0; is < P.sr_nshk; ++is ) {
-                            if( P.sr_mask & (1<<is) ) {
+                            if( P.sr_mask & (1 << is) ) {
                                 s += QString(" %1").arg( is );
                                 ++P.sr_nok;
                             }

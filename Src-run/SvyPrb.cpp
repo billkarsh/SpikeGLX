@@ -136,7 +136,7 @@ void SvyPrbRun::initRun()
         E.sns.uiSaveChanStr.clear();
 
         // Adopt user IMRO; set default bank
-        cfg->validImROTbl( err, E, ip );
+        cfg->validIMROTbl( err, E, ip, p.im.prbAll.srAtDetect );
         E.roTbl->fillShankAndBank( 0, 0 );
 
         cfg->validImMaps( err, E, ip );
