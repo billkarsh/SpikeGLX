@@ -556,7 +556,11 @@ void FVShankViewTab::makeWorldMap()
 
     for( int is = 0; is < ns; ++is ) {
 
-        for( int ib = 0; ib < nb; ++ib ) {
+        int bmax = f->svyS2Bmax( is );
+        if( bmax < 0 )
+            continue;
+
+        for( int ib = 0; ib <= bmax; ++ib ) {
 
             Q->fillShankAndBank( is, ib );
             Q->toShankMap_vis( *m );

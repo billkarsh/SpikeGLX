@@ -285,6 +285,7 @@ private:
                             savedDragR;
     DataSource              DS;
     SvyVSBTT                SVY;
+    QMap<int,int>           sh2bkMax;
     DataFile                *df;
     FVShankCtl              *shankCtl;
     ShankMap                *shankMap;
@@ -408,8 +409,10 @@ public:
         const QBitArray     &exportBits ) const;
 
 // ShankView
+    void svyInit();
     bool isSvy() const      {return SVY.nmaps > 0;}
     int svyMaxbank() const  {return SVY.maxbank;}
+    int svyS2Bmax( int is ) const;
     const double* svyAllBanks(
         int     what,
         int     T,

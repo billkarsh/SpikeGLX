@@ -727,7 +727,7 @@ bool FileViewerWindow::viewFile( QString &error, const QString &fname )
         switch( fType ) {
             case fvAP:
             case fvLF:
-                SVY.fromMeta( df );
+                svyInit();
                 shankCtl = new FVShankCtl_Im( df, this );
                 break;
             case fvOB:
@@ -846,6 +846,28 @@ void FileViewerWindow::getInverseGains(
         if( exportBits.testBit( i ) )
             invGain.push_back( 1.0 / grfParams[i].gain );
     }
+}
+
+
+void FileViewerWindow::svyInit()
+{
+    SVY.fromMeta( df );
+    sh2bkMax.clear();
+
+    if( isSvy() ) {
+        foreach( const SvySBTT &E, SVY.e )
+           sh2bkMax[E.s] = E.b;
+    }
+}
+
+
+int FileViewerWindow::svyS2Bmax( int is ) const
+{
+    QMap<int,int>::const_iterator
+    it  = sh2bkMax.begin(),
+    end = sh2bkMax.end();
+
+    return (it != end && it.key() == is ? it.value() : -1);
 }
 
 

@@ -16,6 +16,7 @@
 - Broken shanks assessed at detect.
 - Broken shanks affect IMRO validation.
 - Broken shanks affect probe configuration.
+- Broken shanks affect survey mode.
 - Metadata ~svySBTT gets run-start entry.
 
 20250915

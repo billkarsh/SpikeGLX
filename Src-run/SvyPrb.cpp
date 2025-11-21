@@ -128,16 +128,25 @@ void SvyPrbRun::initRun()
 
     for( int ip = 0; ip < np; ++ip ) {
 
-        CimCfg::PrbEach &E = p.im.prbj[ip];
-        QString         err;
-        int             nB = E.roTbl->nSvyShank() * (E.svyMaxBnk + 1);
+        const CimCfg::ImProbeDat    &P = cfg->prbTab.get_iProbe( ip );
+        CimCfg::PrbEach             &E = p.im.prbj[ip];
+        QString                     err;
+        int                         nB;
+
+        nB = qMin( E.roTbl->nSvyShank(), int(P.sr_nok) ) * (E.svyMaxBnk + 1);
 
         E.sns.chanMapFile.clear();
         E.sns.uiSaveChanStr.clear();
 
         // Adopt user IMRO; set default bank
         cfg->validIMROTbl( err, E, ip, p.im.prbAll.srAtDetect );
-        E.roTbl->fillShankAndBank( 0, 0 );
+
+        if( E.roTbl->nSvyShank() == 1 )
+            vCurShnk[ip] = 0;
+        else
+            vCurShnk[ip] = cfg->prbTab.get_iProbe( ip ).srFirstOK();
+
+        E.roTbl->fillShankAndBank( vCurShnk[ip], 0 );
 
         cfg->validImMaps( err, E, ip );
 
@@ -147,8 +156,8 @@ void SvyPrbRun::initRun()
             p.stream_nChans( jsIM, ip ) );
 
         vSBTT[ip] =
-        QString("(0 0 0 %4)")
-        .arg( p.im.prbAll.svySettleSec * E.srate );
+        QString("(%1 0 0 %4)")
+        .arg( vCurShnk[ip] ).arg( p.im.prbAll.svySettleSec * E.srate );
 
         if( nB > nrunbank )
             nrunbank = nB;
@@ -202,16 +211,17 @@ bool SvyPrbRun::nextBank()
 
     for( int ip = 0, np = p.stream_nIM(); ip < np; ++ip ) {
 
-        CimCfg::PrbEach &E = p.im.prbj[ip];
-        int             &S = vCurShnk[ip],
-                        &B = vCurBank[ip];
+        const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
+        CimCfg::PrbEach             &E = p.im.prbj[ip];
+        int                         &S = vCurShnk[ip],
+                                    &B = vCurBank[ip];
 
         if( S >= E.roTbl->nSvyShank() )
             continue;   // already done
 
         if( ++B > E.svyMaxBnk ) {
 
-            if( ++S >= E.roTbl->nSvyShank() ) {
+            if( (S = P.srNextOK( S )) >= E.roTbl->nSvyShank() ) {
                 run->dfHaltiq( p.stream2iq( QString("imec%1").arg( ip ) ) );
                 continue;
             }
@@ -219,17 +229,17 @@ bool SvyPrbRun::nextBank()
             B = 0;
         }
 
-        const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
-        QString                     err;
-        qint64                      t0 = run->dfGetFileStart( jsIM, ip ),
-                                    t1 = run->getQ( jsIM, ip )->endCount() - t0,
-                                    t2;
+        QString err;
+        qint64  t0 = run->dfGetFileStart( jsIM, ip ),
+                t1 = run->getQ( jsIM, ip )->endCount() - t0,
+                t2;
 
         run->grfHardPause( true );
         run->grfWaitPaused();
 
         E.roTbl->fillShankAndBank( S, B );
-        E.roTbl->selectSites( P.slot, P.port, P.dock, true, true );
+        E.roTbl->selectSites( P.slot, P.port, P.dock,
+                    true, !p.im.prbAll.srAtDetect || P.srDoCheck() );
         E.sns.chanMapFile.clear();
         cfg->validImMaps( err, E, ip );
         run->grfUpdateProbe( ip, true, true );
