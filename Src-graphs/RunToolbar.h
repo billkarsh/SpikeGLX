@@ -7,6 +7,10 @@ namespace DAQ {
 struct Params;
 }
 
+namespace Ui {
+class FVW_NotesDialog;
+}
+
 class GraphsWindow;
 
 /* ---------------------------------------------------------------- */
@@ -24,6 +28,7 @@ class RunToolbar : public QToolBar
 private:
     GraphsWindow        *gw;
     const DAQ::Params   &p;
+    Ui::FVW_NotesDialog *notesui;
     bool                paused;
 
 public:
@@ -41,6 +46,7 @@ public:
 public slots:
     void recordBut( bool checked );
     void notes();
+    void notesAddStamp();
     void toggleFetcher();
     void remotePause( bool pause );
 };

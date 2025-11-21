@@ -3,14 +3,15 @@
 
 20250930
 --------
-- Can read out of order IMRO files.
 - Fix waveplan loop error.
+- Can read out-of-order IMRO files.
 - FileViewer::Link parses split shanks.
 - FileViewer::Gain box always disabled.
 - FileViewer::YScale applies to all.
 - FileViewer::Apply-all removed.
 - Graphs::YScale applies to all.
 - Graphs::Apply-all removed.
+- Graphs::Notes dialog gets timestamps.
 - Stop run on any disk error.
 - Remote::GetLastGT.
 - Broken shanks assessed at detect.

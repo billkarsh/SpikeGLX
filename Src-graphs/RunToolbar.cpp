@@ -291,12 +291,26 @@ void RunToolbar::notes()
     ui.notesTE->setText( p.sns.notes );
     ui.buttonBox->setStandardButtons(
         QDialogButtonBox::Ok | QDialogButtonBox::Cancel );
+    notesui = &ui;
+
+    ConnectUI( ui.addBut, SIGNAL(clicked()), this, SLOT(notesAddStamp()) );
 
     if( QDialog::Accepted == dlg.exec() ) {
         QString err;
         mainApp()->cfgCtl()->externSetsNotes(
             err, ui.notesTE->toPlainText().trimmed() );
     }
+}
+
+
+void RunToolbar::notesAddStamp()
+{
+    notesui->notesTE->append( QString("\r\n%1: ")
+        .arg( dateTime2Str(
+                QDateTime::currentDateTime(),
+                "M/dd/yy hh:mm:ss" ) ) );
+    notesui->notesTE->moveCursor( QTextCursor::End );
+    notesui->notesTE->setFocus();
 }
 
 
