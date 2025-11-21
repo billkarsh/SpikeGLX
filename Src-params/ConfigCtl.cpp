@@ -714,7 +714,7 @@ bool ConfigCtl::validIMROTbl( QString &err, CimCfg::PrbEach &E, int ip, bool srC
         QString s;
         foreach( int shk, bad )
             s += QString(" %1").arg( shk );
-        err = QString("Imec%1 Sites selected on broken shank-id { %2 }.")
+        err = QString("Imec%1: Sites selected on broken shank-id { %2 }.")
                 .arg( ip ).arg( s.trimmed() );
         return false;
     }
@@ -731,14 +731,16 @@ bool ConfigCtl::validIMROTbl( QString &err, CimCfg::PrbEach &E, int ip, bool srC
             tips |= (1 << shank);
     }
 
-    if( (tips & ~P.sr_mask) == 0 ) {
+    if( tips && !(tips & P.sr_mask) ) {
         QString s;
         for( int is = 0; is < P.sr_nshk; ++is ) {
             if( P.sr_mask & (1 << is) )
                 s += QString(" %1").arg( is );
         }
-        err = QString("Imec%1 Tip (or on-shank) refs only engage broken shank-id { %2 }.")
-                .arg( ip ).arg( s.trimmed() );
+        err = QString(
+        "Imec%1: Uses tip (or on-shank) referencing...\r\n"
+        "but that must include one of shank-id { %2 }.")
+            .arg( ip ).arg( s.trimmed() );
         return false;
     }
 
