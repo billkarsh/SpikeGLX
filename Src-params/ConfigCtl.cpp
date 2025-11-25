@@ -695,8 +695,19 @@ bool ConfigCtl::validIMROTbl( QString &err, CimCfg::PrbEach &E, int ip, bool srC
         err = QString("Imec%1 All shanks broken.").arg( ip );
         return false;
     }
-    else if( R->apiFetchType() == t_fetch_qb )
+    else if( R->apiFetchType() == t_fetch_qb ) {
+        QString s;
+        for( int is = 0; is < P.sr_nshk; ++is ) {
+            if( P.sr_mask & (1 << is) )
+                s += QString(" %1").arg( is );
+        }
+        Warning() << QString("Imec%1: Quadbase with good shanks { %2 }.")
+                        .arg( ip ).arg( s.trimmed() );
+        Warning() << "You can run, but should ignore data from bad shanks.";
+        Warning() << "You can use the IMRO editor 'selective save' feature to"
+        " save channels exclusively from good shanks.";
         return true;
+    }
 
 // Electrodes
 
