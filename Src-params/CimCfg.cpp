@@ -3053,6 +3053,19 @@ bool CimCfg::detect_simProbe(
     P.type      = kvp["imDatPrb_type"].toInt();
     P.cal       = kvp["imCalibrated"].toBool();
 
+    IMROTbl *R = IMROTbl::alloc( P.pn );
+        P.sr_nshk = R->nShank();
+    delete R;
+
+    if( kvp.find( "imDatPrb_sr_mask" ) != kvp.end() ) {
+        P.sr_nok    = kvp["imDatPrb_sr_nok"].toInt();
+        P.sr_mask   = kvp["imDatPrb_sr_mask"].toUInt();
+    }
+    else {
+        P.sr_nok    = P.sr_nshk;
+        P.sr_mask   = (P.sr_nshk == 4 ? 0xF : 1);
+    }
+
     if( !IMROTbl::pnToType( P.type, P.pn ) ) {
         slVers.append(
             QString("Sim probe(slot %1, port %2, dock %3)"
