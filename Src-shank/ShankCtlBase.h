@@ -28,13 +28,14 @@ protected:
     ShankScroll         *_scroll;
     ShankEditTab        *seTab;
     ShankMap            *modal_map;
+    uint8_t             sr_mask;
     bool                modal;
 
 public:
     mutable QMutex      drawMtx;
 
 public:
-    ShankCtlBase( QWidget *parent, bool modal );
+    ShankCtlBase( QWidget *parent, uint8_t sr_mask, bool modal );
     virtual ~ShankCtlBase();
 
     void baseInit( const IMROTbl *R, bool hasViewTab );

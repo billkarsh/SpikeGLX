@@ -14,7 +14,7 @@ SVShankCtl_Ni::SVShankCtl_Ni(
     const DAQ::Params   &p,
     int                 jpanel,
     QWidget             *parent )
-    :   SVShankCtl(p, jpanel, parent)
+    :   SVShankCtl(p, -1, jpanel, parent)
 {
 }
 

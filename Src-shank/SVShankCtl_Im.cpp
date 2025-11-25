@@ -22,7 +22,12 @@ SVShankCtl_Im::SVShankCtl_Im(
     int                 ip,
     int                 jpanel,
     QWidget             *parent )
-    :   SVShankCtl(p, jpanel, parent), ip(ip)
+    :   SVShankCtl(
+            p,
+            mainApp()->cfgCtl()->prbTab.get_iProbe( ip ).sr_mask,
+            jpanel,
+            parent),
+        ip(ip)
 {
 }
 

@@ -35,7 +35,7 @@
 
 ShankView::ShankView( QWidget *parent )
     :   QOpenGLWidget(parent),
-        smap(0), rowPix(8), bnkRws(0), slidePos(0), sel(0)
+        smap(0), rowPix(8), bnkRws(0), slidePos(0), sel(0), sr_mask(-1)
 {
     setAutoFillBackground( false );
     setUpdatesEnabled( true );
@@ -98,7 +98,7 @@ void ShankView::setSel( int ic, bool update )
 }
 
 
-void ShankView::setImro( const IMROTbl *R )
+void ShankView::setImro( const IMROTbl *R, uint8_t sr_mask )
 {
     QMutexLocker    ml( &dataMtx );
 
@@ -115,8 +115,9 @@ void ShankView::setImro( const IMROTbl *R )
         vis_odd[col2vis_od[ic]] = 1;
     }
 
-    _ncolhwr    = R->nCol_hwr();
-    bnkRws      = R->nChanPerBank() / _ncolhwr;
+    _ncolhwr        = R->nCol_hwr();
+    bnkRws          = R->nChanPerBank() / _ncolhwr;
+    this->sr_mask   = sr_mask;
 }
 
 

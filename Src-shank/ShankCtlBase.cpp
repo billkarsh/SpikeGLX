@@ -15,9 +15,9 @@
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-ShankCtlBase::ShankCtlBase( QWidget *parent, bool modal )
+ShankCtlBase::ShankCtlBase( QWidget *parent, uint8_t sr_mask, bool modal )
     :   QDialog(parent), scUI(0), seTab(0),
-        modal_map(0), modal(modal)
+        modal_map(0), sr_mask(sr_mask), modal(modal)
 {
 }
 
@@ -90,7 +90,7 @@ void ShankCtlBase::baseInit( const IMROTbl *R, bool hasViewTab )
     ConnectUI( view(), SIGNAL(lbutReleased()), this, SLOT(lbutReleased()) );
 
     if( R )
-        view()->setImro( R );
+        view()->setImro( R, sr_mask );
 
 // Modal
 

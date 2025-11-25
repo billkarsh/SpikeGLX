@@ -61,6 +61,7 @@ private:
                                 vBot,
                                 vTop,
                                 sel;
+    uint8_t                     sr_mask;
 
 public:
     ShankView( QWidget *parent = 0 );
@@ -76,7 +77,7 @@ public:
     void setSel( int ic, bool update = true );
     int getSel()                {return sel;}
 
-    void setImro( const IMROTbl *R );
+    void setImro( const IMROTbl *R, uint8_t sr_mask );
     void setExcludes( tconstImroSites vX )  {QMutexLocker ml( &dataMtx ); this->vX = vX;}
     void setROI( tconstImroROIs vR )        {QMutexLocker ml( &dataMtx ); vROI = vR;}
 

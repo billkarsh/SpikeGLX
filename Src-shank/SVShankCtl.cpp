@@ -12,8 +12,12 @@
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-SVShankCtl::SVShankCtl( const DAQ::Params &p, int jpanel, QWidget *parent )
-    :   ShankCtlBase(parent, false), p(p), svTab(0), jpanel(jpanel)
+SVShankCtl::SVShankCtl(
+    const DAQ::Params   &p,
+    int                 sr_mask,
+    int                 jpanel,
+    QWidget             *parent )
+    :   ShankCtlBase(parent, sr_mask, false), p(p), svTab(0), jpanel(jpanel)
 {
 }
 

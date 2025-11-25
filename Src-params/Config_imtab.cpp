@@ -420,7 +420,8 @@ void Config_imtab::editIMRO()
 // Launch editor
 // -------------
 
-    ShankCtlBase*   shankCtl = new ShankCtlBase( cfg->dialog(), true );
+    ShankCtlBase*   shankCtl = new ShankCtlBase(
+        cfg->dialog(), cfg->prbTab.get_iProbe( ip ).sr_mask, true );
     ConnectUI( shankCtl, SIGNAL(runSaveChansDlg(QString)), this, SLOT(editSave(QString)) );
     ConnectUI( shankCtl, SIGNAL(modal_done(ShankCtlBase*,QString,bool)), this, SLOT(imro_done(ShankCtlBase*,QString,bool)) );
     shankCtl->baseInit( E.roTbl, false );

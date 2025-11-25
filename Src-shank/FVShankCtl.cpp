@@ -13,7 +13,7 @@
 /* ---------------------------------------------------------------- */
 
 FVShankCtl::FVShankCtl( const DataFile *df, QWidget *parent )
-    :   ShankCtlBase(parent, false), df(df), svTab(0)
+    :   ShankCtlBase(parent, df->sr_mask(), false), df(df), svTab(0)
 {
 }
 

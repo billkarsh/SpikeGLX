@@ -18,7 +18,11 @@ protected:
     int                 jpanel;
 
 public:
-    SVShankCtl( const DAQ::Params &p, int jpanel, QWidget *parent = 0 );
+    SVShankCtl(
+    const DAQ::Params   &p,
+    int                 sr_mask,
+    int                 jpanel,
+    QWidget             *parent = 0 );
     virtual ~SVShankCtl();
 
     virtual void init() = 0;
