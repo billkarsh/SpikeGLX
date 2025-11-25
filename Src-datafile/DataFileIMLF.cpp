@@ -65,6 +65,18 @@ void DataFileIMLF::locFltRadii( int &rin, int &rout, int iflt ) const
 }
 
 
+uint8_t DataFileIMLF::sr_mask() const
+{
+    KVParams::const_iterator    it;
+    uint8_t                     mask = -1;
+
+    if( (it = kvp.find( "imDatPrb_sr_mask" )) != kvp.end() )
+        mask = it.value().toUInt();
+
+    return mask;
+}
+
+
 int DataFileIMLF::svySettleSecs() const
 {
     KVParams::const_iterator    it;
