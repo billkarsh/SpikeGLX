@@ -219,6 +219,7 @@ void ShankView::paintGL()
 
     drawAnatomy();
     drawTips();
+    drawTipXs();
     drawShanks();
     drawTops();
     drawGrid();
@@ -511,6 +512,44 @@ void ShankView::drawTips()
     glPolygonMode( GL_FRONT, GL_FILL );
     glVertexPointer( 2, GL_FLOAT, 0, &vert[0] );
     glDrawArrays( GL_TRIANGLES, 0, nv );
+}
+
+
+void ShankView::drawTipXs()
+{
+    if( sr_mask == 0xFF )
+        return;
+
+    glLineWidth( 4.0f );
+    glColor3f( 0.75f, 0.0f, 0.0f );
+
+    float   lf = -hlfWid;
+    int     ns = smap->ns;
+
+    for( int i = 0; i < ns; ++i, lf += shkWid*(1.0f+SHKSEP) ) {
+
+        if( sr_mask & (1 << i) )
+            continue;
+
+        GLfloat d[4];
+
+        d[0]    = lf;
+        d[1]    = TIPPX;
+
+        d[2]    = lf + shkWid;
+        d[3]    = 0.0f;
+
+        glVertexPointer( 2, GL_FLOAT, 0, d );
+        glDrawArrays( GL_LINES, 0, 2 );
+
+        d[1]    = 0.0f;
+        d[3]    = TIPPX;
+
+        glVertexPointer( 2, GL_FLOAT, 0, d );
+        glDrawArrays( GL_LINES, 0, 2 );
+    }
+
+    glLineWidth( 1.0f );
 }
 
 

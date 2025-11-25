@@ -15,6 +15,7 @@
 - Stop run on any disk error.
 - Remote::GetLastGT.
 - Broken shanks assessed at detect.
+- Broken shanks visual cue in ShankViewer.
 - Broken shanks affect IMRO validation.
 - Broken shanks affect probe configuration.
 - Broken shanks affect survey mode.

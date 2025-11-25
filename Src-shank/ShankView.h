@@ -111,6 +111,7 @@ private:
     void resizePads();
     void drawAnatomy();
     void drawTips();
+    void drawTipXs();
     void drawShanks();
     void drawTops();
     void drawGrid();
