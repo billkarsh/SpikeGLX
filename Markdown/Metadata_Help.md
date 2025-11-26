@@ -604,12 +604,19 @@ V = i * Vmax / Imax / gain.
 
 * Imax = `imMaxInt`
 * Vmax = `imAiRangeMax`
+* gain = `imChan0apGain` 
 
-For type 21 or type 24 imec probes:
+For older metadata that does not have the imChan0apGain item...
+
+Type 21 and type 24 probes:
 
 * gain = 80 (fixed).
 
-For type 0 or other probes with selectable gain:
+Type 2003 and type 2013 probes:
+
+* gain = 100 (fixed).
+
+Type 0 and other probes with selectable gain:
 
 * gain = imroTbl gain entry for AP or LF type.
 
