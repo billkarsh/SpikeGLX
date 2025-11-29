@@ -330,16 +330,17 @@ at the cost of your tuned performance.
 ## Broken Shanks
 
 Inevitably shanks "break" which usually means it looks intact externally
-but an internal trace has broken. And this may happen to just one shank
+but an internal trace has broken. And this may happen to one or more shanks
 of your very expensive quad-probe. Can you still get some use out of it?
 
-Not yet...
+Yes...
 
-There is an enhanced `Shift Register` BIST that now reports which shanks
-are good. That works for both QB and 2.0 4-shank probes.
+SpikeGLX versions 20250930 and later allow you to run a quad-probe that
+has at least one good shank. We must acquire 384 channels from each shank
+of a QB probe, but data from the bad shanks are likely erroneous. The link
+below explains how to avoid writing data from bad shanks to files.
 
-However, there is not yet a facility to program and run with the intact
-shanks. That will come soon, so do not discard your probe yet.
+More here: [SpikeGLX_Broken_Shank_Support](SpikeGLX_Broken_Shank_Support.html).
 
 
 _fin_

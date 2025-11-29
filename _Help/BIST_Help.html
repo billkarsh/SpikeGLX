@@ -161,8 +161,9 @@
 <p>Finally, while it is very unlikely that the headstage has an electronic issue, for a 1.0 headstage, you can try running the HST dialog with the headstage tester dongle.</p>
 <h3 id="shift-register-error">Shift Register Error</h3>
 <p>You should verify the probe is actually broken by trying an alternate headstage and/or cable. If this problem won't go away...</p>
-<p>The shift registers are used to program settings into the probe. Depending upon how badly damaged the probe is, it might &quot;run,&quot; but you have no way of knowing which electrodes are connected or which references are being used.</p>
-<p>Future versions of SpikeGLX/imec firmware may permit the use of a multishank probe that only has one or two broken shanks, but that is not possible yet. Do not throw such probes away.</p>
+<p>The shift registers are used to program settings into the probe. Depending upon how badly damaged the probe is, it might &quot;run,&quot; but you have no way of knowing which electrodes are connected or which references are being used on the broken shanks.</p>
+<p>SpikeGLX versions 20250930 and later allow you to run a multishank probe that has at least one good shank, provided you only select electrodes and refs on good shanks. A quad-base probe can be run if it has at least one good shank. For a quad-base, we must acquire 384 channels from each shank, but data from the bad shanks are likely erroneous.</p>
+<p>More here: <a href="SpikeGLX_Broken_Shank_Support.html">SpikeGLX_Broken_Shank_Support</a>.</p>
 <h3 id="parallel-serial-bus-error">Parallel Serial Bus Error</h3>
 <p>This most commonly occurs when the probe flex is not seated well in the headstage. It will usually clear if you carefully close the clasp on the ZIF while pushing the flex squarely and firmly into the ZIF all the way.</p>
 <hr />

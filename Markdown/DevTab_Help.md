@@ -94,7 +94,7 @@ one you are clicking:
 
 * **Shift-click** to make all boxes in the table match this one.
 
-### Include Probe Checks
+### BIST PSB Checks
 
 **(Connection Failures, Broken Shanks)**
 
@@ -107,20 +107,22 @@ quickly, we recommend you check this box to automatically catch problems
 before every run:
 
 1. Are the probes correctly plugged into their headstages? If not, you'll
-get a "parallel-serial bus error" reported here.
+get a "parallel-serial bus (PSB) error" reported here.
 
 2. Are the internal shank shift register chains intact and functioning? If
-not, you'll get a warning here.
+not, you'll get a warning here. This test is always applied as of version
+'20250930.'
 
 >**IMPORTANT:**
 >
 >The shift register chains are the means by which the IMRO table data
-(electrode and ref selections) are programmed. If there is a break in the
-chains the probe may run, but you'll have no idea which electrode sites are
-actually connected and read out. How does this break? Snapping the shank
-off would certainly cause this. Unfortunately, the internal wiring in a
-shank can develop breaks from only modest bending with no outward sign
+(electrode and ref selections) are programmed. How do these break? Snapping
+the shank off would certainly cause this. Unfortunately, the internal wiring
+in a shank can develop breaks from only modest bending with no outward sign
 of damage. It isn't necessarily your fault. It's a technology limitation.
+If there is a break in the chains of a multishank probe, SpikeGLX can run it,
+but you'll have to select electrodes and refs exclusively on the good shanks.
+More here: [SpikeGLX_Broken_Shank_Support](SpikeGLX_Broken_Shank_Support.html).
 
 ### Detect
 

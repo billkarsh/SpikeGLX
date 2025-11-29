@@ -19,6 +19,7 @@ pandoc -s -c pandoc.css --self-contained SaveTab_Help.md -o ../_Help/SaveTab_Hel
 pandoc -s -c pandoc.css --self-contained ShankView_Help.md -o ../_Help/ShankView_Help.html
 pandoc -s -c pandoc.css --self-contained SimProbes_Help.md -o ../_Help/SimProbes_Help.html
 pandoc -s -c pandoc.css --self-contained Slot_Help.md -o ../_Help/Slot_Help.html
+pandoc -s -c pandoc.css --self-contained SpikeGLX_Broken_Shank_Support.md -o ../_Help/SpikeGLX_Broken_Shank_Support.html
 pandoc -s -c pandoc.css --self-contained SpikeGLX_FAQ.md -o ../_Help/SpikeGLX_FAQ.html
 pandoc -s -c pandoc.css --self-contained SpikeGLX_OneBox_Quickstart.md -o ../_Help/SpikeGLX_OneBox_Quickstart.html
 pandoc -s -c pandoc.css --self-contained SpikeGLX_PXIe_Quickstart.md -o ../_Help/SpikeGLX_PXIe_Quickstart.html

@@ -209,11 +209,16 @@ headstage and/or cable. If this problem won't go away...
 
 The shift registers are used to program settings into the probe. Depending
 upon how badly damaged the probe is, it might "run," but you have no way of
-knowing which electrodes are connected or which references are being used.
+knowing which electrodes are connected or which references are being used on
+the broken shanks.
 
-Future versions of SpikeGLX/imec firmware may permit the use of a multishank
-probe that only has one or two broken shanks, but that is not possible yet.
-Do not throw such probes away.
+SpikeGLX versions 20250930 and later allow you to run a multishank probe that
+has at least one good shank, provided you only select electrodes and refs on
+good shanks. A quad-base probe can be run if it has at least one good shank.
+For a quad-base, we must acquire 384 channels from each shank, but data from
+the bad shanks are likely erroneous.
+
+More here: [SpikeGLX_Broken_Shank_Support](SpikeGLX_Broken_Shank_Support.html).
 
 ### Parallel Serial Bus Error
 

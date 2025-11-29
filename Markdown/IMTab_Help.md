@@ -232,6 +232,12 @@ each listed AP channel. It's just a convenience.
 
 >The checkbox actually applies to all probes, not just the one being edited.
 
+### Max Row Controls
+
+These edit the existing list to only keep AP channels that are between the
+tip of the probe and a specified maximum along the shank. The maximum can
+be given as a row number or as the distance from the tip.
+
 --------
 
 ## Fix Probe ID
