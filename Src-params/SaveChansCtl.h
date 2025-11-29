@@ -36,7 +36,10 @@ public:
     bool edit( QString &uistr, bool &lfPairChk );
 
 private slots:
-    void setBut();
+    void applyBut();
+
+private:
+    bool getCurBits( QBitArray &b );
 };
 
 #endif  // SAVECHANSCTL_H

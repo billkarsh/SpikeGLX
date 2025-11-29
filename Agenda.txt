@@ -14,6 +14,7 @@
 - Graphs::Notes dialog gets timestamps.
 - Stop run on any disk error.
 - Remote::GetLastGT.
+- SaveChannels::MaxRow edits list.
 - Broken shanks assessed at detect.
 - Broken shanks visual cue in ShankViewer.
 - Broken shanks affect IMRO validation.

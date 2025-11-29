@@ -49,7 +49,7 @@ SaveChansCtl::SaveChansCtl( QWidget *parent, const CimCfg::PrbEach &E, int ip )
     svUI->saveChansLE->setText( E.sns.uiSaveChanStr );
     svUI->pairChk->setEnabled( nLF > 0 );
 
-    ConnectUI( svUI->setBut, SIGNAL(clicked()), this, SLOT(setBut()) );
+    ConnectUI( svUI->applyBut, SIGNAL(clicked()), this, SLOT(applyBut()) );
 }
 
 
@@ -118,8 +118,10 @@ bool SaveChansCtl::edit( QString &uistr, bool &lfPairChk )
 }
 
 
-void SaveChansCtl::setBut()
+void SaveChansCtl::applyBut()
 {
+// Set maxRow
+
     const IMROTbl   *R = E.roTbl;
 
     int maxRow; // inclusive
@@ -134,6 +136,8 @@ void SaveChansCtl::setBut()
     }
     maxRow = qBound( 0, maxRow, R->nRow() - 1 );
 
+// Set bits <= maxRow
+
     QBitArray   B( nAP );
 
     for( int ic = 0; ic < nAP; ++ic ) {
@@ -143,7 +147,48 @@ void SaveChansCtl::setBut()
             B.setBit( ic );
     }
 
-    svUI->saveChansLE->setText( Subset::bits2RngStr( B ) );
+// Get existing bits
+
+    QBitArray   b;
+
+    if( !getCurBits( b ) )
+        return;
+
+// Intersect, or replace
+
+    if( b.size() ) {
+
+        b &= B;
+
+        if( b.count( true ) )
+            svUI->saveChansLE->setText( Subset::bits2RngStr( b ) );
+        else {
+            QMessageBox::critical( parent, "Empty Intersection",
+            "Existing channels unchanged." );
+        }
+    }
+    else
+        svUI->saveChansLE->setText( Subset::bits2RngStr( B ) );
+}
+
+
+bool SaveChansCtl::getCurBits( QBitArray &b )
+{
+    SnsChansImec    sns;
+    QString         err;
+
+    sns.uiSaveChanStr = svUI->saveChansLE->text().trimmed();
+
+    if( sns.deriveSaveData(
+            err, DAQ::Params::jsip2stream( jsIM, ip ),
+            nAP+nLF+nSY, 0, nSY ) ) {
+
+        b = sns.saveBits;
+        return true;
+    }
+
+    QMessageBox::critical( parent, "Save Channels Error", err );
+    return false;
 }
 
 
