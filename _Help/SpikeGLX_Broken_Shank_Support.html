@@ -1,0 +1,106 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link href="data:text/css;charset=utf-8,body%20%7B%0Amargin%3A%20auto%3B%0Apadding%2Dright%3A%201em%3B%0Apadding%2Dleft%3A%201em%3B%0Amax%2Dwidth%3A%2068em%3B%20%0Aborder%2Dleft%3A%201px%20solid%20black%3B%0Aborder%2Dright%3A%201px%20solid%20black%3B%0Acolor%3A%20black%3B%0Afont%2Dfamily%3A%20Verdana%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%20100%25%3B%0Aline%2Dheight%3A%20140%25%3B%0Acolor%3A%20%23333%3B%0A%7D%0Ablockquote%20%7B%0Aborder%2Dleft%3A%205px%20solid%20%23cccccc%3B%0Amargin%2Dleft%3A%2020px%3B%0Apadding%3A%200%200%200%2015px%3B%0A%7D%0Apre%20%7B%0Aborder%3A%201px%20dotted%20gray%3B%0Aborder%2Dstyle%3A%20dotted%3B%0Abackground%2Dcolor%3A%20%23f5f5f5%3B%20%0Adisplay%3A%20block%3B%0Acolor%3A%20%23f5f5f5%3B%0Apadding%2Dtop%3A%200%3B%0Apadding%2Dbottom%3A%200%3B%0A%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20monospace%3B%0Afont%2Dsize%3A%20115%25%3B%0Abackground%2Dcolor%3A%20transparent%3B%0Acolor%3A%20%231d9d1d%3B%0A%7D%0Ah1%20a%2C%20h2%20a%2C%20h3%20a%2C%20h4%20a%2C%20h5%20a%20%7B%0Atext%2Ddecoration%3A%20none%3B%0Acolor%3A%20%237a5ada%3B%0A%7D%0Ah1%2C%20h2%2C%20h3%2C%20h4%2C%20h5%20%7B%0Afont%2Dfamily%3A%20verdana%3B%0Afont%2Dweight%3A%20bold%3B%0Aborder%2Dbottom%3A%20none%3B%20%0Acolor%3A%20%237a5ada%3B%20%7D%0Ah1%20%7B%0Afont%2Dsize%3A%20130%25%3B%0A%7D%0Ah2%20%7B%0Afont%2Dsize%3A%20110%25%3B%0A%7D%0Ah3%20%7B%0Afont%2Dsize%3A%2095%25%3B%0A%7D%0Ah4%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah5%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah1%2Etitle%20%7B%0Afont%2Dsize%3A%20200%25%3B%0Afont%2Dweight%3A%20bold%3B%0Apadding%2Dtop%3A%200%2E2em%3B%0Apadding%2Dbottom%3A%200%2E2em%3B%0Atext%2Dalign%3A%20left%3B%0Aborder%3A%20none%3B%0A%7D%0Adt%20code%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Add%20p%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0A%23footer%20%7B%0Apadding%2Dtop%3A%201em%3B%0Afont%2Dsize%3A%2070%25%3B%0Acolor%3A%20gray%3B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Atable%20%7B%0Amargin%2Dbottom%3A%202em%3B%0Aborder%2Dbottom%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dright%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dspacing%3A%200%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Apadding%3A%20%2E2em%201em%3B%0Abackground%2Dcolor%3A%20%23eee%3B%0Aborder%2Dtop%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dleft%3A%201px%20solid%20%23ddd%3B%0A%7D%0Atable%20td%20%7B%0Apadding%3A%20%2E2em%201em%3B%0Aborder%2Dtop%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dleft%3A%201px%20solid%20%23ddd%3B%0Avertical%2Dalign%3A%20top%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<h1 id="spikeglx-broken-shank-support">SpikeGLX Broken Shank Support</h1>
+<p><strong>Topics</strong>:</p>
+<ul>
+<li><a href="#shift-register-errors">Shift Register Errors</a></li>
+<li><a href="#prior-policy">Prior Policy</a></li>
+<li><a href="#new-policy">New Policy</a></li>
+<li><a href="#new-policy-implementation">New Policy Implementation</a>
+<ul>
+<li><a href="#mandatory-bist-sr">Mandatory BIST-SR</a></li>
+<li><a href="#imro-editor-cue">IMRO Editor Cue</a></li>
+<li><a href="#join-tips">Join Tips</a></li>
+<li><a href="#updated-validation">Updated Validation</a></li>
+<li><a href="#updated-programming">Updated Programming</a></li>
+<li><a href="#survey-mode">Survey Mode</a></li>
+</ul></li>
+<li><a href="#quad-base-file-saving">Quad-base File Saving</a></li>
+<li><a href="#pitfalls-and-caveats">Pitfalls and Caveats</a>
+<ul>
+<li><a href="#undetected-errors">Undetected Errors</a></li>
+<li><a href="#reference-noise">Reference Noise</a></li>
+</ul></li>
+</ul>
+<h1 id="shift-register-errors">Shift Register Errors</h1>
+<p>A shift register is a circuit element that stores a value. When you load a new value into it, the old value is pushed out:</p>
+<pre><code>new--&gt;| value |--&gt;old</code></pre>
+<p>You can chain these elements together. For example, suppose three elements are currently storing values {X Y Z}. We can use three pushes to replace that with {A B C}:</p>
+<pre><code>Start:  -&gt;| X |-&gt;| Y |-&gt;| Z |-&gt;
+Push C: -&gt;| C |-&gt;| X |-&gt;| Y |-&gt; collected {Z}
+Push B: -&gt;| B |-&gt;| C |-&gt;| X |-&gt; collected {Y Z}
+Push A: -&gt;| A |-&gt;| B |-&gt;| C |-&gt; collected {X Y Z}</code></pre>
+<p>We can test if we successfully loaded {A B C} into the registers by pushing {A B C} twice. On pass 1 we will collect the original data, as demonstrated for {X Y Z}, but that does not tell us about {A B C}. However, if we push {A B C} again, we should collect {A B C}. If we collect anything else then something is not working. That's a shift register chain error. This is how Neuropixels probes program electrode and reference selections into a shank. The first pass programs shank registers, the second pass checks for error.</p>
+<p>At present, SR-chain error checking is unsophisticated: either there is a perfect match, or an SR-chain error is reported for that shank. There is no additional detail available about what elements of the chain are working or if the chain is severed. That is, it is possible that some registers hold the intended values, but it is possible that none of them do. We can not tell.</p>
+<hr />
+<h1 id="prior-policy">Prior Policy</h1>
+<p>Prior to SpikeGLX version 20250930 we had a very conservative policy regarding data integrity. We would always program your electrode and reference selections with full error checking enabled. If <strong>any</strong> error occurred (SR-chain or otherwise) at runtime, you would get an error message about the type of failure, and the run would be prevented.</p>
+<blockquote>
+<p>Note: NP1.0-like probes {1.0, NHP, UHD} do not trigger SR-chain errors at runtime. That is, even if the BIST SR test detects an error, this is not detected when you click run, which is why it is a very good idea when using these probes to check the box called <code>Include probe checks</code> next to the <code>Detect</code> button (for SpikeGLX prior to 20250930).</p>
+</blockquote>
+<hr />
+<h1 id="new-policy">New Policy</h1>
+<p>With SpikeGLX version 20250930 we adopt a more permissive runtime policy regarding SR-chain errors that depends upon the probe type and circumstances. The policy regarding errors that are not SR-chain errors remains the same: if any non-SR error occurs we tell you and prevent running.</p>
+<p>There are three types of probes with respect to SR error policy, assuming, there are no other errors for the probe:</p>
+<ol style="list-style-type: decimal">
+<li><p><strong>Single-shank probes</strong>: If a single-shank probe has an SR error there is no workaround available. We prevent running in this case. For NP1.0-like probes the new policy is actually more strict than before as we prevent running based upon the BIST SR test, even though the runtime checks do not report this issue.</p></li>
+<li><p><strong>Standard multishank</strong>: If a 2.0, non-quad-base multishank probe has at least one working shank, we permit programming and running. In this case we enforce that you make electrode and reference selections only on the good shanks.</p></li>
+<li><p><strong>Quad-base</strong>: If a QB probe has at least one working shank, we permit programming and running. Note that it is not possible to simply allocate all channels to the good shanks because the shanks are independent. You must program something for each shank, and it remains your burden to be highly suspicious of the data from the bad shanks.</p></li>
+</ol>
+<hr />
+<h2 id="new-policy-implementation">New Policy Implementation</h2>
+<h3 id="mandatory-bist-sr">Mandatory BIST-SR</h3>
+<p>Previously SpikeGLX <em>suggested it was useful</em> for you to check the box called <code>Include probe checks</code> so that, upon clicking <code>Detect</code>, you would get an early notification of any SR issues. That also governed whether to do a PSB BIST to check the health of your flex-headstage connections.</p>
+<p>Now, that check box is <em>only</em> an election whether to do the PSB test upon <code>Detect</code>. The SR BIST is now mandatory so that we can assess that issue and enforce appropriate policy.</p>
+<p>SR tests results are obtained for each probe at <code>Detect</code> and become part of the metadata for the probe, as is done for their part- and serial-numbers. These metadata are recorded in the run .meta files.</p>
+<h3 id="imro-editor-cue">IMRO Editor Cue</h3>
+<p>The graphical IMRO editors behave the same, but a red <code>X</code> is drawn through any bad shank. The editors offer this visual reminder, but do not themselves alter any IMRO selections.</p>
+<h3 id="join-tips">Join Tips</h3>
+<p>This remains a valid option with broken shanks: only the good shanks are connected together. This results in a smaller overall reference area, so cancellation will not be as good. Also review <a href="#reference-noise">caveats below</a>.</p>
+<h3 id="updated-validation">Updated Validation</h3>
+<p>In the Acquisition (Run) Configuration dialog, when you click <code>Verify</code> or <code>Run</code>, as before, a series of self-consistency and sanity checks are applied to all your settings.</p>
+<p>These checks now implement the new policy outlined above. You are notified that running is not possible, or that you should edit your IMRO selections to permit running with the good shanks.</p>
+<h3 id="updated-programming">Updated Programming</h3>
+<p>There are two probe configuration API calls that are handled differently with the new policy:</p>
+<ol style="list-style-type: decimal">
+<li><p>Init(): After communication with a probe is established, this call sets several default parameters, and it is possible that this can fail due to a SR-chain error. However, we will overlook that error type if it is already established at <code>Detect</code> that this probe has an SR error. We will not ignore the error if the probe showed no previous SR error at <code>Detect</code>.</p></li>
+<li><p>writeConfiguration(): The collected electrode, reference and other settings are downloaded to the probe via the writeConfiguration() API call. This call has two selectable modes of operation. The full error checking mode is used for any probe that passed all SR tests at <code>Detect</code>. Full error checking entails programming the SR chains twice to check for an exact input/output match as described above. Alternatively, if the probe has SR errors at <code>Detect</code> we employ the other mode which programs each SR-chain on the probe just once, that is, <strong>error checks are disabled</strong>.</p></li>
+</ol>
+<h3 id="survey-mode">Survey Mode</h3>
+<p>You can run probe surveys to sample activity on the entirety of the good shanks, as assessed at <code>Detect</code>. SpikeGLX survey acquisition and analysis bad-shank aware.</p>
+<blockquote>
+<p><em>For those writing their own survey analysis code: The survey bank-transition metadata item <code>~svySBTT</code> gets a prepended element giving the starting (shank,bank) for the survey, which can no longer be assumed to be (0,0).</em></p>
+</blockquote>
+<hr />
+<h2 id="quad-base-file-saving">Quad-base File Saving</h2>
+<p>With QB probes you must acquire 384 channels from each shank since the probe hardware acts like four single-shank probes. Therefore, you must select sites on each shank whether good or bad.</p>
+<p>On the other hand, you do not have to save bad shanks to runtime binary files. To exclude channels on bad shanks follow these steps in the IMRO editor:</p>
+<ol style="list-style-type: decimal">
+<li>Make your channel selections in the usual way on the good shanks.</li>
+<li>Clear all channels from the bad shanks.</li>
+<li>Click <code>Boxes =&gt; file chans</code>. The Save dialog will show with the list preset to channels on good shanks.</li>
+<li>Click <code>OK</code>.</li>
+<li>In the IMRO editor, set <code>Nrows</code>=192 and <code>New boxes</code>=<code>Full shank</code>.</li>
+<li>Click a single box of 384 sites on each bad shank.</li>
+<li>Save the IMRO file for the next run.</li>
+</ol>
+<hr />
+<h2 id="pitfalls-and-caveats">Pitfalls and Caveats</h2>
+<h3 id="undetected-errors">Undetected Errors</h3>
+<p>On the probe ASIC (base) there are shank SR-chains, and there are base SR-chains that handle other key probe settings. In order to run a probe with damaged shank SR-chains we must disable <strong>all</strong> SR error checking in the writeConfiguration() call. If any error occurs while programming either the good shank SR-chains or the base SR-chains it will not be reported.</p>
+<p>When a probe has sustained damage, understand that the damage could be more extensive than you think. The permissive policy allows you to run, but can no longer guarantee the data are free from error.</p>
+<h3 id="reference-noise">Reference Noise</h3>
+<p>SpikeGLX will guide you to make electrode and reference selections on the good shanks. However, the bad shanks have some influence on the quality of the reference. The shanks contain switches to connect the various ref sources onto the reference lines to the differential amplifiers. So, for example, join tips works by closing a tip switch on each of the shanks. However, on the bad shanks, we are no longer able to control those switches. So regardless of the desired/set referencing mode, the bad shanks could be coupling in unmanaged external or tip sources.</p>
+<p>Expect noise pollution in the reference. This may vary in an uncontrolled way from run to run.</p>
+<p><em>fin</em></p>
+</body>
+</html>
