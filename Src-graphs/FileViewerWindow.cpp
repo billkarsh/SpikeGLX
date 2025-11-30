@@ -3094,8 +3094,12 @@ void FileViewerWindow::showGraph( int ig )
 void FileViewerWindow::selectGraph( int ig, bool updateGraph )
 {
     if( shankCtl && ig >= 0 ) {
-        const SvySBTT   &M = SVY.e[curSMap];
-        shankCtl->selChan( M.s, M.b, ig );
+        if( isSvy() ) {
+            const SvySBTT   &M = SVY.e[curSMap];
+            shankCtl->selChan( M.s, M.b, ig );
+        }
+        else    // sh, bk only used if svy && integrated mode
+            shankCtl->selChan( 0, 0, ig );
     }
 
     if( igSelected == ig )
