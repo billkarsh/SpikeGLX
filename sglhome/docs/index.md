@@ -82,7 +82,7 @@ Latest release highlights:
 
 >Important: Please read the `README` file in your download.
 
-* [Release 20250930-api4](App/Release_v20250930-api4.zip)...[Readme](Readme/Readme_v20250930-api4.txt) : Quadbase, API4, Qt6, api v4.1.3
+* [Release 20250930-api4](App/Release_v20250930-api4.zip)...[Readme](Readme/Readme_v20250930-api4.txt) : Broken shanks, api v4.1.3
 
 >*Release downloads come with two executables*:
 >

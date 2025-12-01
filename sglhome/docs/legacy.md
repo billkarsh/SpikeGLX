@@ -55,6 +55,10 @@ HS and BSC parts are specific to phase3A.
 
 ## Older Versions
 
+**API4**:
+
+* [Release 20250915-api4](../App/Release_v20250915-api4.zip)...[Readme](../Readme/Readme_v20250915-api4.txt) : Quadbase, API4, Qt6, api v4.1.3
+
 **30**:
 
 * [Release 20250325-phase30](../App/Release_v20250325-phase30.zip)...[Readme](../Readme/Readme_v20250325-phase30.txt) : Missing samples, better survey, imec v3.70.3
