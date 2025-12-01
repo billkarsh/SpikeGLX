@@ -183,10 +183,10 @@
 <p>More and more modern computers are using hybrid processors with mixtures of high performance P-cores and high efficiency E-cores. SpikeGLX is already doing what it can to get itself to run on the available P-cores. However, if your machine has been aggressively tuned by the vendor to be maximally efficient (Lenovo to name one) it may still try to throttle core power or even switch our worker threads to E-cores if it is hitting temperature or voltage limiters. Be sure that your CPU management drivers are up-to-date and that all the throttling and tuning component services are running on your machine. Especially beware of IT departments that replace a working OS image from the vendor with their own suite that enhances their security at the cost of your tuned performance.</p>
 <hr />
 <h2 id="broken-shanks">Broken Shanks</h2>
-<p>Inevitably shanks &quot;break&quot; which usually means it looks intact externally but an internal trace has broken. And this may happen to just one shank of your very expensive quad-probe. Can you still get some use out of it?</p>
-<p>Not yet...</p>
-<p>There is an enhanced <code>Shift Register</code> BIST that now reports which shanks are good. That works for both QB and 2.0 4-shank probes.</p>
-<p>However, there is not yet a facility to program and run with the intact shanks. That will come soon, so do not discard your probe yet.</p>
+<p>Inevitably shanks &quot;break&quot; which usually means it looks intact externally but an internal trace has broken. And this may happen to one or more shanks of your very expensive quad-probe. Can you still get some use out of it?</p>
+<p>Yes...</p>
+<p>SpikeGLX versions 20250930 and later allow you to run a quad-probe that has at least one good shank. We must acquire 384 channels from each shank of a QB probe, but data from the bad shanks are likely erroneous. The link below explains how to avoid writing data from bad shanks to files.</p>
+<p>More here: <a href="SpikeGLX_Broken_Shank_Support.html">SpikeGLX_Broken_Shank_Support</a>.</p>
 <p><em>fin</em></p>
 </body>
 </html>

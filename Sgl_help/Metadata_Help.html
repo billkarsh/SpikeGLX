@@ -234,12 +234,18 @@ snsSaveChanSubset=all</code></pre>
 <ul>
 <li>Imax = <code>imMaxInt</code></li>
 <li>Vmax = <code>imAiRangeMax</code></li>
+<li>gain = <code>imChan0apGain</code></li>
 </ul>
-<p>For type 21 or type 24 imec probes:</p>
+<p>For older metadata that does not have the imChan0apGain item...</p>
+<p>Type 21 and type 24 probes:</p>
 <ul>
 <li>gain = 80 (fixed).</li>
 </ul>
-<p>For type 0 or other probes with selectable gain:</p>
+<p>Type 2003 and type 2013 probes:</p>
+<ul>
+<li>gain = 100 (fixed).</li>
+</ul>
+<p>Type 0 and other probes with selectable gain:</p>
 <ul>
 <li>gain = imroTbl gain entry for AP or LF type.</li>
 </ul>
@@ -461,9 +467,12 @@ bit 11: MISS missed sample</code></pre>
 <blockquote>
 <p>Note: There are electrode entries only for saved channels.</p>
 </blockquote>
-<pre><code>~svySBTT=(0 1 312963 360017)(0 2 644811 692174)</code></pre>
-<p>The list of survey transitions: (shank, bank, start-time(samples), end-time(samples)).</p>
+<pre><code>~svySBTT=(0 0 0 60000)(0 1 312963 360017)(0 2 644811 692174)</code></pre>
+<p>The list of survey transition events: (shank, bank, start-time(samples), end-time(samples)).</p>
 <p>The end-times indicate when the amplifiers have settled (more or less).</p>
+<blockquote>
+<p>As of version 20250930, an additional element is prepended representing run startup. That element, when present, represents: the starting shank and bank, start-time=0, and end-time=IM setup tab's settle value. This is done as part of broken shank handling wherein the starting shank could differ from zero.</p>
+</blockquote>
 <hr />
 <h2 id="obx">Obx</h2>
 <pre><code>acqXaDwSy</code></pre>

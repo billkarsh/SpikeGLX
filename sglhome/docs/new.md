@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+December 1, 2025
+
+* SpikeGLX 20250930-api4 (Broken shanks, api v4.1.3).
+
 November 11, 2025
 
 * CatGT 5.1 (Fixes, multithreaded streams).

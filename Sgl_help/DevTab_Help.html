@@ -71,17 +71,17 @@
 <li><p><strong>Ctrl-click</strong> to make all boxes with the same (slot, port) match this one.</p></li>
 <li><p><strong>Shift-click</strong> to make all boxes in the table match this one.</p></li>
 </ul>
-<h3 id="include-probe-checks">Include Probe Checks</h3>
+<h3 id="bist-psb-checks">BIST PSB Checks</h3>
 <p><strong>(Connection Failures, Broken Shanks)</strong></p>
 <p>Imec probes have two common failure modes. These and many other issues can be checked using the built-in self test (<strong>BIST</strong>) dialog, under the <code>Tools</code> menu.</p>
 <p>Nevertheless, because these two issues are so common, and the tests run quickly, we recommend you check this box to automatically catch problems before every run:</p>
 <ol style="list-style-type: decimal">
-<li><p>Are the probes correctly plugged into their headstages? If not, you'll get a &quot;parallel-serial bus error&quot; reported here.</p></li>
-<li><p>Are the internal shank shift register chains intact and functioning? If not, you'll get a warning here.</p></li>
+<li><p>Are the probes correctly plugged into their headstages? If not, you'll get a &quot;parallel-serial bus (PSB) error&quot; reported here.</p></li>
+<li><p>Are the internal shank shift register chains intact and functioning? If not, you'll get a warning here. This test is always applied as of version '20250930.'</p></li>
 </ol>
 <blockquote>
 <p><strong>IMPORTANT:</strong></p>
-<p>The shift register chains are the means by which the IMRO table data (electrode and ref selections) are programmed. If there is a break in the chains the probe may run, but you'll have no idea which electrode sites are actually connected and read out. How does this break? Snapping the shank off would certainly cause this. Unfortunately, the internal wiring in a shank can develop breaks from only modest bending with no outward sign of damage. It isn't necessarily your fault. It's a technology limitation.</p>
+<p>The shift register chains are the means by which the IMRO table data (electrode and ref selections) are programmed. How do these break? Snapping the shank off would certainly cause this. Unfortunately, the internal wiring in a shank can develop breaks from only modest bending with no outward sign of damage. It isn't necessarily your fault. It's a technology limitation. If there is a break in the chains of a multishank probe, SpikeGLX can run it, but you'll have to select electrodes and refs exclusively on the good shanks. More here: <a href="SpikeGLX_Broken_Shank_Support.html">SpikeGLX_Broken_Shank_Support</a>.</p>
 </blockquote>
 <h3 id="detect">Detect</h3>
 <p>Clicking <code>Detect</code> is always required to run. It forces SpikeGLX to talk to each selected device, to check if it is working, to get its model and serial numbers, and enables SpikeGLX to sanity check settings against device capabilities.</p>

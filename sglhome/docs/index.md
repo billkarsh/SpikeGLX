@@ -82,7 +82,7 @@ Latest release highlights:
 
 >Important: Please read the `README` file in your download.
 
-* [Release 20250915-api4](App/Release_v20250915-api4.zip)...[Readme](Readme/Readme_v20250915-api4.txt) : Quadbase, API4, Qt6, api v4.1.3
+* [Release 20250930-api4](App/Release_v20250930-api4.zip)...[Readme](Readme/Readme_v20250930-api4.txt) : Quadbase, API4, Qt6, api v4.1.3
 
 >*Release downloads come with two executables*:
 >
@@ -98,9 +98,9 @@ versions there as long as you run one at a time:
 
 ```
 SpikeGLX\
-    Release_v20250915-api4.zip
+    Release_v20250930-api4.zip
     Release_v20250325-phase30.zip
-    Release_v20250915-api4\
+    Release_v20250930-api4\
     Release_v20250325-phase30\
     Drivers\
         Enclustra_Windows_10&11\
@@ -326,6 +326,7 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.
 * [SpikeGLX Tutorials](Sgl_help/Tutorials/tutorial_toc.html)
 * [SpikeGLX UserManual](Sgl_help/UserManual.html)
 * [SpikeGLX Dirs and Files](help/SpikeGLX_dirs_files/)
+* [SpikeGLX Broken Shank Support](Sgl_help/SpikeGLX_Broken_Shank_Support.html)
 * [SpikeGLX QuickRef](Support/SpikeGLX_QuickRef.html)
 * [SpikeGLX UCL Course 2025](Support/UCL-Course-BillKarsh-2025.html)
 * [SpikeGLX UCL Course 2024](Support/UCL-Course-BillKarsh-2024.html)

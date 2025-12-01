@@ -15,6 +15,7 @@ nav:
         - 'SpikeGLX Tutorials': 'Sgl_help/Tutorials/tutorial_toc.html'
         - 'SpikeGLX UserManual': 'Sgl_help/UserManual.html'
         - 'SpikeGLX Dirs and Files': 'help/SpikeGLX_dirs_files/'
+        - 'SpikeGLX Broken Shank Support': 'Sgl_help/SpikeGLX_Broken_Shank_Support.html'
         - 'SpikeGLX QuickRef': 'Support/SpikeGLX_QuickRef.html'
         - 'SpikeGLX UCL Course 2025': 'Support/UCL-Course-BillKarsh-2025.html'
         - 'SpikeGLX UCL Course 2024': 'Support/UCL-Course-BillKarsh-2024.html'
