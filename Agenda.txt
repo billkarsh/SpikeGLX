@@ -1,26 +1,29 @@
 // RELEASE NOTES
 // ==========================
 
+20251201
+--------
+
 20250930
 --------
-- Fix waveplan loop error.
-- Can read out-of-order IMRO files.
-- FileViewer::Link parses split shanks.
-- FileViewer::Gain box always disabled.
-- FileViewer::YScale applies to all.
-- FileViewer::Apply-all removed.
-- Graphs::YScale applies to all.
-- Graphs::Apply-all removed.
-- Graphs::Notes dialog gets timestamps.
-- Stop run on any disk error.
-- Remote::GetLastGT.
-- SaveChannels::MaxRow edits list.
-- Broken shanks assessed at detect.
-- Broken shanks visual cue in ShankViewer.
-- Broken shanks affect IMRO validation.
-- Broken shanks affect probe configuration.
-- Broken shanks affect survey mode.
-- Metadata ~svySBTT gets run-start entry.
++ Fix waveplan loop error.
++ Can read out-of-order IMRO files.
++ FileViewer::Link parses split shanks.
++ FileViewer::Gain box always disabled.
++ FileViewer::YScale applies to all.
++ FileViewer::Apply-all removed.
++ Graphs::YScale applies to all.
++ Graphs::Apply-all removed.
++ Graphs::Notes dialog gets timestamps.
++ Stop run on any disk error.
++ Remote::GetLastGT.
++ SaveChannels::MaxRow edits list.
++ Broken shanks assessed at detect.
++ Broken shanks visual cue in ShankViewer.
++ Broken shanks affect IMRO validation.
++ Broken shanks affect probe configuration.
++ Broken shanks affect survey mode.
++ Metadata ~svySBTT gets run-start entry.
 
 20250915
 --------
