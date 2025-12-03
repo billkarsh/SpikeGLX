@@ -270,7 +270,7 @@ void SVGrafsM_Ni::putSamps( vec_i16 &data, quint64 headCt )
 
                         // By NOT statting every point in the bin:
                         // (1) Stats agree for all binMax settings.
-                        // (2) BinMax ~30% fatster.
+                        // (2) BinMax ~30% faster.
                         //
                         // stat.add( val );
 

@@ -629,8 +629,10 @@ void IMBISTCtl::test_bistSR()
         }
         write( QString("Zero-based good shank list = { %1 }")
             .arg( s.trimmed() ) );
-        if( ngood < nShnk )
-            write( "You should not use this probe." );
+        if( ngood == 0 )
+            write( "You cannot use this probe." );
+        else if( ngood < nShnk )
+            write( "You can use this probe by selecting sites only on good shanks." );
     }
 
     _closeProbe();
