@@ -49,7 +49,12 @@
 <pre><code>nDataDirs=1</code></pre>
 <p>The number of data directories holding the data from this run. If greater than one, then the files for an imec probe with logical index <code>iProbe</code> are written into the data directory whose index is: <code>iProbe modulo nDataDirs</code>.</p>
 <pre><code>nSavedChans=257</code></pre>
-<p>The number of channels being saved to disk.</p>
+<p>The number of 16-bit channels (words) being saved to disk. All streams are composed of whole 16-bit words:</p>
+<ul>
+<li><p>Analog voltages, such as probe channels and analog aux channels, are stored in one 16-bit signed word per channel.</p></li>
+<li><p>Digital lines are packed as the individual bits of 16-bit digital words. In any digital word type, unused bits are zero.</p></li>
+<li><p>SY channels are digital words wherein bit-6 is the sync signal and other bits are status/error flags.</p></li>
+</ul>
 <pre><code>rmt_USERTYPE=USERDEFINED</code></pre>
 <p>When SpikeGLX is set as a Gate/Trigger server it can receive remote commands to start and stop gate and trigger intervals. It can also receive remote commands to insert custom metadata into saved files. Such tags are automatically prepended with 'rmt_' to distinguish them from built-in tags.</p>
 <pre><code>snsSaveChanSubset=2,4,8,12:150
@@ -186,7 +191,7 @@ snsSaveChanSubset=all</code></pre>
 <pre><code>niXDChans1=1</code></pre>
 <p>This is a printer-like list of NI-DAQ line indices. For example, if your NI device was named 'Fred' and if niXDChans1=2:3, we would acquire from lines {Fred/line2, Fred/line3}.</p>
 <pre><code>snsMnMaXaDw=192,64,0,1</code></pre>
-<p>This is the count of channels, of each type, in each timepoint, as stored in the binary file.</p>
+<p>This is the count of channels (words), of each type, in each timepoint, as stored in the binary file. Remember that digital lines are packed into 16-bit words.</p>
 <pre><code>syncNiChan=0</code></pre>
 <p>The bit or channel number (in the acquired stream).</p>
 <pre><code>syncNiChanType=0</code></pre>

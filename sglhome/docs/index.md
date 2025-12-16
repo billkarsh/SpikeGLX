@@ -298,9 +298,9 @@ Descriptions of metafile items for each phase:
 
 1) For general How-To questions please consult the help documents and videos
 on this site, or pose your question to the
-[Neuropixels slack channel](https://join.slack.com/t/neuropixelsgroup/shared_invite/zt-2zbcrd3dw-nr_Z6iYA8nSEERpLRqAwTA)
-so everyone can learn together. *If there is any problem with the slack
-channel invitation, email the [administrator](mailto:colonellj@hhmi.org).*
+[**Neuropixels Discord server**](https://discord.gg/jmnneS85CY)
+so everyone can learn together. *If there is any problem with the Discord
+invitation, email the [administrator](mailto:colonellj@hhmi.org).*
 
 2) If the community can't help, try emailing me directly. I'm also happy
 to hear about new feature requests, and very eager to hear about suspected
@@ -315,7 +315,7 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.
 
 ## Help
 
-* [Neuropixels Slack Channel](https://join.slack.com/t/neuropixelsgroup/shared_invite/zt-1jibcdbhe-uNyp8q522L4S0apVKwoC6A)
+* [Neuropixels Discord server](https://discord.gg/jmnneS85CY)
 * [Neuropixels Support Page](https://www.neuropixels.org/support)
 * [Noise: Reference and Ground](help/Ref_gnd/)
 * [Noise: Learn How To Solder](help/solder/solder/)

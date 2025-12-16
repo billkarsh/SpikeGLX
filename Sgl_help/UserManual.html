@@ -144,7 +144,7 @@
 </ul>
 <p>And more.</p>
 <h4 id="help-1">Help</h4>
-<p>Also on our <a href="https://billkarsh.github.io/SpikeGLX/">download page</a>, you'll find many videos and help documents on installing, getting started, running and troubleshooting. There's also a link to the Neuropixels Slack channel which hosts a community of over 2200 users.</p>
+<p>Also on our <a href="https://billkarsh.github.io/SpikeGLX/">download page</a>, you'll find many videos and help documents on installing, getting started, running and troubleshooting. There's also a link to the Neuropixels Discord server which hosts a community of ~3000 users.</p>
 <hr />
 <h3 id="installation-and-setup">Installation and Setup</h3>
 <p>To install SpikeGLX on a new system, just copy a virgin SpikeGLX folder to your C-drive and double click SpikeGLX.exe to begin.</p>
@@ -376,7 +376,7 @@
 <h4 id="onebox-channels">OneBox Channels</h4>
 <p>Each OneBox stream acquires up to <strong>three distinct types</strong> of channels:</p>
 <pre><code>1. XA = 16-bit analog channels
-2. XD = 16-bit packed digital lines
+2. XD = 16-bit digital words (packed lines)
 3. SY = 16-bit status/sync word (sync is bit #6)</code></pre>
 <p>You can specify up to 12 analog channels to read out.</p>
 <p>If you click the XD checkbox, all 12 channels are thresholded at 10% of the current voltage range maximum, and read out as the low-12 bits of a single 16-bit word.</p>
@@ -398,7 +398,7 @@
 4. (likewise from dev2)
 5. XA = dev1 non-muxed aux analog signed 16-bit channels
 6. (likewise from dev2)
-7. XD = dev1 non-muxed aux digital unsigned 16-bit words
+7. XD = dev1 non-muxed aux digital unsigned 16-bit words (packed lines)
 8. (likewise from dev2)</code></pre>
 <blockquote>
 <p>Notes:</p>
@@ -406,7 +406,7 @@
 <li><p>Within a multiplexed subgroup, like MN or MA, all the channels connected to a given multiplexer are grouped together. The names of the channels acquired from neural muxer #2 are &quot;MN2C0&quot;...&quot;MN2C31&quot;. Zero-based labeling is used throughout.</p></li>
 <li><p>If a second device is used, each MN, MA, ... category within the central stream is seamlessly expanded as if there were a single higher capacity device.</p></li>
 <li><p>Channel names, e.g., &quot;MA1C2;34&quot; indicate both which channel this is within its own category (here, the 3rd channel in group MA1) and, which it is across all the channels in this stream (here, the 35th channel in the stream). The latter index (34) is how you should refer to this channel in save-strings, in trigger setups and for audio out selection.</p></li>
-<li><p>Up to 32 digital lines can be acquired from your main device (say, dev1) and from a secondary device (say, dev2). The number of bytes needed to hold dev1's lines depends on the highest numbered line. If the highest named line is #31, then 32 bits are required, hence 4 bytes. If #14 is the highest, then 16 bits, hence 2 bytes are used to store the data for that device. Dev1 may need {0,1,2,3 or 4} bytes to hold its XD lines. Dev2 is evaluated the same way, but independently. In the stream, all the bytes for dev1 are together, followed by all those for dev2.</p></li>
+<li><p>Up to 32 digital lines can be acquired from your main device (say, dev1) and from a secondary device (say, dev2). The number of bytes needed to hold dev1's lines depends on the highest numbered line. If the highest named line is #31, then 32 bits are required, hence 4 bytes. If #14 is the highest, then 16 bits, hence 2 bytes are used to store the data for that device. Dev1 may need {0,1,2,3 or 4} bytes to hold its XD lines. Dev2 is evaluated the same way, but independently. In the stream, all the bytes for dev1 are together, followed by all those for dev2. These bytes are set into 16-bit words. Note that the metadata item <code>nSavedChans</code> tallies: analog 16-bit channels + digital 16-bit words.</p></li>
 <li><p>Trigger line numbering depends on bytes. Say XD1=&quot;0:4,22&quot; and XD2=&quot;9.&quot; Suppose you want to use line #9 on dev2 as a TTL trigger input. You should specify bit #33, here's why: There are 6 bits used on dev1, but the highest is #22, so three bytes are needed. Therefore, the offset to the first bit (bit #0) on dev2 is 24. Add 9 to that to get 33.</p></li>
 <li><p>The streams, hence, graphs and data files, always hold an integral number of 16-bit fields. The bytes of digital data are likewise grouped into 16-bit words. There are anywhere from 0..4 bytes (B1) of dev1 lines followed by 0..4 bytes (B2) for dev2. The count of 16-bit words is <code>int(1 + B1 + B2)/2)</code>. That means, divide by 2 and truncate (round down) to an integer.</p></li>
 <li><p>The Graphs window depicts digital data words as groups of 16-lines. The lowest line number in a group is at the bottom. In files the data words have the lowest numbered lines in the lowest order bits.</p></li>
