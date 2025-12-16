@@ -140,9 +140,9 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
 
     if( fv->tbGetNeurChans() ) {
 
-        // Bandpass
-
         addSeparator();
+
+        // Bandpass
 
         if( fType != fvLF ) {
 
@@ -194,42 +194,44 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
             ConnectUI( CB, SIGNAL(currentIndexChanged(int)), fv, SLOT(tbSAveSelChanged(int)) );
             addWidget( CB );
         }
-
-        // BinMax
-
-        if( fType != fvLF ) {
-
-            L = new QLabel( "BinMax", this );
-            L->setTextFormat( Qt::PlainText );
-            L->setToolTip( "Draw peaks of each downsample bin" );
-            L->setStyleSheet( "padding-bottom: 1px" );
-            addWidget( L );
-
-            CB = new QComboBox( this );
-            CB->setToolTip( "Draw peaks of each downsample bin" );
-            CB->addItem( "Off" );
-            CB->addItem( "Slow" );
-            CB->addItem( "Fast" );
-            CB->addItem( "Faster" );
-            CB->setCurrentIndex( fv->tbGetBinMax() );
-            ConnectUI( CB, SIGNAL(currentIndexChanged(int)), fv, SLOT(tbBinMaxChanged(int)) );
-            addWidget( CB );
-        }
     }
 
 // Aux analog
 
     if( fv->tbGetAnaChans() > fv->tbGetNeurChans() ) {
 
-        // -<Tx> (DC filter)
-
         addSeparator();
+
+        // -<Tx> (DC filter)
 
         C = new QCheckBox( "-<Tx>", this );
         C->setToolTip( "Temporally average auxiliary analog channels" );
         C->setChecked( fv->tbGetTxChkOn() );
         ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbTxClicked(bool)) );
         addWidget( C );
+    }
+
+// BinMax
+
+    if( fType != fvLF ) {
+
+        addSeparator();
+
+        L = new QLabel( "BinMax", this );
+        L->setTextFormat( Qt::PlainText );
+        L->setToolTip( "Draw peaks of each downsample bin" );
+        L->setStyleSheet( "padding-bottom: 1px" );
+        addWidget( L );
+
+        CB = new QComboBox( this );
+        CB->setToolTip( "Draw peaks of each downsample bin" );
+        CB->addItem( "Off" );
+        CB->addItem( "Slow" );
+        CB->addItem( "Fast" );
+        CB->addItem( "Faster" );
+        CB->setCurrentIndex( fv->tbGetBinMax() );
+        ConnectUI( CB, SIGNAL(currentIndexChanged(int)), fv, SLOT(tbBinMaxChanged(int)) );
+        addWidget( CB );
     }
 
 // Apply all

@@ -211,7 +211,8 @@ private:
     };
 
     struct SaveOb {
-        int     yPix;
+        int     yPix,
+                binMax;     // {0=Off, 1=slow, 2=fast, 3=faster}
         bool    txChkOn;
 
         void loadSettings( QSettings &S );
@@ -396,6 +397,7 @@ public:
         {
             switch( fType ) {
                 case fvAP: return sav.im.binMax;
+                case fvOB: return sav.ob.binMax;
                 case fvNI: return sav.ni.binMax;
                 default:   return 0;
             }

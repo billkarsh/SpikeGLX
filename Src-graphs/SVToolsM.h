@@ -11,7 +11,7 @@ class SVGrafsM;
 
 // Toolbar for SViewM:
 //
-// Sel Max | [secs^] [scl^] Clr All | [band^] -<Tn> -<S> BinMax | -<Tx>
+// Sel Max | [secs^] [scl^] Clr All | [band^] -<Tn> -<S> | -<Tx> | BinMax
 //
 class SVToolsM : public QToolBar
 {

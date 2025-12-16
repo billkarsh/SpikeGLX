@@ -3,6 +3,7 @@
 
 20251201
 --------
++ Apply BinMax to aux channels.
 
 20250930
 --------
@@ -49,7 +50,6 @@
 
 20250325
 --------
-+ API 4.0.2.
 + Support NP1.0 probe PRB_1_2_480_2.
 + Improve IMRO file error reporting.
 + Fix immediate gate start sensitivity.

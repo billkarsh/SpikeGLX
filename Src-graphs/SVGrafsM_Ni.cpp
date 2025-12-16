@@ -145,7 +145,7 @@ void SVGrafsM_Ni::putSamps( vec_i16 &data, quint64 headCt )
 
     drawMtx.lock();
 
-    bool    drawBinMax  = set.binMaxOn && dwnSmp > 1 && set.bandSel != 2,
+    bool    drawBinMax  = set.binMaxOn && dwnSmp > 1,
             sAveLocal   = false;
 
     // ---------------------------------
@@ -187,7 +187,7 @@ void SVGrafsM_Ni::putSamps( vec_i16 &data, quint64 headCt )
 
     if( set.txChkOn ) {
         Tx.updateLvl( &data[0], ntpts, dwnSmp );
-        Tx.apply( &data[0], ntpts, dwnSmp );
+        Tx.apply( &data[0], ntpts, (drawBinMax ? 1 : dwnSmp) );
     }
 
 // ---------------------
@@ -225,9 +225,9 @@ void SVGrafsM_Ni::putSamps( vec_i16 &data, quint64 headCt )
         qint16  *d  = &data[ic];
         int     ny  = 0;
 
-        if( ic < nNu ) {
+        ic2Y[ic].drawBinMax = false;
 
-            ic2Y[ic].drawBinMax = false;
+        if( ic < nNu ) {
 
             if( !p.ni.sns.shankMap.e[ic].u ) {
 
@@ -236,16 +236,16 @@ void SVGrafsM_Ni::putSamps( vec_i16 &data, quint64 headCt )
                 goto putData;
             }
 
-            // -------------------
-            // Neural downsampling
-            // -------------------
+            // ------
+            // BinMax
+            // ------
 
             // Within each bin, report both max and min
             // values. This ensures spikes aren't missed.
             // Max in ybuf, min in ybuf2.
 
             if( drawBinMax ) {
-
+do_binmax:
                 int ndRem = ntpts;
 
                 ic2Y[ic].drawBinMax = true;
@@ -286,6 +286,11 @@ void SVGrafsM_Ni::putSamps( vec_i16 &data, quint64 headCt )
                     ybuf2[ny] = vmin * ysc;
                     ++ny;
                 }
+
+                switch( set.sAveSel ) {
+                    case 1:
+                    case 2: sAveLocal = true;
+                }
             }
             else if( sAveLocal ) {
 
@@ -305,6 +310,11 @@ void SVGrafsM_Ni::putSamps( vec_i16 &data, quint64 headCt )
             // ----------
             // Aux analog
             // ----------
+
+            if( drawBinMax ) {
+                sAveLocal = false;
+                goto do_binmax;
+            }
 
 draw_analog:
             for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {

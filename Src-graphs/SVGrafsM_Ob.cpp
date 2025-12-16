@@ -68,8 +68,6 @@ SVGrafsM_Ob::SVGrafsM_Ob(
 
 void SVGrafsM_Ob::putSamps( vec_i16 &data, quint64 headCt )
 {
-    double  srate = p.stream_rate( jsOB, ip );
-
 #if 0
     double  tProf = getTime();
 #endif
@@ -105,6 +103,8 @@ void SVGrafsM_Ob::putSamps( vec_i16 &data, quint64 headCt )
 
     drawMtx.lock();
 
+    bool    drawBinMax = set.binMaxOn && dwnSmp > 1;
+
 // -------
 // Filters
 // -------
@@ -115,14 +115,15 @@ void SVGrafsM_Ob::putSamps( vec_i16 &data, quint64 headCt )
 
     if( set.txChkOn ) {
         Tx.updateLvl( &data[0], ntpts, dwnSmp );
-        Tx.apply( &data[0], ntpts, dwnSmp );
+        Tx.apply( &data[0], ntpts, (drawBinMax ? 1 : dwnSmp) );
     }
 
 // ---------------------
 // Append data to graphs
 // ---------------------
 
-    std::vector<float>  ybuf( ntpts );  // append en masse
+    std::vector<float>  ybuf( ntpts ),  // append en masse
+                        ybuf2( drawBinMax ? ntpts : 0 );
 
     theX->dataMtx.lock();
 
@@ -152,16 +153,71 @@ void SVGrafsM_Ob::putSamps( vec_i16 &data, quint64 headCt )
         qint16  *d  = &data[ic];
         int     ny  = 0;
 
+        ic2Y[ic].drawBinMax = false;
+
         if( ic < nAn ) {
 
             // ----------
             // Aux analog
             // ----------
 
-            for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
+            // ------
+            // BinMax
+            // ------
 
-                stat.add( *d );
-                ybuf[ny++] = *d * ysc;
+            // Within each bin, report both max and min
+            // values. This ensures spikes aren't missed.
+            // Max in ybuf, min in ybuf2.
+
+            if( drawBinMax ) {
+
+                int ndRem = ntpts;
+
+                ic2Y[ic].drawBinMax = true;
+
+                for( int it = 0; it < ntpts; it += dwnSmp ) {
+
+                    int val     = *d,
+                        vmax    = val,
+                        vmin    = val,
+                        binWid  = dwnSmp;
+
+                    stat.add( val );
+
+                    d += nC;
+
+                    if( ndRem < binWid )
+                        binWid = ndRem;
+
+                    for( int ib = 1; ib < binWid; ++ib, d += nC ) {
+
+                        val = *d;
+
+                        // By NOT statting every point in the bin:
+                        // (1) Stats agree for all binMax settings.
+                        // (2) BinMax ~30% faster.
+                        //
+                        // stat.add( val );
+
+                        if( val > vmax )
+                            vmax = val;
+                        else if( val < vmin )
+                            vmin = val;
+                    }
+
+                    ndRem -= binWid;
+
+                    ybuf[ny]  = vmax * ysc;
+                    ybuf2[ny] = vmin * ysc;
+                    ++ny;
+                }
+            }
+            else {
+                for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
+
+                    stat.add( *d );
+                    ybuf[ny++] = *d * ysc;
+                }
             }
         }
         else {
@@ -178,6 +234,9 @@ void SVGrafsM_Ob::putSamps( vec_i16 &data, quint64 headCt )
         // Renormalize x-coords -> consecutive indices.
 
         ic2Y[ic].yval.putData( &ybuf[0], ny );
+
+        if( ic2Y[ic].drawBinMax )
+            ic2Y[ic].yval2.putData( &ybuf2[0], ny );
     }
 
 // -----------------------
@@ -187,7 +246,7 @@ void SVGrafsM_Ob::putSamps( vec_i16 &data, quint64 headCt )
     theX->spanMtx.lock();
 
     double  span        = theX->spanSecs(),
-            TabsCursor  = (headCt + ntpts) / srate,
+            TabsCursor  = (headCt + ntpts) / p.stream_rate( jsOB, ip ),
             TwinCursor  = span * theX->Y[0]->yval.cursor()
                             / theX->Y[0]->yval.capacity();
 

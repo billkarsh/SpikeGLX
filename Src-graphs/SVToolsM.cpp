@@ -152,7 +152,7 @@ void SVToolsM::init()
         // -<Tn> (DC filter): Always
 
         C = new QCheckBox( "-<Tn>", this );
-        C->setToolTip( "Temporally average neural channels  " );
+        C->setToolTip( "Temporally average neural channels" );
         C->setStyleSheet( "padding-left: 4px; padding-right: 4px" );
         C->setChecked( gr->isTnChkOn() );
         ConnectUI( C, SIGNAL(clicked(bool)), gr, SLOT(tnChkClicked(bool)) );
@@ -163,12 +163,12 @@ void SVToolsM::init()
         L = new QLabel( "-<S>", this );
         L->setTextFormat( Qt::PlainText );
         L->setAlignment( Qt::AlignCenter );
-        L->setToolTip( "Spatially average spike channels  " );
+        L->setToolTip( "Spatially average spike channels" );
         L->setStyleSheet( "padding-bottom: 1px" );
         addWidget( L );
 
         CB = new QComboBox( this );
-        CB->setToolTip( "Spatially average spike channels  " );
+        CB->setToolTip( "Spatially average spike channels" );
         CB->addItem( "Off" );
         gr->nameLocalFilters( CB );
         CB->addItem( "Glb All" );
@@ -176,15 +176,6 @@ void SVToolsM::init()
         CB->setCurrentIndex( gr->curSAveSel() );
         ConnectUI( CB, SIGNAL(currentIndexChanged(int)), gr, SLOT(sAveSelChanged(int)) );
         addWidget( CB );
-
-        // BinMax: Always
-
-        C = new QCheckBox( "BinMax", this );
-        C->setToolTip( "Graph extrema in each spike channel downsample bin  " );
-        C->setStyleSheet( "padding-left: 4px" );
-        C->setChecked( gr->isBinMaxOn() );
-        ConnectUI( C, SIGNAL(clicked(bool)), gr, SLOT(binMaxChkClicked(bool)) );
-        addWidget( C );
     }
 
 // -------------
@@ -198,12 +189,25 @@ void SVToolsM::init()
         // -<Tx> (DC filter)
 
         C = new QCheckBox( "-<Tx>", this );
-        C->setToolTip( "Temporally average auxiliary analog channels  " );
+        C->setToolTip( "Temporally average auxiliary analog channels" );
         C->setStyleSheet( "padding-left: 4px; padding-right: 4px" );
         C->setChecked( gr->isTxChkOn() );
         ConnectUI( C, SIGNAL(clicked(bool)), gr, SLOT(txChkClicked(bool)) );
         addWidget( C );
     }
+
+// ------
+// BinMax
+// ------
+
+    addSeparator();
+
+    C = new QCheckBox( "BinMax", this );
+    C->setToolTip( "Draw peaks of each downsample bin" );
+    C->setStyleSheet( "padding-left: 4px" );
+    C->setChecked( gr->isBinMaxOn() );
+    ConnectUI( C, SIGNAL(clicked(bool)), gr, SLOT(binMaxChkClicked(bool)) );
+    addWidget( C );
 }
 
 

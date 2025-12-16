@@ -447,10 +447,12 @@ void FileViewerWindow::SaveOb::loadSettings( QSettings &S )
 {
     S.beginGroup( "FileViewer_Obx" );
     yPix    = S.value( "yPix", 100 ).toInt();
+    binMax  = S.value( "binMax", 0 ).toInt();
     txChkOn = S.value( "txChkOn", false ).toBool();
     S.endGroup();
 
-    yPix = qMax( yPix, 4 );
+    yPix   = qMax( yPix, 4 );
+    binMax = qMin( binMax, 3 );
 }
 
 
@@ -458,6 +460,7 @@ void FileViewerWindow::SaveOb::saveSettings( QSettings &S ) const
 {
     S.beginGroup( "FileViewer_Obx" );
     S.setValue( "yPix", qMax( yPix, 4 ) );
+    S.setValue( "binMax", binMax );
     S.setValue( "txChkOn", txChkOn );
     S.endGroup();
 }
@@ -1259,6 +1262,7 @@ void FileViewerWindow::tbBinMaxChanged( int sel )
 {
     switch( fType ) {
         case fvAP: sav.im.binMax = sel; break;
+        case fvOB: sav.ob.binMax = sel; break;
         case fvNI: sav.ni.binMax = sel; break;
         default:   return;
     }
@@ -3539,7 +3543,7 @@ qq=getTime();
         // -----
 
         if( tbGetTxChkOn() )
-            Tx.apply( &data[0], ntpts, dwnSmp );
+            Tx.apply( &data[0], ntpts, (binMax ? binMax : dwnSmp) );
 
 #ifdef PROFILE
 sumG+=getTime()-qq;
@@ -3568,6 +3572,8 @@ qq=getTime();
             qint16      *d      = &data[ig];
             GraphStats  &stat   = grfStats[ig];
 
+            grfY[ig].drawBinMax = false;
+
             if( grfY[ig].usrType == 0 ) {
 
                 // ---------------
@@ -3581,18 +3587,16 @@ qq=getTime();
                 if( shankMap && !shankMap->e[ig].u )
                     continue;
 
-                // -------------------
-                // Neural downsampling
-                // -------------------
+                // ------
+                // BinMax
+                // ------
 
                 // Within each bin, report both max and min
                 // values. This ensures spikes aren't missed.
                 // Max in ybuf, min in ybuf2.
 
-                grfY[ig].drawBinMax = false;
-
                 if( binMax ) {
-
+do_binmax:
                     int dstep   = binMax * nG,
                         val     = V_S_AVE( d ),
                         binLim  = dwnSmp,
@@ -3645,6 +3649,12 @@ qq=getTime();
 
                     grfY[ig].drawBinMax = true;
                     grfY[ig].yval2.putData( &ybuf2[xoff], dtpts - xoff );
+
+                    // re-enable sAveLocal
+                    switch( tbGetSAveSel() ) {
+                        case 1:
+                        case 2: sAveLocal = true;
+                    }
                 }
                 else if( sAveLocal ) {
 
@@ -3666,12 +3676,16 @@ qq=getTime();
                 // Analog: LF or Aux
                 // -----------------
 
-                // ---------------
-                // Skip references
-                // ---------------
-
-                if( fType == fvLF && shankMap && !shankMap->e[ig].u )
-                    continue;
+                if( fType == fvLF ) {
+                    // skip references
+                    if( shankMap && !shankMap->e[ig].u )
+                        continue;
+                }
+                else if( binMax ) {
+                    // disable sAveLocal
+                    sAveLocal = false;
+                    goto do_binmax;
+                }
 
 draw_analog:
                 for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
