@@ -367,13 +367,14 @@ For PXI acquisition, Imec believes that AMD CPUs are not compatible with
 the required enclustra drivers. We have not tested this ourselves, but we
 are aware that one or two users have had success with AMD systems. We need
 more data about this. If you have an AMD system, please try it and report
-whether it works for you on the slack channel. Until thorough testing shows
-that AMD systems work reliably in this application, we will continue to
-recommend using only intel systems.
+whether it works for you on the
+[**Neuropixels Discord server**](https://discord.gg/jmnneS85CY).
+Until thorough testing shows that AMD systems work reliably in this
+application, we will continue to recommend using only intel systems.
 
 *OneBox does not use enclustra drivers, so should work with AMD CPUs,
 but we have not specifically tested that yet. Reports from users via
-slack would be very helpful here.*
+Discord would be very helpful here.*
 
 ### Is My Current Computer Good Enough?
 

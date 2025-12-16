@@ -39,7 +39,22 @@
 <h5 id="general-filters">General Filters</h5>
 <ul>
 <li><p><code>-&lt;Tn&gt;</code> (<code>-&lt;Tx&gt;</code>): Neural (auxiliary analog) time averaging. Samples the data stream per channel to calculate and then subtract the time average value; effectively subtracting the DC component. The value is updated every 5 seconds. This may create artifactual steps at update boundaries.</p></li>
-<li><code>-&lt;S&gt;</code>: Spatial averaging. At each timepoint a neighborhood of electrodes per channel is averaged; the result is subtracted from that channel. The locations of electrodes are known from your imro table or nidq shank map.
+<li><p><code>BinMax</code>: If checked, we report the extrema in each downsample bin. This avoids missing events when showing long time spans. It's especially useful for high sample rates. This exaggerates apparent background noise. Uncheck the box to visualize noise more accurately.</p></li>
+</ul>
+<h5 id="imec-stream-filters">Imec Stream Filters</h5>
+<p><strong>Bandpass options</strong></p>
+<p>For 1.0-like probes {1.0, NHP, UHD}, the <code>imro</code> table determines individually for each AP channel if a 300 Hz high pass filter is applied in hardware. The result is the <code>native</code> AP signal. In addition, LF band signals are always acquired from 1.0-like hardware.</p>
+<p>For 2.0, the <code>native</code> data are full-band, there is no separate LF band.</p>
+<p>The filter selector applies software operations to these <code>native</code> signals:</p>
+<ul>
+<li><code>AP Native</code>: No software filter is applied.</li>
+<li><code>300 - INF</code>: A software high pass filter is applied to all AP channels.</li>
+<li><code>0.5 - 500</code>: A software low pass filter is applied to all AP channels.</li>
+<li><code>AP = AP+LF</code>: All AP channels are graphed as the simple sum of the AP and corresponding LF band signal.</li>
+</ul>
+<p><strong>Spatial averaging</strong></p>
+<ul>
+<li><code>-&lt;S&gt;</code>: At each timepoint a neighborhood of electrodes per channel is averaged; the result is subtracted from that channel. The locations of electrodes are known from your imro table or nidq shank map.
 <ul>
 <li>Notes:
 <ol style="list-style-type: decimal">
@@ -55,15 +70,6 @@
 <li><code>Glb Dmx</code>: All electrodes on probe that are sampled concurrently (same multiplexing phase).</li>
 </ul></li>
 </ul></li>
-<li><p><code>BinMax</code>: If checked, we report the extrema in each neural channel downsample bin. This assists spike visualization but exaggerates apparent background noise. Uncheck the box to visualize noise more accurately.</p></li>
-</ul>
-<h5 id="imec-stream-filters">Imec Stream Filters</h5>
-<p>The <code>imro</code> table determines individually for each AP channel if a 300 Hz high pass filter is applied in hardware. The result is the <code>native</code> AP signal. In addition, LF band signals are always acquired from the hardware. The filter selector applies software operations to these <code>native</code> signals.</p>
-<ul>
-<li><code>AP Native</code>: No software filter is applied.</li>
-<li><code>300 - INF</code>: A software high pass filter is applied to all AP channels.</li>
-<li><code>0.5 - 500</code>: A software low pass filter is applied to all AP channels.</li>
-<li><code>AP = AP+LF</code>: All AP channels are graphed as the simple sum of the AP and corresponding LF band signal.</li>
 </ul>
 <h5 id="nidq-stream-filters">Nidq Stream Filters</h5>
 <ul>

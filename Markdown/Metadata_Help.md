@@ -93,7 +93,17 @@ are written into the data directory whose index is:
 nSavedChans=257
 ```
 
-The number of channels being saved to disk.
+The number of 16-bit channels (words) being saved to disk. All streams
+are composed of whole 16-bit words:
+
+* Analog voltages, such as probe channels and analog aux channels, are
+stored in one 16-bit signed word per channel.
+
+* Digital lines are packed as the individual bits of 16-bit digital words.
+In any digital word type, unused bits are zero.
+
+* SY channels are digital words wherein bit-6 is the sync signal and other
+bits are status/error flags.
 
 ```
 rmt_USERTYPE=USERDEFINED
@@ -498,8 +508,9 @@ lines {Fred/line2, Fred/line3}.
 snsMnMaXaDw=192,64,0,1
 ```
 
-This is the count of channels, of each type, in each timepoint,
-as stored in the binary file.
+This is the count of channels (words), of each type, in each timepoint,
+as stored in the binary file. Remember that digital lines are packed into
+16-bit words.
 
 ```
 syncNiChan=0

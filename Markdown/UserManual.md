@@ -134,8 +134,8 @@ And more.
 
 Also on our [download page](https://billkarsh.github.io/SpikeGLX/), you'll
 find many videos and help documents on installing, getting started, running
-and troubleshooting. There's also a link to the Neuropixels Slack channel
-which hosts a community of over 2200 users.
+and troubleshooting. There's also a link to the Neuropixels Discord server
+which hosts a community of ~3000 users.
 
 --------
 
@@ -559,7 +559,7 @@ Each OneBox stream acquires up to **three distinct types** of channels:
 
 ```
 1. XA = 16-bit analog channels
-2. XD = 16-bit packed digital lines
+2. XD = 16-bit digital words (packed lines)
 3. SY = 16-bit status/sync word (sync is bit #6)
 ```
 
@@ -605,7 +605,7 @@ either one or two NI devices (named say, 'dev1 and 'dev2').
 4. (likewise from dev2)
 5. XA = dev1 non-muxed aux analog signed 16-bit channels
 6. (likewise from dev2)
-7. XD = dev1 non-muxed aux digital unsigned 16-bit words
+7. XD = dev1 non-muxed aux digital unsigned 16-bit words (packed lines)
 8. (likewise from dev2)
 ```
 
@@ -634,7 +634,9 @@ either one or two NI devices (named say, 'dev1 and 'dev2').
 >   the highest, then 16 bits, hence 2 bytes are used to store the data for
 >   that device. Dev1 may need {0,1,2,3 or 4} bytes to hold its XD lines.
 >   Dev2 is evaluated the same way, but independently. In the stream, all
->   the bytes for dev1 are together, followed by all those for dev2.
+>   the bytes for dev1 are together, followed by all those for dev2. These
+>   bytes are set into 16-bit words. Note that the metadata item
+>   `nSavedChans` tallies: analog 16-bit channels + digital 16-bit words.
 >
 > 5. Trigger line numbering depends on bytes. Say XD1="0:4,22" and XD2="9."
 >   Suppose you want to use line #9 on dev2 as a TTL trigger input. You

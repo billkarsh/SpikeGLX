@@ -73,9 +73,35 @@ data stream per channel to calculate and then subtract the time average
 value; effectively subtracting the DC component. The value is updated every
 5 seconds. This may create artifactual steps at update boundaries.
 
-* `-<S>`: Spatial averaging. At each timepoint a neighborhood of electrodes
-per channel is averaged; the result is subtracted from that channel. The
-locations of electrodes are known from your imro table or nidq shank map.
+* `BinMax`: If checked, we report the extrema in each downsample bin.
+This avoids missing events when showing long time spans. It's especially
+useful for high sample rates. This exaggerates apparent background noise.
+Uncheck the box to visualize noise more accurately.
+
+##### Imec Stream Filters
+
+**Bandpass options**
+
+For 1.0-like probes {1.0, NHP, UHD}, the `imro` table determines individually
+for each AP channel if a 300 Hz high pass filter is applied in hardware. The
+result is the `native` AP signal. In addition, LF band signals are always
+acquired from 1.0-like hardware.
+
+For 2.0, the `native` data are full-band, there is no separate LF band.
+
+The filter selector applies software operations to these `native` signals:
+
+* `AP Native`: No software filter is applied.
+* `300 - INF`: A software high pass filter is applied to all AP channels.
+* `0.5 - 500`: A software low pass filter is applied to all AP channels.
+* `AP = AP+LF`: All AP channels are graphed as the simple sum of the AP
+and corresponding LF band signal.
+
+**Spatial averaging**
+
+* `-<S>`: At each timepoint a neighborhood of electrodes per channel is
+averaged; the result is subtracted from that channel. The locations of
+electrodes are known from your imro table or nidq shank map.
     + Notes:
         1. Certain electrodes are omitted from the average: {Those marked
         'use=false' in your map, imec reference electrodes, imec electrodes that
@@ -90,23 +116,6 @@ locations of electrodes are known from your imro table or nidq shank map.
         + `Glb All`: All electrodes on probe.
         + `Glb Dmx`: All electrodes on probe that are sampled
             concurrently (same multiplexing phase).
-
-* `BinMax`: If checked, we report the extrema in each neural channel
-downsample bin. This assists spike visualization but exaggerates apparent
-background noise. Uncheck the box to visualize noise more accurately.
-
-##### Imec Stream Filters
-
-The `imro` table determines individually for each AP channel if a 300 Hz
-high pass filter is applied in hardware. The result is the `native` AP
-signal. In addition, LF band signals are always acquired from the hardware.
-The filter selector applies software operations to these `native` signals.
-
-* `AP Native`: No software filter is applied.
-* `300 - INF`: A software high pass filter is applied to all AP channels.
-* `0.5 - 500`: A software low pass filter is applied to all AP channels.
-* `AP = AP+LF`: All AP channels are graphed as the simple sum of the AP
-and corresponding LF band signal.
 
 ##### Nidq Stream Filters
 

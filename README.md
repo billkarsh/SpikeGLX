@@ -91,9 +91,9 @@ Requirements differ according to platform:
 ### Help
 
 * Find help videos, docs and tools on the [**SpikeGLX Download Page**](http://billkarsh.github.io/SpikeGLX).
-* Get help from expert users on the [**Neuropixels slack channel**](https://join.slack.com/t/neuropixelsgroup/shared_invite/zt-2zbcrd3dw-nr_Z6iYA8nSEERpLRqAwTA).
+* Get help from expert users on the [**Neuropixels Discord server**](https://discord.gg/jmnneS85CY).
 
->*If there is any problem with the slack channel invitation, email the [administrator](mailto:colonellj@hhmi.org).*
+>*If there is any problem with the Discord invitation, email the [administrator](mailto:colonellj@hhmi.org).*
 
 ### Frequently Asked Questions
 
