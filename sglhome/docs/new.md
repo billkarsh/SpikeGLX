@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+December 18, 2025
+
+* SpikeGLX 20251201-api4 (Fix survey, aux BinMax, api v4.1.3).
+
 December 1, 2025
 
 * SpikeGLX 20250930-api4 (Broken shanks, api v4.1.3).

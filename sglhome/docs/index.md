@@ -82,7 +82,7 @@ Latest release highlights:
 
 >Important: Please read the `README` file in your download.
 
-* [Release 20250930-api4](App/Release_v20250930-api4.zip)...[Readme](Readme/Readme_v20250930-api4.txt) : Broken shanks, api v4.1.3
+* [Release 20251201-api4](App/Release_v20251201-api4.zip)...[Readme](Readme/Readme_v20251201-api4.txt) : Fix survey, aux BinMax, api v4.1.3
 
 >*Release downloads come with two executables*:
 >
@@ -98,9 +98,9 @@ versions there as long as you run one at a time:
 
 ```
 SpikeGLX\
-    Release_v20250930-api4.zip
+    Release_v20251201-api4.zip
     Release_v20250325-phase30.zip
-    Release_v20250930-api4\
+    Release_v20251201-api4\
     Release_v20250325-phase30\
     Drivers\
         Enclustra_Windows_10&11\
