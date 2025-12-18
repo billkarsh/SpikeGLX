@@ -3,6 +3,7 @@
 
 20251201
 --------
++ Fix whole survey display.
 + Apply BinMax to aux channels.
 
 20250930

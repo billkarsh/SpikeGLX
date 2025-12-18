@@ -867,7 +867,7 @@ void FileViewerWindow::svyInit()
 int FileViewerWindow::svyS2Bmax( int is ) const
 {
     QMap<int,int>::const_iterator
-    it  = sh2bkMax.begin(),
+    it  = sh2bkMax.find( is ),
     end = sh2bkMax.end();
 
     return (it != end && it.key() == is ? it.value() : -1);
