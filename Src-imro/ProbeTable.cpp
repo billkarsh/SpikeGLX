@@ -9,10 +9,9 @@
 
 #define FTAB    "C:/Users/labadmin/Desktop/ProbeTable/2025_02_20_Probe_feature_table_tab.txt"
 #define FINI    "C:/Users/labadmin/Desktop/ProbeTable/probe_features.ini"
-#define FSRT    "C:/Users/labadmin/Desktop/ProbeTable/probe_features_srt.ini"
 #define FJ2I    "C:/Users/labadmin/Desktop/ProbeTable/probe_features_j2i.ini"
 #define FJSN    "C:/Users/labadmin/Desktop/ProbeTable/probe_features.json"
-#define VERS    "1.4"
+#define VERS    "1.5"
 
 /* ---------------------------------------------------------------- */
 /* CProbeTbl ------------------------------------------------------ */
@@ -166,6 +165,24 @@ void CProbeTbl::extini()
         if( S.value( "lf_gain_list" ).toString() == "1" )
             lf_frq = 0;
         S.setValue( "lf_sample_frequency_hz", lf_frq );
+        S.endGroup();
+    }
+
+// Insert shank_tip_to_base_um
+
+    foreach( const QString &grp, S.childGroups() ) {
+        S.beginGroup( grp );
+        QString desc = S.value( "description" ).toString();
+        int     slen = 10000;
+        if( desc.contains( "NHP MEDIUM", Qt::CaseInsensitive ) ||
+            desc.contains( "25mm", Qt::CaseInsensitive ) ) {
+            slen = 25000;
+        }
+        if( desc.contains( "NHP LONG", Qt::CaseInsensitive ) ||
+            desc.contains( "45mm", Qt::CaseInsensitive ) ) {
+            slen = 45000;
+        }
+        S.setValue( "shank_tip_to_base_um", slen );
         S.endGroup();
     }
 
@@ -632,13 +649,18 @@ void CProbeTbl::parsejson()
 
 void CProbeTbl::driver()
 {
-    ss2ini();
-    extini();
-    sortini();
-    ini2json();
-    json2ini();
-    sortjson2ini();
-    parsejson();
+    // Manual pre-step:
+    // imec xlsx -> exported as tab-sep txt
+
+    ss2ini();       // tab-sep txt -> .ini
+    extini();       // hand coded extensions -> .ini
+    sortini();      // in-place sort -> .ini
+    ini2json();     // .ini -> .json
+    json2ini();     // .json -> _j2i.ini
+    sortjson2ini(); // in-place sort -> _j2i.ini
+    parsejson();    // simple json error checks
+
+    // Do manual file compare [.ini, _j2i.ini]
 }
 
 /* ---------------------------------------------------------------- */
