@@ -80,11 +80,22 @@ void SvyVSBTT::fromMeta( const DataFile *df )
         // OLD: prepend elem-0
         e.reserve( nmaps = n + 1 );
         // elem-0
+        int shank0 = 0;
+        qv = df->getParam( "imDatPrb_sr_mask" );
+        if( qv.isValid() ) {
+            uint    mask = qv.toUInt();
+            for( int i = 0; mask && i < 32; ++i ) {
+                if( mask & (1 << i) ) {
+                    shank0 = i;
+                    break;
+                }
+            }
+        }
         qint64 t2 = 2 * 30000;
         qv = df->getParam( "imSvySettleSec" );
         if( qv.isValid() )
             t2 = qv.toLongLong() * 30000;
-        e.push_back( SvySBTT( 0, 0, 0, t2 ) );
+        e.push_back( SvySBTT( shank0, 0, 0, t2 ) );
         // elem-1
         e.push_back( E0 );
         // elem-2...
