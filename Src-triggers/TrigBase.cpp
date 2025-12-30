@@ -242,6 +242,7 @@ void TrigBase::endTrig()
         dfImAp.clear();
         dfImLf.clear();
         firstCtIm.clear();
+        kvmRmt.remove( "~svySBTT" );
 
         for( int ip = 0, np = firstCtOb.size(); ip < np; ++ip ) {
             getErrFlags( jsOB, ip );
@@ -603,6 +604,7 @@ void TrigBase::endRun( const QString &err )
         dfImAp.clear();
         dfImLf.clear();
         firstCtIm.clear();
+        kvmRmt.remove( "~svySBTT" );
 
         for( int ip = 0, np = firstCtOb.size(); ip < np; ++ip ) {
             getErrFlags( jsOB, ip );
