@@ -1,9 +1,38 @@
-## File Viewer
+# File Viewer
+
+**Topics:**
+
+* [Overview](#overview)
+* [Run Anywhere](#run-anywhere)
+* [Opening a File Viewer](#opening-a-file-viewer)
+* [File Viewer Titlebar](#file-viewer-titlebar)
+* [Shank Viewer](#shank-viewer)
+* [Linking (Time Axes)](#linking-time-axes)
+    + [Link Dialog](#link-dialog)
+    + [Unlinking](#unlinking)
+* [Exporting](#exporting)
+    + [Exporting a Data Subset](#exporting-a-data-subset)
+    + [Exporting a Survey](#exporting-a-survey)
+* [Selecting](#selecting)
+    + [Channel Subsets](#channel-subsets)
+    + [Time Ranges](#time-ranges)
+* [Measuring Time Spans](#measuring-time-spans)
+* [Right-Clicking](#right-clicking)
+    + [ShankMap (GeomMap) Operators](#shankmap-geommap-operators)
+    + [Export](#export)
+* [Setting a Custom File Offset](#setting-a-custom-file-offset)
+* [Wheel Scrolling](#wheel-scrolling)
+* [Performance Tips](#performance-tips)
+
+--------
+
+## Overview
 
 * View any SpikeGLX output data (`bin`) file.
 * Open Shank Viewer to visualize activity on probe.
 * Time-lock (`link`) views across data streams.
 * Export subsets of the data to new bin or text files.
+* Review and export probe surveys.
 
 --------
 
@@ -18,7 +47,7 @@ Compiled SpikeGLX releases contain two executables:
 
 SpikeGLX-NISIM.exe is provided so you can:
 
-* Run Imec acquitision when you don't have/need NI hardware.
+* Run Imec acquisition when you don't have/need NI hardware.
 * Run the File Viewer anywhere without NI hardware.
 
 --------
@@ -72,16 +101,14 @@ automatically update the others. These messages are passed:
 * Time selection changed (Shift-click and drag).
 
 To turn linking on, choose Viewer menu item `File::Link (Ctrl+L)`.
-The link options dialog is shown. The currrent Viewer's context will
+The link options dialog is shown. The current Viewer's context will
 be propagated to the other windows belonging to this run.
 
 You can only link files of the same run. You can only link them if their
 `bin` and `meta` files are all stored in the same directory. Said another
 way, the path and file base name `myRun_gXXX_tYYY` are the association keys.
 
---------
-
-## Link Dialog
+### Link Dialog
 
 The Link command always opens a dialog in which you can select which
 streams from the current run you want opened. You can independently
@@ -97,9 +124,7 @@ for filters and so on. Before linking, turn off all unneeded filters,
 and set a modest time range so that opening and arranging the new files
 will happen reasonably quickly.
 
---------
-
-## Unlinking
+### Unlinking
 
 When linking is on, scrolling in one window causes scrolling in other
 windows which is normally what you want, but if you're mostly looking
@@ -114,7 +139,9 @@ will sync up to it.
 
 --------
 
-## Exporting a Subset of the Data
+## Exporting 
+
+### Exporting a Data Subset
 
 Open the `Export dialog` by: choosing `File::Export`, or pressing `Ctrl+E`,
 or `right-clicking` anywhere in the graph area.
@@ -125,9 +152,57 @@ to include and for the time span to include.
 The next two sections explain how to graphically specify these selections
 **before opening the Export dialog**.
 
+### Exporting a Survey
+
+**Background**
+
+A single survey run can include multiple probes, as well as OBX and NI data
+streams that collect auxiliary data during the survey. Data are collected
+from each probe in segments, which are often but not necessarily indexed by
+(shank, bank). Different probes may be tiled by different numbers of segments.
+E.g., 2.0 single-shank probes usually have 4 segments, while 4-shank probes
+have 16 segments. The survey will transition all of the probes to their next
+segments at roughly the same time. The survey continues until all probes
+are fully tiled. Although probes are switched periodically from segment to
+segment, the OBX and NI streams simply acquire continuously through the
+whole survey.
+
+The `Export Survey` operation splits the original probe survey files into
+their individual segments. This allows you to spike-sort and/or analyze the
+individual segments in ways that the ShankViewer doesn't already provide.
+OBX and NI files are not exportable (not split).
+
+**How To**
+
+For each stream {APj, LFj} that you wish to export (split):
+
+1. Open its original survey file.
+2. Choose `File::Export Survey`.
+
+**Output**
+
+* Within the original survey run folder, a new top-level export folder
+is created: `SvyPrb_datetime_segs`.
+* That folder, in turn, contains a new exported run-like folder for each
+segment: `SvyPrb_datetime_segi_g0`. Note that the original run base name
+is modified by adding the `_segi' tag, and this new run name is used for
+all composing files.
+* These run folders contain probe bin/meta data for that segment. OBX and NI
+data are not included.
+* Probe folders are not created for original surveys, nor are they used for
+the exported runs.
+* In CatGT omit the `-prb_fld` option when processing exported runs.
+* All exported run metadata are appropriate for their segment.
+* Each exported probe metafile contains a new item: `svySegStartSecs` =
+offset (seconds) from original file start to this segment file start. That
+offset can be used to time-align events from a segment file with events in
+any original OBX and NI files.
+
 --------
 
-## Selecting Channels to Show or Export
+## Selecting
+
+### Channel Subsets
 
 You can remove uninteresting channels from the view in two ways:
 
@@ -141,9 +216,7 @@ to remove the channel.
 Channels can be restored in the Channels menu by toggling them on or
 choosing `Show All`.
 
---------
-
-## Selecting Time Ranges
+### Time Ranges
 
 You can use click-and-drag to graphically select a time range either
 to zoom the current view, or to set a range for the export function.

@@ -119,6 +119,7 @@ public:
     void setFirstSample( quint64 firstCt, bool write = false );
     void setParam( const QString &name, const QVariant &value );
     void setRemoteParams( const KeyValMap &kvm );
+    void delParam( const QString &name );
 
     QString notes() const;
     void streamCounts( int &nIm, int &nOb, int &nNi ) const;

@@ -42,10 +42,12 @@
 #include <QDoubleSpinBox>
 #include <QPixmap>
 #include <QCursor>
+#include <QDir>
 #include <QRegularExpression>
 #include <QSettings>
-#include <QMessageBox>
 #include <QThread>
+#include <QMessageBox>
+#include <QProgressDialog>
 
 #include <math.h>
 
@@ -767,6 +769,19 @@ bool FileViewerWindow::viewFile( QString &error, const QString &fname )
             car.setSU( shankMap );
     }
 
+    foreach( QMenu* m, menuBar()->findChildren<QMenu*>() ) {
+        if( m->title() == "&File" ) {
+            foreach( QAction* a, m->actions() ) {
+                if( a->text() == "Export &Survey" ) {
+                    a->setEnabled( fType <= fvLF && SVY.nmaps > 1 );
+                    goto svy_menu_set;
+                }
+            }
+        }
+    }
+
+svy_menu_set:
+
 // ---------------
 // Initialize view
 // ---------------
@@ -1020,6 +1035,261 @@ const double* FileViewerWindow::svyAllBanks(
         delete m;
 
     return &S->at( 0 );
+}
+
+
+// Original run folder:             SvyPrb_datetime_g0
+// - Within, new top:               SvyPrb_datetime_segs
+// - Within top, new run folders:   SvyPrb_datetime_segi_g0
+//
+// - For each segment, update these via Datafile::export:
+// + fileName
+// + fileSHA1
+// + fileSizeBytes
+// + fileTimeSecs
+//
+// Update explicitly:
+// + firstSample
+// + svySegStartSecs
+// + imroFile       (clear)
+// + ~imroTbl
+// + ~snsChanMap
+// + ~snsGeomMap
+// + ~snsShankMap   (if already present)
+// + ~svySBTT       (delete)
+//
+void FileViewerWindow::svyMenuExportHandler() const
+{
+    QGuiApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+
+// ---------------
+// Progress dialog
+// ---------------
+
+    QProgressDialog progress(
+        QString("Exporting %1 segments...").arg( SVY.nmaps ),
+        "Abort", 0, SVY.nmaps, (QWidget*)(this) );
+
+    progress.setWindowFlags( progress.windowFlags()
+        & ~(Qt::WindowContextHelpButtonHint
+            | Qt::WindowCloseButtonHint) );
+
+    progress.setWindowModality( Qt::WindowModal );
+    progress.setMinimumDuration( 0 );
+
+    guiBreathe();
+    guiBreathe();
+    guiBreathe();
+
+// --------------
+// Export indices
+// --------------
+
+    QVector<uint>   indicesOfSrcChans;
+    Subset::defaultVec( indicesOfSrcChans, df->numChans() );
+
+// ----
+// IMRO
+// ----
+
+    IMROTbl *R = NULL;
+
+    if( fType <= fvLF ) {
+        R = IMROTbl::alloc( df->getParam( "imDatPrb_pn" ).toString() );
+        R->fromString( NULL, df->getParam( "~imroTbl" ).toString() );
+    }
+
+// ------
+// Consts
+// ------
+
+    qint64      chunk0      = int(0.02 * df->samplingRateHz());
+    QBitArray   BA          = QBitArray();
+    int         lfOffset    = 0;
+
+    if( fType == fvLF )
+        lfOffset = int(1.5 * df->samplingRateHz());
+
+// --------------
+// Create top dir
+// --------------
+
+    DFRunTag    runTag( df->binFileName() );
+    QString     err,
+                runName = runTag.runName,
+                top     = QString("%1%2_segs/")
+                            .arg( runTag.runDir )
+                            .arg( runName );
+    if( !QDir().exists( top ) && !QDir().mkdir( top ) ) {
+        err = QString("Can't create survey export dir [%1].").arg( top );
+        goto exit;
+    }
+
+// ----
+// Loop
+// ----
+
+    for( int im = 0; im < SVY.nmaps; ++im ) {
+
+        if( progress.wasCanceled() )
+            break;
+
+        const SvySBTT   &M = SVY.e[im];
+        DataFile        *out;
+        QString         rundir,
+                        suffix,
+                        fname;
+
+        // -----------------
+        // Create run folder
+        // -----------------
+
+        runTag.runName = QString("%1_seg%2").arg( runName ).arg( im );
+
+        rundir = QString("%1%2_g0/").arg( top ).arg( runTag.runName );
+
+        if( !QDir().exists( rundir ) && !QDir().mkdir( rundir ) ) {
+            err = QString("Can't create survey export dir [%1].").arg( rundir );
+            goto exit;
+        }
+
+        // ------------------
+        // Create output file
+        // ------------------
+
+        if( fType == fvAP )
+            out = new DataFileIMAP( df->streamip() );
+        else
+            out = new DataFileIMLF( df->streamip() );
+
+        switch( fType ) {
+            case fvAP: suffix = "ap.bin"; break;
+            case fvLF: suffix = "lf.bin"; break;
+            default:   suffix = "bin"; break;
+        }
+
+        fname = QString("%1%2")
+                    .arg( rundir )
+                    .arg( runTag.brevname( fType, df->streamip(), suffix ) );
+
+        if( !out->openForExport( *df, fname, indicesOfSrcChans ) ) {
+            err = "Could not open export file for write.";
+            goto exit;
+        }
+
+        out->setAsyncWriting( false );
+
+        // --------------------
+        // Metadata adjustments
+        // --------------------
+
+        out->setFirstSample( df->firstCt() + M.t2 + lfOffset );
+
+        if( fType <= fvLF ) {
+
+            out->setParam( "svySegStartSecs",
+                    (M.t2 + lfOffset) / df->samplingRateHz() );
+
+            R->fillShankAndBank( M.s, M.b );
+            out->setParam( "imroFile", "" );
+            out->setParam( "~imroTbl", R->toString() );
+            out->delParam( "~svySBTT" );
+
+            ChanMapIM   CM;
+            QBitArray   bandBits;
+            CM.setImroOrder( R );
+            Subset::vec2Bits( bandBits, df->fileChans() );
+            out->setParam( "~snsChanMap", CM.toString( bandBits ) );
+
+            GeomMap GM;
+            R->toGeomMap_snsFileChans( GM, df->fileChans(),
+                (fType == fvAP ? 0 : R->nAP()) );
+            for( int i = 0, n = shankMap->e.size(); i < n; ++i )
+                GM.e[i].u = shankMap->e[i].u;
+            out->setParam( "~snsGeomMap", GM.toString() );
+
+            if( df->getParam( "~snsShankMap" ).isValid() ) {
+                ShankMap    SM;
+                R->toShankMap_hwr( SM );
+                for( int i = 0, n = shankMap->e.size(); i < n; ++i )
+                    SM.e[i].u = shankMap->e[i].u;
+                out->setParam( "~snsShankMap", SM.toString() );
+            }
+        }
+
+        // ---------
+        // Write bin
+        // ---------
+
+        {
+            qint64  f0  = M.t2 + lfOffset,
+                    rem = (im+1 < SVY.nmaps ? SVY.e[im+1].t1 : df->sampCount()) - f0;
+            vec_i16 data;
+
+            for(;;) {
+
+                if( !rem )
+                    break;
+
+                qint64  nread;
+                int     nsmp = qMin( chunk0, rem );
+
+                nread = df->readSamps( data, f0, nsmp, BA );
+
+                if( nread <= 0 )
+                    break;
+
+                f0  += nread;
+                rem -= nread;
+
+                if( !out->writeAndInvalSamps( data ) ) {
+                    err = QString("Error writing survey file %1 of %2.")
+                            .arg( im ).arg( SVY.nmaps );
+                    break;
+                }
+            }
+        }
+
+        // ---------
+        // File done
+        // ---------
+
+        out->closeAndFinalize();
+        delete out;
+
+        if( !err.isEmpty() )
+            break;
+
+        progress.setValue( im + 1 );
+
+        if( !im )
+            QGuiApplication::restoreOverrideCursor();
+
+        guiBreathe();
+        guiBreathe();
+        guiBreathe();
+    }
+
+// -----------
+// Export done
+// -----------
+
+exit:
+    progress.setValue( SVY.nmaps );
+    QGuiApplication::restoreOverrideCursor();
+
+    if( R )
+        delete R;
+
+    if( !err.isEmpty() ) {
+        Error() << err;
+        QMessageBox::critical( (QWidget*)(this),
+            "Export Survey Error", err );
+    }
+    else {
+        QMessageBox::information( (QWidget*)(this),
+            "Export Complete", "Export completed successfully." );
+    }
 }
 
 
@@ -1556,110 +1826,7 @@ void FileViewerWindow::externSelectChan( int ig )
 
 void FileViewerWindow::file_Link()
 {
-    FVLinkRec   L;
-
-    if( !linkShowDialog( L ) )
-        return;
-
-    QGuiApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
-
-    linkStaticSave();
-
-// -----
-// Close
-// -----
-
-    if( L.close ) {
-
-        std::vector<FileViewerWindow*>  vClose;
-
-        for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
-
-            FVOpen  &W = vOpen[iw];
-
-            if( W.runTag == L.runTag ) {
-
-                switch( W.fvw->fType ) {
-                    case fvAP:
-                        if( !L.apBits.testBit( W.fvw->df->streamip() ) )
-                            vClose.push_back( W.fvw );
-                        break;
-                    case fvLF:
-                        if( !L.lfBits.testBit( W.fvw->df->streamip() ) )
-                            vClose.push_back( W.fvw );
-                        break;
-                    case fvOB:
-                        if( !L.obBits.testBit( W.fvw->df->streamip() ) )
-                            vClose.push_back( W.fvw );
-                        break;
-                    case fvNI:
-                        if( !L.openNI )
-                            vClose.push_back( W.fvw );
-                        break;
-                }
-            }
-            else
-                vClose.push_back( W.fvw );
-        }
-
-        for( int ic = 0, nc = vClose.size(); ic < nc; ++ic )
-            vClose[ic]->close();
-    }
-
-// -------------
-// Open selected
-// -------------
-
-    QPoint  corner( 0, 0 );
-
-    L.runTag.load_mip2ip1();
-
-    for( int ib = 0, nb = L.apBits.size(); ib < nb; ++ib ) {
-        if( L.apBits.testBit( ib ) &&
-            (L.runTag.mip2ip1.isEmpty() ||
-             L.runTag.mip2ip1.contains( ib )) ) {
-
-            if( !linkFindName( L.runTag, ib, 0 ) )
-                linkOpenName( L.runTag, ib, 0, corner );
-        }
-    }
-
-    for( int ib = 0, nb = L.lfBits.size(); ib < nb; ++ib ) {
-        if( L.lfBits.testBit( ib ) &&
-            (L.runTag.mip2ip1.isEmpty() ||
-             L.runTag.mip2ip1.contains( ib )) ) {
-
-            if( !linkFindName( L.runTag, ib, 1 ) )
-                linkOpenName( L.runTag, ib, 1, corner );
-        }
-    }
-
-    for( int ib = 0, nb = L.obBits.size(); ib < nb; ++ib ) {
-        if( L.obBits.testBit( ib ) ) {
-            if( !linkFindName( L.runTag, ib, 2 ) )
-                linkOpenName( L.runTag, ib, 2, corner );
-        }
-    }
-
-    if( L.openNI ) {
-        if( !linkFindName( L.runTag, -1, 3 ) )
-            linkOpenName( L.runTag, -1, 3, corner );
-    }
-
-// ----
-// Tile
-// ----
-
-    if( L.tile )
-        linkTile( L );
-
-// ----
-// Link
-// ----
-
-    linkStaticRestore( L.runTag );
-
-    QGuiApplication::restoreOverrideCursor();
+    linkMenuHandler();
 }
 
 
@@ -1682,6 +1849,12 @@ void FileViewerWindow::file_Export()
     exportCtl->initGrfRange( grfVisBits, igSelected );
     exportCtl->initSmpRange( dragL, dragR );
     exportCtl->showExportDlg( this );
+}
+
+
+void FileViewerWindow::file_ExportSurvey()
+{
+    svyMenuExportHandler();
 }
 
 
@@ -2561,7 +2734,9 @@ void FileViewerWindow::initMenus()
     m = mb->addMenu( "&File" );
     m->addAction( "&Link", QKeySequence( tr("Ctrl+L") ), this, SLOT(file_Link()) );
     m->addAction( "&Unlink", QKeySequence( tr("Ctrl+U") ), this, SLOT(file_Unlink()) );
+    m->addSeparator();
     m->addAction( "&Export...", QKeySequence( tr("Ctrl+E") ), this, SLOT(file_Export()) );
+    m->addAction( "Export &Survey", QKeySequence( tr("Ctrl+S") ), this, SLOT(file_ExportSurvey()) );
     m->addSeparator();
     m->addAction( "Zoom &In...", QKeySequence( tr("Ctrl++") ), this, SLOT(file_ZoomIn()) );
     m->addAction( "Zoom &Out...", QKeySequence( tr("Ctrl+-") ), this, SLOT(file_ZoomOut()) );
@@ -4451,6 +4626,115 @@ void FileViewerWindow::linkStaticRestore( const DFRunTag &runTag )
         linkedRuns.insert( runTag.run_g_t() );
     else
         linkedRuns.remove( runTag.run_g_t() );
+}
+
+
+void FileViewerWindow::linkMenuHandler()
+{
+    FVLinkRec   L;
+
+    if( !linkShowDialog( L ) )
+        return;
+
+    QGuiApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+
+    linkStaticSave();
+
+// -----
+// Close
+// -----
+
+    if( L.close ) {
+
+        std::vector<FileViewerWindow*>  vClose;
+
+        for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
+
+            FVOpen  &W = vOpen[iw];
+
+            if( W.runTag == L.runTag ) {
+
+                switch( W.fvw->fType ) {
+                    case fvAP:
+                        if( !L.apBits.testBit( W.fvw->df->streamip() ) )
+                            vClose.push_back( W.fvw );
+                        break;
+                    case fvLF:
+                        if( !L.lfBits.testBit( W.fvw->df->streamip() ) )
+                            vClose.push_back( W.fvw );
+                        break;
+                    case fvOB:
+                        if( !L.obBits.testBit( W.fvw->df->streamip() ) )
+                            vClose.push_back( W.fvw );
+                        break;
+                    case fvNI:
+                        if( !L.openNI )
+                            vClose.push_back( W.fvw );
+                        break;
+                }
+            }
+            else
+                vClose.push_back( W.fvw );
+        }
+
+        for( int ic = 0, nc = vClose.size(); ic < nc; ++ic )
+            vClose[ic]->close();
+    }
+
+// -------------
+// Open selected
+// -------------
+
+    QPoint  corner( 0, 0 );
+
+    L.runTag.load_mip2ip1();
+
+    for( int ib = 0, nb = L.apBits.size(); ib < nb; ++ib ) {
+        if( L.apBits.testBit( ib ) &&
+            (L.runTag.mip2ip1.isEmpty() ||
+             L.runTag.mip2ip1.contains( ib )) ) {
+
+            if( !linkFindName( L.runTag, ib, 0 ) )
+                linkOpenName( L.runTag, ib, 0, corner );
+        }
+    }
+
+    for( int ib = 0, nb = L.lfBits.size(); ib < nb; ++ib ) {
+        if( L.lfBits.testBit( ib ) &&
+            (L.runTag.mip2ip1.isEmpty() ||
+             L.runTag.mip2ip1.contains( ib )) ) {
+
+            if( !linkFindName( L.runTag, ib, 1 ) )
+                linkOpenName( L.runTag, ib, 1, corner );
+        }
+    }
+
+    for( int ib = 0, nb = L.obBits.size(); ib < nb; ++ib ) {
+        if( L.obBits.testBit( ib ) ) {
+            if( !linkFindName( L.runTag, ib, 2 ) )
+                linkOpenName( L.runTag, ib, 2, corner );
+        }
+    }
+
+    if( L.openNI ) {
+        if( !linkFindName( L.runTag, -1, 3 ) )
+            linkOpenName( L.runTag, -1, 3, corner );
+    }
+
+// ----
+// Tile
+// ----
+
+    if( L.tile )
+        linkTile( L );
+
+// ----
+// Link
+// ----
+
+    linkStaticRestore( L.runTag );
+
+    QGuiApplication::restoreOverrideCursor();
 }
 
 

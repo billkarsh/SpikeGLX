@@ -421,6 +421,7 @@ public:
         int     inarow,
         int     maxrow,
         bool    gbldmx );
+    void svyMenuExportHandler() const;
     void svyScrollToShankBank( int shank, int bank );
 
 public slots:
@@ -458,6 +459,7 @@ private slots:
     void file_Link();
     void file_Unlink();
     void file_Export();
+    void file_ExportSurvey();
     void file_ChanMap();
     void file_ZoomIn();
     void file_ZoomOut();
@@ -571,6 +573,7 @@ private:
     void linkTile( FVLinkRec &L );
     void linkStaticSave();
     void linkStaticRestore( const DFRunTag &runTag );
+    void linkMenuHandler();
 };
 
 #endif  // FILEVIEWERWINDOW_H
