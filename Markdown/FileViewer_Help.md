@@ -198,6 +198,23 @@ offset (seconds) from original file start to this segment file start. That
 offset can be used to time-align events from a segment file with events in
 any original OBX and NI files.
 
+**Prefer CatGT 5.2**
+
+CatGT through version 5.1, trims the trailing edges of streams that belong
+to the same (g, t)-indices in pass-1, making them the same span. That's
+because, in normal runs, the start edges of such files are aligned but the
+trailing edges are a bit ragged due to the time required to command streams
+to stop recording.
+
+That trimming is less justified with these pseudo runs. Here, the probe files
+share a common segment index, but the transition response times differ among
+probes. So these files have only very rough correspondence in start time and
+span.
+
+Therefore, CatGT 5.2 and later seek the `svySegStartSecs` tag. If present,
+the trimming action is skipped. This isn't essential for correctness, rather
+it keeps the file spans a few tenths of a second longer.
+
 --------
 
 ## Selecting
