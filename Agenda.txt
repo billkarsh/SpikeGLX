@@ -4,6 +4,7 @@
 20251218
 --------
 + Add FileViewer::Export Survey.
++ Permit js=-2 for any SDK stream operation.
 
 20251201
 --------

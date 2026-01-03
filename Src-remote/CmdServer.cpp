@@ -268,6 +268,7 @@ ConfigCtl* CmdWorker::okjsip( const QString &cmd, int js, int ip )
             errMsg = QString("%1: obx stream-ip must be in range[0..%2].").arg( cmd ).arg( np - 1 );
             break;
         case jsIM:
+        case -jsIM:
             np = p.stream_nIM();
             if( !np ) {
                 errMsg = QString("%1: imec stream not enabled.").arg( cmd );
@@ -278,7 +279,7 @@ ConfigCtl* CmdWorker::okjsip( const QString &cmd, int js, int ip )
             errMsg = QString("%1: imec stream-ip must be in range[0..%2].").arg( cmd ).arg( np - 1 );
             break;
         default:
-            errMsg = QString("%1: stream-js must be in range [0..2].").arg( cmd );
+            errMsg = QString("%1: stream-js must be in set {-2,0,1,2}.").arg( cmd );
     }
 
     return 0;
@@ -295,12 +296,7 @@ ConfigCtl* CmdWorker::okStreamToks( const QString &cmd, int &js, int &ip, const 
     js = toks[0].toInt();
     ip = toks[1].toInt();
 
-    int absjs = js;
-
-    if( js == -jsIM && cmd == "FETCH" )
-        absjs = jsIM;
-
-    return okjsip( cmd, absjs, ip );
+    return okjsip( cmd, js, ip );
 }
 
 
@@ -572,6 +568,7 @@ void CmdWorker::getStreamAcqChans( QString &resp, const QStringList &toks )
             }
             break;
         case jsIM:
+        case -jsIM:
             {
                 const int*  cum = p.im.prbj[ip].imCumTypCnt;
                 int         AP, LF, SY;
@@ -600,10 +597,11 @@ void CmdWorker::getStreamI16ToVolts( QString &resp, const QStringList &toks )
     double              M;
 
     switch( js ) {
-        case jsNI: M = p.ni.int16ToV( 1, toks[2].toInt() ); break;
-        case jsOB: M = p.im.get_iStrOneBox( ip ).int16ToV( 1 ); break;
-        case jsIM: M = p.im.prbj[ip].intToV( 1, toks[2].toInt() ); break;
-        default: errMsg = "GETSTREAMI16TOVOLTS: js must be in range [0..2]."; return;
+        case jsNI:  M = p.ni.int16ToV( 1, toks[2].toInt() ); break;
+        case jsOB:  M = p.im.get_iStrOneBox( ip ).int16ToV( 1 ); break;
+        case jsIM:
+        case -jsIM: M = p.im.prbj[ip].intToV( 1, toks[2].toInt() ); break;
+        default: errMsg = "GETSTREAMI16TOVOLTS: js must be in set {-2,0,1,2}."; return;
     }
 
     resp = QString("%1\n").arg( M );
@@ -622,10 +620,11 @@ void CmdWorker::getStreamMaxInt( QString &resp, const QStringList &toks )
     int                 mx;
 
     switch( js ) {
-        case jsNI: mx = 32768; break;
-        case jsOB: mx = 32768; break;
-        case jsIM: mx = p.im.prbj[ip].roTbl->maxInt(); break;
-        default: errMsg = "GETSTREAMMAXINT: js must be in range [0..2]."; return;
+        case jsNI:  mx = 32768; break;
+        case jsOB:  mx = 32768; break;
+        case jsIM:
+        case -jsIM: mx = p.im.prbj[ip].roTbl->maxInt(); break;
+        default: errMsg = "GETSTREAMMAXINT: js must be in set {-2,0,1,2}."; return;
     }
 
     resp = QString("%1\n").arg( mx );
@@ -649,10 +648,11 @@ void CmdWorker::getStreamNP( QString &resp, const QStringList &toks )
     int                 np;
 
     switch( js ) {
-        case jsNI: np = p.stream_nNI(); break;
-        case jsOB: np = p.stream_nOB(); break;
-        case jsIM: np = p.stream_nIM(); break;
-        default: errMsg = "GETSTREAMNP: js must be in range [0..2]."; return;
+        case jsNI:  np = p.stream_nNI(); break;
+        case jsOB:  np = p.stream_nOB(); break;
+        case jsIM:
+        case -jsIM: np = p.stream_nIM(); break;
+        default: errMsg = "GETSTREAMNP: js must be in set {-2,0,1,2}."; return;
     }
 
     resp = QString("%1\n").arg( np );
@@ -668,7 +668,7 @@ void CmdWorker::getStreamSampleRate( QString &resp, const QStringList &toks )
         return;
 
     const DAQ::Params   &p = C->acceptedParams;
-    resp = QString("%1\n").arg( p.stream_rate( js, ip ), 0, 'f', 6 );
+    resp = QString("%1\n").arg( p.stream_rate( qAbs(js), ip ), 0, 'f', 6 );
 }
 
 
@@ -695,6 +695,7 @@ void CmdWorker::getStreamSaveChans( QString &resp, const QStringList &toks )
                 Q_ARG(int, ip) );
             break;
         case jsIM:
+        case -jsIM:
             QMetaObject::invokeMethod(
                 C, "cmdSrvGetsSaveChansIm",
                 Qt::BlockingQueuedConnection,
@@ -723,13 +724,14 @@ void CmdWorker::getStreamSN( QString &resp, const QStringList &toks )
             }
             break;
         case jsIM:
+        case -jsIM:
             {
                 const CimCfg::ImProbeDat    &P = C->prbTab.get_iProbe( ip );
                 resp = QString("%1 %2\n").arg( P.sn ).arg( P.type );
             }
             break;
         default:
-            errMsg = "GETSTREAMSN: Only valid for js = {1,2}.";
+            errMsg = "GETSTREAMSN: Only valid for js = {-2,1,2}.";
     }
 }
 
@@ -754,6 +756,7 @@ void CmdWorker::getStreamVoltageRange( QString &resp, const QStringList &toks )
             resp    = QString("%1 %2\n").arg( -V ).arg( V );
             break;
         case jsIM:
+        case -jsIM:
             V       = p.im.prbj[ip].roTbl->maxVolts();
             resp    = QString("%1 %2\n").arg( -V ).arg( V );
             break;
@@ -802,6 +805,9 @@ void CmdWorker::mapSample( QString &resp, const QStringList &toks )
 
     if( !(C = okjsip( "MAPSAMPLE (src)", srcjs, srcip )) )
         return;
+
+    dstjs = qAbs( dstjs );
+    srcjs = qAbs( srcjs );
 
     if( dstjs == srcjs && dstip == srcip ) {
         resp = toks.at( 2 ).trimmed() + "\n";
@@ -2204,7 +2210,7 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
     else if( cmd == "GETSTREAMFILESTART" ) {
         int js, ip;
         if( okStreamToks( cmd, js, ip, toks ) )
-            resp = QString("%1\n").arg( RUN->dfGetFileStart( js, ip ) );
+            resp = QString("%1\n").arg( RUN->dfGetFileStart( qAbs(js), ip ) );
     }
     else if( cmd == "GETSTREAMI16TOVOLTS" )
         getStreamI16ToVolts( resp, toks );
@@ -2215,7 +2221,7 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
     else if( cmd == "GETSTREAMSAMPLECOUNT" ) {
         int js, ip;
         if( okStreamToks( cmd, js, ip, toks ) )
-            resp = QString("%1\n").arg( RUN->getSampleCount( js, ip ) );
+            resp = QString("%1\n").arg( RUN->getSampleCount( qAbs(js), ip ) );
     }
     else if( cmd == "GETSTREAMSAMPLERATE" )
         getStreamSampleRate( resp, toks );
@@ -2240,7 +2246,7 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
     else if( cmd == "ISUSRORDER" ) {
         int js, ip;
         if( okStreamToks( cmd, js, ip, toks ) )
-            resp = QString("%1\n").arg( RUN->grfIsUsrOrder( js, ip ) );
+            resp = QString("%1\n").arg( RUN->grfIsUsrOrder( qAbs(js), ip ) );
     }
     else if( cmd == "MAPSAMPLE" )
         mapSample( resp, toks );
