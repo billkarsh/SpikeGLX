@@ -142,6 +142,7 @@ private:
     void startRun();
     void stopRun();
     void triggerGT( const QStringList &toks );
+    void verifyParams();
     void verifySha1( QString file );
     bool doQuery( const QString &cmd, const QStringList &toks );
     bool doCommand( const QString &cmd, const QStringList &toks );

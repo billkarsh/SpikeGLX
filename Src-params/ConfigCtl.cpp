@@ -31,6 +31,7 @@ using namespace Neuropixels;
 //
 ConfigCtl::ConfigCtl( QObject *parent )
     :   QObject(parent),
+        cfgDlg(0),
         cfgUI(0),
         devTab(0),
         imTab(0),
@@ -40,7 +41,6 @@ ConfigCtl::ConfigCtl( QObject *parent )
         gateTab(0),
         trigTab(0),
         snsTab(0),
-        cfgDlg(0),
         usingIM(false), usingOB(false),
         usingNI(false), validated(false)
 {
@@ -938,12 +938,16 @@ QString ConfigCtl::cmdSrvGetsParamStr( int type, int ip ) const
         case 2: return acceptedParams.im.prbj[ip].remoteGetPrbEach();
         case 3: return acceptedParams.im.get_iStrOneBox( ip ).remoteGetObxEach();
     }
+
+    return QString();
 }
 
 
 // Return empty QString or error string.
-// Remote gets params of type:
+// Remote sets params of type:
 // {0=SETPARAMS, 1=SETPARAMSIMALL, 2=SETPARAMSIMPRB(ip), 3=SETPARAMSOBX(ip)}.
+//
+// Send: {paramString="", type=0} => verify acceptedParams.
 //
 QString ConfigCtl::cmdSrvSetsParamStr( const QString &paramString, int type, int ip )
 {
@@ -960,9 +964,11 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &paramString, int type, int
 
 // Then overwrite entries
 
-    switch( type ) {
-        case 0: DAQ::Params::remoteSetDAQParams( paramString ); break;
-        case 1: CimCfg::PrbAll::remoteSetPrbAll( paramString ); break;
+    if( !paramString.isEmpty() ) {
+        switch( type ) {
+            case 0: DAQ::Params::remoteSetDAQParams( paramString ); break;
+            case 1: CimCfg::PrbAll::remoteSetPrbAll( paramString ); break;
+        }
     }
 
 // ----------------------

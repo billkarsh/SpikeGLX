@@ -2106,6 +2106,26 @@ void CmdWorker::triggerGT( const QStringList &toks )
 }
 
 
+void CmdWorker::verifyParams()
+{
+    ConfigCtl   *C = okCfgValidated( "VERIFYPARAMS" );
+
+    if( !C )
+        return;
+
+    QMetaObject::invokeMethod(
+        C, "cmdSrvSetsParamStr",
+        Qt::BlockingQueuedConnection,
+        Q_RETURN_ARG(QString, errMsg),
+        Q_ARG(QString, QString()),
+        Q_ARG(int, 0),
+        Q_ARG(int, 0) );
+
+    if( !errMsg.isEmpty() )
+        errMsg = "VERIFYPARAMS: " + errMsg;
+}
+
+
 void CmdWorker::verifySha1( QString file )
 {
     MainApp *app = mainApp();
@@ -2358,6 +2378,8 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
         stopRun();
     else if( cmd == "TRIGGERGT" )
         triggerGT( toks );
+    else if( cmd == "VERIFYPARAMS" )
+        verifyParams();
     else if( cmd == "VERIFYSHA1" )
         verifySha1( toks.join( " " ).trimmed().replace( "\\", "/" ) );
     else if( cmd == "BYE"
