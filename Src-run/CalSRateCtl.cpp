@@ -179,12 +179,12 @@ void CalSRateCtl::apply()
 // ----
 
     DAQ::Params             p;
-    ConfigCtl               *cfg    = mainApp()->cfgCtl();
-    CimCfg::ImProbeTable    &prbTab = cfg->prbTab;
+    ConfigCtl               *C  = mainApp()->cfgCtl();
+    CimCfg::ImProbeTable    &T  = C->prbTab;
 
     p.loadSettings();
-    prbTab.loadProbeSRates();
-    prbTab.loadOneBoxSRates();
+    T.loadProbeSRates();
+    T.loadOneBoxSRates();
 
     for( int is = 0, ns = vIM.size(); is < ns; ++is ) {
 
@@ -208,14 +208,14 @@ void CalSRateCtl::apply()
                 // Update the current PrbEach records that
                 // correspond to this hssn.
 
-                for( int ip = 0, np = prbTab.nSelProbes(); ip < np; ++ip ) {
+                for( int ip = 0, np = T.nSelProbes(); ip < np; ++ip ) {
 
-                    if( prbTab.get_iProbe( ip ).hssn == hssn )
+                    if( T.get_iProbe( ip ).hssn == hssn )
                         p.im.prbj[ip].srate = S.av;
                 }
 
                 // Update database
-                prbTab.set_hssn_SRate( hssn, S.av );
+                T.set_hssn_SRate( hssn, S.av );
             }
 
             if( isFChk ) {
@@ -290,14 +290,14 @@ void CalSRateCtl::apply()
                 // Update the current ObxEach records that
                 // correspond to this obsn.
 
-                for( int ip = 0, np = prbTab.nSelOneBox(); ip < np; ++ip ) {
+                for( int ip = 0, np = T.nSelOneBox(); ip < np; ++ip ) {
 
-                    if( prbTab.get_iOneBox( ip ).obsn == obsn )
+                    if( T.get_iOneBox( ip ).obsn == obsn )
                         p.im.mod_iSelOneBox( ip ).srate = S.av;
                 }
 
                 // Update database
-                prbTab.set_obsn_SRate( obsn, S.av );
+                T.set_obsn_SRate( obsn, S.av );
             }
 
             if( isFChk ) {
@@ -365,9 +365,9 @@ void CalSRateCtl::apply()
             "Nothing done: No new results were calculated." );
     }
     else if( isGChk ) {
-        cfg->setParams( p, true );
-        prbTab.saveProbeSRates();
-        prbTab.saveOneBoxSRates();
+        C->setParams( p, true );
+        T.saveProbeSRates();
+        T.saveOneBoxSRates();
     }
 }
 
