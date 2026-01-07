@@ -493,6 +493,27 @@ void CmdWorker::getParamsOneBox( QString &resp, const QStringList &toks )
 }
 
 
+void CmdWorker::getProbeAddrs( QString &resp )
+{
+    resp = "()";
+
+    ConfigCtl               *C  = mainApp()->cfgCtl();
+    CimCfg::ImProbeTable    &T  = C->prbTab;
+    int                     np  = T.nSelProbes();
+
+    if( np ) {
+        resp.clear();
+        for( int ip = 0; ip < np; ++ip ) {
+            const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
+            resp += QString("(%1,%2,%3,%4)")
+                    .arg( ip ).arg( P.slot ).arg( P.port ).arg( P.dock );
+        }
+    }
+
+    resp += "\n";
+}
+
+
 void CmdWorker::getProbeList( QString &resp )
 {
     resp = "()";
@@ -2221,6 +2242,8 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
         getParamsImProbe( resp, toks );
     else if( cmd == "GETPARAMSOBX" )
         getParamsOneBox( resp, toks );
+    else if( cmd == "GETPROBEADDRS" )
+        getProbeAddrs( resp );
     else if( cmd == "GETPROBELIST" )
         getProbeList( resp );
     else if( cmd == "GETRUNNAME" )

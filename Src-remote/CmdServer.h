@@ -96,6 +96,7 @@ private:
     void getParamsImAll( QString &resp );
     void getParamsImProbe( QString &resp, const QStringList &toks );
     void getParamsOneBox( QString &resp, const QStringList &toks );
+    void getProbeAddrs( QString &resp );
     void getProbeList( QString &resp );
     void getRunName( QString &resp );
     void getStreamAcqChans( QString &resp, const QStringList &toks );
