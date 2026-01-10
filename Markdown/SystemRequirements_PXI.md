@@ -1,11 +1,12 @@
 ## System Requirements for Neuropixels
 
-**>> Updated: October, 2025 <<**
+**>> Updated: January, 2026 <<**
 
 What's new:
 
 * Chassis notes, tested NI-1090.
 * Avoid Core Ultra (Meteor Lake) CPU.
+* What About This CPU?
 
 --------
 
@@ -34,6 +35,7 @@ What's new:
             * [For 384-channel probes](#for-384-channel-probes)
             * [For 1536-channel probes](#for-1536-channel-probes)
             * [Skip Core Ultra](#skip-core-ultra)
+            * [What About This CPU?](#what-about-this-cpu)
         * [Acquisition GPU](#acquisition-gpu)
         * [Drive](#drive)
         * [Slots and Ports](#slots-and-ports)
@@ -510,6 +512,15 @@ These are performance oriented CPUs that should be fine. We have tested
 13th generation 'Raptor Lake' CPUs such as the 'Core 5 210H' and the
 'i7-13700H' which are actually less expensive than the Core Ultras yet
 work flawlessly. These are better choices at this time. 
+
+#### What About This CPU?
+
+When shopping for computer systems you are likely to come across CPU models
+that we haven't specifically tested. It's pretty useful to use ChatGPT to
+ask "Is the intel XXX CPU or its CPU family more oriented toward energy
+efficiency or toward high performance?" If there is any suggestion in the
+answer that efficiency is a primary goal, then avoid that CPU. The best
+choices will have a clear performance orientation.
 
 ### Acquisition GPU
 
