@@ -1561,6 +1561,40 @@ void CmdWorker::pauseGraphs( QStringList toks )
 }
 
 
+// Expected tok params:
+// 0) errlvl
+// 1) devstring
+//
+void CmdWorker::selectDevices( QStringList toks )
+{
+    if( toks.size() < 2 ) {
+        errMsg = "SELECTDEVS: Requires Requires params {devstring, errlvl}.";
+        return;
+    }
+
+    MainApp *app = mainApp();
+
+    if( app->getRun()->isRunning() ) {
+        errMsg = "SELECTDEVS: Cannot select devices while running.";
+        return;
+    }
+
+    ConfigCtl   *C      = app->cfgCtl();
+    int         errlvl  = qBound( 1, toks.front().toInt(), 2 );
+    toks.pop_front();
+
+    QMetaObject::invokeMethod(
+        C, "cmdSrvSelectsDevices",
+        Qt::BlockingQueuedConnection,
+        Q_RETURN_ARG(QString, errMsg),
+        Q_ARG(QString, toks.join( " " ).trimmed()),
+        Q_ARG(int, errlvl) );
+
+    if( !errMsg.isEmpty() )
+        errMsg = "SELECTDEVS: " + errMsg;
+}
+
+
 // Expected tok parameter is Pinpoint data string:
 // [probe-id,shank-id](startpos,endpos,R,G,B,rgnname)...(startpos,endpos,R,G,B,rgnname)
 //    - probe-id: SpikeGLX logical probe id.
@@ -2384,6 +2418,8 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
         par2Start( toks );
     else if( cmd == "PAUSEGRF" )
         pauseGraphs( toks );
+    else if( cmd == "SELECTDEVS" )
+        selectDevices( toks );
     else if( cmd == "SETANATOMYPP" )
         setAnatomyPP( toks );
     else if( cmd == "SETAUDIOENABLE" )

@@ -7,6 +7,7 @@
 + Permit js=-2 for any SDK stream operation.
 + Support remote verifyParams.
 + Support remote getProbeAddrs.
++ Support remote selectDevices.
 + Improve parsing for remote niDOSet, obxAOSet.
 + Improve parsing for remote ni and obx wave ops.
 

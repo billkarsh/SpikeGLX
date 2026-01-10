@@ -161,6 +161,13 @@ void CimCfg::ImProbeTable::init()
 }
 
 
+void CimCfg::ImProbeTable::uncheckAll()
+{
+    for( int i = 0, n = probes.size(); i < n; ++i )
+        probes[i].enab = false;
+}
+
+
 // Build {iprb2dat[], iobx2dat[], slot[]} index arrays based on:
 // entry enabled.
 //
@@ -450,7 +457,7 @@ bool CimCfg::ImProbeTable::scanCfgSlots( QVector<CfgSlot> &vCS, QString &msg ) c
 }
 
 
-bool CimCfg::ImProbeTable::mapObxSlots( QStringList &slVers )
+bool CimCfg::ImProbeTable::mapObxSlots( ERRLVL &R )
 {
 #ifdef HAVE_IMEC
 
@@ -461,7 +468,7 @@ bool CimCfg::ImProbeTable::mapObxSlots( QStringList &slVers )
     err = np_scanBS();
 
     if( err != SUCCESS ) {
-        slVers.append(
+        R.app_put(
             QString("IMEC scanBS()%1").arg( makeErrorString( err ) ) );
         return false;
     }
@@ -496,11 +503,11 @@ bool CimCfg::ImProbeTable::mapObxSlots( QStringList &slVers )
             // Got user assignment?
 
             if( ID == -1 ) {
-                slVers.append(
+                R.app_put(
                     QString("SLOTS: You haven't assigned slot %1"
                     " to a OneBox.").arg( slot ) );
 instruct:
-                slVers.append(
+                R.append(
                     "Use 'Configure Slots' (above the table)"
                     " to check your slot assignments." );
                 return false;
@@ -511,7 +518,7 @@ instruct:
             err = np_mapBS( ID, slot );
 
             if( err != SUCCESS ) {
-                slVers.append(
+                R.app_put(
                     QString("IMEC mapBS(slot %1, ID %2)%3")
                     .arg( slot ).arg( ID )
                     .arg( makeErrorString( err ) ) );
@@ -525,7 +532,7 @@ instruct:
             err = np_getDeviceInfo( slot, &BS );
 
             if( err != SUCCESS ) {
-                slVers.append(
+                R.app_put(
                     QString("IMEC mapBS-check(slot %1, ID %2)%3")
                     .arg( slot ).arg( ID )
                     .arg( makeErrorString( err ) ) );
@@ -533,7 +540,7 @@ instruct:
             }
 
             if( BS.platformid != NPPlatform_USB || BS.ID != ID ) {
-                slVers.append(
+                R.app_put(
                     QString("SLOTS: You haven't assigned slot %1"
                     " to an existing OneBox.").arg( slot ) );
                 goto instruct;
@@ -541,7 +548,7 @@ instruct:
         }
     }
 #else
-    Q_UNUSED( slVers )
+    Q_UNUSED( R )
 #endif
 
     return true;
@@ -1826,7 +1833,7 @@ void CimCfg::closeAllBS( bool report )
 #define DBG 0
 
 bool CimCfg::detect(
-    QStringList             &slVers,
+    ERRLVL                  &R,
     QStringList             &slBIST,
     QVector<int>            &vHSpsv,
     QVector<int>            &vHS20,
@@ -1841,8 +1848,13 @@ bool CimCfg::detect(
 Log()<<"[[ Start Detect";
 guiBreathe();
 #endif
-    T.init();
-    slVers.clear();
+
+    if( R.isRemote() )
+        ;   // preserve cmdSrvSelectsDevices() passive (pn, sn)
+    else
+        T.init();
+
+    R.sl->clear();
     slBIST.clear();
     vHSpsv.clear();
     vHS20.clear();
@@ -1866,12 +1878,12 @@ guiBreathe();
     if( T.anySlotUSBType() ) {
         QString ftdi;
         if( !ftdiCheck( ftdi, true ) ) {
-            slVers.append( ftdi );
+            R.app_put( ftdi );
             return false;
         }
     }
 
-    if( !T.mapObxSlots( slVers ) )
+    if( !T.mapObxSlots( R ) )
         return false;
 #if DBG
 Log()<<"  Slots mapped";
@@ -1882,7 +1894,7 @@ guiBreathe();
 Log()<<"[ Start detect_API";
 guiBreathe();
 #endif
-    detect_API( slVers, T );
+    detect_API( *R.sl, T );
 #if DBG
 Log()<<"End detect_API ]";
 guiBreathe();
@@ -1892,7 +1904,7 @@ guiBreathe();
 Log()<<"[ Start detect_Slots";
 guiBreathe();
 #endif
-    bool    ok = detect_slots( slVers, T );
+    bool    ok = detect_slots( R, T );
 #if DBG
 Log()<<"End detect_Slots ]";
 guiBreathe();
@@ -1905,7 +1917,7 @@ Log()<<"[ Start detect_Headstages";
 guiBreathe();
 #endif
     if( ok )
-        ok = detect_headstages( slVers, qbMap, vHSpsv, vHS20, T );
+        ok = detect_headstages( R, qbMap, vHSpsv, vHS20, T );
 #if DBG
 Log()<<"End detect_Headstages ]";
 guiBreathe();
@@ -1916,7 +1928,7 @@ Log()<<"[ Start detect_Probes";
 guiBreathe();
 #endif
     if( ok )
-        ok = detect_probes( slVers, slBIST, qbMap, vHSpsv, T, srCheck, psbCheck );
+        ok = detect_probes( R, slBIST, qbMap, vHSpsv, T, srCheck, psbCheck );
 #if DBG
 Log()<<"End detect_Probes ]";
 guiBreathe();
@@ -1975,7 +1987,7 @@ guiBreathe();
 
 
 bool CimCfg::detect_slots(
-    QStringList             &slVers,
+    ERRLVL                  &R,
     ImProbeTable            &T )
 {
     QStringList bs_bsc;
@@ -1990,23 +2002,23 @@ guiBreathe();
 #endif
 
         if( T.simprb.isSimSlot( slot ) ) {
-            detect_simSlot( slVers, T, slot );
+            detect_simSlot( *R.sl, T, slot );
             continue;
         }
 
-        if( !detect_slot_type( slVers, T, slot ) )
+        if( !detect_slot_type( R, T, slot ) )
             return false;
 
-        if( !detect_slot_openBS( slVers, slot ) )
+        if( !detect_slot_openBS( R, slot ) )
             return false;
 
-        if( !detect_slot_BSFW( slVers, V, slot ) )
+        if( !detect_slot_BSFW( R, V, slot ) )
             return false;
 
-        if( !detect_slot_BSC_hID( slVers, V, slot ) )
+        if( !detect_slot_BSC_hID( R, V, slot ) )
             return false;
 
-        if( !detect_slot_BSCFW( slVers, T, V, slot ) )
+        if( !detect_slot_BSCFW( R, T, V, slot ) )
             return false;
 
         if( T.getSlotType( slot ) == NPPlatform_PXI )
@@ -2025,13 +2037,13 @@ guiBreathe();
 
 #ifdef HAVE_IMEC
     if( bs_bsc.size() ) {
-
-        slVers.append("");
-        slVers.append("ERROR: Wrong IMEC Firmware Version(s) ---");
+        R.put("Wrong PXI firmware version(s); do manual 'Detect'");
+        R.append("");
+        R.append("ERROR: Wrong IMEC Firmware Version(s) ---");
         foreach( const QString &s, bs_bsc )
-            slVers.append( s );
-        slVers.append("(1) Select menu item 'Tools/Update Imec PXIe Firmware'.");
-        slVers.append("(2) Read the help for that dialog.");
+            R.append( s );
+        R.append("(1) Select menu item 'Tools/Update Imec PXIe Firmware'.");
+        R.append("(2) Read the help for that dialog.");
         return false;
     }
 #endif
@@ -2041,7 +2053,7 @@ guiBreathe();
 
 
 bool CimCfg::detect_slot_type(
-    QStringList             &slVers,
+    ERRLVL                  &R,
     ImProbeTable            &T,
     int                     slot )
 {
@@ -2050,10 +2062,10 @@ bool CimCfg::detect_slot_type(
     NP_ErrorCode    err = np_getDeviceInfo( slot, &bs );
 
     if( err != SUCCESS ) {
-        slVers.append(
+        R.app_put(
             QString("IMEC getDeviceInfo(slot %1)%2")
             .arg( slot ).arg( makeErrorString( err ) ) );
-        slVers.append(
+        R.app_put(
             "Use 'Configure Slots' (above the table)"
             " to check your slot assignments." );
         return false;
@@ -2072,18 +2084,18 @@ guiBreathe();
 
 
 bool CimCfg::detect_slot_openBS(
-    QStringList             &slVers,
+    ERRLVL                  &R,
     int                     slot )
 {
 #ifdef HAVE_IMEC
     NP_ErrorCode    err = np_openBS( slot );
 
     if( err != SUCCESS ) {
-        slVers.append(
+        R.app_put(
             QString("IMEC openBS(slot %1)%2")
             .arg( slot ).arg( makeErrorString( err ) ) );
-        slVers.append(
-            "Check {slot,port} assignments, connections and power." );
+        R.app_put(
+            "Check (slot,port) assignments, connections and power." );
         return false;
     }
 #endif
@@ -2098,7 +2110,7 @@ guiBreathe();
 
 
 bool CimCfg::detect_slot_BSFW(
-    QStringList             &slVers,
+    ERRLVL                  &R,
     ImSlotVers              &V,
     int                     slot )
 {
@@ -2107,7 +2119,7 @@ bool CimCfg::detect_slot_BSFW(
     NP_ErrorCode    err = np_bs_getFirmwareInfo( slot, &info );
 
     if( err != SUCCESS ) {
-        slVers.append(
+        R.app_put(
             QString("IMEC bs_getFirmwareInfo(slot %1)%2")
             .arg( slot ).arg( makeErrorString( err ) ) );
         return false;
@@ -2119,7 +2131,7 @@ bool CimCfg::detect_slot_BSFW(
     V.bsfw = "0.0.0";
 #endif
 
-    slVers.append(
+    R.append(
         QString("BS(slot %1) firmware version %2")
         .arg( slot ).arg( V.bsfw ) );
 
@@ -2133,7 +2145,7 @@ guiBreathe();
 
 
 bool CimCfg::detect_slot_BSC_hID(
-    QStringList             &slVers,
+    ERRLVL                  &R,
     ImSlotVers              &V,
     int                     slot )
 {
@@ -2142,7 +2154,7 @@ bool CimCfg::detect_slot_BSC_hID(
     NP_ErrorCode    err = np_getBSCHardwareID( slot, &hID );
 
     if( err != SUCCESS ) {
-        slVers.append(
+        R.app_put(
             QString("IMEC getBSCHardwareID(slot %1)%2")
             .arg( slot ).arg( makeErrorString( err ) ) );
         return false;
@@ -2157,7 +2169,7 @@ bool CimCfg::detect_slot_BSC_hID(
     V.bscpn = "sim";
 #endif
 
-    slVers.append(
+    R.append(
         QString("BSC(slot %1) part number %2")
         .arg( slot ).arg( V.bscpn ) );
 
@@ -2171,7 +2183,7 @@ bool CimCfg::detect_slot_BSC_hID(
     V.bsctech = t_tech_sim;
 #endif
 
-    slVers.append(
+    R.append(
         QString("BSC(slot %1) tech %2")
         .arg( slot ).arg( IMROTbl::strTech( V.bsctech ) ) );
 
@@ -2185,7 +2197,7 @@ bool CimCfg::detect_slot_BSC_hID(
     V.bscsn = "0";
 #endif
 
-    slVers.append(
+    R.append(
         QString("BSC(slot %1) serial number %2")
         .arg( slot ).arg( V.bscsn ) );
 
@@ -2199,7 +2211,7 @@ bool CimCfg::detect_slot_BSC_hID(
     V.bschw = "0.0";
 #endif
 
-    slVers.append(
+    R.append(
         QString("BSC(slot %1) hardware version %2")
         .arg( slot ).arg( V.bschw ) );
 
@@ -2213,7 +2225,7 @@ guiBreathe();
 
 
 bool CimCfg::detect_slot_BSCFW(
-    QStringList             &slVers,
+    ERRLVL                  &R,
     ImProbeTable            &T,
     ImSlotVers              &V,
     int                     slot )
@@ -2227,7 +2239,7 @@ bool CimCfg::detect_slot_BSCFW(
         err = np_bsc_getFirmwareInfo( slot, &info );
 
         if( err != SUCCESS ) {
-            slVers.append(
+            R.app_put(
                 QString("IMEC bsc_getFirmwareInfo(slot %1)%2")
                 .arg( slot ).arg( makeErrorString( err ) ) );
             return false;
@@ -2242,7 +2254,7 @@ bool CimCfg::detect_slot_BSCFW(
         err = np_ob_getFirmwareInfo( slot, &info );
 
         if( err != SUCCESS ) {
-            slVers.append(
+            R.app_put(
                 QString("IMEC ob_getFirmwareInfo(slot %1)%2")
                 .arg( slot ).arg( makeErrorString( err ) ) );
             return false;
@@ -2256,7 +2268,7 @@ bool CimCfg::detect_slot_BSCFW(
     V.bscfw = "0.0.0";
 #endif
 
-    slVers.append(
+    R.append(
         QString("BSC(slot %1) firmware version %2")
         .arg( slot ).arg( V.bscfw ) );
 
@@ -2342,7 +2354,7 @@ static bool qbAdd(
 
 
 bool CimCfg::detect_headstages(
-    QStringList             &slVers,
+    ERRLVL                  &R,
     QMap<int,QString>       &qbMap,
     QVector<int>            &vHSpsv,
     QVector<int>            &vHS20,
@@ -2408,7 +2420,7 @@ guiBreathe();
         err = np_detectHeadStage( P.slot, P.port, &isHS );
 
         if( err != SUCCESS ) {
-            slVers.append(
+            R.app_put(
                 QString("IMEC np_detectHeadStage(slot %1, port %2)%3")
                 .arg( P.slot ).arg( P.port )
                 .arg( makeErrorString( err ) ) );
@@ -2416,9 +2428,9 @@ guiBreathe();
         }
 
         if( !isHS ) {
-            slVers.append("");
-            slVers.append(QString("No headstage at (slot %1, port %2)").arg( P.slot ).arg( P.port ));
-            slVers.append("Only check boxes for hardware you intend to run.");
+            R.append("");
+            R.app_put(QString("No headstage at (slot %1, port %2)").arg( P.slot ).arg( P.port ));
+            R.app_put("Only check boxes for hardware you intend to run.");
             return false;
         }
 #endif
@@ -2431,24 +2443,24 @@ guiBreathe();
         err = np_getHeadstageHardwareID( P.slot, P.port, &hID );
 
         if( err != SUCCESS ) {
-            slVers.append(
+            R.app_put(
                 QString("IMEC getHeadstageHardwareID(slot %1, port %2)%3")
                 .arg( P.slot ).arg( P.port )
                 .arg( makeErrorString( err ) ) );
             if( err == NO_LINK ) {
-                slVers.append("");
-                slVers.append("Only check boxes for hardware you intend to run. If you indeed plugged");
-                slVers.append("something in here, error 44 DOES NOT mean the headstage is bad. Rather,");
-                slVers.append("there is a poor connection somewhere on the path from the port to the probe flex.");
-                slVers.append("Top things to try:");
-                slVers.append(" 1. Reconnect flex to headstage firmly and squarely; try several times.");
-                slVers.append(" 2. Try different pairing of probe/headstage for better mechanical fit.");
-                slVers.append(" 3. Try different 5-meter cable.");
+                R.append("");
+                R.append("Only check boxes for hardware you intend to run. If you indeed plugged");
+                R.append("something in here, error 44 DOES NOT mean the headstage is bad. Rather,");
+                R.append("there is a poor connection somewhere on the path from the port to the probe flex.");
+                R.append("Top things to try:");
+                R.append(" 1. Reconnect flex to headstage firmly and squarely; try several times.");
+                R.append(" 2. Try different pairing of probe/headstage for better mechanical fit.");
+                R.append(" 3. Try different 5-meter cable.");
             }
             else if( err == TIMEOUT ) {
-                slVers.append("");
-                slVers.append("Error 8 will occur if you detect with a headstage tester attached.");
-                slVers.append("Use the headstage test dongle only with command: Tools/HST.");
+                R.append("");
+                R.append("Error 8 will occur if you detect with a headstage tester attached.");
+                R.append("Use the headstage test dongle only with command: Tools/HST.");
             }
             return false;
         }
@@ -2466,7 +2478,7 @@ guiBreathe();
                 P.slot, P.port );
 
         if( !techMsg.isEmpty() ) {
-            slVers.append( techMsg );
+            R.app_put( techMsg );
             return false;
         }
 
@@ -2485,6 +2497,19 @@ guiBreathe();
                 if( Z.slot != P.slot || Z.port != P.port )
                     vHSpsv.push_back( ip );
             }
+
+            if( R.isRemote() && P.pn.isEmpty() ) {
+                R.app_put(
+                QString("Passive PN missing for (slot,port)=(%1,%2)")
+                .arg( P.slot ).arg( P.port ) );
+                return false;
+            }
+        }
+        else if( R.isRemote() && !P.pn.isEmpty() ) {
+            R.app_put(
+            QString("Passive PN %1 misassigned to (slot,port)=(%2,%3)")
+            .arg( P.pn ).arg( P.slot ).arg( P.port ) );
+            return false;
         }
 
         // ---------------------------
@@ -2503,7 +2528,7 @@ Log()<<"  headstage: np_getHeadstageHardwareID done";
 guiBreathe();
 #endif
 
-        slVers.append(
+        R.append(
             QString("HS(slot %1, port %2) part number %3")
             .arg( P.slot ).arg( P.port ).arg( P.hspn ) );
 
@@ -2512,7 +2537,7 @@ guiBreathe();
         // -----------
 
         if( P.dock > 1 && P.nHSDocks() == 1 ) {
-            slVers.append(
+            R.app_put(
                 QString("SpikeGLX nHSDocks(slot %1, port %2, dock %3)"
                 " error 'Only select dock 1 with this head stage'.")
                 .arg( P.slot ).arg( P.port ).arg( P.dock ) );
@@ -2566,7 +2591,7 @@ Log()<<"  headstage: vHS20 check done";
 guiBreathe();
 #endif
 
-        slVers.append(
+        R.append(
             QString("HS(slot %1, port %2) hardware version %3")
             .arg( P.slot ).arg( P.port ).arg( P.hshw ) );
 
@@ -2581,7 +2606,7 @@ guiBreathe();
             err = np_hs_getFirmwareInfo( P.slot, P.port, &info );
 
             if( err != SUCCESS ) {
-                slVers.append(
+                R.app_put(
                     QString("IMEC hs_getFirmwareInfo(slot %1 port %2)%3")
                     .arg( P.slot ).arg( P.port ).arg( makeErrorString( err ) ) );
                 return false;
@@ -2593,7 +2618,7 @@ guiBreathe();
         else
             P.hsfw = "0.0.0";
 
-        slVers.append(
+        R.append(
             QString("HS(slot %1, port %2) firmware version %3")
             .arg( P.slot ).arg( P.port ).arg( P.hsfw ) );
     }
@@ -2615,15 +2640,15 @@ guiBreathe();
 
             if( ( v.contains( "1:1" ) && !v.contains( "2:2" )) ||
                 (!v.contains( "1:1" ) &&  v.contains( "2:2" )) ) {
-                slVers.append(
+                R.app_put(
                     QString("Quadbase error: Both plugs required(slot %1, ports (1,2))")
                     .arg( it.key() ) );
-                slVers.append("Always plug in both connectors {(1,2) or (3,4)} AND check the corresponding boxes.");
+                R.app_put("Always plug in both connectors {(1,2) or (3,4)} AND check the corresponding boxes.");
                 return false;
             }
 
             if( v.contains( "1:2" ) || v.contains( "2:1" ) ) {
-                slVers.append(
+                R.app_put(
                     QString("Quadbase error: Plugs reversed(slot %1, ports (1,2))")
                     .arg( it.key() ) );
                 return false;
@@ -2631,15 +2656,15 @@ guiBreathe();
 
             if( ( v.contains( "3:1" ) && !v.contains( "4:2" )) ||
                 (!v.contains( "3:1" ) &&  v.contains( "4:2" )) ) {
-                slVers.append(
+                R.app_put(
                     QString("Quadbase error: Both plugs required(slot %1, ports (3,4))")
                     .arg( it.key() ) );
-                slVers.append("Always plug in both connectors {(1,2) or (3,4)} AND check the corresponding boxes.");
+                R.app_put("Always plug in both connectors {(1,2) or (3,4)} AND check the corresponding boxes.");
                 return false;
             }
 
             if( v.contains( "3:2" ) || v.contains( "4:1" ) ) {
-                slVers.append(
+                R.app_put(
                     QString("Quadbase error: Plugs reversed(slot %1, ports (3,4))")
                     .arg( it.key() ) );
                 return false;
@@ -2653,7 +2678,7 @@ guiBreathe();
 
 
 bool CimCfg::detect_probes(
-    QStringList             &slVers,
+    ERRLVL                  &R,
     QStringList             &slBIST,
     const QMap<int,QString> &qbMap,
     const QVector<int>      &vHSpsv,
@@ -2665,7 +2690,7 @@ bool CimCfg::detect_probes(
     NP_ErrorCode    err;
     HardwareID      hID;
 #else
-    Q_UNUSED( slVers )
+    Q_UNUSED( R )
     Q_UNUSED( slBIST )
     Q_UNUSED( qbMap )
     Q_UNUSED( vHSpsv )
@@ -2694,7 +2719,7 @@ guiBreathe();
 
         if( T.simprb.isSimProbe( P.slot, P.port, P.dock ) ) {
 
-            if( !detect_simProbe( slVers, T, P ) )
+            if( !detect_simProbe( R, T, P ) )
                 return false;
 
             continue;
@@ -2715,10 +2740,10 @@ guiBreathe();
         if( T.isSlotPXIType( P.slot ) && qbMap.contains( P.slot ) ) {
 
             if( P.hspn != "sim" && P.hspn != "NPM_HS_32" ) {
-                slVers.append(
+                R.app_put(
                     QString("Quadbase error: Mixed types(slot %1, port %2, dock %3)")
                     .arg( P.slot ).arg( P.port ).arg( P.dock ) );
-                slVers.append("Can't mix quadbase(NP2020) and other types in PXI slot.");
+                R.app_put("Can't mix quadbase(NP2020) and other types in PXI slot.");
                 return false;
             }
         }
@@ -2734,21 +2759,21 @@ guiBreathe();
             err = np_getFlexHardwareID( P.slot, P.port, P.dock, &hID );
 
             if( err != SUCCESS ) {
-                slVers.append(
+                R.app_put(
                     QString("IMEC getFlexHardwareID(slot %1, port %2, dock %3)%4")
                     .arg( P.slot ).arg( P.port ).arg( P.dock )
                     .arg( makeErrorString( err ) ) );
                 if( err == TIMEOUT ) {
-                    slVers.append("");
-                    slVers.append("Error 8 will occur if you detect with a headstage tester attached.");
-                    slVers.append("Use the headstage test dongle only with command: Tools/HST.");
+                    R.append("");
+                    R.append("Error 8 will occur if you detect with a headstage tester attached.");
+                    R.append("Use the headstage test dongle only with command: Tools/HST.");
                 }
                 else if( err == DESERIALIZER_MODE_ERROR ) {
-                    slVers.append("");
-                    slVers.append("Reinitialize chassis ports:");
-                    slVers.append("1. Shut down computer and chassis.");
-                    slVers.append("2. Plug USB-C cable into each port you will use.");
-                    slVers.append("3. Power up with plugs in.");
+                    R.append("");
+                    R.append("Reinitialize chassis ports:");
+                    R.append("1. Shut down computer and chassis.");
+                    R.append("2. Plug USB-C cable into each port you will use.");
+                    R.append("3. Power up with plugs in.");
                 }
                 return false;
             }
@@ -2765,7 +2790,7 @@ Log()<<"  probe: np_getFlexHardwareID done";
 guiBreathe();
 #endif
 
-        slVers.append(
+        R.append(
             QString("FX(slot %1, port %2, dock %3) part number %4")
             .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( P.fxpn ) );
 
@@ -2782,7 +2807,7 @@ guiBreathe();
         P.fxsn = "0";
 #endif
 
-        slVers.append(
+        R.append(
             QString("FX(slot %1, port %2, dock %3) serial number %4")
             .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( P.fxsn ) );
 
@@ -2799,7 +2824,7 @@ guiBreathe();
         P.fxhw = "0.0";
 #endif
 
-        slVers.append(
+        R.append(
             QString("FX(slot %1, port %2, dock %3) hardware version %4")
             .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( P.fxhw ) );
 
@@ -2813,7 +2838,7 @@ guiBreathe();
             err = np_getProbeHardwareID( P.slot, P.port, P.dock, &hID );
 
             if( err != SUCCESS ) {
-                slVers.append(
+                R.app_put(
                     QString("IMEC getProbeHardwareID(slot %1, port %2, dock %3)%4")
                     .arg( P.slot ).arg( P.port ).arg( P.dock )
                     .arg( makeErrorString( err ) ) );
@@ -2822,7 +2847,7 @@ guiBreathe();
 
             P.pn = hID.ProductNumber;
         }
-        else
+        else if( !R.isRemote() )
             P.pn = "NP1200";
 #else
         P.pn = "NP1000";
@@ -2848,12 +2873,12 @@ guiBreathe();
         // ----
 
         if( !P.setProbeType() ) {
-            slVers.append(
+            R.app_put(
                 QString("SpikeGLX setProbeType(slot %1, port %2, dock %3)"
                 " error 'Probe part number %4 unsupported'.")
                 .arg( P.slot ).arg( P.port ).arg( P.dock )
                 .arg( P.pn ) );
-            slVers.append("Try updating to a newer SpikeGLX/API version.");
+            R.app_put("Try updating to a newer SpikeGLX/API version.");
             return false;
         }
 
@@ -2869,7 +2894,7 @@ guiBreathe();
                 P.slot, P.port, P.dock );
 
         if( !techMsg.isEmpty() ) {
-            slVers.append( techMsg );
+            R.app_put( techMsg );
             return false;
         }
 
@@ -2902,10 +2927,10 @@ guiBreathe();
 Log()<<"probe: SR check";
 guiBreathe();
 #endif
-            IMROTbl *R      = IMROTbl::alloc( P.pn );
-            bool    testSR  = (R->nBanks() > 1);
-            P.sr_nshk       = R->nShank();
-            delete R;
+            IMROTbl *imro   = IMROTbl::alloc( P.pn );
+            bool    testSR  = (imro->nBanks() > 1);
+            P.sr_nshk       = imro->nShank();
+            delete imro;
 
             if( testSR ) {
                 P.sr_mask = 0;
@@ -2918,11 +2943,13 @@ guiBreathe();
                             "SR: (%1,%2,%3) sn=%4 pn=%5 shanks=%6 ok={ ? }")
                             .arg( P.slot ).arg( P.port ).arg( P.dock )
                             .arg( P.sn ).arg( P.pn ).arg( P.sr_nshk ) );
-                        slVers.append(
+                        R.app_put(
                             QString("Error: BIST Shift Register(slot %1, port %2, dock %3)"
                             " not conclusive due to a timeout error.")
                             .arg( P.slot ).arg( P.port ).arg( P.dock ) );
-                        slVers.append("Check connections and try again.");
+                        R.app_put("Check connections and try again.");
+                        if( R.isRemote() )
+                            return false;
                         goto setsrok;
                     }
                     else {
@@ -2939,9 +2966,9 @@ guiBreathe();
                             "SR: (%1,%2,%3) sn=%4 pn=%5 shanks=%6 ok={ %7 }")
                             .arg( P.slot ).arg( P.port ).arg( P.dock )
                             .arg( P.sn ).arg( P.pn ).arg( P.sr_nshk ).arg( s.trimmed() ) );
-                        slVers.append(
+                        R.app_put(
                             QString("Error: BIST Shift Register(slot %1, port %2, dock %3).")
-                            .arg( P.slot ).arg( P.port ).arg( P.dock ) );
+                            .arg( P.slot ).arg( P.port ).arg( P.dock ), 2 );
                     }
                 }
                 else
@@ -2959,11 +2986,11 @@ guiBreathe();
 #endif  // HAVE_IMEC
         }
         else {
-            IMROTbl *R  = IMROTbl::alloc( P.pn );
-            P.sr_nshk   = R->nShank();
-            delete R;
-            P.sr_nok    = P.sr_nshk;
-            P.sr_mask   = (P.sr_nshk == 4 ? 0xF : 1);
+            IMROTbl *imro   = IMROTbl::alloc( P.pn );
+            P.sr_nshk       = imro->nShank();
+            delete imro;
+            P.sr_nok        = P.sr_nshk;
+            P.sr_mask       = (P.sr_nshk == 4 ? 0xF : 1);
         }
 
         // ------------------------------
@@ -2982,7 +3009,7 @@ guiBreathe();
                 slBIST.append(
                     QString("PSB: (%1,%2,%3)")
                     .arg( P.slot ).arg( P.port ).arg( P.dock ) );
-                slVers.append(
+                R.app_put(
                     QString("Error: BIST Parallel Serial Bus(slot %1, port %2, dock %3).")
                     .arg( P.slot ).arg( P.port ).arg( P.dock ) );
             }
@@ -2999,7 +3026,7 @@ guiBreathe();
 
 
 bool CimCfg::detect_simProbe(
-    QStringList             &slVers,
+    ERRLVL                  &R,
     ImProbeTable            &T,
     ImProbeDat              &P )
 {
@@ -3007,7 +3034,7 @@ bool CimCfg::detect_simProbe(
     QFile   f( name + ".ap.bin" );
 
     if( !f.exists() ) {
-        slVers.append(
+        R.app_put(
             QString("Probe bin file(slot %1, port %2, dock %3)"
             " missing '%4'.")
             .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( name + ".ap.bin" ) );
@@ -3018,7 +3045,7 @@ bool CimCfg::detect_simProbe(
     f.setFileName( name );
 
     if( !f.exists() ) {
-        slVers.append(
+        R.app_put(
             QString("Probe metafile(slot %1, port %2, dock %3)"
             " missing '%4'.")
             .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( name ) );
@@ -3028,7 +3055,7 @@ bool CimCfg::detect_simProbe(
     KVParams    kvp;
 
     if( !kvp.fromMetaFile( name ) ) {
-        slVers.append(
+        R.app_put(
             QString("Sim probe(slot %1, port %2, dock %3)"
             " corrupt metafile '%4'.")
             .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( name ) );
@@ -3053,9 +3080,9 @@ bool CimCfg::detect_simProbe(
     P.type      = kvp["imDatPrb_type"].toInt();
     P.cal       = kvp["imCalibrated"].toBool();
 
-    IMROTbl *R = IMROTbl::alloc( P.pn );
-        P.sr_nshk = R->nShank();
-    delete R;
+    IMROTbl *imro = IMROTbl::alloc( P.pn );
+        P.sr_nshk = imro->nShank();
+    delete imro;
 
     if( kvp.find( "imDatPrb_sr_mask" ) != kvp.end() ) {
         P.sr_nok    = kvp["imDatPrb_sr_nok"].toInt();
@@ -3067,30 +3094,30 @@ bool CimCfg::detect_simProbe(
     }
 
     if( !IMROTbl::pnToType( P.type, P.pn ) ) {
-        slVers.append(
+        R.app_put(
             QString("Sim probe(slot %1, port %2, dock %3)"
             " unsupported type '%4'.")
             .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( P.pn ) );
-        slVers.append("Try updating to a newer SpikeGLX/API version.");
+        R.app_put("Try updating to a newer SpikeGLX/API version.");
         return false;
     }
 
-    slVers.append(
+    R.append(
         QString("HS(slot %1, port %2) part number %3")
         .arg( P.slot ).arg( P.port ).arg( P.hspn ) );
-    slVers.append(
+    R.append(
         QString("HS(slot %1, port %2) hardware version %3")
         .arg( P.slot ).arg( P.port ).arg( P.hshw ) );
-    slVers.append(
+    R.append(
         QString("HS(slot %1, port %2) firmware version %3")
         .arg( P.slot ).arg( P.port ).arg( P.hsfw ) );
-    slVers.append(
+    R.append(
         QString("FX(slot %1, port %2, dock %3) part number %4")
         .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( P.fxpn ) );
-    slVers.append(
+    R.append(
         QString("FX(slot %1, port %2, dock %3) serial number %4")
         .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( P.fxsn ) );
-    slVers.append(
+    R.append(
         QString("FX(slot %1, port %2, dock %3) hardware version %4")
         .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( P.fxhw ) );
 
@@ -3158,7 +3185,7 @@ bool CimCfg::testFixCalPath( quint64 sn )
 }
 
 
-bool CimCfg::ftdiCheck(QString &msg, bool usbInTbl )
+bool CimCfg::ftdiCheck( QString &msg, bool usbInTbl )
 {
 #ifdef HAVE_IMEC
     ftdi_driver_version_t   req, cur;

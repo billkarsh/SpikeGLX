@@ -106,6 +106,7 @@ public slots:
     QString cmdSrvGetsSaveChansNi() const;
     QString cmdSrvGetsParamStr( int type, int ip ) const;
     QString cmdSrvSetsParamStr( const QString &paramString, int type, int ip );
+    QString cmdSrvSelectsDevices( const QString &devstring, int errlvl );
 
     void initUsing_im_ob();
     void initUsing_ni();

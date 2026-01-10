@@ -35,6 +35,7 @@ public:
     void showCalWarning( bool show );
     void updateIMParams();
     void updateObxIDs( DAQ::Params &q );
+    void remoteDetect( ERRLVL &R );
 
 private slots:
     void cfgSlotsBut();
@@ -48,15 +49,17 @@ private slots:
     void detectBut();
 
 private:
+    void detect( ERRLVL &R );
     void prbTabToGUI();
     void imWrite( const QString &s );
     void imWriteCurrent();
-    bool imDetect();
+    bool imDetect( ERRLVL &R );
+    void psvPNRemote( const QVector<int> &vP );
     void psvPNDialog( const QVector<int> &vP );
     void HSSNDialog( const QVector<int> &vP );
     void niWrite( const QString &s );
     QColor niSetColor( const QColor &c );
-    bool niDetect();
+    bool niDetect( ERRLVL &R );
 };
 
 #endif  // CONFIG_DEVTAB_H

@@ -155,6 +155,12 @@ void Config_devtab::updateObxIDs( DAQ::Params &q )
     prbTabToGUI();
 }
 
+
+void Config_devtab::remoteDetect( ERRLVL &R )
+{
+    detect( R );
+}
+
 /* ---------------------------------------------------------------- */
 /* Private slots -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -233,22 +239,32 @@ void Config_devtab::hssnSaveSettings( const QString &key, const QString &val )
 }
 
 
+void Config_devtab::detectBut()
+{
+    ERRLVL  R;
+    detect( R );
+}
+
+/* ---------------------------------------------------------------- */
+/* Private -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
 // Access Policy
 // -------------
 // (1) On entry to a dialog session, the checks (p.im.enable)
 // set user intention and enable the possibility of setting
-// the corresponding flag imecOK through the 'Detect' button.
+// the corresponding flag availIM through the 'Detect' button.
 //
-// (2) It is the flag imecOK that governs access to tabs, and
+// (2) It is the flag availIM that governs access to tabs, and
 // other dialog controls that require {hardware, config data}.
 // That is, the check does not control access.
 //
 // (3) The user may revisit the devTab and uncheck a box, even
-// after its flag is set. The doingImec() function, which looks
+// after its flag is set. The usingIM variable, which looks
 // at both check and flag is used as the final test of intent,
 // and the test of what we need to strictly validate.
 //
-void Config_devtab::detectBut()
+void Config_devtab::detect( ERRLVL &R )
 {
     bool    availIM = false,
             availNI = false;
@@ -261,19 +277,23 @@ void Config_devtab::detectBut()
     if( !devTabUI->imecGB->isChecked()
         && !devTabUI->nidqGB->isChecked() ) {
 
-        QMessageBox::information(
-        cfg->dialog(),
-        "No Hardware Selected",
-        "'Enable' the hardware types {imec, nidq} you want use...\n\n"
-        "Then click 'Detect' to see what's installed/working." );
+        if( R.isRemote() )
+            R.put("Devstring contains no (device) terms");
+        else {
+            QMessageBox::information(
+            cfg->dialog(),
+            "No Hardware Selected",
+            "'Enable' the hardware types {imec, nidq} you want use...\n\n"
+            "Then click 'Detect' to see what's installed/working." );
+        }
         return;
     }
 
     if( devTabUI->imecGB->isChecked() )
-        availIM = imDetect();
+        availIM = imDetect( R );
 
     if( devTabUI->nidqGB->isChecked() )
-        availNI = niDetect();
+        availNI = niDetect( R );
 
     if( (devTabUI->imecGB->isChecked() && !availIM) ||
         (devTabUI->nidqGB->isChecked() && !availNI) ) {
@@ -285,9 +305,6 @@ void Config_devtab::detectBut()
     prbTabToGUI();
 }
 
-/* ---------------------------------------------------------------- */
-/* Private -------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
 
 void Config_devtab::prbTabToGUI()
 {
@@ -375,7 +392,7 @@ void Config_devtab::imWriteCurrent()
 }
 
 
-bool Config_devtab::imDetect()
+bool Config_devtab::imDetect( ERRLVL &R )
 {
     CimCfg::ImProbeTable    &T = cfg->prbTab;
 
@@ -394,12 +411,16 @@ bool Config_devtab::imDetect()
 
     if( !T.nTblEntries() ) {
 
-        QMessageBox::information(
-        cfg->dialog(),
-        "No Imec Slots Defined",
-        "1. Click 'Configure Slots' to add PXI/OneBox devices to the table.\n"
-        "2. Click 'Enable' for each probe or OneBox you want to run.\n"
-        "3. Click 'Detect' to check if they're working." );
+        if( R.isRemote() )
+            R.put("No slots defined, use 'Configure Slots'");
+        else {
+            QMessageBox::information(
+            cfg->dialog(),
+            "No Imec Slots Defined",
+            "1. Click 'Configure Slots' to add PXI/OneBox devices to the table.\n"
+            "2. Click 'Enable' for each probe or OneBox you want to run.\n"
+            "3. Click 'Detect' to check if they're working." );
+        }
 
         imWrite( "\nFAIL - Cannot be used" );
         return false;
@@ -407,11 +428,15 @@ bool Config_devtab::imDetect()
 
     if( !T.buildEnabIndexTables() ) {
 
-        QMessageBox::information(
-        cfg->dialog(),
-        "No Imec Streams Enabled",
-        "Enable one or more probes/OneBoxes...\n\n"
-        "Then click 'Detect' to check if they're working." );
+        if( R.isRemote() )
+            R.put("No imec streams enabled");
+        else {
+            QMessageBox::information(
+            cfg->dialog(),
+            "No Imec Streams Enabled",
+            "Enable one or more probes/OneBoxes...\n\n"
+            "Then click 'Detect' to check if they're working." );
+        }
 
         imWrite( "\nFAIL - Cannot be used" );
         return false;
@@ -427,6 +452,8 @@ bool Config_devtab::imDetect()
                     vHS20;
     bool            availIM;
 
+    R.setSL( slVers );
+
     imWrite( "\nConnecting...allow several seconds." );
 
     QGuiApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
@@ -434,7 +461,7 @@ bool Config_devtab::imDetect()
     guiBreathe();
 
     availIM = CimCfg::detect(
-                slVers, slBIST, vHSpsv, vHS20, T,
+                R, slBIST, vHSpsv, vHS20, T,
                 cfg->acceptedParams.im.prbAll.srAtDetect,
                 devTabUI->psbChk->isChecked() );
 
@@ -464,23 +491,28 @@ bool Config_devtab::imDetect()
         return false;
     }
 
-// -----
-// HSpsv
-// -----
+// -------------
+// Passive parts
+// -------------
 
-    if( !vHSpsv.isEmpty() )
-        psvPNDialog( vHSpsv );
+    if( !vHSpsv.isEmpty() ) {
 
-// ----
-// HS20
-// ----
+        if( R.isRemote() )
+            psvPNRemote( vHSpsv );
+        else
+            psvPNDialog( vHSpsv );
+    }
 
+// ------------
+// MessageBoxes
+// ------------
+
+    if( R.isRemote() )
+        return true;
+
+    // @@@ API-4 retired support for HS w/o EEPROM
     if( !vHS20.isEmpty() )
         HSSNDialog( vHS20 );
-
-// ------------
-// BIST results
-// ------------
 
     if( !slBIST.isEmpty() ) {
 
@@ -498,6 +530,27 @@ bool Config_devtab::imDetect()
     }
 
     return true;
+}
+
+
+void Config_devtab::psvPNRemote( const QVector<int> &vP )
+{
+    CimCfg::ImProbeTable    &T = cfg->prbTab;
+    QString                 key, pnval, snval;
+
+    foreach( int ip, vP ) {
+        const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
+        key   += QString("(%1,%2) ").arg( P.slot ).arg( P.port );
+        pnval += QString(",%1").arg( P.pn );
+        snval += QString(",%1").arg( P.sn );
+    }
+
+    QMetaObject::invokeMethod(
+        this, "psvSaveSettings",
+        Qt::QueuedConnection,
+        Q_ARG(QString, key.trimmed()),
+        Q_ARG(QString, pnval.removeFirst()),
+        Q_ARG(QString, snval.removeFirst()) );
 }
 
 
@@ -624,10 +677,8 @@ runDialog:
 
 // Save key, prettied(val) pairs
 
-    pnval = QString("%1").arg( T.get_iProbe( vP[0] ).pn );
-    snval = QString("%1").arg( T.get_iProbe( vP[0] ).sn );
-    for( int ip = 1, np = vP.size(); ip < np; ++ip ) {
-        const CimCfg::ImProbeDat    &P = T.get_iProbe( vP[ip] );
+    foreach( int ip, vP ) {
+        const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
         pnval += QString(",%1").arg( P.pn );
         snval += QString(",%1").arg( P.sn );
     }
@@ -636,8 +687,8 @@ runDialog:
         this, "psvSaveSettings",
         Qt::QueuedConnection,
         Q_ARG(QString, key),
-        Q_ARG(QString, pnval),
-        Q_ARG(QString, snval) );
+        Q_ARG(QString, pnval.removeFirst()),
+        Q_ARG(QString, snval.removeFirst()) );
 }
 
 
@@ -759,7 +810,7 @@ QColor Config_devtab::niSetColor( const QColor &c )
 }
 
 
-bool Config_devtab::niDetect()
+bool Config_devtab::niDetect( ERRLVL &R )
 {
     bool    availNI = false;
 
@@ -775,9 +826,10 @@ bool Config_devtab::niDetect()
 // --------------------------------
 
     if( !cfg->niSingletonReserve() ) {
-        niWrite(
-            "Another instance of " APPNAME " already owns"
-            " the NI hardware." );
+        QString err =
+        "Another instance of " APPNAME " already owns the NI hardware.";
+        R.put( err );
+        niWrite( err );
         goto exit;
     }
 
@@ -786,6 +838,7 @@ bool Config_devtab::niDetect()
 // --------------------
 
     if( !CniCfg::isHardware() ) {
+        R.put("No NI input devices available");
         niWrite( "None" );
         goto exit;
     }
@@ -821,8 +874,10 @@ bool Config_devtab::niDetect()
         }
     }
 
-    if( !availNI )
+    if( !availNI ) {
+        R.put("No suitable NI input devices available");
         niWrite( "None" );
+    }
 
 // ---------------------
 // Query output hardware

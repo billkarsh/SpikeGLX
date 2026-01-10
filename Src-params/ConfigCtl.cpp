@@ -1081,6 +1081,179 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &paramString, int type, int
 }
 
 
+// Format:        (device)...(device)
+// Passive probe: (slot,port,PN,SN) e.g. (2,1,NP1200,12709120122)
+// Regular probe: (slot,port,dock)  e.g. (2,1,1)
+// OneBox XIO:    (slot,obx)        e.g. (21,obx)
+// NI-DAQ:        (nidq)            e.g. (nidq)
+//
+QString ConfigCtl::cmdSrvSelectsDevices( const QString &devstring, int errlvl )
+{
+    ERRLVL      R( errlvl );
+    DAQ::Params p;
+
+// ------------
+// Default data
+// ------------
+
+    prbTab.loadProbeSRates();
+    prbTab.loadOneBoxSRates();
+    prbTab.loadProbeTable();
+    acceptedParams.loadSettings();  // imSRAtDetect
+    p.loadSettings();
+
+// -------------
+// Clear devices
+// -------------
+
+// (1) Clear table data.
+// (2) Use devstring to set checks and passive (pn,sn).
+// (3) Skip clearing again in detect().
+
+    prbTab.init();          // clear all but checkboxes
+    prbTab.uncheckAll();    // clear checkboxes
+    p.im.enabled = false;
+    p.ni.enabled = false;
+
+// ------------------
+// Apply user devices
+// ------------------
+
+    QStringList prn  = devstring.split(
+                        QRegularExpression("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
+                        Qt::SkipEmptyParts );
+    int         nprn = prn.size();
+
+    if( !nprn ) {
+        R.put("Devstring contains no (device) terms");
+        return R.err;
+    }
+
+    for( int iprn = 0; iprn < nprn; ++iprn ) {
+        QStringList tl = prn[iprn].split(
+                            QRegularExpression("^\\s+|\\s*,\\s*"),
+                            Qt::SkipEmptyParts );
+        int         nt = tl.size();
+
+        switch( nt ) {
+            case 1:
+                if( tl[0].toLower() == "nidq" )
+                    p.ni.enabled = true;
+                else {
+                    R.put(
+                    QString("Unknown device (%1), expected (nidq)")
+                    .arg( prn[iprn] ) );
+                    return R.err;
+                }
+                break;
+            case 2:
+                if( tl[1].toLower() == "obx" ) {
+                    int slot = tl[0].toInt();
+                    for( int k = 0, nk = prbTab.nTblEntries(); k < nk; ++k ) {
+                        CimCfg::ImProbeDat  &P = prbTab.mod_kTblEntry( k );
+                        if( P.slot == slot && P.isOneBox() ) {
+                            P.enab          = true;
+                            p.im.enabled    = true;
+                            goto next_device;
+                        }
+                    }
+                    R.put(QString("Unknown device (%1)").arg( prn[iprn] ));
+                    return R.err;
+                }
+                else {
+                    R.put(
+                    QString("Unknown device (%1), expected (slot,obx)")
+                    .arg( prn[iprn] ) );
+                    return R.err;
+                }
+                break;
+            case 3:
+                {
+                    int slot = tl[0].toInt(),
+                        port = tl[1].toInt(),
+                        dock = tl[2].toInt();
+                    for( int k = 0, nk = prbTab.nTblEntries(); k < nk; ++k ) {
+                        CimCfg::ImProbeDat  &P = prbTab.mod_kTblEntry( k );
+                        if( P.slot == slot && P.port == port && P.dock == dock ) {
+                            P.enab          = true;
+                            p.im.enabled    = true;
+                            goto next_device;
+                        }
+                    }
+                    R.put(QString("Unknown device (%1)").arg( prn[iprn] ));
+                    return R.err;
+                }
+                break;
+            case 4:
+                {
+                    QString pn   = tl[2];
+                    quint64 sn   = tl[3].toLongLong();
+                    int     slot = tl[0].toInt(),
+                            port = tl[1].toInt(),
+                            type;
+                    IMROTbl::pnToType( type, pn );
+                    if( type != 1200 ) {
+                        R.put(
+                        QString("Invalid passive probe part number (%1)")
+                        .arg( prn[iprn] ));
+                        return R.err;
+                    }
+                    for( int k = 0, nk = prbTab.nTblEntries(); k < nk; ++k ) {
+                        CimCfg::ImProbeDat  &P = prbTab.mod_kTblEntry( k );
+                        if( P.slot == slot && P.port == port && P.dock == 1 ) {
+                            P.pn            = pn;
+                            P.sn            = sn;
+                            P.enab          = true;
+                            p.im.enabled    = true;
+                            goto next_device;
+                        }
+                    }
+                    R.put(QString("Unknown device (%1)").arg( prn[iprn] ));
+                    return R.err;
+                }
+                break;
+            default:
+                R.put(QString("Bad device format (%1)").arg( prn[iprn] ));
+                return R.err;
+        }
+next_device:;
+    }
+
+// -----------
+// Init dialog
+// -----------
+
+    devTab->toGUI( p, true );
+    imTab->reset( p );
+    setNoDialogAccess();
+    syncTab->resetCalRunMode();
+
+// ------------
+// Start dialog
+// ------------
+
+    cfgDlg->show();
+
+// ------
+// Detect
+// ------
+
+    devTab->remoteDetect( R );
+
+// --------
+// Validate
+// --------
+
+    if( R.err.isEmpty() ) {
+        QString err;
+        if( !valid( err ) )
+            R.put(QString("Verify Error [%1]").arg( err ));
+    }
+
+    return R.err;
+}
+
+
 void ConfigCtl::initUsing_im_ob()
 {
     usingIM = false;

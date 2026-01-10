@@ -593,8 +593,10 @@ bool Run::startRun( QString &err )
 // ------------
 
     QStringList sl;
+    ERRLVL      R;
+    R.setSL( sl );
 
-    if( !app->cfgCtl()->prbTab.mapObxSlots( sl ) ) {
+    if( !app->cfgCtl()->prbTab.mapObxSlots( R ) ) {
         err = sl[0];
         return false;
     }
@@ -717,7 +719,7 @@ void Run::stopRun()
 
     CStim::ni_run_cleanup();
 
-   aoStopDev();
+    aoStopDev();
 
     vGW[0].gw->soStopFetching();
 
@@ -1072,7 +1074,7 @@ QString Run::setAnatomyPP( const QString &s )
     QString err;
 
 // Split header-other:
-// [probe-id,shank-id](startpos,endpos,R,G,B,rgnname)(startpos,endpos,R,G,B,rgnname)...()
+// [probe-id,shank-id](startpos,endpos,R,G,B,rgnname)...(startpos,endpos,R,G,B,rgnname)
 
     QStringList sl = s.split(
                         QRegularExpression("\\s*\\]\\s*"),

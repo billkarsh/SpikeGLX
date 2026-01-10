@@ -16,6 +16,30 @@ class QTableWidget;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+struct ERRLVL {
+    QStringList *sl;
+    QString     err;
+    int         userLevel;  // 0=none, 1=err, 2=warn, ...
+    ERRLVL() : sl(0), userLevel(0)                          {}
+    ERRLVL( int userLevel ) : sl(0), userLevel(userLevel)   {}
+    void setSL( QStringList &slVers )           {sl = &slVers;}
+    bool isRemote()                             {return userLevel > 0;}
+    void append( QString msg )                  {if( sl ) sl->append( msg );}
+    void app_put( QString msg, int level = 1 )
+    {
+        append( msg );
+        put( msg, level );
+    }
+    void put( QString msg, int level = 1 )
+    {
+        if( level <= userLevel ) {
+            err += QString("<<%1:").arg( level );
+            err += msg.replace( "\n", ";;" );
+            err += ">>";
+        }
+    }
+};
+
 #define imOBX_SRATE 30303.0
 #define imOBX_NCHN  12
 
@@ -209,6 +233,7 @@ public:
         QMap<int,ImSlotVers>    slot2Vers;
 
         void init();
+        void uncheckAll();
         int buildEnabIndexTables();
         int buildQualIndexTables();
         bool haveQualCalFiles() const;
@@ -221,7 +246,7 @@ public:
         void getCfgSlots( QVector<CfgSlot> &vCS );
         bool scanCfgSlots( QVector<CfgSlot> &vCS, QString &msg ) const;
 
-        bool mapObxSlots( QStringList &slVers );
+        bool mapObxSlots( ERRLVL &R );
 
         bool isSlotUsed( int slot ) const
             {return slotsUsed.contains( slot );}
@@ -242,6 +267,9 @@ public:
         bool isSlotUSBType( int slot ) const;
 
         int getTypedSlots( QVector<int> &vslot, int bstype ) const;
+
+        ImProbeDat& mod_kTblEntry( int k )
+            {return probes[k];}
 
         ImProbeDat& mod_iProbe( int i )
             {return probes[iprb2dat[i]];}
@@ -512,7 +540,7 @@ public:
     static bool isBSSupported( int slot );
     static void closeAllBS( bool report = true );
     static bool detect(
-        QStringList             &slVers,
+        ERRLVL                  &R,
         QStringList             &slBIST,
         QVector<int>            &vHSpsv,
         QVector<int>            &vHS20,
@@ -523,25 +551,25 @@ public:
         QStringList             &slVers,
         ImProbeTable            &T );
     static bool detect_slots(
-        QStringList             &slVers,
+        ERRLVL                  &R,
         ImProbeTable            &T );
     static bool detect_slot_type(
-        QStringList             &slVers,
+        ERRLVL                  &R,
         ImProbeTable            &T,
         int                     slot );
     static bool detect_slot_openBS(
-        QStringList             &slVers,
+        ERRLVL                  &R,
         int                     slot );
     static bool detect_slot_BSFW(
-        QStringList             &slVers,
+        ERRLVL                  &R,
         ImSlotVers              &V,
         int                     slot );
     static bool detect_slot_BSC_hID(
-        QStringList             &slVers,
+        ERRLVL                  &R,
         ImSlotVers              &V,
         int                     slot );
     static bool detect_slot_BSCFW(
-        QStringList             &slVers,
+        ERRLVL                  &R,
         ImProbeTable            &T,
         ImSlotVers              &V,
         int                     slot );
@@ -550,13 +578,13 @@ public:
         ImProbeTable            &T,
         int                     slot );
     static bool detect_headstages(
-        QStringList             &slVers,
+        ERRLVL                  &R,
         QMap<int,QString>       &qbMap,
         QVector<int>            &vHSpsv,
         QVector<int>            &vHS20,
         ImProbeTable            &T );
     static bool detect_probes(
-        QStringList             &slVers,
+        ERRLVL                  &R,
         QStringList             &slBIST,
         const QMap<int,QString> &qbMap,
         const QVector<int>      &vHSpsv,
@@ -564,7 +592,7 @@ public:
         bool                    srCheck,
         bool                    psbCheck );
     static bool detect_simProbe(
-        QStringList             &slVers,
+        ERRLVL                  &R,
         ImProbeTable            &T,
         ImProbeDat              &P );
     static void detect_OneBoxes( ImProbeTable &T );
