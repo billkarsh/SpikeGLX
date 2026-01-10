@@ -1147,7 +1147,7 @@ void CmdWorker::getStreamShankMap( const QStringList &toks )
 // 0) channel string
 // 1) uint32 bits
 //
-void CmdWorker::niDOSet( const QStringList &toks )
+void CmdWorker::niDOSet( QStringList toks )
 {
     if( toks.size() < 2 ) {
         errMsg = "NIDOSET: Requires params {lines, bits}.";
@@ -1159,7 +1159,10 @@ void CmdWorker::niDOSet( const QStringList &toks )
     if( !app )
         return;
 
-    errMsg = CniCfg::setDO( toks.at( 0 ), toks.at( 1 ).toUInt() );
+    quint32 bits = toks.last().toUInt();
+    toks.pop_back();
+
+    errMsg = CniCfg::setDO( toks.join( "" ).trimmed(), bits );
 
     if( !errMsg.isEmpty() )
         errMsg = "NIDOSET: Look at Log window (debug mode) for details.";
@@ -1192,7 +1195,7 @@ void CmdWorker::niWaveArm( const QStringList &toks )
 // 1) wave string
 // 2) loop Boolean 0/1.
 //
-void CmdWorker::niWaveLoad( const QStringList &toks )
+void CmdWorker::niWaveLoad( QStringList toks )
 {
     if( toks.size() < 3 ) {
         errMsg = "NIWVLOAD: Requires params {outChan, wavename, loop}.";
@@ -1202,7 +1205,14 @@ void CmdWorker::niWaveLoad( const QStringList &toks )
     if( !okRunStarted( "NIWVLOAD" ) )
         return;
 
-    errMsg = CStim::ni_wave_download_file( toks[0], toks[1], toks[2].toInt() );
+    QString outChan = toks.first();
+    toks.pop_front();
+
+    int loop = toks.last().toInt();
+    toks.pop_back();
+
+    errMsg = CStim::ni_wave_download_file(
+                outChan, toks.join( " " ).trimmed(), loop );
 
     if( !errMsg.isEmpty() )
         errMsg = "NIWVLOAD: " + errMsg;
@@ -1213,7 +1223,7 @@ void CmdWorker::niWaveLoad( const QStringList &toks )
 // 0) outChan string
 // 1) start Boolean 0/1.
 //
-void CmdWorker::niWaveStartStop( const QStringList &toks )
+void CmdWorker::niWaveStartStop( QStringList toks )
 {
     if( toks.size() < 2 ) {
         errMsg = "NIWVSTSP: Requires params {outChan, start}.";
@@ -1223,7 +1233,10 @@ void CmdWorker::niWaveStartStop( const QStringList &toks )
     if( !okRunStarted( "NIWVSTSP" ) )
         return;
 
-    errMsg = CStim::ni_wave_start_stop( toks[0], toks[1].toInt() );
+    int start = toks.last().toInt();
+    toks.pop_back();
+
+    errMsg = CStim::ni_wave_start_stop( toks.join( "" ).trimmed(), start );
 
     if( !errMsg.isEmpty() )
         errMsg = "NIWVSTSP: " + errMsg;
@@ -1235,7 +1248,7 @@ void CmdWorker::niWaveStartStop( const QStringList &toks )
 // 1) slot
 // 2) chn_vlt string
 //
-void CmdWorker::obxAOSet( const QStringList &toks )
+void CmdWorker::obxAOSet( QStringList toks )
 {
     if( toks.size() < 3 ) {
         errMsg = "OBXAOSET: Requires params {ip, slot, chn_vlt}.";
@@ -1273,7 +1286,10 @@ void CmdWorker::obxAOSet( const QStringList &toks )
         }
     }
 
-    errMsg = CStim::obx_set_AO( ip, toks[2] );
+    toks.pop_front();
+    toks.pop_front();
+
+    errMsg = CStim::obx_set_AO( ip, toks.join( " " ).trimmed() );
 
     if( !errMsg.isEmpty() )
         errMsg = "OBXAOSET: " + errMsg;
@@ -1336,7 +1352,7 @@ void CmdWorker::obxWaveArm( const QStringList &toks )
 // 1) slot
 // 2) wave string
 //
-void CmdWorker::obxWaveLoad( const QStringList &toks )
+void CmdWorker::obxWaveLoad( QStringList toks )
 {
     if( toks.size() < 3 ) {
         errMsg = "OBXWVLOAD: Requires params {ip, slot, wavename}.";
@@ -1374,7 +1390,10 @@ void CmdWorker::obxWaveLoad( const QStringList &toks )
         }
     }
 
-    errMsg = CStim::obx_wave_download_file( ip, toks[2] );
+    toks.pop_front();
+    toks.pop_front();
+
+    errMsg = CStim::obx_wave_download_file( ip, toks.join( " " ).trimmed() );
 
     if( !errMsg.isEmpty() )
         errMsg = "OBXWVLOAD: " + errMsg;
@@ -1461,7 +1480,7 @@ void CmdWorker::opto_emit( QStringList toks )
 void CmdWorker::par2Start( QStringList toks )
 {
     if( toks.count() < 2 ) {
-        errMsg = "PAR2: Requires at least 2 parameters.";
+        errMsg = "PAR2: Requires params {op, filename}.";
         return;
     }
 
@@ -1543,7 +1562,7 @@ void CmdWorker::pauseGraphs( QStringList toks )
 
 
 // Expected tok parameter is Pinpoint data string:
-// [probe-id,shank-id](startpos,endpos,R,G,B,rgnname)(startpos,endpos,R,G,B,rgnname)...()
+// [probe-id,shank-id](startpos,endpos,R,G,B,rgnname)...(startpos,endpos,R,G,B,rgnname)
 //    - probe-id: SpikeGLX logical probe id.
 //    - shank-id: [0..n-shanks].
 //    - startpos: region start in microns from tip.

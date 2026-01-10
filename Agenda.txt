@@ -5,6 +5,10 @@
 --------
 + Add FileViewer::Export Survey.
 + Permit js=-2 for any SDK stream operation.
++ Support remote verifyParams.
++ Support remote getProbeAddrs.
++ Improve parsing for remote niDOSet, obxAOSet.
++ Improve parsing for remote ni and obx wave ops.
 
 20251201
 --------
