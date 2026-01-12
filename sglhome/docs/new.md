@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+January 12, 2026
+
+* CatGT 5.2 (Don't trim exported surveys).
+
 December 18, 2025
 
 * SpikeGLX 20251201-api4 (Fix survey, aux BinMax, api v4.1.3).
