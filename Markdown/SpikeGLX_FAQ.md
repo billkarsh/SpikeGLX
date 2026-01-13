@@ -7,6 +7,8 @@
 * [Side by Side Versions](#side-by-side-versions)
 * [Running Two Copies of SpikeGLX](#running-two-copies-of-spikeglx)
 * [Data Integrity](#data-integrity)
+    + [Graceful Shutdown](#graceful-shutdown)
+    + [Crash](#crash)
 * [Gauging System Health](#gauging-system-health)
 * [How to Report Bugs](#how-to-report-bugs)
 * [Graphics Problems](#graphics-problems)
