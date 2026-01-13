@@ -22,9 +22,9 @@
 #include "GeomMap.h"
 #include "ShankMap.h"
 #include "Util.h"
+#include "Version.h"
 
 #ifdef HAVE_IMEC
-#include "Version.h"
 #include "IMEC/NeuropixAPI.h"
 using namespace Neuropixels;
 #endif

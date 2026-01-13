@@ -2021,8 +2021,10 @@ guiBreathe();
         if( !detect_slot_BSCFW( R, T, V, slot ) )
             return false;
 
+#ifdef HAVE_IMEC
         if( T.getSlotType( slot ) == NPPlatform_PXI )
             IMROTbl::bscCheckTech( bs_bsc, V.bsfw, V.bscfw, V.bsctech, slot );
+#endif
 
         // -------------
         // Add map entry
@@ -2599,6 +2601,7 @@ guiBreathe();
         // HSFW
         // ----
 
+#ifdef HAVE_IMEC
         if( P.hspn.contains( "NXT" ) ) {
 
             firmware_Info   info;
@@ -2616,6 +2619,7 @@ guiBreathe();
                         .arg( info.major ).arg( info.minor ).arg( info.build );
         }
         else
+#endif
             P.hsfw = "0.0.0";
 
         R.append(
@@ -2690,11 +2694,9 @@ bool CimCfg::detect_probes(
     NP_ErrorCode    err;
     HardwareID      hID;
 #else
-    Q_UNUSED( R )
     Q_UNUSED( slBIST )
     Q_UNUSED( qbMap )
     Q_UNUSED( vHSpsv )
-    Q_UNUSED( doBIST )
 #endif
 
 // ------------------------
