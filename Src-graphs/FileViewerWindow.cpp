@@ -3778,7 +3778,7 @@ do_binmax:
                         vmax    = val,
                         vmin    = val;
 
-                    if( bptrans-- <= 0 )
+                    if( binMax > bptrans )
                         stat.add( val );
                     d += dstep;
 
@@ -3803,7 +3803,7 @@ do_binmax:
                             // start new
                             vmax    = val;
                             vmin    = val;
-                            if( bptrans-- <= 0 )
+                            if( it > bptrans )
                                 stat.add( val );
                             binLim += dwnSmp;
                         }
@@ -3837,7 +3837,7 @@ do_binmax:
 
                         int val = car.lcl_1( d, ig );
 
-                        if( bptrans-- <= 0 )
+                        if( it > bptrans )
                             stat.add( val );
                         ybuf[ny++] = val * ysc;
                     }
@@ -3865,7 +3865,7 @@ do_binmax:
 draw_analog:
                 for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
-                    if( bptrans-- <= 0 )
+                    if( it > bptrans )
                         stat.add( *d );
                     ybuf[ny++] = *d * ysc;
                 }

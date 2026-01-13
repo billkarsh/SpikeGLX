@@ -3,6 +3,7 @@
 
 20251218
 --------
++ FileViewer::Fix rms & stddev.
 + Add FileViewer::Export Survey.
 + Permit js=-2 for any SDK stream operation.
 + Support remote verifyParams.
