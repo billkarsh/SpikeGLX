@@ -7,6 +7,7 @@
 + Add FileViewer::Export Survey.
 + Permit js=-2 for any SDK stream operation.
 + Support remote verifyParams.
++ Support remote getOneBoxAddrs.
 + Support remote getProbeAddrs.
 + Support remote selectDevices.
 + Improve parsing for remote niDOSet, obxAOSet.

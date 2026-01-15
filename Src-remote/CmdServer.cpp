@@ -384,6 +384,26 @@ void CmdWorker::getLastGT( QString &resp )
 }
 
 
+void CmdWorker::getOneBoxAddrs( QString &resp )
+{
+    resp = "()";
+
+    ConfigCtl               *C  = mainApp()->cfgCtl();
+    CimCfg::ImProbeTable    &T  = C->prbTab;
+    int                     np  = T.nSelOneBox();
+
+    if( np ) {
+        resp.clear();
+        for( int ip = 0; ip < np; ++ip ) {
+            const CimCfg::ImProbeDat    &P = T.get_iOneBox( ip );
+            resp += QString("(%1,%2)").arg( ip ).arg( P.slot );
+        }
+    }
+
+    resp += "\n";
+}
+
+
 void CmdWorker::getParams( QString &resp )
 {
     ConfigCtl   *C = okCfgValidated( "GETPARAMS" );
@@ -2287,6 +2307,8 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
         getImecChanGains( resp, toks );
     else if( cmd == "GETLASTGT" )
         getLastGT( resp );
+    else if( cmd == "GETOBXADDRS" )
+        getOneBoxAddrs( resp );
     else if( cmd == "GETPARAMS" )
         getParams( resp );
     else if( cmd == "GETPARAMSIMALL" )
