@@ -485,7 +485,7 @@ giving you 256 input channels. Whisper requires S-series devices (61xx).
 To allow fetching of peri-event context data the streams are sized to hold
 the smaller of {8 seconds of data, 40% of your available RAM}. We always
 generate a warning message with the length, like this:
-*"Stream length limited to 8 seconds."* Making it a warning gives it a
+*"History length limited to 8 seconds."* Making it a warning gives it a
 highlight color in the logs so you'll take notice of it.
 
 --------
