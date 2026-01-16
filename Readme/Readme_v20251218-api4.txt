@@ -3,7 +3,7 @@
 Version
 -------
 
-SpikeGLX Release v20251201-api4.
+SpikeGLX Release v20251218-api4.
 
 Imec API at v4.1.3.
 
