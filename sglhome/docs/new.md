@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+January 15, 2026
+
+* SpikeGLX 20251218-api4 (Export survey, SDK selectDevices, api v4.1.3).
+
 January 12, 2026
 
 * CatGT 5.2 (Don't trim exported surveys).
