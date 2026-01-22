@@ -237,7 +237,7 @@ void SockUtil::shutdown( QTcpSocket *sock )
 {
 //#define SHUT_RDWR   2
     if( sock && sock->state() == QAbstractSocket::ConnectedState )
-        shutdown( sock->socketDescriptor(), SHUT_RDWR );
+        ::shutdown( sock->socketDescriptor(), SHUT_RDWR );
 }
 #else
 void SockUtil::shutdown( QTcpSocket * )

@@ -287,10 +287,6 @@ QString glGetErrorString( int err );
 // True if named extension available
 bool hasOpenGLExtension( const char *ext_name );
 
-// Enable/disable vertical sync in OpenGL. Defaults to on in Windows,
-// off on Linux. Make sure the GL context is current when you call this!
-void setOpenGLVSyncMode( bool onoff );
-
 /* ---------------------------------------------------------------- */
 /* Execution environs --------------------------------------------- */
 /* ---------------------------------------------------------------- */

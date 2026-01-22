@@ -11,8 +11,14 @@
 #include "ColorTTLCtl.h"
 #include "Subset.h"
 #include "SignalBlocker.h"
+
+#ifdef HAVE_IMEC
 #include "IMEC/NeuropixAPI.h"
 using namespace Neuropixels;
+#else
+#define TIP_REF 1
+#define INT_REF 2
+#endif
 
 #include <QMessageBox>
 #include <QComboBox>

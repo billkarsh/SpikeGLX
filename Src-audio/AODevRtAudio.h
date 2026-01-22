@@ -1,6 +1,9 @@
 #ifndef AODEVRTAUDIO_H
 #define AODEVRTAUDIO_H
 
+#include <qglobal.h>
+#ifdef Q_OS_WIN
+
 #include "AODevBase.h"
 #include "RtAudio.h"
 #include "AIQ.h"
@@ -65,6 +68,8 @@ private:
         RtAudioStreamStatus status,
         void                *userData );
 };
+
+#endif	// Q_OS_WIN
 
 #endif  // AODEVRTAUDIO_H
 

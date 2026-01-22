@@ -29,6 +29,10 @@ CONFIG(debug, debug|release) {
             DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/DEBUG510
         }
     }
+
+    unix {
+        DESTDIR = /home/jic/target/debug64
+    }
 }
 else {
     win32-g++ {
@@ -42,6 +46,10 @@ else {
 
     win32-msvc {
         DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/MSVC510
+    }
+
+    unix {
+        DESTDIR = /home/jic/target/release64
     }
 }
 
@@ -72,12 +80,14 @@ for(dir, SRC_SGLX) {
 }
 
 # 3rd party
-SRC_ALIEN = \
-    RtAudio \
-    Samplerate
-for(dir, SRC_ALIEN) {
-    INCLUDEPATH += $$PWD/$$dir
-    include($$dir/$$dir".pri")
+win32 {
+    SRC_ALIEN = \
+        RtAudio \
+        Samplerate
+    for(dir, SRC_ALIEN) {
+        INCLUDEPATH += $$PWD/$$dir
+        include($$dir/$$dir".pri")
+    }
 }
 
 # Resources
@@ -154,6 +164,7 @@ win32 {
 }
 
 unix {
+    DEFINES         += OPENGL54
     CONFIG          += debug warn_on
 #   QMAKE_CFLAGS    += -Wall -Wno-return-type
 #   QMAKE_CXXFLAGS  += -Wall -Wno-return-type

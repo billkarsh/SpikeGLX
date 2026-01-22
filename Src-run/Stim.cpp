@@ -5,8 +5,12 @@
 #include "ConfigCtl.h"
 #include "DAQ.h"
 #include "Subset.h"
+
+#ifdef HAVE_IMEC
 #include "IMEC/NeuropixAPI.h"
 using namespace Neuropixels;
+#endif
+
 #ifdef HAVE_NIDAQmx
 #include "NI/NIDAQmx.h"
 #else

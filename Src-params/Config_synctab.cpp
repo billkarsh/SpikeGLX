@@ -168,6 +168,7 @@ void Config_synctab::syncSourceCBChanged()
         syncTabUI->calChk->setChecked( false );
     }
 
+#ifdef HAVE_IMEC
     syncTabUI->imSlotSB->setEnabled(
         cfg->prbTab.anySlotPXIType() &&
         (   // source not PXI
@@ -176,6 +177,9 @@ void Config_synctab::syncSourceCBChanged()
                 cfg->prbTab.getEnumSlot(
                     sourceIdx - DAQ::eSyncSourceIM ) )
         ) );
+#else
+    syncTabUI->imSlotSB->setEnabled( false );
+#endif
 
     syncTabUI->sourceSB->setEnabled( sourceSBEnab );
     syncTabUI->calChk->setEnabled( calChkEnab );

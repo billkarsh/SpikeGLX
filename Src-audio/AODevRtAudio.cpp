@@ -1,4 +1,7 @@
 
+#include <qglobal.h>
+#ifdef Q_OS_WIN
+
 #include "AOCtl.h"
 #include "AODevRtAudio.h"
 #include "Util.h"
@@ -702,5 +705,7 @@ fetched:
 
     return 0;
 }
+
+#endif	// Q_OS_WIN
 
 

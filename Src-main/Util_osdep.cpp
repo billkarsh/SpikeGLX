@@ -11,7 +11,6 @@
 #include "MainApp.h"
 
 #include <QThread>
-//#include <QGLContext>
 
 /* ---------------------------------------------------------------- */
 /* Includes single OS --------------------------------------------- */
@@ -393,129 +392,6 @@ bool hasOpenGLExtension( const char *ext_name )
 
     return hasOpenGLXExtension( ext_name );
 }
-
-/* ---------------------------------------------------------------- */
-/* setOpenGLVSyncMode --------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-#ifndef Q_OS_WIN
-
-typedef BOOL (APIENTRY *wglswapfn_t)( int );
-
-void setOpenGLVSyncMode( bool onoff )
-{
-    static Qt::HANDLE   lastThread = 0;    // limit report verbosity
-
-    Qt::HANDLE  thread = QThread::currentThreadId();
-
-    wglswapfn_t wglSwapIntervalEXT =
-                (wglswapfn_t)QGLContext::currentContext()
-                ->getProcAddress( "wglSwapIntervalEXT" );
-
-    if( wglSwapIntervalEXT ) {
-
-        wglSwapIntervalEXT( (onoff ? 1 : 0) );
-
-        if( thread != lastThread ) {
-            Log()
-                << "OpenGL VSync mode "
-                << (onoff ? "enabled" : "disabled")
-                << " using wglSwapIntervalEXT().";
-            lastThread = thread;
-        }
-    }
-    else if( thread != lastThread ) {
-        Warning()
-            << "OpenGL VSync mode could not be set"
-            " because wglSwapIntervalEXT function not found.";
-        lastThread = thread;
-    }
-}
-
-#elif defined(Q_WS_X11)
-
-typedef int (*swap_t)( int );
-
-void setOpenGLVSyncMode( bool onoff )
-{
-    static Qt::HANDLE   lastThread = 0;    // limit report verbosity
-
-    Qt::HANDLE  thread = QThread::currentThreadId();
-
-    if( hasOpenGLExtension( "GLX_SGI_swap_control" ) ) {
-
-        if( thread != lastThread ) {
-            Log()
-                << "Found GLX_SGI_swap_control extension, turning "
-                "OpenGL VSync mode "
-                << (onoff ? "on" : "off")
-                << ".";
-            thread = lastThread;
-        }
-
-        swap_t  fun = (swap_t)glXGetProcAddressARB(
-                        (const GLubyte*)"glXSwapIntervalSGI" );
-
-        if( fun )
-            fun( onoff ? 1 : 0 );
-        else if( thread != lastThread ) {
-            Warning() <<  "Error: glXSwapIntervalSGI function not found.";
-            thread = lastThread;
-        }
-    }
-    else if( thread != lastThread ) {
-        Warning()
-            << "OpenGL VSync mode could not be set"
-            " because GLX_SGI_swap_control function not found.";
-        thread = lastThread;
-    }
-}
-
-#elif defined(Q_WS_MACX)
-
-void setOpenGLVSyncMode( bool onoff )
-{
-    static Qt::HANDLE   lastThread = 0;    // limit report verbosity
-
-    Qt::HANDLE  thread = QThread::currentThreadId();
-
-    GLint       tmp = (onoff ? 1 : 0);
-    AGLContext  ctx = aglGetCurrentContext();
-
-    if( aglEnable( ctx, AGL_SWAP_INTERVAL ) == GL_FALSE ) {
-
-        if( thread != lastThread ) {
-            Warning()
-                << "OpenGL VSync mode could not be set because"
-                " aglEnable(AGL_SWAP_INTERVAL) returned false.";
-            thread = lastThread;
-        }
-    }
-    else {
-        if( aglSetInteger( ctx, AGL_SWAP_INTERVAL, &tmp ) == GL_FALSE ) {
-
-            if( thread != lastThread ) {
-                Warning()
-                    << "OpenGL VSync mode could not be set because"
-                    " aglSetInteger returned false.";
-                thread = lastThread;
-            }
-        }
-        else if( thread != lastThread ) {
-            Log()
-                << "OpenGL VSync mode "
-                << (onoff ? "enabled" : "disabled")
-                << " using aglSetInteger().";
-            thread = lastThread;
-        }
-    }
-}
-
-#else /* !Q_OS_WIN && !Q_WS_X11 && !Q_WS_MACX */
-
-#warning Warning: setOpenGLVSyncMode() not implemented on this platform!
-
-#endif
 
 /* ---------------------------------------------------------------- */
 /* isWindows7OrLater ---------------------------------------------- */

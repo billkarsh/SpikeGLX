@@ -8,6 +8,7 @@
 #include "Run.h"
 #include "SignalBlocker.h"
 #include "AODevRtAudio.h"
+#include "AODevSim.h"
 
 #include <QKeyEvent>
 #include <QMessageBox>
@@ -207,7 +208,7 @@ qint16 AOCtl::Derived::vol( qint16 val, double vol ) const
 AOCtl::AOCtl( const DAQ::Params &p, QWidget *parent )
     :   QWidget(parent), p(p), usr(p), dlgShown(false)
 {
-#if 1
+#ifdef Q_OS_WIN
     aoDev = new AODevRtAudio( this, p );
 #else
     aoDev = new AODevSim( this, p );
@@ -674,7 +675,7 @@ void AOCtl::ctorCheckAudioSupport()
         ctorErr = "No audio output hardware found on this machine.";
 
     if( !ctorErr.isEmpty() )
-        Warning() << "Audio error: " << ctorErr;
+        Warning() << "Audio warning: " << ctorErr;
 }
 
 
