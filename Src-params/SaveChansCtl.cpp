@@ -7,7 +7,6 @@
 #include "Util.h"
 
 #include <QClipboard>
-#include <QDialog>
 #include <QMessageBox>
 
 #include <math.h>
@@ -20,16 +19,14 @@
 /* ---------------------------------------------------------------- */
 
 SaveChansCtl::SaveChansCtl( QWidget *parent, const CimCfg::PrbEach &E, int ip )
-    :   QObject(parent), parent(parent), E(E), ip(ip)
+    :   QDialog(parent), parent(parent), E(E), ip(ip)
 {
-    svDlg = new QDialog;
-
-    svDlg->setWindowFlags( svDlg->windowFlags()
+    setWindowFlags( windowFlags()
         & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
     svUI = new Ui::IMSaveChansDlg;
-    svUI->setupUi( svDlg );
+    svUI->setupUi( this );
 
     nAP = E.roTbl->nAP();
     nLF = E.roTbl->nLF();
@@ -59,11 +56,6 @@ SaveChansCtl::~SaveChansCtl()
         delete svUI;
         svUI = 0;
     }
-
-    if( svDlg ) {
-        delete svDlg;
-        svDlg = 0;
-    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -85,7 +77,7 @@ bool SaveChansCtl::edit( QString &uistr, bool &lfPairChk )
 
     for(;;) {
 
-        if( QDialog::Accepted == svDlg->exec() ) {
+        if( QDialog::Accepted == exec() ) {
 
             SnsChansImec    sns;
             QString         err;

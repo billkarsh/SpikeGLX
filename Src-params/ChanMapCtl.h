@@ -3,24 +3,21 @@
 
 #include "ChanMap.h"
 
-#include <QObject>
+#include <QDialog>
 
 namespace Ui {
 class ChanMappingDlg;
 }
 
-class QDialog;
-
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class ChanMapCtl : public QObject
+class ChanMapCtl : public QDialog
 {
     Q_OBJECT
 
 private:
-    QDialog             *mapDlg;
     Ui::ChanMappingDlg  *mapUI;
     const ChanMap       &D;
     ChanMap             *Mref,
@@ -31,7 +28,7 @@ private:
     int                 ip;
 
 public:
-    ChanMapCtl( QObject *parent, const ChanMap &defMap );
+    ChanMapCtl( QWidget *parent, const ChanMap &defMap );
     virtual ~ChanMapCtl();
 
     QString edit( const QString &file, int ip );

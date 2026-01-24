@@ -1189,7 +1189,7 @@ void MainApp::tools_CalSRate()
         return;
     }
 
-    CalSRateCtl rateCtl( consoleWindow );
+    CalSRateCtl rateCtl( 0 );
 }
 
 
@@ -1222,7 +1222,7 @@ void MainApp::tools_ImBist()
         return;
     }
 
-    IMBISTCtl bistCtl( consoleWindow );
+    IMBISTCtl bistCtl( 0 );
 #endif
 }
 
@@ -1239,7 +1239,7 @@ void MainApp::tools_ImHst()
         return;
     }
 
-    IMHSTCtl hstCtl( consoleWindow );
+    IMHSTCtl hstCtl( 0 );
 #endif
 }
 
@@ -1256,7 +1256,7 @@ void MainApp::tools_ImFirmware()
         return;
     }
 
-    IMFirmCtl firmCtl( consoleWindow );
+    IMFirmCtl firmCtl( 0 );
 #endif
 }
 
@@ -1378,7 +1378,7 @@ void MainApp::help_ExploreApp()
 
 void MainApp::help_About()
 {
-    QMessageBox about( consoleWindow );
+    QMessageBox about( 0 );
     about.setWindowTitle( "About " APPNAME );
     about.setText(
         "<!DOCTYPE html>"

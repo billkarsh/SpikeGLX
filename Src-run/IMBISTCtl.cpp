@@ -40,12 +40,10 @@ static QString getNPErrorString()
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-IMBISTCtl::IMBISTCtl( QObject *parent ) : QObject(parent)
+IMBISTCtl::IMBISTCtl( QWidget *parent ) : QDialog(parent)
 {
-    dlg = new QDialog();
-
     bistUI = new Ui::IMBISTDlg;
-    bistUI->setupUi( dlg );
+    bistUI->setupUi( this );
     ConnectUI( bistUI->goBut, SIGNAL(clicked()), this, SLOT(go()) );
     ConnectUI( bistUI->helpBut, SIGNAL(clicked()), this, SLOT(helpBut()) );
     ConnectUI( bistUI->clearBut, SIGNAL(clicked()), this, SLOT(clear()) );
@@ -53,7 +51,7 @@ IMBISTCtl::IMBISTCtl( QObject *parent ) : QObject(parent)
 
     _closeSlots();
 
-    dlg->exec();
+    exec();
 }
 
 
@@ -64,11 +62,6 @@ IMBISTCtl::~IMBISTCtl()
     if( bistUI ) {
         delete bistUI;
         bistUI = 0;
-    }
-
-    if( dlg ) {
-        delete dlg;
-        dlg = 0;
     }
 }
 
@@ -138,7 +131,7 @@ void IMBISTCtl::clear()
 void IMBISTCtl::save()
 {
     QString fn = QFileDialog::getSaveFileName(
-                    dlg,
+                    this,
                     "Save test results as text file",
                     mainApp()->dataDir(),
                     "Text files (*.txt)" );
@@ -253,7 +246,7 @@ bool IMBISTCtl::_openSlot()
 {
     int slot = bistUI->slotSB->value();
 
-    if( openSlots.end() == find( openSlots.begin(), openSlots.end(), slot ) )
+    if( openSlots.end() == std::find( openSlots.begin(), openSlots.end(), slot ) )
         openSlots.push_back( slot );
 
     return true;

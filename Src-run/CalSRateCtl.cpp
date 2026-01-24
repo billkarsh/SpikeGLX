@@ -16,13 +16,11 @@
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-CalSRateCtl::CalSRateCtl( QObject *parent )
-    :   QObject(parent), thd(0)
+CalSRateCtl::CalSRateCtl( QWidget *parent )
+    :   QDialog(parent), thd(0)
 {
-    dlg = new QDialog();
-
     calUI = new Ui::CalSRateDlg;
-    calUI->setupUi( dlg );
+    calUI->setupUi( this );
     calUI->allRB->setChecked( true );
     calUI->cancelBut->setEnabled( false );
     ConnectUI( calUI->browseBut, SIGNAL(clicked()), this, SLOT(browse()) );
@@ -30,7 +28,7 @@ CalSRateCtl::CalSRateCtl( QObject *parent )
     ConnectUI( calUI->helpBut, SIGNAL(clicked()), this, SLOT(helpBut()) );
     ConnectUI( calUI->applyBut, SIGNAL(clicked()), this, SLOT(apply()) );
 
-    dlg->exec();
+    exec();
 }
 
 
@@ -49,11 +47,6 @@ CalSRateCtl::~CalSRateCtl()
     if( calUI ) {
         delete calUI;
         calUI = 0;
-    }
-
-    if( dlg ) {
-        delete dlg;
-        dlg = 0;
     }
 }
 
@@ -93,7 +86,7 @@ void CalSRateCtl::finished()
 void CalSRateCtl::browse()
 {
     QString f = QFileDialog::getOpenFileName(
-                    dlg,
+                    this,
                     "Select binary output file",
                     mainApp()->dataDir(),
                     "BIN Files (*.ap.bin *.obx.bin *.nidq.bin)" );
@@ -168,7 +161,7 @@ void CalSRateCtl::apply()
     if( !(isGChk || isFChk) ) {
 
         QMessageBox::information(
-            dlg,
+            this,
             "No Update Targets",
             "Use checkboxes to specify how results are applied." );
         return;
@@ -360,7 +353,7 @@ void CalSRateCtl::apply()
     if( !isRslt ) {
 
         QMessageBox::information(
-            dlg,
+            this,
             "No Valid Results",
             "Nothing done: No new results were calculated." );
     }

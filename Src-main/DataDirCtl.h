@@ -1,31 +1,28 @@
 #ifndef DATADIRCTL_H
 #define DATADIRCTL_H
 
-#include <QObject>
+#include <QDialog>
 #include <QStringList>
 
 namespace Ui {
 class DataDirDialog;
 }
 
-class QDialog;
-
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class DataDirCtl : public QObject
+class DataDirCtl : public QDialog
 {
     Q_OBJECT
 
 private:
-    QDialog             *ddDlg;
     Ui::DataDirDialog   *ddUI;
     QStringList         sl;
     bool                isMD;
 
 public:
-    DataDirCtl( QObject *parent, const QStringList &sl, bool isMD );
+    DataDirCtl( QWidget *parent, const QStringList &sl, bool isMD );
     virtual ~DataDirCtl();
 
     void run();

@@ -4,7 +4,6 @@
 #include "SimProbesCtl.h"
 #include "Util.h"
 
-#include <QDialog>
 #include <QFileDialog>
 #include <QTimer>
 
@@ -21,17 +20,15 @@
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-SimProbesCtl::SimProbesCtl( QObject *parent, SimProbes &SP )
-    :   QObject(parent), SP(SP)
+SimProbesCtl::SimProbesCtl( QWidget *parent, SimProbes &SP )
+    :   QDialog(parent), SP(SP)
 {
-    spDlg = new QDialog;
-
-    spDlg->setWindowFlags( spDlg->windowFlags()
+    setWindowFlags( windowFlags()
         & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
     spUI = new Ui::SimProbesDialog;
-    spUI->setupUi( spDlg );
+    spUI->setupUi( this );
 
     SP.loadSettings();
     maddr = SP.getProbes();
@@ -54,11 +51,6 @@ SimProbesCtl::~SimProbesCtl()
         delete spUI;
         spUI = 0;
     }
-
-    if( spDlg ) {
-        delete spDlg;
-        spDlg = 0;
-    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -67,7 +59,7 @@ SimProbesCtl::~SimProbesCtl()
 
 void SimProbesCtl::run()
 {
-    spDlg->exec();
+    exec();
 }
 
 /* ---------------------------------------------------------------- */
@@ -147,14 +139,14 @@ void SimProbesCtl::okBut()
     if( fromTable() ) {
 
         SP.saveSettings( maddr );
-        spDlg->accept();
+        accept();
     }
 }
 
 
 void SimProbesCtl::cancelBut()
 {
-    spDlg->reject();
+    reject();
 }
 
 
@@ -255,7 +247,7 @@ bool SimProbesCtl::selectFile( QString &file )
 
     file =
         QFileDialog::getOpenFileName(
-            spDlg,
+            this,
             "Choose AP bin file",
             file,
             "AP binary files (*.ap.bin)" );

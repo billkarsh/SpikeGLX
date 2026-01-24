@@ -16,17 +16,15 @@
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-DataDirCtl::DataDirCtl( QObject *parent, const QStringList &sl, bool isMD )
-    :   QObject(parent), sl(sl), isMD(isMD)
+DataDirCtl::DataDirCtl( QWidget *parent, const QStringList &sl, bool isMD )
+    :   QDialog(parent), sl(sl), isMD(isMD)
 {
-    ddDlg = new QDialog;
-
-    ddDlg->setWindowFlags( ddDlg->windowFlags()
+    setWindowFlags( windowFlags()
         & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
     ddUI = new Ui::DataDirDialog;
-    ddUI->setupUi( ddDlg );
+    ddUI->setupUi( this );
 
     toDialog();
 
@@ -45,11 +43,6 @@ DataDirCtl::~DataDirCtl()
         delete ddUI;
         ddUI = 0;
     }
-
-    if( ddDlg ) {
-        delete ddDlg;
-        ddDlg = 0;
-    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -58,7 +51,7 @@ DataDirCtl::~DataDirCtl()
 
 void DataDirCtl::run()
 {
-    ddDlg->exec();
+    exec();
 }
 
 /* ---------------------------------------------------------------- */
@@ -179,13 +172,13 @@ void DataDirCtl::okBut()
 
     mainApp()->dataDirCtlUpdate( sl, isMD );
 
-    ddDlg->accept();
+    accept();
 }
 
 
 void DataDirCtl::cancelBut()
 {
-    ddDlg->reject();
+    reject();
 }
 
 /* ---------------------------------------------------------------- */
@@ -202,7 +195,7 @@ bool DataDirCtl::selectDir( QString &dir_inout )
 
     dir_inout =
         QFileDialog::getExistingDirectory(
-            ddDlg,
+            this,
             "Choose Data Directory",
             dir_inout,
             QFileDialog::DontResolveSymlinks

@@ -6,7 +6,6 @@
 #include "MainApp.h"
 #include "ConfigCtl.h"
 
-#include <QDialog>
 #include <QFileDialog>
 #include <QRegularExpression>
 #include <QSettings>
@@ -19,19 +18,17 @@
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-ChanMapCtl::ChanMapCtl( QObject *parent, const ChanMap &defMap )
-    :   QObject(parent), D(defMap), Mref(0), Mcur(0)
+ChanMapCtl::ChanMapCtl( QWidget *parent, const ChanMap &defMap )
+    :   QDialog(parent), D(defMap), Mref(0), Mcur(0)
 {
     loadSettings();
 
-    mapDlg = new QDialog;
-
-    mapDlg->setWindowFlags( mapDlg->windowFlags()
+    setWindowFlags( windowFlags()
         & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
     mapUI = new Ui::ChanMappingDlg;
-    mapUI->setupUi( mapDlg );
+    mapUI->setupUi( this );
 
     if( DAQ::Params::stream_isOB( D.type() ) ) {
 
@@ -48,8 +45,7 @@ ChanMapCtl::ChanMapCtl( QObject *parent, const ChanMap &defMap )
     ConnectUI( mapUI->buttonBox, SIGNAL(accepted()), this, SLOT(okBut()) );
     ConnectUI( mapUI->buttonBox, SIGNAL(rejected()), this, SLOT(cancelBut()) );
 
-    mapDlg->setWindowTitle(
-            QString("%1 %2").arg( D.type() ).arg( mapDlg->windowTitle() ) );
+    setWindowTitle( QString("%1 %2").arg( D.type() ).arg( windowTitle() ) );
 
     mapUI->cfgLbl->setText( D.hdrText() );
 }
@@ -62,11 +58,6 @@ ChanMapCtl::~ChanMapCtl()
     if( mapUI ) {
         delete mapUI;
         mapUI = 0;
-    }
-
-    if( mapDlg ) {
-        delete mapDlg;
-        mapDlg = 0;
     }
 
     if( Mref ) {
@@ -101,7 +92,7 @@ QString ChanMapCtl::edit( const QString &file, int ip )
     else
         applyAutoBut( DAQ::Params::stream_isIM( D.type() ) ? 1 : 0 );
 
-    mapDlg->exec();
+    exec();
 
     return refFile;
 }
@@ -131,7 +122,7 @@ void ChanMapCtl::applyAutoBut( int idx )
 
         if( C->isConfigDlg( parent() ) ) {
 
-            if( !C->chanMapGetsShankOrder( s, D.type(), ip, idx==2, mapDlg ) )
+            if( !C->chanMapGetsShankOrder( s, D.type(), ip, idx==2, this ) )
                 return;
         }
         else {
@@ -206,7 +197,7 @@ void ChanMapCtl::applyListBut()
 void ChanMapCtl::loadBut()
 {
     QString fn = QFileDialog::getOpenFileName(
-                    mapDlg,
+                    this,
                     "Load a channel mapping",
                     lastDir,
                     QString("Map files (*.%1.cmp)").arg( Mcur->type() ) );
@@ -224,7 +215,7 @@ void ChanMapCtl::saveBut()
         return;
 
     QString fn = QFileDialog::getSaveFileName(
-                    mapDlg,
+                    this,
                     "Save channel mapping",
                     lastDir,
                     QString("Map files (*.%1.cmp)").arg( Mcur->type() ) );
@@ -256,14 +247,14 @@ void ChanMapCtl::okBut()
         return;
     }
 
-    mapDlg->accept();
+    accept();
 }
 
 
 void ChanMapCtl::cancelBut()
 {
     refFile = iniFile;
-    mapDlg->reject();
+    reject();
 }
 
 /* ---------------------------------------------------------------- */

@@ -3,31 +3,28 @@
 
 #include "SimProbes.h"
 
-#include <QObject>
+#include <QDialog>
 
 namespace Ui {
 class SimProbesDialog;
 }
 
-class QDialog;
-
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class SimProbesCtl : public QObject
+class SimProbesCtl : public QDialog
 {
     Q_OBJECT
 
 private:
-    QDialog                 *spDlg;
     Ui::SimProbesDialog     *spUI;
     SimProbes               &SP;
     QMap<SPAddr,QString>    maddr;
     int                     clkRow;
 
 public:
-    SimProbesCtl( QObject *parent, SimProbes &SP );
+    SimProbesCtl( QWidget *parent, SimProbes &SP );
     virtual ~SimProbesCtl();
 
     void run();

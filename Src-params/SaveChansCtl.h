@@ -3,25 +3,22 @@
 
 #include "CimCfg.h"
 
-#include <QWidget>
+#include <QDialog>
 
 namespace Ui {
 class IMSaveChansDlg;
 }
 
-class QDialog;
-
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class SaveChansCtl : public QObject
+class SaveChansCtl : public QDialog
 {
     Q_OBJECT
 
 private:
     QWidget                 *parent;
-    QDialog                 *svDlg;
     Ui::IMSaveChansDlg      *svUI;
     const CimCfg::PrbEach   &E;
     int                     ip,

@@ -5,24 +5,21 @@
 
 #include "IMEC/NeuropixAPI.h"
 
-#include <QObject>
+#include <QDialog>
 
 namespace Ui {
 class IMBISTDlg;
 }
 
-class QDialog;
-
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class IMBISTCtl : public QObject
+class IMBISTCtl : public QDialog
 {
     Q_OBJECT
 
 private:
-    QDialog             *dlg;
     Ui::IMBISTDlg       *bistUI;
     std::vector<int>    openSlots;
     QString             pn;
@@ -30,7 +27,7 @@ private:
     bool                testEEPROM;
 
 public:
-    IMBISTCtl( QObject *parent = 0 );
+    IMBISTCtl( QWidget *parent = 0 );
     virtual ~IMBISTCtl();
 
 private slots:

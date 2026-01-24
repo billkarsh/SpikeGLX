@@ -42,14 +42,12 @@ static QString makeErrorString( NP_ErrorCode err )
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-IMFirmCtl::IMFirmCtl( QObject *parent ) : QObject(parent)
+IMFirmCtl::IMFirmCtl( QWidget *parent ) : QDialog(parent)
 {
-    dlg = new QDialog();
-
-    dlg->setWindowFlags( dlg->windowFlags() & ~Qt::WindowCloseButtonHint );
+    setWindowFlags( windowFlags() & ~Qt::WindowCloseButtonHint );
 
     firmUI = new Ui::IMFirmDlg;
-    firmUI->setupUi( dlg );
+    firmUI->setupUi( this );
 
     firmUI->PBar->setMaximum( 1 );
     firmUI->PBar->setValue( 0 );
@@ -64,8 +62,8 @@ IMFirmCtl::IMFirmCtl( QObject *parent ) : QObject(parent)
     ConnectUI( firmUI->helpBut, SIGNAL(clicked()), this, SLOT(helpBut()) );
 
     slotChanged();
-    dlg->resize( dlg->minimumSizeHint() );
-    dlg->exec();
+    resize( minimumSizeHint() );
+    exec();
 }
 
 
@@ -74,11 +72,6 @@ IMFirmCtl::~IMFirmCtl()
     if( firmUI ) {
         delete firmUI;
         firmUI = 0;
-    }
-
-    if( dlg ) {
-        delete dlg;
-        dlg = 0;
     }
 }
 
@@ -132,21 +125,21 @@ void IMFirmCtl::update()
 
     if( slot < 2 ) {
 
-        QMessageBox::information( dlg,
+        QMessageBox::information( this,
             "No Slot Selected",
             "Select a base station module." );
         goto exit;
     }
     else if( tech == t_tech_sim ) {
 
-        QMessageBox::information( dlg,
+        QMessageBox::information( this,
             "Unidentified Module",
             "No module found at this slot." );
         goto exit;
     }
     else if( !jobBits ) {
 
-        QMessageBox::information( dlg,
+        QMessageBox::information( this,
             "No Action Needed",
             "Your module is already up to date." );
         goto exit;
@@ -287,7 +280,7 @@ void IMFirmCtl::update()
     firmUI->PBar->setMaximum( 1 );
     firmUI->PBar->setValue( 1 );
 
-    QMessageBox::information( dlg,
+    QMessageBox::information( this,
         "Completed",
         QString("Update is done.\n%1")
         .arg( !sbs.isEmpty() ?
@@ -447,7 +440,7 @@ bool IMFirmCtl::paths( QString &bs, QString &bsc )
 
     QString path =
         QFileDialog::getExistingDirectory(
-            dlg,
+            this,
             "Select SGLX_Firmware Directory",
             targetdir.absolutePath(),
             QFileDialog::DontResolveSymlinks

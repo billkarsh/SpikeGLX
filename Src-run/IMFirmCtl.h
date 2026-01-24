@@ -3,24 +3,21 @@
 
 #ifdef HAVE_IMEC
 
-#include <QObject>
+#include <QDialog>
 
 namespace Ui {
 class IMFirmDlg;
 }
 
-class QDialog;
-
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class IMFirmCtl : public QObject
+class IMFirmCtl : public QDialog
 {
     Q_OBJECT
 
 private:
-    QDialog         *dlg;
     Ui::IMFirmDlg   *firmUI;
     int             tech,
                     jobBits,    // {0=none,1=BS,2=BSC}
@@ -29,7 +26,7 @@ private:
                     barOffset;
 
 public:
-    IMFirmCtl( QObject *parent = 0 );
+    IMFirmCtl( QWidget *parent = 0 );
     virtual ~IMFirmCtl();
 
 private slots:

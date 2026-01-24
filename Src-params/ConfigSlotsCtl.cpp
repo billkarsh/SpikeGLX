@@ -5,8 +5,6 @@
 #include "Util.h"
 #include "SignalBlocker.h"
 
-#include <QDialog>
-
 #define TBL_SLOT    0
 #define TBL_ID      1
 #define TBL_DET     2
@@ -19,17 +17,15 @@
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-ConfigSlotsCtl::ConfigSlotsCtl( QObject *parent, CimCfg::ImProbeTable &prbTab )
-    :   QObject(parent), prbTab(prbTab)
+ConfigSlotsCtl::ConfigSlotsCtl( QWidget *parent, CimCfg::ImProbeTable &prbTab )
+    :   QDialog(parent), prbTab(prbTab)
 {
-    csDlg = new QDialog;
-
-    csDlg->setWindowFlags( csDlg->windowFlags()
+    setWindowFlags( windowFlags()
         & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
     csUI = new Ui::ConfigSlotsDialog;
-    csUI->setupUi( csDlg );
+    csUI->setupUi( this );
     ConnectUI( csUI->addBut, SIGNAL(clicked()), this, SLOT(addBut()) );
     ConnectUI( csUI->tableWidget, SIGNAL(itemSelectionChanged()), this, SLOT(selectionChanged()) );
     ConnectUI( csUI->slotCB, SIGNAL(currentIndexChanged(int)), this, SLOT(slotCBChanged(int)) );
@@ -48,11 +44,6 @@ ConfigSlotsCtl::~ConfigSlotsCtl()
         delete csUI;
         csUI = 0;
     }
-
-    if( csDlg ) {
-        delete csDlg;
-        csDlg = 0;
-    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -68,7 +59,7 @@ bool ConfigSlotsCtl::run()
 
     selectionChanged();
 
-    return QDialog::Accepted == csDlg->exec();
+    return QDialog::Accepted == exec();
 }
 
 /* ---------------------------------------------------------------- */
@@ -292,13 +283,13 @@ void ConfigSlotsCtl::okBut()
 
     prbTab.setCfgSlots( vCS );
 
-    csDlg->accept();
+    accept();
 }
 
 
 void ConfigSlotsCtl::cancelBut()
 {
-    csDlg->reject();
+    reject();
 }
 
 /* ---------------------------------------------------------------- */

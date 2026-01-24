@@ -42,12 +42,10 @@ static bool continueAnyway( NP_ErrorCode err )
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-IMHSTCtl::IMHSTCtl( QObject *parent ) : QObject(parent)
+IMHSTCtl::IMHSTCtl( QWidget *parent ) : QDialog(parent)
 {
-    dlg = new QDialog();
-
     hstUI = new Ui::IMBISTDlg;
-    hstUI->setupUi( dlg );
+    hstUI->setupUi( this );
     hstUI->dockLbl->hide();
     hstUI->dockSB->hide();
     ConnectUI( hstUI->goBut, SIGNAL(clicked()), this, SLOT(go()) );
@@ -71,8 +69,8 @@ IMHSTCtl::IMHSTCtl( QObject *parent ) : QObject(parent)
 
     _closeSlots();
 
-    dlg->setWindowTitle( "HST (Imec Headstage Diagnostics)" );
-    dlg->exec();
+    setWindowTitle( "HST (Imec Headstage Diagnostics)" );
+    exec();
 }
 
 
@@ -83,11 +81,6 @@ IMHSTCtl::~IMHSTCtl()
     if( hstUI ) {
         delete hstUI;
         hstUI = 0;
-    }
-
-    if( dlg ) {
-        delete dlg;
-        dlg = 0;
     }
 }
 
@@ -143,7 +136,7 @@ void IMHSTCtl::clear()
 void IMHSTCtl::save()
 {
     QString fn = QFileDialog::getSaveFileName(
-                    dlg,
+                    this,
                     "Save test results as text file",
                     mainApp()->dataDir(),
                     "Text files (*.txt)" );
@@ -246,7 +239,7 @@ bool IMHSTCtl::_openSlot()
 {
     int slot = hstUI->slotSB->value();
 
-    if( openSlots.end() == find( openSlots.begin(), openSlots.end(), slot ) )
+    if( openSlots.end() == std::find( openSlots.begin(), openSlots.end(), slot ) )
         openSlots.push_back( slot );
 
     return true;

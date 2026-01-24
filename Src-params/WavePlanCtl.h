@@ -1,30 +1,27 @@
 #ifndef WAVEPLANCTL_H
 #define WAVEPLANCTL_H
 
-#include <QObject>
+#include <QDialog>
 
 namespace Ui {
 class WavePlanDialog;
 }
 
-class QDialog;
-
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class WavePlanCtl : public QObject
+class WavePlanCtl : public QDialog
 {
     Q_OBJECT
 
 private:
-    QDialog             *wvDlg;
     Ui::WavePlanDialog  *wvUI;
     QString             type;
     int                 binsamp;
 
 public:
-    WavePlanCtl( QObject *parent = 0 );
+    WavePlanCtl( QWidget *parent = 0 );
     virtual ~WavePlanCtl();
 
 private slots:

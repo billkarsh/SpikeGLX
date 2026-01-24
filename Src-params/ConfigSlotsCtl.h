@@ -3,30 +3,27 @@
 
 #include "CimCfg.h"
 
-#include <QObject>
+#include <QDialog>
 
 namespace Ui {
 class ConfigSlotsDialog;
 }
 
-class QDialog;
-
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class ConfigSlotsCtl : public QObject
+class ConfigSlotsCtl : public QDialog
 {
     Q_OBJECT
 
 private:
-    QDialog                     *csDlg;
     Ui::ConfigSlotsDialog       *csUI;
     CimCfg::ImProbeTable        &prbTab;
     QVector<CimCfg::CfgSlot>    vCS;
 
 public:
-    ConfigSlotsCtl( QObject *parent, CimCfg::ImProbeTable &prbTab );
+    ConfigSlotsCtl( QWidget *parent, CimCfg::ImProbeTable &prbTab );
     virtual ~ConfigSlotsCtl();
 
     bool run();

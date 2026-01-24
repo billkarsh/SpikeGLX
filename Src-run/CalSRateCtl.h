@@ -3,22 +3,21 @@
 
 #include "CalSRate.h"
 
+#include <QDialog>
+
 namespace Ui {
 class CalSRateDlg;
 }
-
-class QDialog;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class CalSRateCtl : public QObject
+class CalSRateCtl : public QDialog
 {
     Q_OBJECT
 
 private:
-    QDialog                     *dlg;
     Ui::CalSRateDlg             *calUI;
     DFRunTag                    runTag;
     std::vector<CalSRStream>    vIM;
@@ -27,7 +26,7 @@ private:
     CalSRThread                 *thd;
 
 public:
-    CalSRateCtl( QObject *parent = 0 );
+    CalSRateCtl( QWidget *parent = 0 );
     virtual ~CalSRateCtl();
 
 public slots:

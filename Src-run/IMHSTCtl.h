@@ -5,30 +5,27 @@
 
 #include "IMEC/NeuropixAPI.h"
 
-#include <QObject>
+#include <QDialog>
 
 namespace Ui {
 class IMBISTDlg;
 }
 
-class QDialog;
-
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class IMHSTCtl : public QObject
+class IMHSTCtl : public QDialog
 {
     Q_OBJECT
 
 private:
-    QDialog             *dlg;
     Ui::IMBISTDlg       *hstUI;
     std::vector<int>    openSlots;
     bool                isHelloText;
 
 public:
-    IMHSTCtl( QObject *parent = 0 );
+    IMHSTCtl( QWidget *parent = 0 );
     virtual ~IMHSTCtl();
 
 private slots:

@@ -14,12 +14,10 @@
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-WavePlanCtl::WavePlanCtl( QObject *parent ) : QObject(parent)
+WavePlanCtl::WavePlanCtl( QWidget *parent ) : QDialog(parent)
 {
-    wvDlg = new QDialog();
-
     wvUI = new Ui::WavePlanDialog;
-    wvUI->setupUi( wvDlg );
+    wvUI->setupUi( this );
 
     newBut();
 
@@ -40,7 +38,7 @@ WavePlanCtl::WavePlanCtl( QObject *parent ) : QObject(parent)
     ConnectUI( wvUI->saveBut, SIGNAL(clicked()), this, SLOT(saveBut()) );
     ConnectUI( wvUI->buttonBox, SIGNAL(rejected()), this, SLOT(closeBut()) );
 
-    wvDlg->exec();
+    exec();
 }
 
 
@@ -49,11 +47,6 @@ WavePlanCtl::~WavePlanCtl()
     if( wvUI ) {
         delete wvUI;
         wvUI = 0;
-    }
-
-    if( wvDlg ) {
-        delete wvDlg;
-        wvDlg = 0;
     }
 }
 
@@ -111,7 +104,7 @@ void WavePlanCtl::loadBut()
     QString wavedir = makeWaves();
 
     QString fn = QFileDialog::getOpenFileName(
-                    wvDlg,
+                    this,
                     "Select Wave Metafile",
                     wavedir,
                     "Waves (*.meta)" );
@@ -277,7 +270,7 @@ void WavePlanCtl::saveBut()
             wavedir = makeWaves();
 
     QString fn = QFileDialog::getSaveFileName(
-                    wvDlg,
+                    this,
                     "Save Wave Metafile",
                     wavedir,
                     "Waves (*.meta)" );
@@ -330,7 +323,7 @@ void WavePlanCtl::saveBut()
 
 void WavePlanCtl::closeBut()
 {
-    wvDlg->reject();
+    reject();
 }
 
 /* ---------------------------------------------------------------- */
