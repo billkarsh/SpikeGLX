@@ -873,8 +873,10 @@ void FileViewerWindow::svyInit()
     sh2bkMax.clear();
 
     if( isSvy() ) {
-        foreach( const SvySBTT &E, SVY.e )
+        for( int i = 0, n = SVY.e.size(); i < n; ++i ) {
+           const SvySBTT &E = SVY.e[i];
            sh2bkMax[E.s] = E.b;
+        }
     }
 }
 
@@ -1997,7 +1999,7 @@ void FileViewerWindow::file_Notes()
             | Qt::WindowCloseButtonHint) );
 
     ui.setupUi( &dlg );
-    ui.notesTE->setFocusPolicy(Qt::NoFocus);
+    ui.notesTE->setFocusPolicy( Qt::NoFocus );
     ui.notesTE->setReadOnly( true );
 
     QString notes = df->notes();
@@ -2013,11 +2015,46 @@ void FileViewerWindow::file_Notes()
 
 void FileViewerWindow::file_Meta()
 {
-    if( df ) {
-        QDesktopServices::openUrl(
-            QUrl::fromUserInput( df->metaFileName() )
-        );
+    if( !df )
+        return;
+
+#ifdef Q_OS_WIN
+
+    QDesktopServices::openUrl(
+        QUrl::fromUserInput( df->metaFileName() )
+    );
+
+#elif defined(Q_OS_LINUX)
+
+    QDialog             dlg;
+    Ui::FVW_NotesDialog ui;
+
+    dlg.setWindowFlags( dlg.windowFlags()
+        & ~(Qt::WindowContextHelpButtonHint
+            | Qt::WindowCloseButtonHint) );
+
+    ui.setupUi( &dlg );
+    ui.addBut->hide();
+    ui.notesTE->setFocusPolicy( Qt::NoFocus );
+    ui.notesTE->setReadOnly( true );
+    dlg.setWindowTitle( "Metadata" );
+
+    KVParams    kvp;
+    if( !kvp.fromMetaFile( df->metaFileName() ) ) {
+        ui.notesTE->setText(
+            QString("Corrupt metafile '%1'.").arg( df->metaFileName() ) );
+        return;
     }
+
+    QString meta = kvp.toString();
+    if( meta.isEmpty() )
+        ui.notesTE->setText( "-- No metadata --" );
+    else
+        ui.notesTE->setText( meta );
+
+    dlg.exec();
+
+#endif
 }
 
 

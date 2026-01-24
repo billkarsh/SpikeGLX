@@ -277,7 +277,7 @@ void Par2Worker::processID()
     if( process ) {
 #if QT_VERSION >= 0x050300
         pid = process->processId();
-#elif defined Q_OS_WIN
+#elif defined(Q_OS_WIN)
         // pid() gets pointer to PROCESS_INFORMATION
         if( process->pid() )
             pid = process->pid()->dwProcessId;

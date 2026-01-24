@@ -54,6 +54,11 @@ void ShankCtlBase::baseInit( const IMROTbl *R, bool hasViewTab )
     scUI = new Ui::ShankWindow;
     scUI->setupUi( this );
 
+#ifdef Q_OS_LINUX
+    setAttribute( Qt::WA_NativeWindow );
+    setAttribute( Qt::WA_DontCreateNativeAncestors );
+#endif
+
     // Edit the layout to replace the scroll QWidget with
     // a container holding a proper ShankScroll. Crucially,
     // the ShankScroll is not in the parent-child hierarchy
@@ -73,6 +78,10 @@ void ShankCtlBase::baseInit( const IMROTbl *R, bool hasViewTab )
         szp.setHeightForWidth( C->sizePolicy().hasHeightForWidth() );
         C->setSizePolicy( szp );
         C->setMinimumSize( QSize( 80, 0 ) );
+#ifdef Q_OS_LINUX
+        C->setAttribute( Qt::WA_NativeWindow );
+        C->setAttribute( Qt::WA_DontCreateNativeAncestors );
+#endif
 
         QGridLayout *G = findChild<QGridLayout*>("gridLayout");
         QWidget     *X = findChild<QWidget*>("scroll");
@@ -138,6 +147,13 @@ void ShankCtlBase::baseInit( const IMROTbl *R, bool hasViewTab )
 
         // update cur width based on square pads
         resize( width() + view()->deltaWidth(), h );
+#ifdef Q_OS_LINUX
+        QRect   rPar = parentWidget()->frameGeometry(),
+                rDlg = frameGeometry();
+        move(
+            rPar.center().x() - rDlg.width()/2,
+            rPar.center().y() - rDlg.height()/2 );
+#endif
     }
     else {
         setWindowFlag( Qt::Tool, true );
