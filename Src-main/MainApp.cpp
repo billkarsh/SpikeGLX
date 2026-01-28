@@ -1139,6 +1139,8 @@ void MainApp::file_AskQuit()
 
         M->show();
         processEvents();
+        processEvents();
+        processEvents();
 
         run->stopRun();
 
@@ -1552,6 +1554,11 @@ void MainApp::rsInit()
             S = QGuiApplication::primaryScreen()->geometry();
     rsWin->move( (S.width() - s.width())/2, (S.height() - s.height())/2 );
     rsWin->show();
+    rsWin->raise();
+    rsWin->activateWindow();
+    processEvents();
+    processEvents();
+    processEvents();
 
 // -------------------
 // Initialize app data
@@ -1576,22 +1583,28 @@ void MainApp::rsInit()
 
 void MainApp::rsAuxStep()
 {
-    if( rsWin )
+    if( rsWin ) {
         rsUI->auxBar->setValue( 1 + rsUI->auxBar->value() );
+        processEvents();
+    }
 }
 
 
 void MainApp::rsProbeStep()
 {
-    if( rsWin )
+    if( rsWin ) {
         rsUI->prb0->setValue( 1 + rsUI->prb0->value() );
+        processEvents();
+    }
 }
 
 
 void MainApp::rsStartStep()
 {
-    if( rsWin )
+    if( rsWin ) {
         rsUI->startBar->setValue( 1 + rsUI->startBar->value() );
+        processEvents();
+    }
 }
 
 

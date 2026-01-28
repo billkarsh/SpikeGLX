@@ -446,8 +446,6 @@ void Run::grfClose( GraphsWindow *gw )
 /* Owned AIStream ops --------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-#ifdef Q_OS_WIN64
-
 // Return length in range [2..8] seconds,
 // and no greater than 40% of available RAM.
 //
@@ -472,42 +470,6 @@ int Run::streamSpanMax( const DAQ::Params &p, bool warn )
 
     return secs;
 }
-
-#else
-
-// Return smaller of {secsMax seconds, fracMax of available RAM}.
-//
-// Note: Running with
-//   + 1 second long NI stream of 8 analog chans
-//   + two shank viewers
-//   + audio
-// takes about 128 MB RAM as measured by enabling NI PERFMON switch.
-// We therefore set baseline "startup" memory use to 130 MB.
-//
-int Run::streamSpanMax( const DAQ::Params &p, bool warn )
-{
-    double  startup = 0.13 * 1024.0 * 1024.0 * 1024.0,
-            fracMax = 0.40,
-            ram     = fracMax * (getRAMBytes32BitApp() - startup),
-            bps     = 0.0;
-    int     secsMax = 30,
-            secs;
-
-    for( int iq = 0, nq = p.stream_nq(); iq < nq; ++iq ) {
-        int ip, js = p.iq2jsip( ip, iq );
-        bps += p.stream_rate( js, ip ) * p.stream_nChans( js, ip );
-    }
-
-    bps *= 2.0;
-    secs = qBound( 2, int(ram/bps), secsMax );
-
-    if( warn && secs < secsMax )
-        Warning() << "History length limited to " << secs << " seconds.";
-
-    return secs;
-}
-
-#endif
 
 
 quint64 Run::getSampleCount( int js, int ip ) const

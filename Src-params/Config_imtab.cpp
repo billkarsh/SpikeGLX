@@ -307,12 +307,10 @@ QString Config_imtab::remoteSetPrbEach( const QString &s, int ip )
 
 void Config_imtab::imro_done( ShankCtlBase *editor, QString fn, bool ok )
 {
-    // These needed to run dialog using exec()
-    //
-    // if( ok )
-    //     editor->accept();
-    // else
-    //     editor->reject();
+    if( ok )
+        editor->accept();
+    else
+        editor->reject();
 
     if( !ok && !imro_cancelName.isEmpty() ) {
         ok = true;

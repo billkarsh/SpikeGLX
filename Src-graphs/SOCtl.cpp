@@ -343,7 +343,9 @@ void SOCtl::init()
 
 // Window
 
-    setWindowFlags( windowFlags() | Qt::Tool );
+#ifdef Q_OS_WIN
+    setWindowFlags( Qt::Tool );
+#endif
     setAttribute( Qt::WA_DeleteOnClose, false );
 
     restoreScreenState();

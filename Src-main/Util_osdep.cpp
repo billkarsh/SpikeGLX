@@ -28,9 +28,11 @@
     #include <agl.h>
     #include <gl.h>
 #elif defined(Q_OS_LINUX)
+    #include <fstream>
     #include <sys/mman.h>
     #include <sys/types.h>
     #include <sys/stat.h>
+    #include <sys/statvfs.h>
     #include <sys/sysinfo.h>
     #include <errno.h>
     #include <sched.h>
@@ -88,6 +90,13 @@ QString osPath()
     return QString::fromUtf8( qgetenv( "windir" ) ).replace( "\\", "/" );
 }
 
+#elif defined(Q_OS_LINUX)
+
+QString osPath()
+{
+    return "/etc";
+}
+
 #else
 
 QString osPath()
@@ -122,10 +131,73 @@ quint64 availableDiskSpace( int iDataDir )
     return quint64(4096) * 1024 * 1024;
 }
 
+#elif defined(Q_OS_LINUX)
+
+// Helper to check if we are running inside WSL
+//
+bool isWSL()
+{
+    std::ifstream   file( "/proc/version" );
+    std::string     line;
+
+    if( std::getline( file, line ) ) {
+
+        // Look for "microsoft" or "wsl" (case insensitive usually, but lower here)
+        // Modern WSL2 kernels often contain "microsoft-standard-WSL2"
+
+        std::transform( line.begin(), line.end(), line.begin(), ::tolower );
+
+        if( line.find( "microsoft" ) != std::string::npos ||
+            line.find( "wsl" ) != std::string::npos ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+quint64 availableDiskSpace( int iDataDir )
+{
+// Get standard path (e.g., /home/Bill/Data)
+    std::string localPath = mainApp()->dataDir( iDataDir ).toStdString();
+
+    struct statvfs  statLocal;
+    quint64         localAvail = 0;
+
+    if( statvfs( localPath.c_str(), &statLocal ) == 0 )
+        localAvail = quint64(statLocal.f_bavail) * quint64(statLocal.f_frsize);
+    else {
+        // Fallback if path doesn't exist
+        return quint64(4096) * 1024 * 1024;
+    }
+
+// If we are in WSL, we MUST also check the physical host (C: drive)
+// because the virtual disk might report 1TB free when physical disk is full.
+
+    if( isWSL() ) {
+
+        // Check /mnt/c which maps to Windows system drive
+
+        struct statvfs  statHost;
+
+        if( statvfs( "/mnt/c", &statHost ) == 0 ) {
+
+            quint64 hostAvail = quint64(statHost.f_bavail) * quint64(statHost.f_frsize);
+
+            if( hostAvail < localAvail )
+                return hostAvail;
+        }
+    }
+
+    return localAvail;
+}
+
 #else
 
 quint64 availableDiskSpace( int iDataDir )
 {
+    Q_UNUSED( iDataDir )
+
 // Failing any actual query, return either a show-stopping zero
 // or a modest number, such as 4GB.
 
@@ -536,6 +608,13 @@ int getCurProcessorIdx()
     return GetCurrentProcessorNumber();
 }
 
+#elif defined(Q_OS_LINUX)
+
+int getCurProcessorIdx()
+{
+    return sched_getcpu();
+}
+
 #else
 
 int getCurProcessorIdx()
@@ -750,51 +829,6 @@ quint64 setCurrentThreadAffinityMask( quint64 )
 #endif
 
 /* ---------------------------------------------------------------- */
-/* getRAMBytes32BitApp -------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-#ifdef Q_OS_WIN
-
-// Installed RAM as seen by 32-bit application.
-//
-// <http://putridparrot.com/blog/memory-limits-for-a-32-bit-net-application/>
-//
-double getRAMBytes32BitApp()
-{
-    double          G;
-    MEMORYSTATUSEX  M;
-
-    ZeroMemory( &M, sizeof(MEMORYSTATUSEX) );
-    M.dwLength = sizeof(MEMORYSTATUSEX);
-
-    if( GlobalMemoryStatusEx( &M ) ) {
-
-        G = double(M.ullTotalVirtual) / (1024.0 * 1024.0 * 1024.0);
-
-        if( G < 2.5 )
-            G = 1.2;    // 32-bit OS: effective max
-        else
-            G = 2.8;    // 64-bit OS: effective max
-    }
-    else {
-        Warning() << "getRAMBytes32BitApp did not succeed.";
-        G = 1.2;
-    }
-
-    return G * 1024.0 * 1024.0 * 1024.0;
-}
-
-#else /* !Q_OS_WIN */
-
-double getRAMBytes32BitApp()
-{
-    Warning() << "getRAMBytes32BitApp not implemented.";
-    return 0.0;
-}
-
-#endif
-
-/* ---------------------------------------------------------------- */
 /* getRAMBytes64BitApp -------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -816,7 +850,48 @@ double getRAMBytes64BitApp()
     return 4.0 * 1024.0 * 1024.0 * 1024.0;
 }
 
-#else /* !Q_OS_WIN */
+#elif defined(Q_OS_LINUX)
+
+double getRAMBytes64BitApp()
+{
+// Method 1: Try reading /proc/meminfo (Recommended)
+// This is the most accurate way to get "Available" memory on Linux kernels 3.14+
+// It accounts for cache that can be reclaimed, similar to Windows behavior.
+
+    std::ifstream   file( "/proc/meminfo" );
+
+    if( file.is_open() ) {
+
+        std::string token;
+
+        while( file >> token ) {
+
+            if( token == "MemAvailable:" ) {
+                quint64 memAvailableKb;
+                if( file >> memAvailableKb ) {
+                    // /proc/meminfo reports in kB, convert to bytes
+                    return memAvailableKb * 1024.0;
+                }
+            }
+        }
+
+        file.close();
+    }
+
+// Method 2: Fallback to sysinfo()
+// Used if /proc/meminfo fails or MemAvailable isn't present (very old kernels).
+// Note: 'freeram' is strictly unused memory and does not count reclaimable cache,
+// so this number will likely be lower than Method 1.
+
+    struct sysinfo  info;
+    if( sysinfo(&info) == 0 )
+        return double(info.freeram) * double(info.mem_unit);
+
+    Warning() << "getRAMBytes64BitApp did not succeed.";
+    return 4.0 * 1024.0 * 1024.0 * 1024.0;
+}
+
+#else
 
 double getRAMBytes64BitApp()
 {

@@ -316,9 +316,6 @@ void setProcessAffinityMask( quint64 mask );
 // Return previous mask, or zero if error.
 quint64 setCurrentThreadAffinityMask( quint64 mask );
 
-// Installed RAM as seen by 32-bit application
-double getRAMBytes32BitApp();
-
 // Installed RAM as seen by 64-bit application
 double getRAMBytes64BitApp();
 

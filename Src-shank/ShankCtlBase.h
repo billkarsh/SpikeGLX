@@ -24,6 +24,7 @@ class ShankCtlBase : public QDialog
     Q_OBJECT
 
 protected:
+    QWidget             *cfgdlg;
     Ui::ShankWindow     *scUI;
     ShankScroll         *_scroll;
     ShankEditTab        *seTab;

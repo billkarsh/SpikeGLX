@@ -16,8 +16,8 @@
 /* ---------------------------------------------------------------- */
 
 ShankCtlBase::ShankCtlBase( QWidget *parent, uint8_t sr_mask, bool modal )
-    :   QDialog(parent), scUI(0), seTab(0),
-        modal_map(0), sr_mask(sr_mask), modal(modal)
+    :   QDialog(modal ? 0 : parent), cfgdlg(parent), scUI(0), _scroll(0),
+        seTab(0), modal_map(0), sr_mask(sr_mask), modal(modal)
 {
 }
 
@@ -38,11 +38,6 @@ ShankCtlBase::~ShankCtlBase()
         delete scUI;
         scUI = 0;
     }
-
-    if( _scroll ) {
-        delete _scroll;
-        _scroll = 0;
-    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -54,54 +49,38 @@ void ShankCtlBase::baseInit( const IMROTbl *R, bool hasViewTab )
     scUI = new Ui::ShankWindow;
     scUI->setupUi( this );
 
-#ifdef Q_OS_LINUX
-    setAttribute( Qt::WA_NativeWindow );
-    setAttribute( Qt::WA_DontCreateNativeAncestors );
-#endif
+// Swap in real scrolling opengl widget for placeholder
 
-    // Edit the layout to replace the scroll QWidget with
-    // a container holding a proper ShankScroll. Crucially,
-    // the ShankScroll is not in the parent-child hierarchy
-    // so does not interfere with owning windows. We must
-    // show and delete the embedded _scroll manually.
-    {
-        _scroll = new ShankScroll();
-        _scroll->setWindowFlags( Qt::FramelessWindowHint );
+    _scroll = new ShankScroll( this );
 
-        QWindow     *W = QWindow::fromWinId( _scroll->winId() );
-        QWidget     *C = QWidget::createWindowContainer( W );
+    QSizePolicy szp( QSizePolicy::Policy::MinimumExpanding,
+                     QSizePolicy::Policy::MinimumExpanding );
+    szp.setHorizontalStretch( 0 );
+    szp.setVerticalStretch( 0 );
+    szp.setHeightForWidth( _scroll->sizePolicy().hasHeightForWidth() );
+    _scroll->setSizePolicy( szp );
+    _scroll->setMinimumSize( QSize( 80, 0 ) );
 
-        QSizePolicy szp( QSizePolicy::Policy::MinimumExpanding,
-                         QSizePolicy::Policy::MinimumExpanding );
-        szp.setHorizontalStretch( 0 );
-        szp.setVerticalStretch( 0 );
-        szp.setHeightForWidth( C->sizePolicy().hasHeightForWidth() );
-        C->setSizePolicy( szp );
-        C->setMinimumSize( QSize( 80, 0 ) );
-#ifdef Q_OS_LINUX
-        C->setAttribute( Qt::WA_NativeWindow );
-        C->setAttribute( Qt::WA_DontCreateNativeAncestors );
-#endif
+    QGridLayout *G = findChild<QGridLayout*>("gridLayout");
+    QWidget     *X = findChild<QWidget*>("scroll");
+    QLayoutItem *I = G->replaceWidget( X, _scroll );
 
-        QGridLayout *G = findChild<QGridLayout*>("gridLayout");
-        QWidget     *X = findChild<QWidget*>("scroll");
-        QLayoutItem *I = G->replaceWidget( X, C );
-
-        if( I ) {
-            if( I->widget() )
-                delete I->widget();
-            delete I;
-        }
+    if( I ) {
+        if( I->widget() )
+            delete I->widget();
+        delete I;
     }
+
+// Signals
 
     ConnectUI( view(), SIGNAL(gridHover(int,int,bool)), this, SLOT(gridHover(int,int,bool)) );
     ConnectUI( view(), SIGNAL(gridClicked(int,int,int,bool)), this, SLOT(gridClicked(int,int,int,bool)) );
     ConnectUI( view(), SIGNAL(lbutReleased()), this, SLOT(lbutReleased()) );
 
+// Imro
+
     if( R )
         view()->setImro( R, sr_mask );
-
-// Modal
 
     if( modal ) {
         if( modal_map )
@@ -129,34 +108,35 @@ void ShankCtlBase::baseInit( const IMROTbl *R, bool hasViewTab )
 // Window
 
     if( modal ) {
-        setWindowModality( Qt::WindowModal );
+        setWindowModality( Qt::ApplicationModal );
+        setWindowFlag( Qt::WindowStaysOnTopHint, true );
         setWindowFlag( Qt::WindowContextHelpButtonHint, false );
         setWindowFlag( Qt::WindowCloseButtonHint, false );
         setWindowTitle( "IMRO Table Editor" );
 
         // cur width of editor, height taller than parent
-        int h = int(1.10 * parentWidget()->height());
+        int h = int(1.10 * cfgdlg->height());
         h = qMin( h,
             QApplication::primaryScreen()->availableGeometry().height()
             - 40 );
 
-        // Actualize geometry using show()
+        // actualize geometry using show()
         show();
-        _scroll->show();
-        guiBreathe();
 
         // update cur width based on square pads
         resize( width() + view()->deltaWidth(), h );
-#ifdef Q_OS_LINUX
-        QRect   rPar = parentWidget()->frameGeometry(),
+
+        // center over cfgdlg
+        QRect   rCfg = cfgdlg->frameGeometry(),
                 rDlg = frameGeometry();
         move(
-            rPar.center().x() - rDlg.width()/2,
-            rPar.center().y() - rDlg.height()/2 );
-#endif
+            rCfg.center().x() - rDlg.width()/2,
+            rCfg.center().y() - rDlg.height()/2 );
     }
     else {
-        setWindowFlag( Qt::Tool, true );
+#ifdef Q_OS_WIN
+        setWindowFlags( Qt::Tool );
+#endif
         setAttribute( Qt::WA_DeleteOnClose, false );
     }
 }
@@ -174,18 +154,14 @@ void ShankCtlBase::setOriginal( const QString &inFile )
 void ShankCtlBase::showDialog()
 {
     showNormal();
-    _scroll->show();
     _scroll->scrollToSelected();
 
     if( !modal ) {
         qf_enable();
         mainApp()->modelessOpened( this );
     }
-    else {
-        // Run exec() here, but not needed
-        //
-        // exec();
-    }
+    else
+        exec();
 }
 
 

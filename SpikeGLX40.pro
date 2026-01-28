@@ -166,6 +166,8 @@ win32 {
 unix {
     DEFINES         += OPENGL54
     CONFIG          += debug warn_on
+#   QMAKE_CXXFLAGS  += -fsanitize=address -fno-omit-frame-pointer -g
+#   QMAKE_LFLAGS    += -fsanitize=address
 #   QMAKE_CFLAGS    += -Wall -Wno-return-type
 #   QMAKE_CXXFLAGS  += -Wall -Wno-return-type
 # Enable these for profiling
