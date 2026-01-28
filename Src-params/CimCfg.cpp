@@ -773,6 +773,12 @@ void CimCfg::ImProbeTable::loadProbeTable()
 
     int np = settings.value( "nrows", 0 ).toInt();
 
+#ifndef HAVE_IMEC
+    // simulate PXI device
+    if( !np )
+        np = 4;
+#endif
+
     probes.resize( np );
 
     for( int i = 0; i < np; ++i )
