@@ -41,8 +41,10 @@ void ShankViewLut::initializeGL()
 //
 void ShankViewLut::resizeGL( int w, int h )
 {
-    if( !isValid() )
-        return;
+    // Only called by OpenGL
+    //
+    // if( !isValid() )
+    //     return;
 
 // ------------
 // Coord system

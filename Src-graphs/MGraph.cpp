@@ -460,8 +460,10 @@ void MGraph::initializeGL()
 //
 void MGraph::resizeGL( int w, int h )
 {
-    if( !isValid() )
-        return;
+    // Only called by OpenGL
+    //
+    // if( !isValid() )
+    //     return;
 
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();

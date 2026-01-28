@@ -114,8 +114,10 @@ void SOGraph::initializeGL()
 //
 void SOGraph::resizeGL( int w, int h )
 {
-    if( !isValid() )
-        return;
+    // Only called by OpenGL
+    //
+    // if( !isValid() )
+    //     return;
 
 // ------------
 // Coord system

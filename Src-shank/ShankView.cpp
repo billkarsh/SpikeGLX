@@ -172,7 +172,9 @@ void ShankView::initializeGL()
 }
 
 
-// Note: makeCurrent() called automatically.
+// Note: makeCurrent() called automatically (will be valid),
+// AND, by ShankScroll::resizeEvent(), (might not be valid).
+//
 //
 void ShankView::resizeGL( int w, int h )
 {
@@ -1007,6 +1009,7 @@ void ShankScroll::resizeEvent( QResizeEvent *e )
 
     theV->makeCurrent();
     theV->resizeGL( theV->width(), theV->height() );
+    theV->doneCurrent();
     theV->update();
 }
 
