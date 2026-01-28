@@ -44,6 +44,12 @@ ShankView::ShankView( QWidget *parent )
 }
 
 
+// Value used to resize whole ShankCtlBase window.
+// We like square pixels...
+// - Calculate width based upon current pad height.
+// - Add 20 for scrollbar.
+// - Add  4 for borders and frames.
+//
 int ShankView::idealWidth()
 {
     QMutexLocker    ml( &dataMtx );
@@ -52,7 +58,7 @@ int ShankView::idealWidth()
             nc  = smap->nc;
     float   pad = rowPix/(1.0f+ROWSEP),
             shk = 2*PADMRG + nc*pad + (nc-1)*pad*COLSEP;
-    return 2*MRGPX + 2*ROIPX + ns*shk + (ns-1)*shk*SHKSEP;
+    return 2*MRGPX + 2*ROIPX + ns*shk + (ns-1)*shk*SHKSEP + 24;
 }
 
 
