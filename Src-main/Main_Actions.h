@@ -46,6 +46,7 @@ public:
         *logFileAct,
     // Window
         *bringFrontAct,
+        *raiseConsAct,
         *shwHidConsAct,
         *shwHidGrfsAct,
         *wvDlgAct,

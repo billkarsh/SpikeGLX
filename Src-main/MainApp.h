@@ -183,6 +183,7 @@ public slots:
     void tools_SaveLogFile();
 
 // Window
+    void window_RaiseConsole();
     void window_ShowHideConsole();
     void window_ShowHideGraphs();
     void window_WVDlg();

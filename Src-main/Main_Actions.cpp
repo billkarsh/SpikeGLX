@@ -102,6 +102,11 @@ void Main_Actions::initActions()
     bringFrontAct = new QAction( "&Bring All to Front", this );
     ConnectUI( bringFrontAct, SIGNAL(triggered()), &app->win, SLOT(bringAllToFront()) );
 
+    raiseConsAct = new QAction( "&Raise Console", this );
+    raiseConsAct->setShortcut( QKeySequence( tr("Ctrl+Z") ) );
+    raiseConsAct->setShortcutContext( Qt::ApplicationShortcut );
+    ConnectUI( raiseConsAct, SIGNAL(triggered()), app, SLOT(window_RaiseConsole()) );
+
     shwHidConsAct = new QAction( "Hide/Sho&w Console", this );
     shwHidConsAct->setShortcut( QKeySequence( tr("Ctrl+H") ) );
     shwHidConsAct->setShortcutContext( Qt::ApplicationShortcut );
@@ -208,6 +213,7 @@ void Main_Actions::initMenus( QMainWindow *w )
     m = mb->addMenu( "&Window" );
     m->addAction( bringFrontAct );
     m->addSeparator();
+    m->addAction( raiseConsAct );
     m->addAction( shwHidConsAct );
     m->addAction( shwHidGrfsAct );
     m->addSeparator();

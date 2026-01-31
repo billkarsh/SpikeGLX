@@ -5,6 +5,10 @@
 #include <QApplication>
 #include <QMenu>
 
+#ifdef Q_OS_LINUX
+#include <QTimer>
+#endif
+
 
 
 
@@ -86,9 +90,20 @@ void Main_WinMenu::activateWindow( QWidget *w )
     }
 
     if( w ) {
+#ifdef Q_OS_WIN
         QMetaObject::invokeMethod( w, "raise", Qt::AutoConnection );
         QMetaObject::invokeMethod( w, "showNormal", Qt::AutoConnection );
         w->activateWindow();
+#elif defined(Q_OS_LINUX)
+        w->move( w->pos() + QPoint(26, 5) );
+        QTimer::singleShot( 60, w, [w]()
+        {
+            w->hide();
+            w->raise();
+            w->show();
+            w->activateWindow();
+        });
+#endif
     }
 }
 
@@ -108,6 +123,7 @@ void Main_WinMenu::bringAllToFront()
     QWidget     *prevTop    = QApplication::activeWindow();
     QWidgetList all         = QApplication::topLevelWidgets();
 
+#ifdef Q_OS_WIN
     foreach( QWidget *w, all ) {
 
         if( w != prevTop && !w->isHidden() )
@@ -116,6 +132,16 @@ void Main_WinMenu::bringAllToFront()
 
     if( prevTop )
         QMetaObject::invokeMethod( prevTop, "raise", Qt::AutoConnection );
+#elif defined(Q_OS_LINUX)
+    foreach( QWidget *w, all ) {
+
+        if( w != prevTop && !w->isHidden() )
+            activateWindow( w );
+    }
+
+    if( prevTop )
+        activateWindow( prevTop );
+#endif
 }
 
 

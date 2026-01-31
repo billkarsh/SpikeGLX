@@ -1291,6 +1291,29 @@ void MainApp::tools_SaveLogFile()
 }
 
 
+void MainApp::window_RaiseConsole()
+{
+    if( !consoleWindow )
+        return;
+
+#ifdef Q_OS_WIN
+        consoleWindow->raise();
+        consoleWindow->showNormal();
+        consoleWindow->activateWindow();
+#elif defined(Q_OS_LINUX)
+        consoleWindow->move( consoleWindow->pos() + QPoint(26, 5) );
+        QWidget *w = consoleWindow;
+        QTimer::singleShot( 60, w, [w]()
+        {
+            w->hide();
+            w->raise();
+            w->showNormal();
+            w->activateWindow();
+        });
+#endif
+}
+
+
 void MainApp::window_ShowHideConsole()
 {
     if( !consoleWindow )
