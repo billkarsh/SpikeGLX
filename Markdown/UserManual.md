@@ -1171,6 +1171,11 @@ Capture recent log entries to a file.
 * *Bring All to Front*:
 Bring SpikeGLX and its windows to the foreground.
 
+* *Raise Console*:
+Bring the Console (Log) window to the foreground. Use this to quickly
+access error messages and other features and windows, even if the Console
+is current hidden under other large windows.
+
 * *Hide/Show Console*:
 Toggle visibility of the main Console window. Note that you can reshow
 the window from the SpikeGLX icon in the Windows Task Bar

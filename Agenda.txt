@@ -3,6 +3,7 @@
 
 20260115
 --------
++ Ctrl+Z raises the Console (Log) window.
 
 20251218
 --------

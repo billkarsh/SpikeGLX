@@ -644,7 +644,7 @@ void MetricsWindow::saveScreenState() const
 {
     STDSETTINGS( settings, "windowlayout" );
 
-    settings.setValue( "WinLayout_Metrics/geometry", saveGeometry() );
+    settings.setValue( "WinLayout_Metrics/geometry", geomSave( this, 26, 5 ) );
 }
 
 

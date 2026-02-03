@@ -700,7 +700,7 @@ void SOCtl::saveScreenState() const
 {
     STDSETTINGS( settings, "windowlayout" );
 
-    settings.setValue( "WinLayout_Spikes/geometry", saveGeometry() );
+    settings.setValue( "WinLayout_Spikes/geometry", geomSave( this, 26, 5 ) );
 }
 
 

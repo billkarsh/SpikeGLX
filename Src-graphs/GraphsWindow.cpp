@@ -688,7 +688,7 @@ void GraphsWindow::saveScreenState() const
     STDSETTINGS( settings, "windowlayout" );
 
     settings.setValue(
-        QString("WinLayout_Graphs%1/geometry").arg( igw ), saveGeometry() );
+        QString("WinLayout_Graphs%1/geometry").arg( igw ), geomSave( this, -12, -54 ) );
     settings.setValue(
         QString("WinLayout_Graphs%1/windowState").arg( igw ), saveState() );
 }

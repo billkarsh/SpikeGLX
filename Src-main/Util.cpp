@@ -15,6 +15,10 @@
 #include <QRegularExpression>
 #include <QUrl>
 
+#ifdef Q_OS_LINUX
+#include <QDataStream>
+#endif
+
 /* ---------------------------------------------------------------- */
 /* Internal macros ------------------------------------------------ */
 /* ---------------------------------------------------------------- */
@@ -788,6 +792,83 @@ QString getMyIPAddress()
 QString getHostName()
 {
     return QHostInfo::localHostName();
+}
+
+/* ---------------------------------------------------------------- */
+/* Windows -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+QByteArray geomSave( const QWidget *w, int dx, int dy )
+{
+#ifdef Q_OS_WIN
+
+    Q_UNUSED( dx )
+    Q_UNUSED( dy )
+
+#elif defined(Q_OS_LINUX)
+
+    QByteArray  data = w->saveGeometry();
+
+    int x_fix = dx,
+        y_fix = dy;
+
+    QDataStream in( &data, QIODevice::ReadOnly );
+    in.setVersion( QDataStream::Qt_DefaultCompiledVersion );
+
+    QByteArray  newData;
+    QDataStream out( &newData, QIODevice::WriteOnly );
+    out.setVersion( QDataStream::Qt_DefaultCompiledVersion );
+
+    if( in.atEnd() )
+        return data;
+
+    quint32     magic;
+    quint16     majorversion,
+                minorversion;
+    QRect       frameRect,
+                normalRect;
+    qint32      screenIdx;
+    quint8      maxiState,
+                fullScreenState;
+    quint32     screenWidth;
+    QRect       geom;
+
+    in  >> magic
+        >> majorversion
+        >> minorversion
+        >> frameRect
+        >> normalRect
+        >> screenIdx
+        >> maxiState
+        >> fullScreenState
+        >> screenWidth
+        >> geom;
+
+    if( !frameRect.isNull() )
+        frameRect.translate( x_fix, y_fix );
+
+    if( !normalRect.isNull() )
+        normalRect.translate( x_fix, y_fix );
+
+    if( !geom.isNull() )
+        geom.translate( x_fix, y_fix );
+
+    out << magic
+        << majorversion
+        << minorversion
+        << frameRect
+        << normalRect
+        << screenIdx
+        << maxiState
+        << fullScreenState
+        << screenWidth
+        << geom;
+
+    return newData;
+
+ #endif
+
+    return w->saveGeometry();
 }
 
 /* ---------------------------------------------------------------- */

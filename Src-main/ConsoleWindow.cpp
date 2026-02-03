@@ -196,7 +196,7 @@ void ConsoleWindow::saveScreenState() const
 {
     STDSETTINGS( settings, "windowlayout" );
 
-    settings.setValue( "WinLayout_Console/geometry", saveGeometry() );
+    settings.setValue( "WinLayout_Console/geometry", geomSave( this, -6, -27 ) );
     settings.setValue( "WinLayout_Console/windowState", saveState() );
 }
 

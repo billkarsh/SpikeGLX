@@ -797,7 +797,7 @@ void AOCtl::saveScreenState() const
 {
     STDSETTINGS( settings, "windowlayout" );
 
-    settings.setValue( "WinLayout_Audio/geometry", saveGeometry() );
+    settings.setValue( "WinLayout_Audio/geometry", geomSave( this, 26, 5 ) );
 }
 
 

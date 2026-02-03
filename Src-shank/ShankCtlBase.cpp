@@ -285,7 +285,7 @@ void ShankCtlBase::saveScreenState() const
 {
     STDSETTINGS( settings, "windowlayout" );
 
-    settings.setValue( screenStateName(), saveGeometry() );
+    settings.setValue( screenStateName(), geomSave( this, 26, 5 ) );
 }
 
 
