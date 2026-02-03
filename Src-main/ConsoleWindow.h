@@ -25,7 +25,7 @@ private:
             maxLines;
 
 public:
-    ConsoleWindow( QWidget *parent = 0, Qt::WindowFlags flags = Qt::WindowFlags() );
+    ConsoleWindow();
     void predelete();
 
     void setReadOnly( bool readOnly );

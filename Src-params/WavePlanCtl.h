@@ -21,7 +21,7 @@ private:
     int                 binsamp;
 
 public:
-    WavePlanCtl( QWidget *parent = 0 );
+    WavePlanCtl();
     virtual ~WavePlanCtl();
 
 private slots:

@@ -14,7 +14,7 @@
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-WavePlanCtl::WavePlanCtl( QWidget *parent ) : QDialog(parent)
+WavePlanCtl::WavePlanCtl() : QDialog(0)
 {
     wvUI = new Ui::WavePlanDialog;
     wvUI->setupUi( this );

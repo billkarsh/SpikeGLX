@@ -33,10 +33,12 @@ void MetricsWindow::MXDiskRec::init()
 /* MetricsWindow -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-MetricsWindow::MetricsWindow( QWidget *parent )
-    :   QWidget(parent), mxTimer(this),
+MetricsWindow::MetricsWindow()
+    :   QWidget(0), mxTimer(this),
         erLines(0), erMaxLines(2000), isRun(false)
 {
+    setAttribute( Qt::WA_DeleteOnClose, false );
+
     mxUI = new Ui::MetricsWindow;
     mxUI->setupUi( this );
     ConnectUI( mxUI->helpBut, SIGNAL(clicked()), this, SLOT(helpBut()) );

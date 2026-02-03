@@ -27,7 +27,7 @@ private:
     bool                testEEPROM;
 
 public:
-    IMBISTCtl( QWidget *parent = 0 );
+    IMBISTCtl();
     virtual ~IMBISTCtl();
 
 private slots:

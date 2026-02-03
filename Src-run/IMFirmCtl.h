@@ -26,7 +26,7 @@ private:
                     barOffset;
 
 public:
-    IMFirmCtl( QWidget *parent = 0 );
+    IMFirmCtl();
     virtual ~IMFirmCtl();
 
 private slots:

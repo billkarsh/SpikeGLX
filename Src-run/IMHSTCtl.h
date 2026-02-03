@@ -25,7 +25,7 @@ private:
     bool                isHelloText;
 
 public:
-    IMHSTCtl( QWidget *parent = 0 );
+    IMHSTCtl();
     virtual ~IMHSTCtl();
 
 private slots:

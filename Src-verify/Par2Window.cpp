@@ -321,9 +321,11 @@ void Par2Worker::killProc()
 /* Par2Window ----------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-Par2Window::Par2Window( QWidget *parent )
-    :   QWidget(parent), worker(0), op(Par2Worker::Verify)
+Par2Window::Par2Window()
+    :   QWidget(0), worker(0), op(Par2Worker::Verify)
 {
+    setAttribute( Qt::WA_DeleteOnClose, false );
+
     p2wUI = new Ui::Par2Window;
     p2wUI->setupUi( this );
     p2wUI->verifyRB->setChecked( true );

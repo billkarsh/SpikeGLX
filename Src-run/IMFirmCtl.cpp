@@ -42,7 +42,7 @@ static QString makeErrorString( NP_ErrorCode err )
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-IMFirmCtl::IMFirmCtl( QWidget *parent ) : QDialog(parent)
+IMFirmCtl::IMFirmCtl() : QDialog(0)
 {
     setWindowFlags( windowFlags() & ~Qt::WindowCloseButtonHint );
 

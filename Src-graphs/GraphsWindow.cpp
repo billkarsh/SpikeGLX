@@ -58,6 +58,8 @@ GraphsWindow::GraphsWindow( const DAQ::Params &p, int igw )
     :   QMainWindow(0), p(p), tbar(0), LED(0),
         lW(0), rW(0), TTLCC(0), soctl(0), igw(igw)
 {
+    setAttribute( Qt::WA_DeleteOnClose, false );
+
 // Install widgets
 
     if( igw == 0 ) {

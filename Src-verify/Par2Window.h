@@ -89,7 +89,7 @@ private:
     Par2Worker::Op  op;
 
 public:
-    Par2Window( QWidget *parent = 0 );
+    Par2Window();
     virtual ~Par2Window();
 
 signals:

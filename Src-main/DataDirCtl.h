@@ -22,7 +22,7 @@ private:
     bool                isMD;
 
 public:
-    DataDirCtl( QWidget *parent, const QStringList &sl, bool isMD );
+    DataDirCtl( const QStringList &sl, bool isMD );
     virtual ~DataDirCtl();
 
     void run();

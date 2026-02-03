@@ -205,9 +205,11 @@ qint16 AOCtl::Derived::vol( qint16 val, double vol ) const
 /* AOCtl ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-AOCtl::AOCtl( const DAQ::Params &p, QWidget *parent )
-    :   QWidget(parent), p(p), usr(p), dlgShown(false)
+AOCtl::AOCtl( const DAQ::Params &p )
+    :   QWidget(0), p(p), usr(p), dlgShown(false)
 {
+    setAttribute( Qt::WA_DeleteOnClose, false );
+
 #ifdef Q_OS_WIN
     aoDev = new AODevRtAudio( this, p );
 #else

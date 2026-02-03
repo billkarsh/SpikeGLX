@@ -42,7 +42,7 @@ static bool continueAnyway( NP_ErrorCode err )
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-IMHSTCtl::IMHSTCtl( QWidget *parent ) : QDialog(parent)
+IMHSTCtl::IMHSTCtl() : QDialog(0)
 {
     hstUI = new Ui::IMBISTDlg;
     hstUI->setupUi( this );

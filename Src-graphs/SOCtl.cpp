@@ -210,6 +210,10 @@ void SOFetcher::setGroups( SOGroup *grpbase, const DAQ::Params &p )
 SOCtl::SOCtl( const DAQ::Params &p, QWidget *parent )
     :   QDialog(parent), p(p), soUI(0), fetch(0)
 {
+#ifdef Q_OS_WIN
+    setWindowFlags( Qt::Tool );
+#endif
+    setAttribute( Qt::WA_DeleteOnClose, false );
 }
 
 
@@ -340,13 +344,6 @@ void SOCtl::init()
     ConnectUI( soUI->ySB3, SIGNAL(valueChanged(int)), this, SLOT(ySB3Changed(int)) );
 
     ConnectUI( soUI->helpBut, SIGNAL(clicked()), this, SLOT(helpBut()) );
-
-// Window
-
-#ifdef Q_OS_WIN
-    setWindowFlags( Qt::Tool );
-#endif
-    setAttribute( Qt::WA_DeleteOnClose, false );
 
     restoreScreenState();
 }

@@ -15,9 +15,11 @@
 /* Public --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-ConsoleWindow::ConsoleWindow( QWidget *p, Qt::WindowFlags f )
-    :   QMainWindow(p, f), nLines(0), maxLines(2000)
+ConsoleWindow::ConsoleWindow()
+    :   QMainWindow(0), nLines(0), maxLines(2000)
 {
+    setAttribute( Qt::WA_DeleteOnClose, false );
+
     MainApp *app = mainApp();
 
 // Central text

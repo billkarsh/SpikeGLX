@@ -16,8 +16,7 @@
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-CalSRateCtl::CalSRateCtl( QWidget *parent )
-    :   QDialog(parent), thd(0)
+CalSRateCtl::CalSRateCtl() : QDialog(0), thd(0)
 {
     calUI = new Ui::CalSRateDlg;
     calUI->setupUi( this );

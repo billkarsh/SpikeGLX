@@ -16,8 +16,8 @@
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-DataDirCtl::DataDirCtl( QWidget *parent, const QStringList &sl, bool isMD )
-    :   QDialog(parent), sl(sl), isMD(isMD)
+DataDirCtl::DataDirCtl( const QStringList &sl, bool isMD )
+    :   QDialog(0), sl(sl), isMD(isMD)
 {
     setWindowFlags( windowFlags()
         & ~(Qt::WindowContextHelpButtonHint

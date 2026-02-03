@@ -85,7 +85,7 @@ private:
     bool                dlgShown;
 
 public:
-    AOCtl( const DAQ::Params &p, QWidget *parent = 0 );
+    AOCtl( const DAQ::Params &p );
     void predelete();
 
     bool uniqueAIs( std::vector<int> &vAI, const QString &stream ) const;

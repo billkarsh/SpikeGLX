@@ -26,7 +26,7 @@ private:
     CalSRThread                 *thd;
 
 public:
-    CalSRateCtl( QWidget *parent = 0 );
+    CalSRateCtl();
     virtual ~CalSRateCtl();
 
 public slots:

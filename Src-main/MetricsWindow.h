@@ -106,7 +106,7 @@ private:
     bool                isRun;
 
 public:
-    MetricsWindow( QWidget *parent = 0 );
+    MetricsWindow();
     void predelete();
 
     void showDialog();

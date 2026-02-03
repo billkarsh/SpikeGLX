@@ -40,7 +40,7 @@ static QString getNPErrorString()
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-IMBISTCtl::IMBISTCtl( QWidget *parent ) : QDialog(parent)
+IMBISTCtl::IMBISTCtl() : QDialog(0)
 {
     bistUI = new Ui::IMBISTDlg;
     bistUI->setupUi( this );

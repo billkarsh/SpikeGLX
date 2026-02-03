@@ -622,9 +622,8 @@ FileViewerWindow::FileViewerWindow()
         didLayout(false), sortingDisabled(false),
         selDrag(false), zoomDrag(false)
 {
-    initDataIndepStuff();
-
     setAttribute( Qt::WA_DeleteOnClose, false );
+    initDataIndepStuff();
     show();
 }
 

@@ -90,7 +90,7 @@ void AppData::makePathAbsolute( QString &path ) const
 void AppData::dataDirDlg()
 {
     remoteMtx.lock();
-    DataDirCtl  D( 0, slDataDir, multidrive );
+    DataDirCtl  D( slDataDir, multidrive );
     remoteMtx.unlock();
 
     D.run();
@@ -272,7 +272,6 @@ MainApp::MainApp( int &argc, char **argv )
 // -----------
 
     consoleWindow = new ConsoleWindow;
-    consoleWindow->setAttribute( Qt::WA_DeleteOnClose, false );
     consoleWindow->show();
 
 #ifdef Q_OS_MACX
@@ -290,7 +289,6 @@ MainApp::MainApp( int &argc, char **argv )
     Log() << "Application started";
 
     mxWin = new MetricsWindow;
-    mxWin->setAttribute( Qt::WA_DeleteOnClose, false );
     ConnectUI( mxWin, SIGNAL(closed(QWidget*)), this, SLOT(modelessClosed(QWidget*)) );
 
 // -------------
@@ -300,7 +298,6 @@ MainApp::MainApp( int &argc, char **argv )
     configCtl = new ConfigCtl;
 
     aoCtl = new AOCtl( configCtl->acceptedParams );
-    aoCtl->setAttribute( Qt::WA_DeleteOnClose, false );
     aoCtl->setWindowTitle( APPNAME " - Audio Settings" );
     ConnectUI( aoCtl, SIGNAL(closed(QWidget*)), this, SLOT(modelessClosed(QWidget*)) );
 
@@ -1169,7 +1166,6 @@ void MainApp::tools_ShowPar2Win()
     if( !par2Win ) {
 
         par2Win = new Par2Window;
-        par2Win->setAttribute( Qt::WA_DeleteOnClose, false );
         par2Win->setWindowTitle( APPNAME " - Par2 Redundancy Tool" );
         par2Win->setWindowIcon( QPixmap(ParWindowIcon_xpm) );
         ConnectUI( par2Win, SIGNAL(closed(QWidget*)), this, SLOT(modelessClosed(QWidget*)) );
@@ -1191,7 +1187,7 @@ void MainApp::tools_CalSRate()
         return;
     }
 
-    CalSRateCtl rateCtl( 0 );
+    CalSRateCtl rateCtl;
 }
 
 
@@ -1224,7 +1220,7 @@ void MainApp::tools_ImBist()
         return;
     }
 
-    IMBISTCtl bistCtl( 0 );
+    IMBISTCtl bistCtl;
 #endif
 }
 
@@ -1241,7 +1237,7 @@ void MainApp::tools_ImHst()
         return;
     }
 
-    IMHSTCtl hstCtl( 0 );
+    IMHSTCtl hstCtl;
 #endif
 }
 
@@ -1258,7 +1254,7 @@ void MainApp::tools_ImFirmware()
         return;
     }
 
-    IMFirmCtl firmCtl( 0 );
+    IMFirmCtl firmCtl;
 #endif
 }
 
@@ -1353,7 +1349,7 @@ void MainApp::window_ShowHideGraphs()
 
 void MainApp::window_WVDlg()
 {
-    WavePlanCtl W( 0 );
+    WavePlanCtl W;
 }
 
 
