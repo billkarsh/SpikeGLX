@@ -851,7 +851,7 @@ The inserts are recorded in a file at the top level of your data directory.
 The name of the file will be "runname.missed_samples.imecj.txt" for probe-j
 or "runname.missed_samples.obxj.txt" for OneBox ADC stream-j. There is an
 entry in the file for each inserted run of zeros. The entries have the form:
-<sample,nzeros>, that is, the first value is the sample number at which the
+(sample,nzeros), that is, the first value is the sample number at which the
 zeros are inserted (measured from the start of the acquisition run) and the
 second value is the number of inserted zeros. Each inserted sample is all
 zeros except for the status word(s) which set bit 11 and extend the flags
@@ -1254,7 +1254,7 @@ The inserts are recorded in a file at the top level of your data directory.
 The name of the file will be "runname.missed_samples.imecj.txt" for probe-j
 or "runname.missed_samples.obxj.txt" for OneBox ADC stream-j. There is an
 entry in the file for each inserted run of zeros. The entries have the form:
-<sample,nzeros>, that is, the first value is the sample number at which the
+(sample,nzeros), that is, the first value is the sample number at which the
 zeros are inserted (measured from the start of the acquisition run) and the
 second value is the number of inserted zeros. Each inserted sample is all
 zeros except for the status word(s) which set bit 11 and extend the flags

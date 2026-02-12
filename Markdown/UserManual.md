@@ -170,6 +170,7 @@ SpikeGLX/
     libstdc++-6.dll
     libwinpthread-1.dll
     msvcp(version).dll
+    msvcp(version)-atomic-wait.dll
     NeuropixAPI_version_info.dll
     opengl32sw.dll
     qt.conf
