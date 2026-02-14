@@ -639,6 +639,11 @@ FileViewerWindow::~FileViewerWindow()
     if( shankMap )
         delete shankMap;
 
+#ifdef Q_OS_LINUX
+    if( shankCtl )
+        delete shankCtl;
+#endif
+
     if( hipass )
         delete hipass;
 

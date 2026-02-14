@@ -15,11 +15,23 @@
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
+#ifdef Q_OS_WIN
+
 ShankCtlBase::ShankCtlBase( QWidget *parent, uint8_t sr_mask, bool modal )
     :   QDialog(modal ? 0 : parent), cfgdlg(parent), scUI(0), _scroll(0),
         seTab(0), modal_map(0), sr_mask(sr_mask), modal(modal)
 {
 }
+
+#else
+
+ShankCtlBase::ShankCtlBase( QWidget *parent, uint8_t sr_mask, bool modal )
+    :   QDialog(0), cfgdlg(parent), scUI(0), _scroll(0),
+        seTab(0), modal_map(0), sr_mask(sr_mask), modal(modal)
+{
+}
+
+#endif
 
 
 ShankCtlBase::~ShankCtlBase()
@@ -136,6 +148,8 @@ void ShankCtlBase::baseInit( const IMROTbl *R, bool hasViewTab )
     else {
 #ifdef Q_OS_WIN
         setWindowFlags( Qt::Tool );
+#else
+        setWindowFlag( Qt::WindowStaysOnTopHint, true );
 #endif
         setAttribute( Qt::WA_DeleteOnClose, false );
     }

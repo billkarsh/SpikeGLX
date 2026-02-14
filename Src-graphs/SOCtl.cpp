@@ -207,14 +207,27 @@ void SOFetcher::setGroups( SOGroup *grpbase, const DAQ::Params &p )
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
+#ifdef Q_OS_WIN
+
 SOCtl::SOCtl( const DAQ::Params &p, QWidget *parent )
     :   QDialog(parent), p(p), soUI(0), fetch(0)
 {
-#ifdef Q_OS_WIN
     setWindowFlags( Qt::Tool );
-#endif
     setAttribute( Qt::WA_DeleteOnClose, false );
 }
+
+#else
+
+SOCtl::SOCtl( const DAQ::Params &p, QWidget *parent )
+    :   QDialog(0), p(p), soUI(0), fetch(0)
+{
+    Q_UNUSED( parent )
+
+    setWindowFlags( Qt::WindowStaysOnTopHint );
+    setAttribute( Qt::WA_DeleteOnClose, false );
+}
+
+#endif
 
 
 void SOCtl::predelete()
@@ -226,6 +239,10 @@ void SOCtl::predelete()
         delete soUI;
         soUI = 0;
     }
+
+#ifdef Q_OS_LINUX
+    deleteLater();
+#endif
 }
 
 /* ---------------------------------------------------------------- */

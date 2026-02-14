@@ -229,6 +229,11 @@ SVGrafsM::~SVGrafsM()
 
 // OK to destroy
 
+#ifdef Q_OS_LINUX
+    if( shankCtl )
+        delete shankCtl;
+#endif
+
     QMutexLocker    ml( &fltMtx );
 
     if( hipass )
