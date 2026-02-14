@@ -475,7 +475,7 @@ bool TrigBase::nSampsFromCt(
     }
     catch( const std::exception& ) {
         Error() <<  "Trigger low mem (See log window text).";
-        Log() <<    "(1) Check Windows System Event Log to see if SpikeGLX";
+        Log() <<    "(1) Check Windows System Event Log to see if SpikeGLX"
                     " or another app was using excessive memory at this time.";
         Log() <<    "(2) If SpikeGLX, make sure you write runs to a local SSD"
                     " drive that maintains the required write rate for the"
