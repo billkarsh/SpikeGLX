@@ -2696,55 +2696,66 @@ void FileViewerWindow::linkRecvDraw()
 /* Protected ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-bool FileViewerWindow::eventFilter( QObject *obj, QEvent *e )
+bool FileViewerWindow::eventFilter( QObject *obj, QEvent *event )
 {
-    if( (obj == mscroll || obj == scanGrp->getSliderObj())
-        && e->type() == QEvent::KeyPress ) {
+    if( event->type() == QEvent::KeyPress ) {
 
-        QKeyEvent   *keyEvent   = static_cast<QKeyEvent*>(e);
-        double      newPos      = -1.0; // illegal
-        qint64      pos         = scanGrp->curPos();
+        QKeyEvent   *e = static_cast<QKeyEvent*>(event);
 
-        switch( keyEvent->key() ) {
-            case Qt::Key_Home:
-                newPos = 0;
-                break;
-            case Qt::Key_End:
-                newPos = scanGrp->maxPos();
-                break;
-            case Qt::Key_Left:
-            case Qt::Key_Up:
-                newPos =
-                    qMax( 0.0, pos - sav.all.fArrowKey * nSampsPerGraph() );
-                break;
-            case Qt::Key_Right:
-            case Qt::Key_Down:
-                newPos = pos + sav.all.fArrowKey * nSampsPerGraph();
-                break;
-            case Qt::Key_PageUp:
-                newPos =
-                    qMax( 0.0, pos - sav.all.fPageKey * nSampsPerGraph() );
-                break;
-            case Qt::Key_PageDown:
-                newPos = pos + sav.all.fPageKey * nSampsPerGraph();
-                break;
+        if( e->modifiers() == Qt::ControlModifier ) {
+
+            if( e->key() == Qt::Key_Z ) {
+                mainApp()->act.raiseConsAct->trigger();
+                e->ignore();
+                return true;
+            }
         }
+        else if( obj == mscroll || obj == scanGrp->getSliderObj() ) {
 
-        if( newPos >= 0.0 )
-            return scanGrp->guiSetPos( newPos );
+            double  newPos  = -1.0; // illegal
+            qint64  pos     = scanGrp->curPos();
+
+            switch( e->key() ) {
+                case Qt::Key_Home:
+                    newPos = 0;
+                    break;
+                case Qt::Key_End:
+                    newPos = scanGrp->maxPos();
+                    break;
+                case Qt::Key_Left:
+                case Qt::Key_Up:
+                    newPos =
+                        qMax( 0.0, pos - sav.all.fArrowKey * nSampsPerGraph() );
+                    break;
+                case Qt::Key_Right:
+                case Qt::Key_Down:
+                    newPos = pos + sav.all.fArrowKey * nSampsPerGraph();
+                    break;
+                case Qt::Key_PageUp:
+                    newPos =
+                        qMax( 0.0, pos - sav.all.fPageKey * nSampsPerGraph() );
+                    break;
+                case Qt::Key_PageDown:
+                    newPos = pos + sav.all.fPageKey * nSampsPerGraph();
+                    break;
+            }
+
+            if( newPos >= 0.0 )
+                return scanGrp->guiSetPos( newPos );
+        }
     }
 
-    return QMainWindow::eventFilter( obj, e );
+    return QMainWindow::eventFilter( obj, event );
 }
 
 
-void FileViewerWindow::closeEvent( QCloseEvent *e )
+void FileViewerWindow::closeEvent( QCloseEvent *event )
 {
     if( queryCloseOK() ) {
 
-        QWidget::closeEvent( e );
+        QWidget::closeEvent( event );
 
-        if( e->isAccepted() ) {
+        if( event->isAccepted() ) {
 
             if( shankCtl )
                 shankCtl->close();

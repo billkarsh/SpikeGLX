@@ -503,8 +503,8 @@ private slots:
     void linkRecvDraw();
 
 protected:
-    virtual bool eventFilter( QObject *obj, QEvent *e );
-    virtual void closeEvent( QCloseEvent *e );
+    virtual bool eventFilter( QObject *obj, QEvent *event );
+    virtual void closeEvent( QCloseEvent *event );
 
 private:
 // Data-independent inits

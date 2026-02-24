@@ -255,6 +255,11 @@ bool ShankCtlBase::eventFilter( QObject *watched, QEvent *event )
 
         if( e->modifiers() == Qt::ControlModifier ) {
 
+            if( e->key() == Qt::Key_Z ) {
+                mainApp()->act.raiseConsAct->trigger();
+                e->ignore();
+                return true;
+            }
             if( e->key() == Qt::Key_A ) {
                 mainApp()->act.aoDlgAct->trigger();
                 e->ignore();
