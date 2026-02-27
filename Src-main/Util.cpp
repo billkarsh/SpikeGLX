@@ -409,7 +409,16 @@ QString rmvLastSlash( const QString &path )
 
 QString appPath()
 {
-    QString path = QDir::currentPath();
+    QString path;
+
+#ifdef Q_OS_LINUX
+    QByteArray  appImage = qgetenv( "APPIMAGE" );
+
+    if( !appImage.isEmpty() )
+        return QFileInfo( QString::fromUtf8( appImage ) ).absolutePath();
+#endif
+
+    path = QDir::currentPath();
 
 #ifdef Q_OS_MAC
     QDir    D( path );
