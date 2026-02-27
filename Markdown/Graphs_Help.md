@@ -1,5 +1,21 @@
 ## Graphs Window Tools
 
+**Topics:**
+
+* [Second Graphs Window](#second-graphs-window)
+* [Run Toolbar](#run-toolbar)
+* [Stream Toolbar Controls](#stream-toolbar-controls)
+    + [Filters Applied Only to Neural Channels](#filters-applied-only-to-neural-channels)
+        + [General Filters](#general-filters)
+        + [Imec Stream Filters](#imec-stream-filters)
+        + [Nidq Stream Filters](#nidq-stream-filters)
+* [Page Toolbar Controls](#page-toolbar-controls)
+* [Right-Click on Graph](#right-click-on-graph)
+    + [Imec Menu](#imec-menu)
+* [Other Graph Window Features](#other-graph-window-features)
+
+--------
+
 ### Second Graphs Window
 
 In the Console window menus choose `Window/More Traces (Ctrl+T)` to open

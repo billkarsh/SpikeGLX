@@ -7,9 +7,23 @@
 **Topics:**
 
 * [Edit Tab](#edit-tab-quick-reference)
+    + [Boxes](#boxes)
+        + [Readouts](#readouts)
+        + [Making New Boxes](#making-new-boxes)
+        + [Resizing Boxes](#resizing-boxes)
+        + [Clearing/Erasing Boxes](#clearingerasing-boxes)
+        + [Boxes => file chans](#boxes-file-chans)
 * [View Tab](#view-tab-quick-reference)
+    + [Online Data Flow](#online-data-flow)
+    + [File Viewer Data Flow](#file-viewer-data-flow)
+    + [Setting a Spike Threshold 'T(-uV)'](#setting-a-spike-threshold-t-uv)
+    + [Setting 'Stay low'](#setting-stay-low)
+    + [Anatomy Colors](#anatomy-colors)
+    + [Right-click](#right-click)
 
-### Edit Tab Quick Reference
+--------
+
+## Edit Tab Quick Reference
 
 * The editor is resizable.
 * `Load` and view an existing file without applying.
@@ -83,7 +97,7 @@ the resulting string is merely copied to the clipboard.
 
 --------
 
-### View Tab Quick Reference
+## View Tab Quick Reference
 
 * The viewer is resizable.
 * The viewer stays in front of its Graphs window.

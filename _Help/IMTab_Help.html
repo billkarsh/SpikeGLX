@@ -13,6 +13,38 @@
 <p><strong>In brief: Detailed settings for each probe.</strong></p>
 <p>On the <code>Devices</code> tab you checked the <code>enable</code> boxes for the probes you want to run and then clicked <code>Detect</code>.</p>
 <p>Use this tab to configure parameters for each probe, individually.</p>
+<p><strong>Topics:</strong></p>
+<ul>
+<li><a href="#all-probes">All Probes</a>
+<ul>
+<li><a href="#calibration-policy">Calibration Policy</a></li>
+<li><a href="#low-latency-mode">Low Latency Mode</a></li>
+<li><a href="#acquisition-start-signal">Acquisition Start Signal</a></li>
+<li><a href="#survey-all-probe-banks">Survey all probe banks</a>
+<ul>
+<li><a href="#max-bank">Max bank</a></li>
+</ul></li>
+<li><a href="#filtered-streams">Filtered Streams</a></li>
+</ul></li>
+<li><a href="#probe-database">Probe Database</a></li>
+<li><a href="#table-viewing-and-sizing">Table Viewing and Sizing</a></li>
+<li><a href="#measured-sample-rate">Measured Sample Rate</a></li>
+<li><a href="#editing">Editing</a>
+<ul>
+<li><a href="#led">LED</a></li>
+<li><a href="#imro-table">IMRO Table</a></li>
+<li><a href="#bad-stand-by-channels">Bad (Stand-by) Channels</a></li>
+<li><a href="#channel-map">Channel Map</a></li>
+<li><a href="#save-channels">Save Channels</a>
+<ul>
+<li><a href="#force-lf-to-complement-listed-ap-channels">Force LF to Complement Listed AP Channels</a></li>
+<li><a href="#max-row-controls">Max Row Controls</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#fix-probe-id">Fix Probe ID</a></li>
+<li><a href="#default">Default</a></li>
+<li><a href="#copy">Copy</a></li>
+</ul>
 <hr />
 <h2 id="all-probes">All Probes</h2>
 <p>A few settings are common to all the probes...</p>
@@ -65,6 +97,10 @@
 <li>Drag the <code>Configure</code> dialog's outer edges or corners to resize all content.</li>
 </ul>
 <hr />
+<h2 id="measured-sample-rate">Measured Sample Rate</h2>
+<p>Not editable.</p>
+<p>This is the probe's (headstage's) measured sample rate as determined by the calibration procedures on the <code>Sync</code> tab (See User Manual).</p>
+<hr />
 <h2 id="editing">Editing</h2>
 <ul>
 <li>Select a table row, then click <code>Default</code>, or,</li>
@@ -80,11 +116,7 @@
 </ul>
 <p>More details below.</p>
 <hr />
-<h2 id="measured-sample-rate">Measured Sample Rate</h2>
-<p>Not editable.</p>
-<p>This is the probe's (headstage's) measured sample rate as determined by the calibration procedures on the <code>Sync</code> tab (See User Manual).</p>
-<hr />
-<h2 id="led">LED</h2>
+<h3 id="led">LED</h3>
 <p>One checkbox per probe, but really the LEDs are on headstages...</p>
 <ul>
 <li>NP 1.0-type probes: One probe per headstage: no conflicts.</li>
@@ -92,7 +124,7 @@
 </ul>
 <p>When you click <code>Verify</code> or <code>Run</code> you will be warned if your LED settings for the same headstage conflict.</p>
 <hr />
-<h2 id="imro-table">IMRO Table</h2>
+<h3 id="imro-table">IMRO Table</h3>
 <p>Use the <a href="ShankView_Help.html#edit-tab-quick-reference">graphical IMRO editor</a> to select:</p>
 <ul>
 <li>Regions of interest (&quot;boxes&quot;).</li>
@@ -100,7 +132,7 @@
 <li>AP and LF gains and filters (where applicable).</li>
 </ul>
 <hr />
-<h2 id="bad-stand-by-channels">Bad (Stand-by) Channels</h2>
+<h3 id="bad-stand-by-channels">Bad (Stand-by) Channels</h3>
 <p>Edit directly in the table cell by specifying a channel list, just as you do for saved channels. E.g., 0:3,200,301:305.</p>
 <p>The probe API lets you turn off the amplifiers for selected channels; what imec terms setting the channel to stand-by mode. The channel is still read out but its amplitude will effectively be zero. This makes graph windows easier to view. There is another more important way we use the bad channel list...</p>
 <p>SpikeGLX and CatGT observe the geometry map that's stored in every recording's metadata file. A geometry (geom) map describes:</p>
@@ -114,10 +146,10 @@
 <li>Listed bad channels.</li>
 </ul>
 <hr />
-<h2 id="channel-map">Channel Map</h2>
+<h3 id="channel-map">Channel Map</h3>
 <p>This lets you group/sort/order the channels in SpikeGLX graph windows. It has no effect on how binary data are stored.</p>
 <hr />
-<h2 id="save-channels">Save Channels</h2>
+<h3 id="save-channels">Save Channels</h3>
 <p>You can save all of the channels being acquired by setting the list to any of:</p>
 <ul>
 <li>blank</li>
@@ -128,12 +160,12 @@
 <blockquote>
 <p>The SY channel is always added to your list because it carries error flags and the sync channel.</p>
 </blockquote>
-<h3 id="force-lf-to-complement-listed-ap-channels">Force LF to Complement Listed AP Channels</h3>
+<h4 id="force-lf-to-complement-listed-ap-channels">Force LF to Complement Listed AP Channels</h4>
 <p>(If checked) AND (if this probe type has separate LF channels) THEN your list of saved channels is edited so that there is a saved LF channel for each listed AP channel. It's just a convenience.</p>
 <blockquote>
 <p>The checkbox actually applies to all probes, not just the one being edited.</p>
 </blockquote>
-<h3 id="max-row-controls">Max Row Controls</h3>
+<h4 id="max-row-controls">Max Row Controls</h4>
 <p>These edit the existing list to only keep AP channels that are between the tip of the probe and a specified maximum along the shank. The maximum can be given as a row number or as the distance from the tip.</p>
 <hr />
 <h2 id="fix-probe-id">Fix Probe ID</h2>

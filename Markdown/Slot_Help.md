@@ -14,6 +14,22 @@ Each probe has a logical address in the system given by its
 This document defines terminology, and then covers details of
 the `Configure Slots` dialog.
 
+**Topics:**
+
+* [Important Hardware Note](#important-hardware-note)
+* [Background: Slots, Ports, Docks and Probes](#background-slots-ports-docks-and-probes)
+    + [Slots](#slots)
+        + [Slot index ranges](#slot-index-ranges)
+        + [Slot index assignment](#slot-index-assignment)
+    + [Ports](#ports)
+    + [Docks](#docks)
+    + [Probe Table](#probe-table)
+* [Configure Slots Dialog](#configure-slots-dialog)
+    + [Slot Table](#slot-table)
+        + [Actions](#actions)
+    + [1 or 2 Docks](#or-2-docks)
+    + [Detect Button](#detect-button)
+
 --------
 
 ## Important Hardware Note

@@ -7,6 +7,30 @@ to run and then clicked `Detect`.
 
 Use this tab to configure parameters for each probe, individually.
 
+**Topics:**
+
+* [All Probes](#all-probes)
+    + [Calibration Policy](#calibration-policy)
+    + [Low Latency Mode](#low-latency-mode)
+    + [Acquisition Start Signal](#acquisition-start-signal)
+    + [Survey all probe banks](#survey-all-probe-banks)
+        + [Max bank](#max-bank)
+    + [Filtered Streams](#filtered-streams)
+* [Probe Database](#probe-database)
+* [Table Viewing and Sizing](#table-viewing-and-sizing)
+* [Measured Sample Rate](#measured-sample-rate)
+* [Editing](#editing)
+    + [LED](#led)
+    + [IMRO Table](#imro-table)
+    + [Bad (Stand-by) Channels](#bad-stand-by-channels)
+    + [Channel Map](#channel-map)
+    + [Save Channels](#save-channels)
+        + [Force LF to Complement Listed AP Channels](#force-lf-to-complement-listed-ap-channels)
+        + [Max Row Controls](#max-row-controls)
+* [Fix Probe ID](#fix-probe-id)
+* [Default](#default)
+* [Copy](#copy)
+
 --------
 
 ## All Probes
@@ -128,6 +152,15 @@ database for future runs.
 
 --------
 
+## Measured Sample Rate
+
+Not editable.
+
+This is the probe's (headstage's) measured sample rate as determined by the
+calibration procedures on the `Sync` tab (See User Manual).
+
+--------
+
 ## Editing
 
 * Select a table row, then click `Default`, or,
@@ -145,16 +178,7 @@ More details below.
 
 --------
 
-## Measured Sample Rate
-
-Not editable.
-
-This is the probe's (headstage's) measured sample rate as determined by the
-calibration procedures on the `Sync` tab (See User Manual).
-
---------
-
-## LED
+### LED
 
 One checkbox per probe, but really the LEDs are on headstages...
 
@@ -166,7 +190,7 @@ settings for the same headstage conflict.
 
 --------
 
-## IMRO Table
+### IMRO Table
 
 Use the [graphical IMRO editor](ShankView_Help.html#edit-tab-quick-reference)
 to select:
@@ -177,7 +201,7 @@ to select:
 
 --------
 
-## Bad (Stand-by) Channels
+### Bad (Stand-by) Channels
 
 Edit directly in the table cell by specifying a channel list,
 just as you do for saved channels. E.g., 0:3,200,301:305.
@@ -202,14 +226,14 @@ These channels are set to (used=0):
 
 --------
 
-## Channel Map
+### Channel Map
 
 This lets you group/sort/order the channels in SpikeGLX graph windows.
 It has no effect on how binary data are stored.
 
 --------
 
-## Save Channels
+### Save Channels
 
 You can save all of the channels being acquired by setting the list to
 any of:
@@ -224,7 +248,7 @@ list of individual channels and/or ranges, like: 1:200,205,207,350:360.
 >The SY channel is always added to your list because it carries error flags
 and the sync channel.
 
-### Force LF to Complement Listed AP Channels
+#### Force LF to Complement Listed AP Channels
 
 (If checked) AND (if this probe type has separate LF channels) THEN your
 list of saved channels is edited so that there is a saved LF channel for
@@ -232,7 +256,7 @@ each listed AP channel. It's just a convenience.
 
 >The checkbox actually applies to all probes, not just the one being edited.
 
-### Max Row Controls
+#### Max Row Controls
 
 These edit the existing list to only keep AP channels that are between the
 tip of the probe and a specified maximum along the shank. The maximum can

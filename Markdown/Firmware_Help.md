@@ -1,5 +1,17 @@
 ## Updating Imec PXIe Firmware
 
+**Topics:**
+
+* [OneBoxes](#oneboxes)
+* [Dual Boot Images](#dual-boot-images)
+* [Power Cycling](#power-cycling)
+* [Update Procedure](#update-procedure)
+* [Corruption](#corruption)
+* [Recovery](#recovery)
+* [Secret Button](#secret-button)
+
+--------
+
 ### OneBoxes
 
 There is a device driver for OneBox, but you do not need to manually

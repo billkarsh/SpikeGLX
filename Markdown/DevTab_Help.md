@@ -1,5 +1,24 @@
 ## Devices Tab
 
+**Topics:**
+
+* [Overview](#overview)
+    + [SpikeGLX vs Open-Ephys](#spikeglx-vs-open-ephys)
+* [Dialog Notes](#dialog-notes)
+* [Imec](#imec)
+    + [Populate the Probe Table](#populate-the-probe-table)
+    + [Configure Slots](#configure-slots)
+    + [Enable Checkboxes](#enable-checkboxes)
+    + [Enable Probe Shortcuts](#enable-probe-shortcuts)
+    + [BIST PSB Checks](#bist-psb-checks)
+    + [Detect](#detect)
+    + [Logical Index Numbers](#logical-index-numbers)
+* [National Instruments](#national-instruments)
+
+--------
+
+## Overview
+
 **In brief: Select which components (data streams) to enable.**
 
 1. Describe which Neuropixels components you've installed.

@@ -1,5 +1,21 @@
 ## Audio Notes
 
+**Topics:**
+
+* [WARNING!](#warning)
+* [Output to Speakers and Headphones](#output-to-speakers-and-headphones)
+* [Hot-plugging Headphones](#hot-plugging-headphones)
+* [Stream](#stream)
+* [Channels](#channels)
+    + [Click and play](#click-and-play)
+* [Bandpass](#bandpass)
+    + [IM filtered stream](#im-filtered-stream)
+* [Volume](#volume)
+* [Latency](#latency)
+* [Crackle](#crackle)
+
+--------
+
 ### WARNING!
 
 Audio output is surprisingly resource hungry. If you are running 16 imec

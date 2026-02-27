@@ -7,6 +7,22 @@ you want to run and then clicked `Detect`.
 
 Use this tab to configure parameters for each OneBox, individually.
 
+**Topics:**
+
+* [OneBox Database](#onebox-database)
+* [Table Viewing and Sizing](#table-viewing-and-sizing)
+* [Measured Sample Rate](#measured-sample-rate)
+* [Editing](#editing)
+    + [XA Analog Channels](#xa-analog-channels)
+    + [XD Digital Lines](#xd-digital-lines)
+    + [AI Range](#ai-range)
+    + [AO Analog (DAC) Channels](#ao-analog-dac-channels)
+        + [AO Voltages](#ao-voltages)
+    + [Channel Map](#channel-map)
+    + [Save Channels](#save-channels)
+* [Default](#default)
+* [Copy](#copy)
+
 --------
 
 ## OneBox Database
@@ -38,6 +54,15 @@ database for future runs.
 
 --------
 
+## Measured Sample Rate
+
+Not editable.
+
+This is the OneBox's measured input sample rate as determined by
+the calibration procedures on the `Sync` tab (See User Manual).
+
+--------
+
 ## Editing
 
 * Select a table row, then click `Default`, or,
@@ -56,16 +81,7 @@ More details below.
 
 --------
 
-## Measured Sample Rate
-
-Not editable.
-
-This is the OneBox's measured input sample rate as determined by
-the calibration procedures on the `Sync` tab (See User Manual).
-
---------
-
-## XA Analog Channels
+### XA Analog Channels
 
 Edit directly in the table cell by specifying a channel list,
 just as you do for saved channels. E.g., 0:3,7.
@@ -76,7 +92,7 @@ If desired, the XA box can be blank (specfying **NO** analog channels).
 
 --------
 
-## XD Digital Lines
+### XD Digital Lines
 
 If you enable the XD (digital) option, then, regardless of your XA channel
 list, **ALL 12** analog inputs are digitized using a fixed threshold value
@@ -95,14 +111,14 @@ device using indices: `(js,ip) = (1,ID)`.
 
 --------
 
-## AI Range
+### AI Range
 
 The selected scale +/- {2.5,5,10} volts is applied to all input analog
 channels.
 
 --------
 
-## AO Analog (DAC) Channels
+### AO Analog (DAC) Channels
 
 Edit directly in the table cell by specifying a channel list,
 just as you do for saved channels. E.g., 0:3,7.
@@ -127,21 +143,21 @@ A OneBox is configured for output if at least one AO channel is listed.
 In SDK remote interface functions you can access the output features for
 this device using its assigned `slot number`.
 
-### AO Voltages
+#### AO Voltages
 
 * Use the SDK during a run to set constant AO voltage levels: range +/- 5V.
 * All listed AO channels are initialized to zero when a run starts.
 
 --------
 
-## Channel Map
+### Channel Map
 
 This lets you group/sort/order the channels in SpikeGLX graph windows.
 It has no effect on how binary data are stored.
 
 --------
 
-## Save Channels
+### Save Channels
 
 Edit directly in the table cell by specifying a channel list.
 

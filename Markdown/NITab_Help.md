@@ -1,5 +1,41 @@
 ## NI Tab
 
+**Topics:**
+
+* [NI Hardware Requirements](#ni-hardware-requirements)
+    + [Simultaneous Sampling (Fast, Expensive)](#simultaneous-sampling-fast-expensive)
+    + [Multiplexed Sampling (Slower, Budget Friendly)](#multiplexed-sampling-slower-budget-friendly)
+    + [USB Devices](#usb-devices)
+    + [Favorite All-Arounders](#favorite-all-arounders)
+    + [Breakout Box and Cable](#breakout-box-and-cable)
+* [Primary and Secondary Devices](#primary-and-secondary-devices)
+* [Primary Device](#primary-device)
+    + [Analog Channel Strings](#analog-channel-strings)
+    + [Digital Strings](#digital-strings)
+* [Secondary Device](#secondary-device)
+* [Common Analog Params](#common-analog-params)
+    + [Chans / Muxer](#chans-muxer)
+    + [MN, MA Gain](#mn-ma-gain)
+    + [AI range (V)](#ai-range-v)
+    + [Termination](#termination)
+* [Timing](#timing)
+    + [Clock Source](#clock-source)
+    + [Optional Start Signal](#optional-start-signal)
+* [Maps](#maps)
+    + [Shank Map](#shank-map)
+    + [Channel Map](#channel-map)
+    + [Save Channels](#save-channels)
+* [Examples of Sample Clock Configuration](#examples-of-sample-clock-configuration)
+    + [Case A: Internal Clock Source, No Multiplexing](#case-a-internal-clock-source-no-multiplexing)
+    + [Case B: External Clock Source, No Multiplexing](#case-b-external-clock-source-no-multiplexing)
+    + [Case C: Whisper Multiplexer](#case-c-whisper-multiplexer)
+    + [Case D: Whisper with Second Device](#case-d-whisper-with-second-device)
+* [Sharing Channels With Other Programs](#sharing-channels-with-other-programs)
+    + [Digital Lines (XD)](#digital-lines-xd)
+    + [Analog Channels (XA)](#analog-channels-xa)
+
+--------
+
 ## NI Hardware Requirements
 
 SpikeGLX has these requirements for NI recording devices:
