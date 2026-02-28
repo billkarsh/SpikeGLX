@@ -133,7 +133,7 @@ Type of pulser source {0=None, 1=External, 2=NI, 3+=IM}.
 syncSourcePeriod=1.0
 ```
 
-Measured period of the shared pulse train in seconds.
+Set period of the shared pulse train in seconds.
 
 ```
 trigMode=1

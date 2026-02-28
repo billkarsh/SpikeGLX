@@ -2273,11 +2273,17 @@ bool ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
 
     if( usingIM ) {
 
-        if( (   // source not PXI
-                q.sync.sourceIdx < DAQ::eSyncSourceIM ||
-                !prbTab.isSlotPXIType( prbTab.getEnumSlot( q.sync.sourceIdx - DAQ::eSyncSourceIM ) )
-            )
-            && prbTab.anySlotPXIType() ) {
+        if( // source is PXI
+            q.sync.sourceIdx >= DAQ::eSyncSourceIM &&
+            prbTab.isSlotPXIType( prbTab.getEnumSlot( q.sync.sourceIdx - DAQ::eSyncSourceIM ) ) ) {
+
+            if( q.sync.sourcePeriod > 1 ) {
+                err =
+                "Sync tab: IM PXI sync source must use 1 second period.";
+                return false;
+            }
+        }
+        else if( prbTab.anySlotPXIType() ) {
 
             if( !prbTab.isSlotUsed( q.sync.imPXIInputSlot ) ) {
 

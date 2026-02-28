@@ -245,7 +245,7 @@ bool CimAcqImec::_aux_setObxSyncAsOutput( int slot )
 
     NP_ErrorCode    err;
 
-    err = np_setSyncClockPeriod( slot, 1000 );
+    err = np_setSyncClockPeriod( slot, 1000 * p.sync.sourcePeriod );
 
     if( err != SUCCESS ) {
         runError(

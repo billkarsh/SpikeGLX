@@ -818,11 +818,11 @@ bool CniAcqDmx::createInternalCTRTask()
 /* createSyncPulserTask ------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// TaskSyncPls programs a square wave with period 1 second and %50
-// duty cycle (high 500 ms). For multifunction IO devices output is
-// at Ctr1InternalOutput (pin 40). Digital devices write to line0.
-// That signal can be physically routed by the user to a channel in
-// all acquisition streams. This pulser serves to measure the
+// TaskSyncPls programs a square wave with sync period and %50
+// duty cycle. For multifunction IO devices output is at
+// Ctr1InternalOutput (pin 40). Digital devices write to line0.
+// That signal can be physically routed by the user to a channel
+// in all acquisition streams. This pulser serves to measure the
 // effective sample rates of the streams, and as a cross reference
 // for mapping events between streams.
 //
@@ -835,7 +835,7 @@ bool CniAcqDmx::createSyncPulserTask()
 
     if( CniCfg::isDigitalDev( p.ni.dev1 ) ) {
 
-        uint                nlvl = 100,
+        uint                nlvl = 100 * p.sync.sourcePeriod,
                             line = 0;
         std::vector<uInt32> data( 2*nlvl );
 
@@ -855,7 +855,7 @@ bool CniAcqDmx::createSyncPulserTask()
          || DAQmxErrChkNoJump( DAQmxCfgSampClkTiming(
                                 taskSyncPls,
                                 "",
-                                2.0*nlvl,
+                                200.0,
                                 DAQmx_Val_Rising,
                                 DAQmx_Val_ContSamps,
                                 2*nlvl ) )
@@ -888,8 +888,8 @@ bool CniAcqDmx::createSyncPulserTask()
                                 DAQmx_Val_Seconds,
                                 DAQmx_Val_Low,
                                 0.0,
-                                0.5,
-                                0.5 ) )
+                                0.5 * p.sync.sourcePeriod,
+                                0.5 * p.sync.sourcePeriod ) )
          || DAQmxErrChkNoJump( DAQmxCfgImplicitTiming(
                                 taskSyncPls,
                                 DAQmx_Val_ContSamps,

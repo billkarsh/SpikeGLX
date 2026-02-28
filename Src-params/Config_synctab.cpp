@@ -62,7 +62,7 @@ void Config_synctab::toGUI( const DAQ::Params &p )
         sel = DAQ::eSyncSourceNI + (ns > 0);
 
     syncTabUI->sourceCB->setCurrentIndex( sel );
-    syncTabUI->sourceSB->setValue( p.sync.sourcePeriod );
+    syncTabUI->periodCB->setCurrentIndex( int(p.sync.sourcePeriod) - 1 );
 
 // Inputs
 
@@ -86,7 +86,7 @@ void Config_synctab::toGUI( const DAQ::Params &p )
 void Config_synctab::fromGUI( DAQ::Params &q )
 {
     q.sync.sourceIdx        = curSource();
-    q.sync.sourcePeriod     = syncTabUI->sourceSB->value();
+    q.sync.sourcePeriod     = syncTabUI->periodCB->currentIndex() + 1;
 
     q.sync.imPXIInputSlot   = syncTabUI->imSlotSB->value();
 
@@ -181,7 +181,7 @@ void Config_synctab::syncSourceCBChanged()
     syncTabUI->imSlotSB->setEnabled( false );
 #endif
 
-    syncTabUI->sourceSB->setEnabled( sourceSBEnab );
+    syncTabUI->periodCB->setEnabled( sourceSBEnab );
     syncTabUI->calChk->setEnabled( calChkEnab );
 
     syncNiChanTypeCBChanged();

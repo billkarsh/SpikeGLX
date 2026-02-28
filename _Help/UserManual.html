@@ -555,13 +555,13 @@ snsSaveChanSubset=2:4 // diff: file-index 0,1,2 maps to acquired 2,3,4</code></p
 <p>Each stream has its own asynchronous hardware clock, hence, its own <strong>start time</strong> and <strong>sample rate</strong>. The time at which an event occurs, for example a spike or a TTL trigger, can be accurately mapped from one stream to another if we can accurately measure the stream timing parameters. SpikeGLX has several tools for that purpose:</p>
 <ul>
 <li>SpikeGLX: Clock rate calibration.</li>
-<li>SpikeGLX: Generate/acquire 1 Hz pulser signal.</li>
+<li>SpikeGLX: Generate/acquire sync pulser signal.</li>
 <li>CatGT (offline tool): Extract event and pulser edge times.</li>
 <li>TPrime (offline tool): Align/map data using pulser edges.</li>
 </ul>
 <h4 id="procedure-to-calibrate-sample-rates">Procedure to Calibrate Sample Rates</h4>
 <ol style="list-style-type: decimal">
-<li><p>A pulse generator is configured to produce a square wave with period of 1 s and 50% duty cycle. You can provide your own source, or SpikeGLX can program the NI-DAQ device to make this signal, or the imec devices can be selected as the source.</p></li>
+<li><p>A pulse generator is configured to produce a square wave with period of {1,2,or,3} s and 50% duty cycle. You can provide your own source, or SpikeGLX can program one of the acquisition devices to generate the waveform.</p></li>
 <li><p>You connect the output of the generator to one input channel of each stream and name these channels in the <code>Sync tab</code> in the Configuration dialog.</p></li>
 <li><p>In the <code>Sync tab</code> you check the box to do a calibration run. This will automatically acquire and analyze data appropriate to measuring the sample rates of each enabled stream. These rates are stored in a database (by device SN) for use in subsequent runs. The database is in the <code>_Calibration</code> subfolder. Be sure to transplant this folder to the new SpikeGLX folder when you upgrade the software.</p></li>
 </ol>
@@ -579,7 +579,7 @@ snsSaveChanSubset=2:4 // diff: file-index 0,1,2 maps to acquired 2,3,4</code></p
 <p>In this mode of operation, you've previously done a calibration run to get good estimators of the rates, and you are dedicating a channel in each stream to the common generator (pulser) during regular data runs. Two things happen under these conditions:</p>
 <ol style="list-style-type: decimal">
 <li><p>When the run is starting up SpikeGLX uses the pulser to adjust the estimated stream start times so they agree to within a millisecond.</p></li>
-<li><p>During the run, the time coordinate of any event can be referenced to the nearest pulser edge, which is no more than one second away, and that allows times to be mapped with sub-millisecond accuracy.</p></li>
+<li><p>During the run, the time coordinate of any event can be referenced to the nearest pulser edge, which is no more than one sync period away, and that allows times to be mapped with sub-millisecond accuracy.</p></li>
 </ol>
 <h4 id="updating-the-calibration">Updating the Calibration</h4>
 <p>Menu item: <code>Tools/Sample Rates From Run</code> lets you open any existing run that was acquired with a connected generator and recalibrate the rates for those streams. You can then elect to update the stated sample rates within this run's metadata, and/or update the global settings for use in the next run.</p>

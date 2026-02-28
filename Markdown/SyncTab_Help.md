@@ -19,8 +19,8 @@ Choose `Disable sync waveform` to run without active alignment to edges
 of a common square wave. The software will still apply the measured sample
 rates for streams that have previously been calibrated.
 
-Otherwise, a generator source should be programmed to form a simple
-square wave with a 1 second period and 50% duty cycle. You have three
+Otherwise, a generator source should be programmed to form a simple square
+wave with a {1,2,or,3} second period and 50% duty cycle. You have three
 choices for the generator:
 
 * `Separate high precision pulser` allows you to provide any waveform
@@ -35,11 +35,12 @@ programmed to make the waveform on `line-0`.
 * `Imec slot N` will program the indicated BS (PXI or OneBox) to produce
 the sync waveform and make it available at its SMA connector.
 
-Whichever pulser source you select, the programmed (set) period is 1
-second, but the actual period may differ from that. If you have measured
-the actual period of the generator's output with a high precision
-frequency/period analyzer, then enter that value in the `Measured period`
-box. If you have not measured it, enter **1** in the box.
+Set the period selector for {1, 2, or 3} seconds. A shorter period sets
+a smaller upper limit on the alignment error after Tprime is applied. A
+longer period allows longer acquisition times before cummulative clock
+drift interferes with pairing sync edges.
+
+>Imec PXIe cards are constrained to period = 1s.
 
 >The calibration procedure measures the rates of clocks relative to the
 square wave generator clock. You should use the same generator for real

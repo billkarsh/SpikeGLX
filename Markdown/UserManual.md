@@ -944,16 +944,15 @@ if we can accurately measure the stream timing parameters. SpikeGLX has
 several tools for that purpose:
 
 * SpikeGLX: Clock rate calibration.
-* SpikeGLX: Generate/acquire 1 Hz pulser signal.
+* SpikeGLX: Generate/acquire sync pulser signal.
 * CatGT (offline tool): Extract event and pulser edge times.
 * TPrime (offline tool): Align/map data using pulser edges.
 
 #### Procedure to Calibrate Sample Rates
 
 1) A pulse generator is configured to produce a square wave with period of
-1 s and 50% duty cycle. You can provide your own source, or SpikeGLX can
-program the NI-DAQ device to make this signal, or the imec devices can be
-selected as the source.
+{1,2,or,3} s and 50% duty cycle. You can provide your own source, or SpikeGLX
+can program one of the acquisition devices to generate the waveform.
 
 2) You connect the output of the generator to one input channel of each
 stream and name these channels in the `Sync tab` in the Configuration
@@ -1009,8 +1008,8 @@ Two things happen under these conditions:
 estimated stream start times so they agree to within a millisecond.
 
 2) During the run, the time coordinate of any event can be referenced
-to the nearest pulser edge, which is no more than one second away, and
-that allows times to be mapped with sub-millisecond accuracy.
+to the nearest pulser edge, which is no more than one sync period away,
+and that allows times to be mapped with sub-millisecond accuracy.
 
 #### Updating the Calibration
 

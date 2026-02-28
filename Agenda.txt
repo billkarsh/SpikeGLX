@@ -5,6 +5,7 @@
 --------
 + Update msvc dll set in releases.
 + Ctrl+Z raises the Console (Log) window.
++ Sync period can be set to {1,2,3} seconds.
 
 20251218
 --------
