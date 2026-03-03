@@ -674,8 +674,9 @@ ls -s &lt;path/myoriginalname.meta&gt; &lt;...ZZZ/goodname_g0_t0.imec0.ap.meta&g
 <p>You can override the count giving any value &gt;= 1.</p>
 <h4 id="extractors-no_auto_sync-option">Extractors no_auto_sync option</h4>
 <p>Starting with version 3.0, CatGT automatically extracts sync edges from all streams unless you turn that off using <code>-no_auto_sync</code>.</p>
-<p>For an NI stream, CatGT reads the metadata to see which analog or digital word contains the sync waveform and builds the corresponding extractor for you, either <code>-xa=0,0,word,thresh,0,500</code> or <code>-xd=0,0,word,bit,500</code>.</p>
-<p>For OB and AP streams, CatGT seeks edges in bit #6 of the SY word, as if you had specified <code>-xd=1,ip,-1,6,500</code> and/or <code>-xd=2,ip,-1,6,500</code>.</p>
+<p>In the following autonaming examples, <code>span</code> is 1/2 the sync period in ms, so span = 500 for the default case of 1 second sync.</p>
+<p>For an NI stream, CatGT reads the metadata to see which analog or digital word contains the sync waveform and builds the corresponding extractor for you, either <code>-xa=0,0,word,thresh,0,span</code> or <code>-xd=0,0,word,bit,span</code>.</p>
+<p>For OB and AP streams, CatGT seeks edges in bit #6 of the SY word, as if you had specified <code>-xd=1,ip,-1,6,span</code> and/or <code>-xd=2,ip,-1,6,span</code>.</p>
 <h3 id="tcat-defer-extraction-to-a-later-pass">-t=cat defer extraction to a later pass</h3>
 <p>You might want to concatenate/filter the data in a first pass, and later extract nonneural events from the ensuing output files which are now named <code>tcat</code>. Do that by specifying <code>-t=tcat</code> in the second pass.</p>
 <blockquote>
@@ -992,6 +993,10 @@ Options:
 <p>Supercat creates output file: <code>dest/supercat_run_ga/run_ga_fyi.txt</code>. This lists key output paths and filenames you can use to build downstream command lines for TPrime.</p>
 <hr />
 <h2 id="change-log">Change Log</h2>
+<p>Version 5.3</p>
+<ul>
+<li>Auto sync extractors decode period.</li>
+</ul>
 <p>Version 5.2</p>
 <ul>
 <li>Suppress span-trimming in exported survey runs.</li>

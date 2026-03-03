@@ -224,6 +224,11 @@ TPrime is a command-line tool that maps event times (all probe types):
 
 ## Post-processing Tools
 
+SpikeGLX_Linux_offline is an AppImage that lets you run the offline
+FileViewer and ShankViewer natively under Linux.
+
+* [SpikeGLX_Linux_offline](Support/SpikeGLX_Linux_offline.zip)
+
 NIScaler command-line tool to calibrate/rescale NI analog voltages acquired
 with SpikeGLX versions earlier than 20220101. SpikeGLX versions 20220101 and
 later automatically acquire scaled data.

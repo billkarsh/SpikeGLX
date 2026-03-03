@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+March 2, 2026
+
+* SpikeGLX_Linux_offline.
+
 January 15, 2026
 
 * SpikeGLX 20251218-api4 (Export survey, SDK selectDevices, api v4.1.3).

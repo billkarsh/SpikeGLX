@@ -45,13 +45,14 @@ editing of the raw acquired data. Rather it is a scheme for mapping
 post-analysis event times (seconds, not samples) from one coordinate
 system to another.
 
-This mapping scheme is implemented as follows. A common 1 Hz square wave
-is recorded in one channel of each data stream throughout the experiment.
-In offline processing, the rising edges in this "**sync wave**" are paired
-across streams A & B. Any event (T) occurring in B is no more than one
-second away from a nearest (preceding) sync wave edge (Eb) in stream B.
-That edge has a simultaneously occurring matching edge (Ea) in stream A.
-To map T in stream B to T' in stream A, we simply calculate:
+This mapping scheme is implemented as follows. A common square wave of
+period {1,2,3} seconds is recorded in one channel of each data stream
+throughout the experiment. In offline processing, the rising edges in this
+"**sync wave**" are paired across streams A & B. Any event (T) occurring
+in B is no more than one period away from a nearest (preceding) sync wave
+edge (Eb) in stream B. That edge has a simultaneously occurring matching
+edge (Ea) in stream A. To map T in stream B to T' in stream A, we simply
+calculate:
 
 ```
     T' = T - Eb + Ea.
@@ -60,16 +61,32 @@ To map T in stream B to T' in stream A, we simply calculate:
 ![<BR/>](SyncWaves.jpg)
 
 Assuming we can correctly pair sync wave edges, the error on any mapped
-time is bounded by [1s * rate_error/rate]. For example, if the nominal
-probe sample rate is 30kHz and the error in that value is 3Hz, then the
-error in the mapped time would be 0.1ms.
+time is bounded by [sync_period * rate_error/rate]. For example, if the
+nominal probe sample rate is 30kHz, the error in that value is 3Hz, and
+the sync period is 1s, then the error in the mapped time would be 0.1ms.
 
 Rate error arises when we do not know the actual clock rate. The two
 largest sources of error are (1) bad/unknown calibration (the largest
-difference from 30kHz we've seen post calibration is 1Hz), and
-(2) temperature variation, which we measure to be very small near room
-temperature:  < 0.01Hz/5C. So mapping errors after application of TPrime
-are typically smaller than 0.1ms.
+difference from 30kHz we've seen is 1Hz so it is important to do a
+calibration to reduce this error to ~0.1Hz), and (2) temperature variation,
+which we measure to be very small near room temperature: < 0.01Hz/5C. So
+with calibration and 1-s sync, mapping errors after application of TPrime
+are typically: 1.0 * (2 * 0.15)/30000 = 0.01 ms.
+
+SpikeGLX allows you to select a sync period of {1,2,3} seconds (imec PXI
+cards can only generate 1 second waves). Shorter periods tighten bounds
+on final alignment error. Longer periods allow running longer before
+cummulative clock drift makes it difficult to pair edges. Suppose the total
+drift error between two stream clocks is 0.3Hz, which is realistic with
+calibrated clocks. Then there may be a progressive phase shift of 0.3
+sample/s = 1080 sample/hr. In 27 hours this much error exceeds 30,000 and
+it becomes tricky to pair edges. However, it would take 3X longer to drift
+as much as 90,000 samples.
+
+We place an upper limit of 3 seconds on the period because SpikeGLX needs
+to find matching edges by looking back in its online history queues which
+are nominally 8 seconds long. At 4 seconds target matching edges potentially
+drop out of the queue before we can fetch them.
 
 Briefly, the sync-related roles of various components are the
 following, listed in the order you would organize your workflow:
@@ -106,17 +123,18 @@ roughly see how things line up without the bother of running TPrime, that
 will work better if all clocks are at least calibrated.
 
 * TPrime needs to be able to identify pairs of matching edges. If the
-recorded times of edges in the sync wave are a second or more off, the
+recorded times of edges in the sync wave are a period or more off, the
 adjustment may suffer phase error. This could be a problem in a long
 run where error is cumulative. To estimate the duration, consider that
 an uncalibrated clock could run as much as 1Hz differently than 30kHz.
-Then a problem will occur at time T, where `1Hz * T = 30000` or T = 8.3 hours.
+Two such clocks could have 2Hz of relative error. Then a problem will
+occur at time T, where `2Hz * T = 30000` or T = 4.1 hours.
 
 ### How to
 
 Using the `Sync` tab in the Configuration dialog, you:
 
-* select a sync wave source
+* select a sync wave source (any period works for this)
 * specify for each stream which channels are getting sync wave input
 * check `Use next run for calibration` (and select a run-length)
 
@@ -172,7 +190,7 @@ options:
 
     * Select any one of the imec slots.
     * Select your NI multifunction I/O device (SpikeGLX programs its output).
-    * Use your own signal generator. Set it for 1 Hz and 50% duty cycle.
+    * Use your own signal generator. Set it for {1,2,or,3} sec and 50% duty cycle.
 
 2. Feed wires from the source to one channel in each stream.
 
@@ -181,6 +199,9 @@ options:
     a wire connected to its SMA connector, whether it is specified as
     input or output (source). So you connect a wire to just one (active)
     module, and all imec probes will automatically record the sync wave.
+    
+    * For a single OneBox running a few probes and collection its aux channel
+    data you don't need to run any wires; it's all connected internally. 
 
     * If NI is the source, the `Notes` field indicates which output terminal to connect.
 
@@ -444,12 +465,15 @@ You can override the count giving any value >= 1.
 Starting with version 3.0, CatGT automatically extracts sync edges
 from all streams unless you turn that off using `-no_auto_sync`.
 
+In the following autonaming examples, `span` is 1/2 the sync period in ms,
+so span = 500 for the default case of 1 second sync.
+
 For an NI stream, CatGT reads the metadata to see which analog or digital
 word contains the sync waveform and builds the corresponding extractor for
-you, either `-xa=0,0,word,thresh,0,500` or `-xd=0,0,word,bit,500`.
+you, either `-xa=0,0,word,thresh,0,span` or `-xd=0,0,word,bit,span`.
 
 For OB and AP streams, CatGT seeks edges in bit #6 of the SY word, as if
-you had specified `-xd=1,ip,-1,6,500` and/or `-xd=2,ip,-1,6,500`.
+you had specified `-xd=1,ip,-1,6,span` and/or `-xd=2,ip,-1,6,span`.
 
 ------
 
@@ -515,6 +539,7 @@ We focus here on SpikeGLX settings relevant to the CatGT/TPrime command lines...
     * Maps :: `Channels to save`: **all**
 * `Sync` tab:
     * `Square wave source` :: **Imec slot 3**
+    * `Set period (s)`: **1**
     * Inputs :: `Nidq`: **Digital bit, 3**
 * `Triggers` tab
     * `Trigger mode`: **Immediate start**   *; single file, record upon button press*
