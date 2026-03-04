@@ -12,10 +12,11 @@
     + [Updated Validation](#updated-validation)
     + [Updated Programming](#updated-programming)
     + [Survey Mode](#survey-mode)
-* [Quad-base File Saving](#quad-base-file-saving)
-* [Pitfalls and Caveats](#pitfalls-and-caveats)
+* [Quad-Base File Saving](#quad-base-file-saving)
+* [Pitfalls and Caveats (Non-Quad-Base)](#pitfalls-and-caveats-non-quad-base)
     + [Undetected Errors](#undetected-errors)
     + [Reference Noise](#reference-noise)
+    + [Electrode Mixing](#electrode-mixing)
 
 
 # Shift Register Errors
@@ -172,7 +173,7 @@ to be (0,0).*
 
 --------
 
-## Quad-base File Saving
+## Quad-Base File Saving
 
 With QB probes you must acquire 384 channels from each shank since the
 probe hardware acts like four single-shank probes. Therefore, you must
@@ -193,7 +194,15 @@ preset to channels on good shanks.
 
 --------
 
-## Pitfalls and Caveats
+## Pitfalls and Caveats (Non-Quad-Base)
+
+Note that QB probes are actually four complete single-shank probes packaged
+together. When one or more of these shanks break the others are fully intact.
+
+However, the 4 shanks of a standard 2.0 probe share the same base electronics
+and the four shanks are cross-connected to allow flexible configuration.
+When one of these shanks is malfunctioning it can affect the whole probe
+as detailed below.
 
 ### Undetected Errors
 
@@ -222,6 +231,16 @@ coupling in unmanaged external or tip sources.
 Expect noise pollution in the reference. This may vary in an uncontrolled
 way from run to run.
 
+### Electrode Mixing
+
+Even though the software guides you to select electrode sites only on the
+good shanks, there is no way of knowing if site selection switches on the
+bad shanks are connecting any of those sites to the readout channels. So
+one or more readout channels may be superpositions of desired sites and
+other sites on the broken shanks. That can have several affects. The units
+may not be where you think they are. Unit waveforms may be distorted and
+have decreased amplitude. The background will be higher. Noise may increase
+or decrease depending upon how coherent it is across sites.
 
 _fin_
 
