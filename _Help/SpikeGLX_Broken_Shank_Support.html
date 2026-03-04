@@ -24,11 +24,12 @@
 <li><a href="#updated-programming">Updated Programming</a></li>
 <li><a href="#survey-mode">Survey Mode</a></li>
 </ul></li>
-<li><a href="#quad-base-file-saving">Quad-base File Saving</a></li>
-<li><a href="#pitfalls-and-caveats">Pitfalls and Caveats</a>
+<li><a href="#quad-base-file-saving">Quad-Base File Saving</a></li>
+<li><a href="#pitfalls-and-caveats-non-quad-base">Pitfalls and Caveats (Non-Quad-Base)</a>
 <ul>
 <li><a href="#undetected-errors">Undetected Errors</a></li>
 <li><a href="#reference-noise">Reference Noise</a></li>
+<li><a href="#electrode-mixing">Electrode Mixing</a></li>
 </ul></li>
 </ul>
 <h1 id="shift-register-errors">Shift Register Errors</h1>
@@ -81,7 +82,7 @@ Push A: -&gt;| A |-&gt;| B |-&gt;| C |-&gt; collected {X Y Z}</code></pre>
 <p><em>For those writing their own survey analysis code: The survey bank-transition metadata item <code>~svySBTT</code> gets a prepended element giving the starting (shank,bank) for the survey, which can no longer be assumed to be (0,0).</em></p>
 </blockquote>
 <hr />
-<h2 id="quad-base-file-saving">Quad-base File Saving</h2>
+<h2 id="quad-base-file-saving">Quad-Base File Saving</h2>
 <p>With QB probes you must acquire 384 channels from each shank since the probe hardware acts like four single-shank probes. Therefore, you must select sites on each shank whether good or bad.</p>
 <p>On the other hand, you do not have to save bad shanks to runtime binary files. To exclude channels on bad shanks follow these steps in the IMRO editor:</p>
 <ol style="list-style-type: decimal">
@@ -94,13 +95,17 @@ Push A: -&gt;| A |-&gt;| B |-&gt;| C |-&gt; collected {X Y Z}</code></pre>
 <li>Save the IMRO file for the next run.</li>
 </ol>
 <hr />
-<h2 id="pitfalls-and-caveats">Pitfalls and Caveats</h2>
+<h2 id="pitfalls-and-caveats-non-quad-base">Pitfalls and Caveats (Non-Quad-Base)</h2>
+<p>Note that QB probes are actually four complete single-shank probes packaged together. When one or more of these shanks break the others are fully intact.</p>
+<p>However, the 4 shanks of a standard 2.0 probe share the same base electronics and the four shanks are cross-connected to allow flexible configuration. When one of these shanks is malfunctioning it can affect the whole probe as detailed below.</p>
 <h3 id="undetected-errors">Undetected Errors</h3>
 <p>On the probe ASIC (base) there are shank SR-chains, and there are base SR-chains that handle other key probe settings. In order to run a probe with damaged shank SR-chains we must disable <strong>all</strong> SR error checking in the writeConfiguration() call. If any error occurs while programming either the good shank SR-chains or the base SR-chains it will not be reported.</p>
 <p>When a probe has sustained damage, understand that the damage could be more extensive than you think. The permissive policy allows you to run, but can no longer guarantee the data are free from error.</p>
 <h3 id="reference-noise">Reference Noise</h3>
 <p>SpikeGLX will guide you to make electrode and reference selections on the good shanks. However, the bad shanks have some influence on the quality of the reference. The shanks contain switches to connect the various ref sources onto the reference lines to the differential amplifiers. So, for example, join tips works by closing a tip switch on each of the shanks. However, on the bad shanks, we are no longer able to control those switches. So regardless of the desired/set referencing mode, the bad shanks could be coupling in unmanaged external or tip sources.</p>
 <p>Expect noise pollution in the reference. This may vary in an uncontrolled way from run to run.</p>
+<h3 id="electrode-mixing">Electrode Mixing</h3>
+<p>Even though the software guides you to select electrode sites only on the good shanks, there is no way of knowing if site selection switches on the bad shanks are connecting any of those sites to the readout channels. So one or more readout channels may be superpositions of desired sites and other sites on the broken shanks. That can have several affects. The units may not be where you think they are. Unit waveforms may be distorted and have decreased amplitude. The background will be higher. Noise may increase or decrease depending upon how coherent it is across sites.</p>
 <p><em>fin</em></p>
 </body>
 </html>
