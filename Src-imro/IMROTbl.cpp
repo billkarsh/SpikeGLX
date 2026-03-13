@@ -243,6 +243,11 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 break;
             case 1032:  // NHP phase 2 (active) 45 mm, SOI115 / 125 linear, cap
             case 1033:  // NHP phase 2 (active) 45 mm, SOI115 / 125 linear sterilized, cap
+            case 1040:  // Neuropixels 1.0 NHP MAX long, tube underneath shank, linear, probe with silicon cap, 35 um shank thickness
+            case 1041:  // Neuropixels 1.0 NHP MAX long, tube underneath shank, linear, probe with 1.0 metal cap, 35 um shank thickness
+            case 1042:  // Neuropixels 1.0 NHP MAX long, tube underneath shank, linear, probe with 2.0 metal cap, 35 um shank thickness
+            case 1050:  // Neuropixels 1.0 NHP MAX long, tube around shank, linear, probe with 1.0 metal cap
+            case 1051:  // Neuropixels 1.0 NHP MAX long, tube around shank, linear, probe with 2.0 metal cap
                 _ncolhwr    = 2;
                 _ncolvis    = 2;
                 _col2vis_ev = {0,1};
@@ -1168,6 +1173,11 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
             case 1031:  // NHP phase 2 (active) 45 mm, SOI125 el 4416
             case 1032:  // NHP phase 2 (active) 45 mm, SOI115 / 125 linear, cap
             case 1033:  // NHP phase 2 (active) 45 mm, SOI115 / 125 linear sterilized, cap
+            case 1040:  // Neuropixels 1.0 NHP MAX long, tube underneath shank, linear, probe with silicon cap, 35 um shank thickness
+            case 1041:  // Neuropixels 1.0 NHP MAX long, tube underneath shank, linear, probe with 1.0 metal cap, 35 um shank thickness
+            case 1042:  // Neuropixels 1.0 NHP MAX long, tube underneath shank, linear, probe with 2.0 metal cap, 35 um shank thickness
+            case 1050:  // Neuropixels 1.0 NHP MAX long, tube around shank, linear, probe with 1.0 metal cap
+            case 1051:  // Neuropixels 1.0 NHP MAX long, tube around shank, linear, probe with 2.0 metal cap
                 type = 1030;
                 supp = true;
                 break;
@@ -1295,6 +1305,11 @@ IMROTbl* IMROTbl::alloc( const QString &pn )
             case 1031:  // NHP phase 2 (active) 45 mm, SOI125 el 4416
             case 1032:  // NHP phase 2 (active) 45 mm, SOI115 / 125 linear, cap
             case 1033:  // NHP phase 2 (active) 45 mm, SOI115 / 125 linear sterilized, cap
+            case 1040:  // Neuropixels 1.0 NHP MAX long, tube underneath shank, linear, probe with silicon cap, 35 um shank thickness
+            case 1041:  // Neuropixels 1.0 NHP MAX long, tube underneath shank, linear, probe with 1.0 metal cap, 35 um shank thickness
+            case 1042:  // Neuropixels 1.0 NHP MAX long, tube underneath shank, linear, probe with 2.0 metal cap, 35 um shank thickness
+            case 1050:  // Neuropixels 1.0 NHP MAX long, tube around shank, linear, probe with 1.0 metal cap
+            case 1051:  // Neuropixels 1.0 NHP MAX long, tube around shank, linear, probe with 2.0 metal cap
                 return new IMROTbl_T1030( pn );
             case 1100:  // UHD phase 1 el 384
                 return new IMROTbl_T1100( pn );

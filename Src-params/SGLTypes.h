@@ -2,22 +2,15 @@
 #define SGLTYPES_H
 
 #include <qglobal.h>
-#include <limits>
 #include <vector>
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-#ifdef _MSC_VER
-#define UNSET64 _LLONG_MAX
-#else
 #define UNSET64 std::numeric_limits<qint64>::max()
-#endif
-
 
 typedef std::vector<qint16> vec_i16;
-
 
 struct VRange {
     double  rmin,

@@ -720,13 +720,16 @@ versions distributed around Janelia and elsewhere.
 // QT VERSIONS for SpikeGLX
 // ==========================
 
-Phase3A and earlier: Qt 5.3.2  MinGW 4.8.2  32bit.
-Phase3B1:            Qt 5.10.1 MinGW 5.3.0  32bit.
-Phase3B2:            Qt 5.12.0 MinGW 7.3.0  64bit.
-Phase20:             Qt 5.12.0 MinGW 7.3.0  64bit.
-Phase30 (build):     Qt 5.12.0 MinGW 7.3.0  64bit.
-Phase30 (tested):    Qt 5.15.1 MinGW 8.1.0  64bit.
-API4    (build):     Qt 6.9.1  MinGW 13.1.0 64bit.
+Phase3A and earlier: Qt 5.3.2  MinGW 4.8.2   32bit.
+Phase3B1:            Qt 5.10.1 MinGW 5.3.0   32bit.
+Phase3B2:            Qt 5.12.0 MinGW 7.3.0   64bit.
+Phase20:             Qt 5.12.0 MinGW 7.3.0   64bit.
+Phase30 (build):     Qt 5.12.0 MinGW 7.3.0   64bit.
+Phase30 (tested):    Qt 5.15.1 MinGW 8.1.0   64bit.
+API4    (build):     Qt 6.9.1  MinGW 13.1.0  64bit.
+API4    (tested):    Qt 6.9.3  MinGW 13.1.0  64bit.
+API4    (tested):    Qt 6.10.2 MinGW 13.1.0  64bit.
+API4    (tested):    Qt 6.10.2 MSVC  2026-18 64bit.
 
 
 // LOOSE ENDS

@@ -81,9 +81,15 @@ for(dir, SRC_SGLX) {
 
 # 3rd party
 win32 {
-    SRC_ALIEN = \
-        RtAudio \
-        Samplerate
+    win32-g++ {
+        SRC_ALIEN = \
+            RtAudio \
+            Samplerate
+    }
+    else {
+        SRC_ALIEN = \
+            RtAudio
+    }
     for(dir, SRC_ALIEN) {
         INCLUDEPATH += $$PWD/$$dir
         include($$dir/$$dir".pri")

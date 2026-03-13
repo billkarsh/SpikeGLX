@@ -7,11 +7,11 @@
 #include <QJsonObject>
 #include <QSettings>
 
-#define FTAB    "C:/Users/labadmin/Desktop/ProbeTable/2025_02_20_Probe_feature_table_tab.txt"
+#define FTAB    "C:/Users/labadmin/Desktop/ProbeTable/2025_12_10_Probe_feature_table_tab.txt"
 #define FINI    "C:/Users/labadmin/Desktop/ProbeTable/probe_features.ini"
 #define FJ2I    "C:/Users/labadmin/Desktop/ProbeTable/probe_features_j2i.ini"
 #define FJSN    "C:/Users/labadmin/Desktop/ProbeTable/probe_features.json"
-#define VERS    "1.5"
+#define VERS    "1.6"
 
 /* ---------------------------------------------------------------- */
 /* CProbeTbl ------------------------------------------------------ */
@@ -24,7 +24,7 @@ void CProbeTbl::ss2ini()
     fi.open( QIODevice::ReadOnly | QIODevice::Text );
 
 // SS cols = ini keys
-    QString hdr = fi.readLine().toLower();
+    QString hdr = fi.readLine().toLower().trimmed();
     hdr.replace( "/ leaflet", "" );
     hdr.replace( " (y/n)", "" );
     hdr.replace( "�", "u" );
@@ -137,26 +137,6 @@ void CProbeTbl::extini()
         S.endGroup();
     }
 
-    {
-        // Duplicate group: [NP3021] -> [NP3022]
-
-        QMap<QString,QVariant>  P;
-
-        S.beginGroup( "NP3021" );
-            foreach( const QString &key, S.childKeys() )
-                P[key] = S.value( key );
-        S.endGroup();
-
-        QMap<QString,QVariant>::const_iterator
-            it, end = P.end();
-
-        S.beginGroup( "NP3022" );
-            for( it = P.begin(); it != end; ++it )
-                S.setValue( it.key(), it.value() );
-            S.setValue( "description", "Neuropixels NXT pre-alpha multishank metal cap" );
-        S.endGroup();
-    }
-
 // Insert lf_sample_frequency_hz
 
     foreach( const QString &grp, S.childGroups() ) {
@@ -179,6 +159,7 @@ void CProbeTbl::extini()
             slen = 25000;
         }
         if( desc.contains( "NHP LONG", Qt::CaseInsensitive ) ||
+            desc.contains( "NHP MAX", Qt::CaseInsensitive )  ||
             desc.contains( "45mm", Qt::CaseInsensitive ) ) {
             slen = 45000;
         }

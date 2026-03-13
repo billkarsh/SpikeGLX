@@ -18,8 +18,8 @@
 
 #ifdef Q_OS_WIN
     #include <QDir>
-    #include <GL/gl.h>
     #include <windows.h>
+    #include <GL/gl.h>
 #elif defined(Q_WS_X11)
     #include <GL/gl.h>
     #include <GL/glx.h>
