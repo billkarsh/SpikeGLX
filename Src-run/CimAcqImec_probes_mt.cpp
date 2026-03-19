@@ -360,12 +360,12 @@ bool ImCfgWorker::_mt_setLEDs( const CimCfg::ImProbeDat &P )
 bool ImCfgWorker::_mt_selectElectrodes( const CimCfg::ImProbeDat &P )
 {
     NP_ErrorCode    err = NP_ErrorCode(acq->p.im.prbj[P.ip].roTbl->
-                            selectSites( P.slot, P.port, P.dock, false, true ));
+                            selectSites4( P.slot, P.port, P.dock, false, true ));
 
     if( err != SUCCESS ) {
         shr.seterror(
             QString(
-            "IMEC selectSites(slot %1, port %2, dock %3)%4")
+            "IMEC selectSites4(slot %1, port %2, dock %3)%4")
             .arg( P.slot ).arg( P.port ).arg( P.dock )
             .arg( acq->makeErrorString( err ) ) );
         return false;
@@ -378,12 +378,12 @@ bool ImCfgWorker::_mt_selectElectrodes( const CimCfg::ImProbeDat &P )
 bool ImCfgWorker::_mt_selectReferences( const CimCfg::ImProbeDat &P )
 {
     NP_ErrorCode    err = NP_ErrorCode(acq->p.im.prbj[P.ip].roTbl->
-                            selectRefs( P.slot, P.port, P.dock ));
+                            selectRefs4( P.slot, P.port, P.dock ));
 
     if( err != SUCCESS ) {
         shr.seterror(
             QString(
-            "IMEC selectRefs(slot %1, port %2, dock %3)%4")
+            "IMEC selectRefs4(slot %1, port %2, dock %3)%4")
             .arg( P.slot ).arg( P.port ).arg( P.dock )
             .arg( acq->makeErrorString( err ) ) );
         return false;
@@ -396,11 +396,11 @@ bool ImCfgWorker::_mt_selectReferences( const CimCfg::ImProbeDat &P )
 bool ImCfgWorker::_mt_selectGains( const CimCfg::ImProbeDat &P )
 {
     NP_ErrorCode    err = NP_ErrorCode(acq->p.im.prbj[P.ip].roTbl->
-                            selectGains( P.slot, P.port, P.dock ));
+                            selectGains4( P.slot, P.port, P.dock ));
 
     if( err != SUCCESS ) {
         shr.seterror(
-            QString("IMEC selectGains(slot %1, port %2, dock %3)%4")
+            QString("IMEC selectGains4(slot %1, port %2, dock %3)%4")
             .arg( P.slot ).arg( P.port ).arg( P.dock )
             .arg( acq->makeErrorString( err ) ) );
         return false;
@@ -413,12 +413,12 @@ bool ImCfgWorker::_mt_selectGains( const CimCfg::ImProbeDat &P )
 bool ImCfgWorker::_mt_selectAPFiltes( const CimCfg::ImProbeDat &P )
 {
     NP_ErrorCode    err = NP_ErrorCode(acq->p.im.prbj[P.ip].roTbl->
-                            selectAPFlts( P.slot, P.port, P.dock ));
+                            selectAPFlts4( P.slot, P.port, P.dock ));
 
     if( err != SUCCESS ) {
         shr.seterror(
             QString(
-            "IMEC selectAPFlts(slot %1, port %2, dock %3)%4")
+            "IMEC selectAPFlts4(slot %1, port %2, dock %3)%4")
             .arg( P.slot ).arg( P.port ).arg( P.dock )
             .arg( acq->makeErrorString( err ) ) );
         return false;

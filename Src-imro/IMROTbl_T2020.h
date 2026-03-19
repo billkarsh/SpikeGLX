@@ -121,8 +121,8 @@ struct IMROTbl_T2020 : public IMROTbl
 
 // Hardware
 
-    virtual int selectGains( int, int, int ) const  {return 0;}
-    virtual int selectAPFlts( int, int, int ) const {return 0;}
+    virtual int selectGains4( int, int, int ) const  {return 0;}
+    virtual int selectAPFlts4( int, int, int ) const {return 0;}
 
 // Edit
 

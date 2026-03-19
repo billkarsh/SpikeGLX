@@ -30,6 +30,7 @@ HEADERS += \
     $$PWD/IMROTbl_T3010base.h \
     $$PWD/IMROTbl_T3020.h \
     $$PWD/IMROTbl_T3020base.h \
+    $$PWD/IMROTbl_T3022.h \
     $$PWD/IMROTbl_T3A.h \
     $$PWD/ProbeTable.h
 

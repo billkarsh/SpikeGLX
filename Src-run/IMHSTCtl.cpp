@@ -215,8 +215,8 @@ bool IMHSTCtl::okVersions()
         write( "ERROR: Wrong IMEC Firmware Version(s) ---" );
         foreach( const QString &s, bs_bsc )
             write( s );
-        write("(1) Select menu item 'Tools/Update Imec PXIe Firmware'.");
-        write("(2) Read the help for that dialog.");
+        write( "(1) Select menu item 'Tools/Update Imec PXIe Firmware'." );
+        write( "(2) Read the help for that dialog." );
         return false;
     }
 

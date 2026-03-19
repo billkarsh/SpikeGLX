@@ -331,7 +331,7 @@ void IMROTbl_T21base::muxTable( int &nADC, int &nGrp, std::vector<int> &T ) cons
 
 // This method connects multiple electrodes per channel.
 //
-int IMROTbl_T21base::selectSites(
+int IMROTbl_T21base::selectSites4(
     int     slot,
     int     port,
     int     dock,

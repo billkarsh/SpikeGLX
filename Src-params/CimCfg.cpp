@@ -2405,7 +2405,7 @@ guiBreathe();
         // ----------------------------------
 
 #if 0
-        if( T.slot2Vers[P.slot].bsctech == t_tech_nxt ) {
+        if( T.slot2Vers[P.slot].bsctech == t_tech_nxt_pa ) {
 
             HardwareID  H;
             np_closeBS( P.slot );

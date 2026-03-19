@@ -271,12 +271,12 @@ bool CimAcqImec::_1t_setLEDs( const CimCfg::ImProbeDat &P )
 bool CimAcqImec::_1t_selectElectrodes( const CimCfg::ImProbeDat &P )
 {
     NP_ErrorCode    err = NP_ErrorCode(p.im.prbj[P.ip].roTbl->
-                            selectSites( P.slot, P.port, P.dock, false, true ));
+                            selectSites4( P.slot, P.port, P.dock, false, true ));
 
     if( err != SUCCESS ) {
         runError(
             QString(
-            "IMEC selectSites(slot %1, port %2, dock %3)%4")
+            "IMEC selectSites4(slot %1, port %2, dock %3)%4")
             .arg( P.slot ).arg( P.port ).arg( P.dock )
             .arg( makeErrorString( err ) ) );
         return false;
@@ -289,12 +289,12 @@ bool CimAcqImec::_1t_selectElectrodes( const CimCfg::ImProbeDat &P )
 bool CimAcqImec::_1t_selectReferences( const CimCfg::ImProbeDat &P )
 {
     NP_ErrorCode    err = NP_ErrorCode(p.im.prbj[P.ip].roTbl->
-                            selectRefs( P.slot, P.port, P.dock ));
+                            selectRefs4( P.slot, P.port, P.dock ));
 
     if( err != SUCCESS ) {
         runError(
             QString(
-            "IMEC selectRefs(slot %1, port %2, dock %3)%4")
+            "IMEC selectRefs4(slot %1, port %2, dock %3)%4")
             .arg( P.slot ).arg( P.port ).arg( P.dock )
             .arg( makeErrorString( err ) ) );
         return false;
@@ -307,11 +307,11 @@ bool CimAcqImec::_1t_selectReferences( const CimCfg::ImProbeDat &P )
 bool CimAcqImec::_1t_selectGains( const CimCfg::ImProbeDat &P )
 {
     NP_ErrorCode    err = NP_ErrorCode(p.im.prbj[P.ip].roTbl->
-                            selectGains( P.slot, P.port, P.dock ));
+                            selectGains4( P.slot, P.port, P.dock ));
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC selectGains(slot %1, port %2, dock %3)%4")
+            QString("IMEC selectGains4(slot %1, port %2, dock %3)%4")
             .arg( P.slot ).arg( P.port ).arg( P.dock )
             .arg( makeErrorString( err ) ) );
         return false;
@@ -324,12 +324,12 @@ bool CimAcqImec::_1t_selectGains( const CimCfg::ImProbeDat &P )
 bool CimAcqImec::_1t_selectAPFilters( const CimCfg::ImProbeDat &P )
 {
     NP_ErrorCode    err = NP_ErrorCode(p.im.prbj[P.ip].roTbl->
-                            selectAPFlts( P.slot, P.port, P.dock ));
+                            selectAPFlts4( P.slot, P.port, P.dock ));
 
     if( err != SUCCESS ) {
         runError(
             QString(
-            "IMEC selectAPFlts(slot %1, port %2, dock %3)%4")
+            "IMEC selectAPFlts4(slot %1, port %2, dock %3)%4")
             .arg( P.slot ).arg( P.port ).arg( P.dock )
             .arg( makeErrorString( err ) ) );
         return false;

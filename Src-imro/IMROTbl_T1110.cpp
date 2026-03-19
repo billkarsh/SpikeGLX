@@ -442,7 +442,7 @@ void IMROTbl_T1110::muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const
 /* Hardware ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-int IMROTbl_T1110::selectSites(
+int IMROTbl_T1110::selectSites4(
     int     slot,
     int     port,
     int     dock,
@@ -490,7 +490,7 @@ int IMROTbl_T1110::selectSites(
 }
 
 
-int IMROTbl_T1110::selectRefs( int slot, int port, int dock ) const
+int IMROTbl_T1110::selectRefs4( int slot, int port, int dock ) const
 {
 #ifdef HAVE_IMEC
 // -----------------------------
@@ -514,7 +514,7 @@ int IMROTbl_T1110::selectRefs( int slot, int port, int dock ) const
 
 #if 1
 // True gain setter
-int IMROTbl_T1110::selectGains( int slot, int port, int dock ) const
+int IMROTbl_T1110::selectGains4( int slot, int port, int dock ) const
 {
 #ifdef HAVE_IMEC
 // -------------------------
@@ -562,7 +562,7 @@ int IMROTbl_T1110::selectGains( int slot, int port, int dock ) const
 
 #if 0
 // Experiment setting gain by row or col
-int IMROTbl_T1110::selectGains( int slot, int port, int dock ) const
+int IMROTbl_T1110::selectGains4( int slot, int port, int dock ) const
 {
 #ifdef HAVE_IMEC
 
@@ -584,7 +584,7 @@ int IMROTbl_T1110::selectGains( int slot, int port, int dock ) const
 #endif
 
 
-int IMROTbl_T1110::selectAPFlts( int slot, int port, int dock ) const
+int IMROTbl_T1110::selectAPFlts4( int slot, int port, int dock ) const
 {
 #ifdef HAVE_IMEC
 // -------------------------

@@ -15,25 +15,26 @@ class QBitArray;
 /* ---------------------------------------------------------------- */
 
 enum T_probe_tech {
-    t_tech_sim  = 0,
-    t_tech_std  = 1,
-    t_tech_qb   = 2,
-    t_tech_opto = 20,
-    t_tech_nxt  = 30
+    t_tech_sim      = 0,
+    t_tech_std      = 1,
+    t_tech_qb       = 2,
+    t_tech_opto     = 20,
+    t_tech_nxt_ppa  = 30,
+    t_tech_nxt_pa   = 31
 };
 
 enum T_probe_mapping {
-    t_map_np1   = 0,
-    t_map_np2ss = 1,
-    t_map_np2ms = 2,
-    t_map_uhd   = 3
+    t_map_np1       = 0,
+    t_map_np2ss     = 1,
+    t_map_np2ms     = 2,
+    t_map_uhd       = 3
 };
 
 enum T_probe_fetch {
-    t_fetch_np1 = 0,
-    t_fetch_np2 = 2,
-    t_fetch_qb  = 4,
-    t_fetch_obx = 9
+    t_fetch_np1     = 0,
+    t_fetch_np2     = 2,
+    t_fetch_qb      = 4,
+    t_fetch_obx     = 9
 };
 
 #define IMRO_ROI_MAX    16
@@ -208,15 +209,15 @@ public:
 
 // Hardware
 
-    virtual int selectSites(
+    virtual int selectSites4(
         int     slot,
         int     port,
         int     dock,
         bool    write,
         bool    check ) const;
-    virtual int selectRefs( int slot, int port, int dock ) const;
-    virtual int selectGains( int slot, int port, int dock ) const;
-    virtual int selectAPFlts( int slot, int port, int dock ) const;
+    virtual int selectRefs4( int slot, int port, int dock ) const;
+    virtual int selectGains4( int slot, int port, int dock ) const;
+    virtual int selectAPFlts4( int slot, int port, int dock ) const;
 
 // Edit
 

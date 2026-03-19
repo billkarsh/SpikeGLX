@@ -138,7 +138,7 @@ struct IMROTbl_T3A : public IMROTbl
 
 // Hardware
 
-    virtual int selectAPFlts( int, int, int ) const {return 0;}
+    virtual int selectAPFlts4( int, int, int ) const {return 0;}
 
 // Edit
 

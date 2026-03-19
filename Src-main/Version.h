@@ -11,8 +11,8 @@
 #define VERS_PXI_OPTO_BS        "3.0.196"
 #define VERS_PXI_OPTO_BSC       "4.0.17"
 
-#define VERS_PXI_NXT_BS         "3.0.196"
-#define VERS_PXI_NXT_BSC        "4.0.216"
+#define VERS_PXI_NXT_PA_BS      "3.0.196"
+#define VERS_PXI_NXT_PA_BSC     "4.0.216"
 
 #endif  // VERSION_H
 

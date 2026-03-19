@@ -139,15 +139,15 @@ struct IMROTbl_T1110 : public IMROTbl
 
 // Hardware
 
-    virtual int selectSites(
+    virtual int selectSites4(
         int     slot,
         int     port,
         int     dock,
         bool    write,
         bool    check ) const;
-    virtual int selectRefs( int slot, int port, int dock ) const;
-    virtual int selectGains( int slot, int port, int dock ) const;
-    virtual int selectAPFlts( int slot, int port, int dock ) const;
+    virtual int selectRefs4( int slot, int port, int dock ) const;
+    virtual int selectGains4( int slot, int port, int dock ) const;
+    virtual int selectAPFlts4( int slot, int port, int dock ) const;
 
 // Edit
 
