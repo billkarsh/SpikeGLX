@@ -981,7 +981,7 @@ void IMROTbl::edit_tbl2ROI( tImroROIs vR ) const
     toShankMap_hwr( M );
     std::sort( M.e.begin(), M.e.end() );    // s->r->c
 
-    for( int ie = 0, ne = M.e.size(); ie < ne; ) {
+    for( int ie = 0, ne = (int)M.e.size(); ie < ne; ) {
 
         // Start pat0 and box row-range
         ShankMapDesc    &B0     = M.e[ie++];
@@ -1064,7 +1064,7 @@ void IMROTbl::edit_exclude( tImroSites vX, tconstImroROIs vR ) const
 {
     vX.clear();
 
-    for( int ib = 0, nb = vR.size(); ib < nb; ++ib ) {
+    for( int ib = 0, nb = (int)vR.size(); ib < nb; ++ib ) {
 
         const IMRO_ROI  &B = vR[ib];
 
@@ -1087,7 +1087,7 @@ void IMROTbl::edit_ROI2Bits( QBitArray &b, tconstImroROIs vR ) const
     b.clear();
     b.resize( nAP() );
 
-    for( int ib = 0, nb = vR.size(); ib < nb; ++ib ) {
+    for( int ib = 0, nb = (int)vR.size(); ib < nb; ++ib ) {
 
         const IMRO_ROI  &B = vR[ib];
 

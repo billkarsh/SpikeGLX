@@ -453,7 +453,7 @@ void IMROTbl_T24base::edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
     if( joinTips )
         refIdx = tip0;
 
-    for( int ib = 0, nb = vR.size(); ib < nb; ++ib ) {
+    for( int ib = 0, nb = (int)vR.size(); ib < nb; ++ib ) {
 
         const IMRO_ROI  &B = vR[ib];
 

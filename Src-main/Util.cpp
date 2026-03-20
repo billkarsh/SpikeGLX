@@ -547,7 +547,7 @@ qint64 readThreaded(
             fofffinal   = foffstart + bytes,
             doffset     = 0,
             nread;
-    int     nT          = vF.size();
+    int     nT          = (int)vF.size();
 
     nread = bytes / nT;
     --nT;

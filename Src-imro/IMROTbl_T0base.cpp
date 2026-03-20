@@ -449,7 +449,7 @@ void IMROTbl_T0base::edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
     e.clear();
     e.resize( nAP() );
 
-    for( int ib = 0, nb = vR.size(); ib < nb; ++ib ) {
+    for( int ib = 0, nb = (int)vR.size(); ib < nb; ++ib ) {
 
         const IMRO_ROI  &B = vR[ib];
 

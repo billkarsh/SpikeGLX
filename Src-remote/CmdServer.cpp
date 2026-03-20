@@ -1062,7 +1062,7 @@ void CmdWorker::fetch( const QStringList &toks )
             return;
         }
 
-        size = data.size();
+        size = (int)data.size();
 
         if( size )
             break;
@@ -1103,7 +1103,7 @@ void CmdWorker::fetch( const QStringList &toks )
         if( dnsmp > 1 )
             Subset::downsample( data, data, nChans, dnsmp );
 
-        size = data.size();
+        size = (int)data.size();
     }
 
 // ----
@@ -1142,7 +1142,7 @@ void CmdWorker::getStreamShankMap( const QStringList &toks )
             return;
     }
 
-    ne = sm->e.size();
+    ne = (int)sm->e.size();
 
     SU.send(
         QString("SHANKMAP %1 %2 %3 %4\n")
