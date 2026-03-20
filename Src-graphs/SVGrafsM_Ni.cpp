@@ -389,7 +389,7 @@ void SVGrafsM_Ni::updateRHSFlags()
 
     const QBitArray &saveBits = p.ni.sns.saveBits;
 
-    for( int ic = 0, nC = ic2Y.size(); ic < nC; ++ic ) {
+    for( int ic = 0, nC = (int)ic2Y.size(); ic < nC; ++ic ) {
 
         MGraphY &Y = ic2Y[ic];
 

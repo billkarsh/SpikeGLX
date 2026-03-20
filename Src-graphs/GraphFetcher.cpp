@@ -18,7 +18,7 @@ void GFWorker::setStreams( const std::vector<GFStream> &gfs )
 
     this->gfs = gfs;
 
-    for( int is = 0, ns = gfs.size(); is < ns; ++is ) {
+    for( int is = 0, ns = (int)gfs.size(); is < ns; ++is ) {
 
         GFStream    &G = this->gfs[is];
 
@@ -42,7 +42,7 @@ void GFWorker::run()
 
             QMutexLocker    ml( &gfsMtx );
 
-            for( int is = 0, ns = gfs.size(); is < ns; ++is )
+            for( int is = 0, ns = (int)gfs.size(); is < ns; ++is )
                 fetch( gfs[is] );
         }
 

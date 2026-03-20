@@ -221,7 +221,7 @@ void MGraphX::setYSelByUsrChan( int usrChan )
     if( usrChan < 0 )
         return;
 
-    for( int i = 0, n = Y.size(); i < n; ++i ) {
+    for( int i = 0, n = (int)Y.size(); i < n; ++i ) {
 
         if( Y[i]->usrChan == usrChan ) {
             ySel = i;
@@ -501,7 +501,7 @@ void MGraph::paintGL()
     drawEvents();
     drawGrid();
 
-    int span = X->verts.size();
+    int span = (int)X->verts.size();
 
     if( span > 1 && X->Y.size() ) {
 
@@ -531,7 +531,7 @@ void MGraph::mouseMoveEvent( QMouseEvent *evt )
 {
     int ny;
 
-    if( X && (ny = X->Y.size()) ) {
+    if( X && (ny = (int)X->Y.size()) ) {
 
         double  x, y;
         int     iy = evtCoords( x, y, evt, ny );
@@ -548,7 +548,7 @@ void MGraph::mousePressEvent( QMouseEvent *evt )
 {
     int ny;
 
-    if( X && (ny = X->Y.size()) ) {
+    if( X && (ny = (int)X->Y.size()) ) {
 
         double  x, y;
         int     iy = evtCoords( x, y, evt, ny );
@@ -585,7 +585,7 @@ void MGraph::mouseDoubleClickEvent( QMouseEvent *evt )
 {
     int ny;
 
-    if( X && (ny = X->Y.size()) && (evt->buttons() & Qt::LeftButton) ) {
+    if( X && (ny = (int)X->Y.size()) && (evt->buttons() & Qt::LeftButton) ) {
 
         double  x, y;
         int     iy = evtCoords( x, y, evt, ny );
@@ -673,7 +673,7 @@ void MGraph::drawBaselines()
     int     clipHgt = height();
     float   yscl    = 2.0f / clipHgt;
 
-    for( int iy = 0, ny = X->Y.size(); iy < ny; ++iy ) {
+    for( int iy = 0, ny = (int)X->Y.size(); iy < ny; ++iy ) {
 
         if( X->Y[iy]->isDigType )
             continue;
@@ -787,7 +787,7 @@ void MGraph::drawLabels()
                     fontMid = ftHt / 2 - X->clipTop;
     float           offset  = (X->ypxPerGrf > 2.25f * ftHt ? 0.25f : 0.5f);
 
-    for( int iy = 0, ny = X->Y.size(); iy < ny; ++iy ) {
+    for( int iy = 0, ny = (int)X->Y.size(); iy < ny; ++iy ) {
 
         bool    isL = !X->Y[iy]->lhsLabel.isEmpty(),
                 isR = !X->Y[iy]->rhsLabel.isEmpty();
@@ -954,7 +954,7 @@ void MGraph::drawEvents()
     QMutexLocker    ml( &X->spanMtx );
 
     for( int clr = 0; clr < 4; ++clr )
-        sum += (nEv[clr] = X->evQ[clr].size());
+        sum += (nEv[clr] = (int)X->evQ[clr].size());
 
     if( !sum )
         return;
@@ -1180,7 +1180,7 @@ void MGraph::drawPointsMain()
 // Loop
 // ----
 
-    int ny      = X->Y.size(),
+    int ny      = (int)X->Y.size(),
         clipHgt = height();
 
     for( int iy = 0; iy < ny; ++iy ) {
@@ -1552,7 +1552,7 @@ void MGScroll::scrollTo( int y )
 
 void MGScroll::adjustLayout()
 {
-    int ny = theX->Y.size(),
+    int ny = (int)theX->Y.size(),
         vh = viewport()->height(),
         gh;
 

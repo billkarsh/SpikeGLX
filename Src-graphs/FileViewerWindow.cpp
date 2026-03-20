@@ -877,7 +877,7 @@ void FileViewerWindow::svyInit()
     sh2bkMax.clear();
 
     if( isSvy() ) {
-        for( int i = 0, n = SVY.e.size(); i < n; ++i ) {
+        for( int i = 0, n = (int)SVY.e.size(); i < n; ++i ) {
            const SvySBTT &E = SVY.e[i];
            sh2bkMax[E.s] = E.b;
         }
@@ -1210,14 +1210,14 @@ void FileViewerWindow::svyMenuExportHandler() const
             GeomMap GM;
             R->toGeomMap_snsFileChans( GM, df->fileChans(),
                 (fType == fvAP ? 0 : R->nAP()) );
-            for( int i = 0, n = shankMap->e.size(); i < n; ++i )
+            for( int i = 0, n = (int)shankMap->e.size(); i < n; ++i )
                 GM.e[i].u = shankMap->e[i].u;
             out->setParam( "~snsGeomMap", GM.toString() );
 
             if( df->getParam( "~snsShankMap" ).isValid() ) {
                 ShankMap    SM;
                 R->toShankMap_hwr( SM );
-                for( int i = 0, n = shankMap->e.size(); i < n; ++i )
+                for( int i = 0, n = (int)shankMap->e.size(); i < n; ++i )
                     SM.e[i].u = shankMap->e[i].u;
                 out->setParam( "~snsShankMap", SM.toString() );
             }
@@ -1585,7 +1585,7 @@ void FileViewerWindow::tbApplyAll()
     if( type < 2 )
         saveSettings();
 
-    for( int ig = 0, nG = grfParams.size(); ig < nG; ++ig ) {
+    for( int ig = 0, nG = (int)grfParams.size(); ig < nG; ++ig ) {
 
         if( ig != igSelected && grfY[ig].usrType == type ) {
 
@@ -1609,7 +1609,7 @@ static Ui::FVW_MapDialog*   mapUI;
 
 void FileViewerWindow::cmDefaultBut()
 {
-    int ne = chanMap->e.size();
+    int ne = (int)chanMap->e.size();
 
     for( int i = 0; i < ne; ++i )
         chanMap->e[i].order = i;
@@ -1639,7 +1639,7 @@ void FileViewerWindow::cmApplyBut()
     QMap<int,int>       nam2Idx;
     QMap<int,int>       ord2Idx;
     QRegularExpression  re(";(\\d+)");
-    int                 ne = chanMap->e.size();
+    int                 ne = (int)chanMap->e.size();
 
     for( int i = 0; i < ne; ++i ) {
 
@@ -2068,7 +2068,7 @@ void FileViewerWindow::channels_ShowAll()
 
     igMaximized = -1;
 
-    int nG = grfY.size();
+    int nG = (int)grfY.size();
 
     grfVisBits.fill( true, nG );
 
@@ -2090,7 +2090,7 @@ void FileViewerWindow::channels_HideAll()
 
     igMaximized = -1;
 
-    int nG = grfY.size();
+    int nG = (int)grfY.size();
 
     grfVisBits.fill( false, nG );
 
@@ -2118,7 +2118,7 @@ void FileViewerWindow::channels_Edit()
 // List shown channels
 
     QVector<uint>   chans;
-    int             nG = grfY.size();
+    int             nG = (int)grfY.size();
 
     for( int ig = 0; ig < nG; ++ig ) {
 
@@ -2268,7 +2268,7 @@ void FileViewerWindow::shankmap_Edit()
 
     QVector<uint>   chans;
 
-    for( int ig = 0, nG = grfY.size(); ig < nG; ++ig ) {
+    for( int ig = 0, nG = (int)grfY.size(); ig < nG; ++ig ) {
 
         if( !shankMap->e[ig].u )
             chans.push_back( ig2ic[ig] );
@@ -2330,7 +2330,7 @@ void FileViewerWindow::shankmap_Restore()
 
             ShankMap *SM = df->shankMap( false );
 
-            for( int i = 0, n = SM->e.size(); i < n; ++i )
+            for( int i = 0, n = (int)SM->e.size(); i < n; ++i )
                 shankMap->e[i].u = SM->e[i].u;
 
             delete SM;
@@ -2619,7 +2619,7 @@ void FileViewerWindow::layoutGraphs()
     if( igMaximized > -1 )
         theX->Y.push_back( &grfY[igMaximized] );
     else {
-        for( int is = 0, nG = grfY.size(); is < nG; ++is ) {
+        for( int is = 0, nG = (int)grfY.size(); is < nG; ++is ) {
 
             int ig = order2ig[is];
 
@@ -3008,7 +3008,7 @@ void FileViewerWindow::killActions()
 {
 // Remove submenus referencing actions
 
-    for( int im = 0, nM = chanSubMenus.size(); im < nM; ++im ) {
+    for( int im = 0, nM = (int)chanSubMenus.size(); im < nM; ++im ) {
 
         QAction *a = chanSubMenus[im]->menuAction();
         channelsMenu->removeAction( a );
@@ -3018,7 +3018,7 @@ void FileViewerWindow::killActions()
 
 // Delete the actions
 
-    for( int ig = 0, nG = grfY.size(); ig < nG; ++ig )
+    for( int ig = 0, nG = (int)grfY.size(); ig < nG; ++ig )
         delete grfActShowHide[ig];
 }
 
@@ -3028,7 +3028,7 @@ void FileViewerWindow::initGraphs()
     const IMROTbl   *R              = df->imro();
     MGraphX         *theX           = mscroll->theX;
     QMenu           *subMenu        = 0;
-    int             nG              = grfY.size(),
+    int             nG              = (int)grfY.size(),
                     igNewSubMenu    = 0,
                     nAP,
                     maxInt;
@@ -3251,7 +3251,7 @@ QString FileViewerWindow::nameGraph( int ig ) const
 
 void FileViewerWindow::hideGraph( int ig )
 {
-    int nG = grfY.size();
+    int nG = (int)grfY.size();
 
     if( ig < 0 || ig >= nG )
         return;
@@ -3390,7 +3390,7 @@ void FileViewerWindow::selectShankMap( qint64 pos )
 
 // Copy u-flags
 
-    for( int i = 0, n = SM->e.size(); i < n; ++i )
+    for( int i = 0, n = (int)SM->e.size(); i < n; ++i )
         SM->e[i].u = shankMap->e[i].u;
 
 // Install
@@ -4085,7 +4085,7 @@ bool FileViewerWindow::queryCloseOK()
 //
 FVOpen* FileViewerWindow::linkFindMe()
 {
-    for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
+    for( int iw = 0, nw = (int)vOpen.size(); iw < nw; ++iw ) {
 
         FVOpen  *W = &vOpen[iw];
 
@@ -4114,7 +4114,7 @@ FVOpen* FileViewerWindow::linkFindName(
 
     brief = runTag.brevname( fType, ip, suffix );
 
-    for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
+    for( int iw = 0, nw = (int)vOpen.size(); iw < nw; ++iw ) {
 
         FVOpen  *W = &vOpen[iw];
 
@@ -4158,7 +4158,7 @@ int FileViewerWindow::linkNSameRun( const FVOpen *me )
 
     if( me && !me->runTag.t.isEmpty() ) {
 
-        for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
+        for( int iw = 0, nw = (int)vOpen.size(); iw < nw; ++iw ) {
 
             if( vOpen[iw].runTag == me->runTag )
                 ++n;
@@ -4271,7 +4271,7 @@ void FileViewerWindow::linkSendPos( int fChanged )
     double  t0      = scanGrp->curTime(),
             tSpan   = sav.all.xSpan;
 
-    for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
+    for( int iw = 0, nw = (int)vOpen.size(); iw < nw; ++iw ) {
 
         FVOpen  *W = &vOpen[iw];
 
@@ -4304,7 +4304,7 @@ void FileViewerWindow::linkSendSel()
     else
         tL = tR = -1;
 
-    for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
+    for( int iw = 0, nw = (int)vOpen.size(); iw < nw; ++iw ) {
 
         FVOpen  *W = &vOpen[iw];
 
@@ -4327,7 +4327,7 @@ void FileViewerWindow::linkSendManualUpdate( bool manualUpdate )
     if( !linkIsLinked( me ) )
         return;
 
-    for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
+    for( int iw = 0, nw = (int)vOpen.size(); iw < nw; ++iw ) {
 
         FVOpen  *W = &vOpen[iw];
 
@@ -4352,7 +4352,7 @@ void FileViewerWindow::linkWhosOpen( FVLinkRec &L )
     L.obBits.fill( false, L.nOb );
     L.openNI = false;
 
-    for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
+    for( int iw = 0, nw = (int)vOpen.size(); iw < nw; ++iw ) {
 
         FVOpen  &W = vOpen[iw];
 
@@ -4554,7 +4554,7 @@ void FileViewerWindow::linkTile( FVLinkRec &L )
     if( L.openNI )
         vT.push_back( FVTile( linkFindName( L.runTag, -1, 3 )->fvw, 0 ) );
 
-    int nT = vT.size();
+    int nT = (int)vT.size();
 
     if( !nT )
         return;
@@ -4641,7 +4641,7 @@ void FileViewerWindow::linkStaticRestore( const DFRunTag &runTag )
 {
 // Send params
 
-    for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
+    for( int iw = 0, nw = (int)vOpen.size(); iw < nw; ++iw ) {
 
         FVOpen  &W = vOpen[iw];
 
@@ -4659,7 +4659,7 @@ void FileViewerWindow::linkStaticRestore( const DFRunTag &runTag )
 
     int nLinked = 0;
 
-    for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
+    for( int iw = 0, nw = (int)vOpen.size(); iw < nw; ++iw ) {
 
         FVOpen  &W = vOpen[iw];
 
@@ -4700,7 +4700,7 @@ void FileViewerWindow::linkMenuHandler()
 
         std::vector<FileViewerWindow*>  vClose;
 
-        for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
+        for( int iw = 0, nw = (int)vOpen.size(); iw < nw; ++iw ) {
 
             FVOpen  &W = vOpen[iw];
 
@@ -4729,7 +4729,7 @@ void FileViewerWindow::linkMenuHandler()
                 vClose.push_back( W.fvw );
         }
 
-        for( int ic = 0, nc = vClose.size(); ic < nc; ++ic )
+        for( int ic = 0, nc = (int)vClose.size(); ic < nc; ++ic )
             vClose[ic]->close();
     }
 

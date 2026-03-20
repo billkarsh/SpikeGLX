@@ -658,7 +658,7 @@ int ColorTTLCtl::eventsScanningThisStream(
             clr.push_back( i );
     }
 
-    return clr.size();
+    return (int)clr.size();
 }
 
 
@@ -963,7 +963,7 @@ void ColorTTLCtl::processEvents(
             dst = &A;
     }
 
-    for( int i = 0, ni = vClr.size(); i < ni; ++i ) {
+    for( int i = 0, ni = (int)vClr.size(); i < ni; ++i ) {
 
         int     clr     = vClr[i],
                 nextCt  = 0,

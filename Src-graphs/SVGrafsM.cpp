@@ -388,7 +388,7 @@ void SVGrafsM::showColorDialog()
 
     if( c.isValid() ) {
 
-        int iclr = theX->yColor.size();
+        int iclr = (int)theX->yColor.size();
 
         drawMtx.lock();
         theX->dataMtx.lock();
@@ -414,7 +414,7 @@ void SVGrafsM::applyAll()
 
     const MGraphY   &Y = ic2Y[selected];
 
-    for( int ic = 0, nC = ic2Y.size(); ic < nC; ++ic ) {
+    for( int ic = 0, nC = (int)ic2Y.size(); ic < nC; ++ic ) {
 
         if( ic2Y[ic].usrType == Y.usrType )
             ic2Y[ic].yscl = Y.yscl;
@@ -621,7 +621,7 @@ void SVGrafsM::initGraphs()
         nAP = R->nAP();
     }
 
-    for( int ic = 0, nC = ic2Y.size(); ic < nC; ++ic ) {
+    for( int ic = 0, nC = (int)ic2Y.size(); ic < nC; ++ic ) {
 
         MGraphY &Y = ic2Y[ic];
         int     idum;
@@ -672,7 +672,7 @@ void SVGrafsM::pageChange( int first, bool internUpdateTimes )
 
         theX->fixedNGrf = 0;
 
-        for( int ig = first, nG = ic2Y.size(); ig < nG; ++ig ) {
+        for( int ig = first, nG = (int)ic2Y.size(); ig < nG; ++ig ) {
 
             theX->Y.push_back( &ic2Y[ig2ic[ig]] );
 
@@ -737,7 +737,7 @@ void SVGrafsM::setGraphTimeSecs()
 //
 void SVGrafsM::update_ic2iy( int first )
 {
-    int nG  = ic2Y.size(),
+    int nG  = (int)ic2Y.size(),
         nY  = 0;
 
     ic2iy.fill( -1 );
