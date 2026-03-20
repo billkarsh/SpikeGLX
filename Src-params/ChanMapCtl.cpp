@@ -328,7 +328,7 @@ void ChanMapCtl::emptyTable()
 void ChanMapCtl::Mcur2table()
 {
     QTableWidget    *T = mapUI->tableWidget;
-    int             nr = Mcur->e.size();
+    int             nr = (int)Mcur->e.size();
 
     T->setRowCount( nr );
 
@@ -386,7 +386,7 @@ bool ChanMapCtl::table2Mcur()
         return false;
     }
 
-    int         nr      = Mcur->e.size(),
+    int         nr      = (int)Mcur->e.size(),
                 vMax    = Mcur->i16Count();
     QSet<int>   seen;
 
@@ -484,7 +484,7 @@ void ChanMapCtl::theseChansToTop( const QString &s )
     QMap<int,int>       nam2Idx;
     QMap<int,int>       ord2Idx;
     QRegularExpression  re(";(\\d+)");
-    int                 ne = Mcur->e.size();
+    int                 ne = (int)Mcur->e.size();
 
     for( int i = 0; i < ne; ++i ) {
 

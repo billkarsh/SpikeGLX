@@ -264,7 +264,7 @@ void ShankMapCtl::emptyTable()
 void ShankMapCtl::Mcur2table()
 {
     QTableWidget    *T = mapUI->tableWidget;
-    int             nr = Mcur->e.size();
+    int             nr = (int)Mcur->e.size();
 
     T->setRowCount( nr );
 
@@ -363,7 +363,7 @@ bool ShankMapCtl::table2Mcur()
         return false;
     }
 
-    int             nr = Mcur->e.size();
+    int             nr = (int)Mcur->e.size();
     QSet<QString>   seen;
 
     for( int i = 0; i < nr; ++i ) {

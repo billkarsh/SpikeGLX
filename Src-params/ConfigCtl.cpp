@@ -721,7 +721,7 @@ bool ConfigCtl::validIMROTbl( QString &err, CimCfg::PrbEach &E, int ip, bool srC
     QSet<int>   bad;
     R->toShankMap_hwr( S );
 
-    for( int ie = 0, ne = S.e.size(); ie < ne; ++ie ) {
+    for( int ie = 0, ne = (int)S.e.size(); ie < ne; ++ie ) {
         int shk = S.e[ie].s;
         if( !(P.sr_mask & (1 << shk)) )
             bad.insert( shk );

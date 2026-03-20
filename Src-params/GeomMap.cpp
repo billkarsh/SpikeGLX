@@ -90,7 +90,7 @@ void GeomMap::chanOrderFromMapIm( QString &s, int nLF ) const
     QString     s2;
     QTextStream tsAP( &s,  QIODevice::WriteOnly );
     QTextStream tsLF( &s2, QIODevice::WriteOnly );
-    int         nC = e.size(),
+    int         nC = (int)e.size(),
                 v;
 
 // first item
@@ -137,7 +137,7 @@ void GeomMap::revChanOrderFromMapIm( QString &s, int nLF ) const
     QString     s2;
     QTextStream tsAP( &s,  QIODevice::WriteOnly );
     QTextStream tsLF( &s2, QIODevice::WriteOnly );
-    int         nC = e.size(),
+    int         nC = (int)e.size(),
                 v;
 
 // first item
@@ -170,9 +170,7 @@ void GeomMap::inverseMap( QMap<GeomMapDesc,uint> &inv ) const
 {
     inv.clear();
 
-    int n = e.size();
-
-    for( int i = 0; i < n; ++i )
+    for( int i = 0, n = (int)e.size(); i < n; ++i )
         inv[e[i]] = i;
 }
 
@@ -189,7 +187,7 @@ QString GeomMap::toString() const
 {
     QString     s;
     QTextStream ts( &s, QIODevice::WriteOnly );
-    int         n = e.size();
+    int         n = (int)e.size();
 
     ts << "(" << pn << "," << ns << "," << ds << "," << wd << ")";
 

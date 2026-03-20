@@ -7,7 +7,6 @@
 #include "GeomMap.h"
 #include "Subset.h"
 #include "SignalBlocker.h"
-#include "Version.h"
 
 #ifdef HAVE_IMEC
 #include "IMEC/NeuropixAPI.h"
@@ -1786,6 +1785,7 @@ bool CimCfg::isBSSupported( int slot )
 void CimCfg::closeAllBS( bool report )
 {
 #ifdef HAVE_IMEC
+
     if( report ) {
         QString s = "Manually closing hardware; about 4 seconds...";
         Systray() << s;
