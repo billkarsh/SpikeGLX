@@ -38,7 +38,7 @@ void FVShankCtl_Ni::exportHeat( QFile *f, const double *val )
 
 // Overwrite active entries
 
-    for( int i = 0, n = smap->e.size(); i < n; ++i ) {
+    for( int i = 0, n = (int)smap->e.size(); i < n; ++i ) {
         const ShankMapDesc  &E = smap->e[i];
         if( E.u )
             T[ShankMapDesc(E.s,E.c,E.r,0)] = val[i];

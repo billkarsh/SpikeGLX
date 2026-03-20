@@ -77,7 +77,7 @@ void Anatomy::fillLegend( QTextEdit *leg ) const
     QMap<QString,QColor>    mlbl;
 
     rgnMtx.lock();
-        for( int i = 0, n = rgn.size(); i < n; ++i ) {
+        for( int i = 0, n = (int)rgn.size(); i < n; ++i ) {
             const AnatomyRgn   &R = rgn[i];
             mlbl[R.lbl] = QColor( R.r, R.g, R.b );
         }
@@ -116,10 +116,10 @@ void Anatomy::colorTraces( MGraphX *theX, std::vector<MGraphY> &vY, bool on )
         // Push unique rgn colors onto theX->yColor.
         // Assign anaclr to each rgn.
 
-        for( int ir = 0, nr = rgn.size(); ir < nr; ++ir ) {
+        for( int ir = 0, nr = (int)rgn.size(); ir < nr; ++ir ) {
 
             AnatomyRgn  &R = rgn[ir];
-            int         nc = theX->yColor.size();
+            int         nc = (int)theX->yColor.size();
             QColor      C( R.r, R.g, R.b );
 
             for( int ic = 0; ic < nc; ++ic ) {
@@ -136,7 +136,7 @@ next_rgn:;
 
         // Color each graph by its {shank,row}
 
-        for( int iy = 0, ny = vY.size(); iy < ny; ++iy ) {
+        for( int iy = 0, ny = (int)vY.size(); iy < ny; ++iy ) {
 
             MGraphY &Y = vY[iy];
 
@@ -153,7 +153,7 @@ next_rgn:;
         }
     }
     else {
-        for( int iy = 0, ny = vY.size(); iy < ny; ++iy )
+        for( int iy = 0, ny = (int)vY.size(); iy < ny; ++iy )
             vY[iy].anaclr = -1;
     }
 }

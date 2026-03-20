@@ -115,7 +115,7 @@ void ShankView::setImro( const IMROTbl *R, uint8_t sr_mask )
     vis_evn.assign( nC, 0 );
     vis_odd.assign( nC, 0 );
 
-    nC = col2vis_ev.size();
+    nC = (int)col2vis_ev.size();
     for( int ic = 0; ic < nC; ++ic ) {
         vis_evn[col2vis_ev[ic]] = 1;
         vis_odd[col2vis_od[ic]] = 1;
@@ -139,7 +139,7 @@ void ShankView::colorPads( const double *val, double rngMax )
     if( !smap )
         return;
 
-    for( int i = 0, ne = smap->e.size(); i < ne; ++i ) {
+    for( int i = 0, ne = (int)smap->e.size(); i < ne; ++i ) {
 
         if( !smap->e[i].u )
             continue;
@@ -347,7 +347,7 @@ void ShankView::resizePads()
         nc = smap->nc,
         nr = smap->nr,
         ng = ns*nc*nr,
-        ne = smap->e.size();
+        ne = (int)smap->e.size();
 
     shkWid = (VRGT-VLFT-2*ROIPX*(VRGT-VLFT)/w) / (ns + (ns-1)*SHKSEP);
 
@@ -453,7 +453,7 @@ void ShankView::resizePads()
 //
 void ShankView::drawAnatomy()
 {
-    int nA = vA.size();
+    int nA = (int)vA.size();
 
     if( !nA || !smap || !bnkRws )
         return;
@@ -610,7 +610,7 @@ void ShankView::drawGrid()
     glColorPointer( 3, GL_UNSIGNED_BYTE, 0, &vGclr[0] );
     glPolygonMode( GL_FRONT, GL_LINE );
     glVertexPointer( 2, GL_FLOAT, 0, &vG[0] );
-    glDrawArrays( GL_QUADS, 0, vG.size()/2 );
+    glDrawArrays( GL_QUADS, 0, (int)vG.size()/2 );
 
     glDisableClientState( GL_COLOR_ARRAY );
 }
@@ -626,7 +626,7 @@ void ShankView::drawPads()
     glColorPointer( 3, GL_UNSIGNED_BYTE, 0, &vRclr[0] );
     glPolygonMode( GL_FRONT, GL_FILL );
     glVertexPointer( 2, GL_FLOAT, 0, &vR[0] );
-    glDrawArrays( GL_QUADS, 0, vR.size()/2 );
+    glDrawArrays( GL_QUADS, 0, (int)vR.size()/2 );
 
     glDisableClientState( GL_COLOR_ARRAY );
 }
@@ -700,7 +700,7 @@ void ShankView::drawExcludes()
     if( !bnkRws )
         return;
 
-    int nx = vX.size();
+    int nx = (int)vX.size();
 
     if( !nx )
         return;
@@ -745,7 +745,7 @@ void ShankView::drawROIs()
     if( !bnkRws )
         return;
 
-    int nb = vROI.size();
+    int nb = (int)vROI.size();
 
     if( !nb )
         return;

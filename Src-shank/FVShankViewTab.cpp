@@ -546,7 +546,6 @@ void FVShankViewTab::makeWorldMap()
     ShankMap            *m = new ShankMap;
     int                 nC = R->nAP(),
                         ns = R->nSvyShank(),
-                        nb = 1 + f->svyMaxbank(),
                         ng = 0,
                         R0;
 

@@ -104,7 +104,7 @@ bool ShankEditTab::Click::selected( int c, int r )
 {
     sel_ib = -1;
 
-    for( int ib = 0, nb = se->vR.size(); ib < nb; ++ib ) {
+    for( int ib = 0, nb = (int)se->vR.size(); ib < nb; ++ib ) {
 
         const IMRO_ROI  &B = se->vR[ib];
 
@@ -150,7 +150,7 @@ void ShankEditTab::Click::sel_set_gap0( int sel_FLR )
 
 // Scan boxes
 
-    for( int ib = 0, nb = se->vR.size(); ib < nb; ++ib ) {
+    for( int ib = 0, nb = (int)se->vR.size(); ib < nb; ++ib ) {
 
         const IMRO_ROI  &B = se->vR[ib];
 
@@ -172,7 +172,7 @@ void ShankEditTab::Click::sel_set_gap0( int sel_FLR )
 
     const IMRO_ROI  &B = se->vR[sel_ib];
 
-    for( int ix = 0, nx = se->vX.size(); ix < nx; ++ix ) {
+    for( int ix = 0, nx = (int)se->vX.size(); ix < nx; ++ix ) {
 
         const IMRO_Site &S = se->vX[ix];
 
@@ -204,7 +204,7 @@ void ShankEditTab::Click::sel_set_gapLim( int sel_FLR )
 
 // Scan boxes
 
-    for( int ib = 0, nb = se->vR.size(); ib < nb; ++ib ) {
+    for( int ib = 0, nb = (int)se->vR.size(); ib < nb; ++ib ) {
 
         const IMRO_ROI  &B = se->vR[ib];
 
@@ -226,7 +226,7 @@ void ShankEditTab::Click::sel_set_gapLim( int sel_FLR )
 
     const IMRO_ROI  &B = se->vR[sel_ib];
 
-    for( int ix = 0, nx = se->vX.size(); ix < nx; ++ix ) {
+    for( int ix = 0, nx = (int)se->vX.size(); ix < nx; ++ix ) {
 
         const IMRO_Site &S = se->vX[ix];
 
@@ -272,7 +272,7 @@ void ShankEditTab::Click::where( int c )
     gap0    = 0;
     gapLim  = se->R->nRow();
 
-    for( int ib = 0, nb = vT.size(); ib < nb; ++ib ) {
+    for( int ib = 0, nb = (int)vT.size(); ib < nb; ++ib ) {
 
         const IMRO_ROI  &B = vT[ib];
 
@@ -309,7 +309,7 @@ void ShankEditTab::Click::where( int c )
 //
 void ShankEditTab::Click::buildTestBoxes( tImroROIs vT, int click_FLR, int h )
 {
-    for( int ib = 0, nb = se->vR.size(); ib < nb; ++ib ) {
+    for( int ib = 0, nb = (int)se->vR.size(); ib < nb; ++ib ) {
 
         const IMRO_ROI  &B = se->vR[ib];
 
@@ -328,7 +328,7 @@ void ShankEditTab::Click::buildTestBoxes( tImroROIs vT, int click_FLR, int h )
 
     int r0 = -1, nr = 0;
 
-    for( int ix = 0, nx = se->vX.size(); ix < nx; ++ix ) {
+    for( int ix = 0, nx = (int)se->vX.size(); ix < nx; ++ix ) {
 
         const IMRO_Site &S = se->vX[ix];
 
@@ -549,7 +549,7 @@ void ShankEditTab::gridClicked( int s, int c, int r, bool shift )
 
     if( shift ) {
 
-        for( int ib = 0, nb = vR.size(); ib < nb; ++ib ) {
+        for( int ib = 0, nb = (int)vR.size(); ib < nb; ++ib ) {
 
             IMRO_ROI    &B = vR[ib];
 
@@ -857,12 +857,12 @@ void ShankEditTab::initItems()
 
 // Reference
 
-    for( int i = 0, nr = G.refs.size(); i < nr; ++i )
+    for( int i = 0, nr = (int)G.refs.size(); i < nr; ++i )
         seTabUI->rfCB->addItem( G.refs[i] );
 
 // Gains, highpass
 
-    for( int i = 0, ng = G.gains.size(); i < ng; ++i ) {
+    for( int i = 0, ng = (int)G.gains.size(); i < ng; ++i ) {
         QString s = QString("%1").arg( G.gains[i] );
         seTabUI->apCB->addItem( s );
         seTabUI->lfCB->addItem( s );
@@ -997,7 +997,7 @@ void ShankEditTab::enableItems( bool enabled, bool clear )
 
 void ShankEditTab::clearShank( int s )
 {
-    for( int nb = vR.size(), ib = nb - 1; ib >= 0; --ib ) {
+    for( int nb = (int)vR.size(), ib = nb - 1; ib >= 0; --ib ) {
 
         if( s == vR[ib].s )
             vR.erase( vR.begin() + ib );
@@ -1100,7 +1100,7 @@ bool ShankEditTab::isFull( int s )
 void ShankEditTab::addBox( const IMRO_ROI &B )
 {
     vR.push_back( B );
-    updateAll( B.s, vR.size() - 1 );
+    updateAll( B.s, (int)vR.size() - 1 );
 }
 
 
@@ -1121,7 +1121,7 @@ void ShankEditTab::updateAll( int s, int ib )
 
 void ShankEditTab::updateSums( int s )
 {
-    int nb   = vR.size(),
+    int nb   = (int)vR.size(),
         wmax = R->nCol_hwr(),
         sum  = 0;
 
