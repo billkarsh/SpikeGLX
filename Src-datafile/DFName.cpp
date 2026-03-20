@@ -132,7 +132,7 @@ void DFRunTag::load_mip2ip1()
     QStringList pr      = smap.split(
                         QRegularExpression("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
                         Qt::SkipEmptyParts );
-    int         n       = pr.size();
+    int         n       = (int)pr.size();
     if( !n )
         return;
 

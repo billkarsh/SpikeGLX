@@ -221,7 +221,7 @@ samples_loop_again:;
 
             double  srcTAbs = vS[0].tAbs;
 
-            for( int is = vS.size() - 1; is > 0; --is ) {
+            for( int is = (int)vS.size() - 1; is > 0; --is ) {
 
                 SyncStream  &dst = vS[is];
 

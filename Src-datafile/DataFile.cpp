@@ -530,7 +530,7 @@ bool DataFile::openForExport(
 // --------
 
     sRate       = dfSrc.sRate;
-    nSavedChans = indicesOfSrcChans.size();
+    nSavedChans = (int)indicesOfSrcChans.size();
     trgStream   = dfSrc.trgStream;
     trgChan     = dfSrc.trgChan;
 

@@ -77,7 +77,7 @@ void AODevRtAudio::test1()
             Log() << "default " << info.isDefaultOutput;
             Log() << "format " << info.nativeFormats;
 
-            int n = info.sampleRates.size();
+            int n = (int)info.sampleRates.size();
 
             for( int k = 0; k < n; ++k )
                 Log() << info.sampleRates[k];

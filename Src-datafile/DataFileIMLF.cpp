@@ -138,7 +138,7 @@ ShankMap* DataFileIMLF::shankMap( bool forExport ) const
         GeomMap    *G = geomMap( false );
 
         if( G ) {
-            for( int ie = 0, ne = G->e.size(); ie < ne; ++ie )
+            for( int ie = 0, ne = (int)G->e.size(); ie < ne; ++ie )
                 shankMap->e[ie].u = G->e[ie].u;
             delete G;
         }
@@ -149,7 +149,7 @@ ShankMap* DataFileIMLF::shankMap( bool forExport ) const
 
                 S->fromString( it.value().toString() );
 
-                for( int ie = 0, ne = S->e.size(); ie < ne; ++ie )
+                for( int ie = 0, ne = (int)S->e.size(); ie < ne; ++ie )
                     shankMap->e[ie].u = S->e[ie].u;
             }
 
@@ -398,7 +398,7 @@ GeomMap* DataFileIMLF::geomMap( bool forExport ) const
 
         ShankMap    *S = shankMap( false );
         if( S ) {
-            for( int ie = 0, ne = S->e.size(); ie < ne; ++ie )
+            for( int ie = 0, ne = (int)S->e.size(); ie < ne; ++ie )
                 geomMap->e[ie].u = S->e[ie].u;
             delete S;
         }

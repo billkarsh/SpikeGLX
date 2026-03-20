@@ -69,7 +69,7 @@ void AOCtl::User::saveSettings( bool remote ) const
 
     STDSETTINGS( settings, file );
 
-    for( int iq = 0, nq = each.size(); iq < nq; ++iq ) {
+    for( int iq = 0, nq = (int)each.size(); iq < nq; ++iq ) {
 
         settings.beginGroup( QString("AOCtl_%1").arg( p.iq2stream( iq ) ) );
             each[iq].saveSettings( settings );

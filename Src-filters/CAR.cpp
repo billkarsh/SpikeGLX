@@ -22,7 +22,7 @@ void CAR::Median_1::init( const SUList &SU, int nAP )
             idx.push_back( ig );
     }
 
-    arrange.resize( nU = idx.size() );
+    arrange.resize( nU = (int)idx.size() );
     ibeg = arrange.begin();
     iend = arrange.end();
     imid = ibeg + nU / 2;
@@ -69,7 +69,7 @@ void CAR::Median_4::init( const SUList &SU, int nAP )
     arrange.resize( 4 );
 
     for( int is = 0; is < 4; ++is ) {
-        arrange[is].resize( nU[is] = idx[is].size() );
+        arrange[is].resize( nU[is] = (int)idx[is].size() );
         ibeg[is] = arrange[is].begin();
         iend[is] = arrange[is].end();
         imid[is] = ibeg[is] + nU[is] / 2;
@@ -122,7 +122,7 @@ void CAR::setSU( const GeomMap *map )
 {
     SU.clear();
 
-    for( int ie = 0, ne = map->e.size(); ie < ne; ++ie ) {
+    for( int ie = 0, ne = (int)map->e.size(); ie < ne; ++ie ) {
         const GeomMapDesc   &E = map->e[ie];
         SU.push_back( SUElem( E.s, E.u ) );
     }
@@ -135,7 +135,7 @@ void CAR::setSU( const ShankMap *map, int maxr )
 
     SU.clear();
 
-    for( int ie = 0, ne = map->e.size(); ie < ne; ++ie ) {
+    for( int ie = 0, ne = (int)map->e.size(); ie < ne; ++ie ) {
         const ShankMapDesc  &E = map->e[ie];
         SU.push_back( SUElem( E.s, (E.r <= R ? E.u : 0) ) );
     }
@@ -332,7 +332,7 @@ int CAR::lcl_1( const qint16 *d_ig, int ig ) const
 {
     const std::vector<int>  &V = neib[ig];
 
-    int nv = V.size();
+    int nv = (int)V.size();
 
     if( nv ) {
 
