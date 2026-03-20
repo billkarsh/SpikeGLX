@@ -17,7 +17,7 @@ static TrigImmed    *ME;
 
 void TrImmWorker::run()
 {
-    const int   niq = viq.size();
+    const int   niq = (int)viq.size();
     bool        ok  = true;
 
     for(;;) {
@@ -49,7 +49,7 @@ bool TrImmWorker::writeSome( int iq )
     if( !ME->nSampsFromCt( data, headCt, -LOOP_MS, S.js, S.ip ) )
         return false;
 
-    uint    size = data.size();
+    uint    size = (uint)data.size();
 
     if( !size )
         return true;
@@ -117,7 +117,7 @@ void TrigImmed::run()
     TrImmShared                 shr( p );
     const int                   nPrbPerThd  = 2;
 
-    iqMax   = vS.size() - 1;
+    iqMax   = (int)vS.size() - 1;
     nThd    = 0;
 
     for( int iq0 = 0; iq0 < iqMax; iq0 += nPrbPerThd ) {

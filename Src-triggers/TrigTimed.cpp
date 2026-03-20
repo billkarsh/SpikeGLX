@@ -19,7 +19,7 @@ static TrigTimed    *ME;
 
 void TrTimWorker::run()
 {
-    const int   niq = viq.size();
+    const int   niq = (int)viq.size();
     bool        ok  = true;
 
     for(;;) {
@@ -53,7 +53,7 @@ bool TrTimWorker::doSomeH( int iq )
     if( !ME->nSampsFromCt( data, headCt, nMax, S.js, S.ip ) )
         return false;
 
-    uint    size = data.size();
+    uint    size = (uint)data.size();
 
     if( !size )
         return true;

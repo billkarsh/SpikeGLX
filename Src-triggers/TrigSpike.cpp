@@ -22,7 +22,7 @@ static TrigSpike    *ME;
 
 void TrSpkWorker::run()
 {
-    const int   niq = viq.size();
+    const int   niq = (int)viq.size();
     bool        ok  = true;
 
     for(;;) {
@@ -52,7 +52,7 @@ bool TrSpkWorker::writeSome( int iq )
     if( !ME->nSampsFromCt( data, headCt, C.remCt[iq], S.js, S.ip ) )
         return false;
 
-    uint    size = data.size();
+    uint    size = (uint)data.size();
 
     if( !size )
         return true;

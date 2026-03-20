@@ -19,7 +19,7 @@ static TrigTTL      *ME;
 
 void TrTTLWorker::run()
 {
-    const int   niq = viq.size();
+    const int   niq = (int)viq.size();
     bool        ok  = true;
 
     for(;;) {
@@ -65,7 +65,7 @@ bool TrTTLWorker::writePreMargin( int iq )
     if( !ME->nSampsFromCt( data, headCt, nMax, S.js, S.ip ) )
         return false;
 
-    uint    size = data.size();
+    uint    size = (uint)data.size();
 
     if( !size )
         return true;
@@ -102,7 +102,7 @@ bool TrTTLWorker::writePostMargin( int iq )
     if( !ME->nSampsFromCt( data, headCt, nMax, S.js, S.ip ) )
         return false;
 
-    uint    size = data.size();
+    uint    size = (uint)data.size();
 
     if( !size )
         return true;
@@ -150,7 +150,7 @@ bool TrTTLWorker::doSomeH( int iq )
     if( !ok )
         return false;
 
-    uint    size = data.size();
+    uint    size = (uint)data.size();
 
     if( !size )
         return true;

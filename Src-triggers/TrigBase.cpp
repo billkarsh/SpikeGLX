@@ -68,14 +68,14 @@ bool TrigBase::isInUse( const QFileInfo &fi ) const
 {
     QMutexLocker    ml( &dfMtx );
 
-    for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
+    for( int ip = 0, np = (int)firstCtIm.size(); ip < np; ++ip ) {
         if( dfImAp[ip] && fi == QFileInfo( dfImAp[ip]->binFileName() ) )
             return true;
         if( dfImLf[ip] && fi == QFileInfo( dfImLf[ip]->binFileName() ) )
             return true;
     }
 
-    for( int ip = 0, np = firstCtOb.size(); ip < np; ++ip ) {
+    for( int ip = 0, np = (int)firstCtOb.size(); ip < np; ++ip ) {
         if( dfOb[ip] && fi == QFileInfo( dfOb[ip]->binFileName() ) )
             return true;
     }
@@ -229,7 +229,7 @@ void TrigBase::endTrig()
         freq = offHertz;
         msec = offmsec;
 
-        for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
+        for( int ip = 0, np = (int)firstCtIm.size(); ip < np; ++ip ) {
             getErrFlags( jsIM, ip );
             if( dfImAp[ip] ) {
                 if( !svySBTT[ip].isEmpty() )
@@ -244,7 +244,7 @@ void TrigBase::endTrig()
         firstCtIm.clear();
         kvmRmt.remove( "~svySBTT" );
 
-        for( int ip = 0, np = firstCtOb.size(); ip < np; ++ip ) {
+        for( int ip = 0, np = (int)firstCtOb.size(); ip < np; ++ip ) {
             getErrFlags( jsOB, ip );
             if( dfOb[ip] )
                 dfOb[ip]->closeAsync( kvmRmt );
@@ -416,14 +416,14 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 
 void TrigBase::setSyncWriteMode()
 {
-    for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
+    for( int ip = 0, np = (int)firstCtIm.size(); ip < np; ++ip ) {
         if( dfImAp[ip] )
             dfImAp[ip]->setAsyncWriting( false );
         if( dfImLf[ip] )
             dfImLf[ip]->setAsyncWriting( false );
     }
 
-    for( int ip = 0, np = firstCtOb.size(); ip < np; ++ip ) {
+    for( int ip = 0, np = (int)firstCtOb.size(); ip < np; ++ip ) {
         if( dfOb[ip] )
             dfOb[ip]->setAsyncWriting( false );
     }
@@ -553,13 +553,13 @@ quint64 TrigBase::sampCount( int js )
     switch( js ) {
         case jsNI: df = dfNi; break;
         case jsOB:
-            for( int ip = 0, np = firstCtOb.size(); ip < np; ++ip ) {
+            for( int ip = 0, np = (int)firstCtOb.size(); ip < np; ++ip ) {
                 if( (df = dfOb[ip]) )
                     goto count;
             }
             break;
         case jsIM:
-            for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
+            for( int ip = 0, np = (int)firstCtIm.size(); ip < np; ++ip ) {
                 if( (df = dfImAp[ip]) )
                     goto count;
                 if( (df = dfImLf[ip]) )
@@ -586,7 +586,7 @@ void TrigBase::endRun( const QString &err )
         freq = offHertz;
         msec = offmsec;
 
-        for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
+        for( int ip = 0, np = (int)firstCtIm.size(); ip < np; ++ip ) {
             getErrFlags( jsIM, ip );
             if( dfImAp[ip] ) {
                 if( !svySBTT[ip].isEmpty() )
@@ -606,7 +606,7 @@ void TrigBase::endRun( const QString &err )
         firstCtIm.clear();
         kvmRmt.remove( "~svySBTT" );
 
-        for( int ip = 0, np = firstCtOb.size(); ip < np; ++ip ) {
+        for( int ip = 0, np = (int)firstCtOb.size(); ip < np; ++ip ) {
             getErrFlags( jsOB, ip );
             if( dfOb[ip] ) {
                 dfOb[ip]->setRemoteParams( kvmRmt );
@@ -851,7 +851,7 @@ void TrigBase::statusWrPerf( QString &s )
 
         // report worst case values
 
-        for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
+        for( int ip = 0, np = (int)firstCtIm.size(); ip < np; ++ip ) {
             if( dfImAp[ip] ) {
                 imFull   = qMax( imFull, dfImAp[ip]->percentFull() );
                 wbps    += dfImAp[ip]->writtenBytes();
@@ -864,7 +864,7 @@ void TrigBase::statusWrPerf( QString &s )
             }
         }
 
-        for( int ip = 0, np = firstCtOb.size(); ip < np; ++ip ) {
+        for( int ip = 0, np = (int)firstCtOb.size(); ip < np; ++ip ) {
             if( dfOb[ip] ) {
                 obFull   = qMax( obFull, dfOb[ip]->percentFull() );
                 wbps    += dfOb[ip]->writtenBytes();
@@ -1052,7 +1052,7 @@ bool TrigBase::writeDataLF(
 //
 bool TrigBase::writeDataIM( vec_i16 &data, quint64 headCt, int ip )
 {
-    int     np      = firstCtIm.size();
+    int     np      = (int)firstCtIm.size();
     bool    isAP    = (ip < np && dfImAp[ip]),
             isLF    = (ip < np && dfImLf[ip]),
             xtra    = false;
@@ -1095,7 +1095,7 @@ bool TrigBase::writeDataIM( vec_i16 &data, quint64 headCt, int ip )
 
 bool TrigBase::writeDataOB( vec_i16 &data, quint64 headCt, int ip )
 {
-    int np = firstCtOb.size();
+    int np = (int)firstCtOb.size();
 
     if( ip >= np || !dfOb[ip] )
         return true;
