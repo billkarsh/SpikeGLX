@@ -178,7 +178,7 @@ void CalSRateCtl::apply()
     T.loadProbeSRates();
     T.loadOneBoxSRates();
 
-    for( int is = 0, ns = vIM.size(); is < ns; ++is ) {
+    for( int is = 0, ns = (int)vIM.size(); is < ns; ++is ) {
 
         const CalSRStream   &S = vIM[is];
 
@@ -260,7 +260,7 @@ void CalSRateCtl::apply()
 // Obx
 // ---
 
-    for( int is = 0, ns = vOB.size(); is < ns; ++is ) {
+    for( int is = 0, ns = (int)vOB.size(); is < ns; ++is ) {
 
         const CalSRStream   &S = vOB[is];
 

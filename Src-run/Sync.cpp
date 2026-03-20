@@ -137,7 +137,7 @@ void syncDstTAbsMult(
     src.tAbs = src.Ct2TAbs( srcCt );
 
     quint64 srcEdge;
-    int     nS = vS.size();
+    int     nS = (int)vS.size();
 
     for( int is = 0; is < nS; ++is )
         vS[is].bySync = false;

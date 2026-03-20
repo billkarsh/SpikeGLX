@@ -422,7 +422,7 @@ void ImSimPrbWorker::run()
 
         double  loopT = getTime();
 
-        for( int i = 0, n = simDat.size(); i < n; ++i )
+        for( int i = 0, n = (int)simDat.size(); i < n; ++i )
             simDat[i].loadToN( (getTime() - T0) * rate );
 
         // Fetch no more often than every loopPeriod_us
@@ -1150,7 +1150,7 @@ void ImAcqWorker::run()
     std::vector<std::vector<qint16> >   lfLast;
     vec_i16                             i16Buf;
 
-    const int   nID     = streams.size();
+    const int   nID     = (int)streams.size();
     int         nCHMax  = 0,
                 T2Chans = OBX_N_ACQ,
                 nT0     = 0,
@@ -1871,7 +1871,7 @@ bool ImAcqWorker::workerYield()
 // Sum outstanding packets for this worker thread
 
     int sumPkts = 0,
-        nID     = streams.size();
+        nID     = (int)streams.size();
 
     for( int iID = 0; iID < nID; ++iID ) {
 
@@ -2031,7 +2031,7 @@ CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
 
 CimAcqImec::~CimAcqImec()
 {
-    for( int iThd = 0, nThd = cfgThd.size(); iThd < nThd; ++iThd ) {
+    for( int iThd = 0, nThd = (int)cfgThd.size(); iThd < nThd; ++iThd ) {
         ImCfgThread *T = cfgThd[iThd];
         if( T ) {
             if( T->thread->isRunning() )
@@ -2047,7 +2047,7 @@ CimAcqImec::~CimAcqImec()
         simThd = 0;
     }
 
-    for( int iThd = 0, nThd = acqThd.size(); iThd < nThd; ++iThd ) {
+    for( int iThd = 0, nThd = (int)acqThd.size(); iThd < nThd; ++iThd ) {
         ImAcqThread *T = acqThd[iThd];
         if( T ) {
             if( T->thread->isRunning() )
@@ -2099,7 +2099,7 @@ void CimAcqImec::run()
 
     acqShr.runMtx.lock();
     {
-        int nThd = acqThd.size();
+        int nThd = (int)acqThd.size();
 
         while( acqShr.asleep < nThd ) {
             acqShr.runMtx.unlock();

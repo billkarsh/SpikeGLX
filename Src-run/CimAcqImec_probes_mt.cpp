@@ -18,7 +18,7 @@
 
 void ImCfgWorker::run()
 {
-    for( int ip = 0, np = vip.size(); ip < np; ++ip ) {
+    for( int ip = 0, np = (int)vip.size(); ip < np; ++ip ) {
 
         const CimCfg::ImProbeDat    &P = T.get_iProbe( vip[ip] );
 
@@ -538,7 +538,7 @@ bool CimAcqImec::_mt_configProbes( const CimCfg::ImProbeTable &T )
     for( int ip = 0; ip < np; ++ip ) {
         const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
         if( T.simprb.isSimProbe( P.slot, P.port, P.dock ) ) {
-            int isim = simDat.size();
+            int isim = (int)simDat.size();
             simDat.resize( isim + 1 );
             ip2simdat[ip] = isim;
         }
@@ -589,7 +589,7 @@ bool CimAcqImec::_mt_configProbes( const CimCfg::ImProbeTable &T )
         cfgThd.push_back( new ImCfgThread( this, T, vip, cfgShr ) );
     }
 
-    for( int nThd = cfgThd.size(), iThd = nThd - 1; iThd >= 0; --iThd ) {
+    for( int nThd = (int)cfgThd.size(), iThd = nThd - 1; iThd >= 0; --iThd ) {
         ImCfgThread *T = cfgThd[iThd];
         if( T ) {
             if( T->thread->isRunning() )

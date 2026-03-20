@@ -522,7 +522,7 @@ int IMFirmCtl::callback( size_t bytes )
         ME->firmUI->PBar,
         "setValue",
         Qt::QueuedConnection,
-        Q_ARG(int, ME->barOffset + bytes) );
+        Q_ARG(int, ME->barOffset + (int)bytes) );
 
     QThread::usleep( 1500 );
     guiBreathe();

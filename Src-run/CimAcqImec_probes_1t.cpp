@@ -412,7 +412,7 @@ bool CimAcqImec::_1t_configProbes( const CimCfg::ImProbeTable &T )
     for( int ip = 0; ip < np; ++ip ) {
         const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
         if( T.simprb.isSimProbe( P.slot, P.port, P.dock ) ) {
-            int isim = simDat.size();
+            int isim = (int)simDat.size();
             simDat.resize( isim + 1 );
             ip2simdat[ip] = isim;
         }

@@ -1282,7 +1282,7 @@ void CniAcqDmx::demuxMerge( int nwhole )
                 continue;
 
             quint16 W = 0;
-            bool    F = 0;   // filling F: {0=empty,1=lsb,2=full}
+            int     F = 0;   // filling F: {0=empty,1=lsb}
 
             if( kxd1 == 4 ) {
                 *dst++ = *sD1;
@@ -1443,7 +1443,7 @@ void CniAcqDmx::demuxMerge( int nwhole )
             continue;
 
         quint16 W = 0;
-        bool    F = 0;   // filling F: {0=empty,1=lsb,2=full}
+        int     F = 0;   // filling F: {0=empty,1=lsb}
 
         if( kxd1 == 4 ) {
             *dst++ = *sD1;

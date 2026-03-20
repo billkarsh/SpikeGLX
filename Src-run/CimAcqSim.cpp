@@ -78,7 +78,7 @@ void ImSimAcqWorker::run()
 //
     std::vector<vec_i16 >   i16Buf;
 
-    const int   nID = probes.size();
+    const int   nID = (int)probes.size();
 
     i16Buf.resize( nID );
 
@@ -302,7 +302,7 @@ CimAcqSim::~CimAcqSim()
 {
     shr.kill();
 
-    for( int iThd = 0, nThd = imT.size(); iThd < nThd; ++iThd ) {
+    for( int iThd = 0, nThd = (int)imT.size(); iThd < nThd; ++iThd ) {
         imT[iThd]->thread->wait( 10000/nThd );
         delete imT[iThd];
     }
@@ -375,7 +375,7 @@ void CimAcqSim::run()
 
     shr.runMtx.lock();
     {
-        int nThd = imT.size();
+        int nThd = (int)imT.size();
 
         while( shr.asleep < nThd ) {
             shr.runMtx.unlock();

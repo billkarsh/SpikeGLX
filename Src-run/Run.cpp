@@ -182,7 +182,7 @@ void Run::grfSetStreams( std::vector<GFStream> &gfs, int igw )
 {
     QMutexLocker    ml( &runMtx );
 
-    for( int is = 0, ns = gfs.size(); is < ns; ++is ) {
+    for( int is = 0, ns = (int)gfs.size(); is < ns; ++is ) {
 
         GFStream    &S = gfs[is];
 
@@ -222,7 +222,7 @@ bool Run::grfHardPause( bool pause, int igw )
 {
     QMutexLocker    ml( &runMtx );
 
-    int ngw = vGW.size();
+    int ngw = (int)vGW.size();
 
     if( igw >= 0 && igw < ngw && vGW[igw].gf )
         return vGW[igw].gf->hardPause( pause );
@@ -244,7 +244,7 @@ void Run::grfWaitPaused( int igw )
 {
     QMutexLocker    ml( &runMtx );
 
-    int ngw = vGW.size();
+    int ngw = (int)vGW.size();
 
     if( igw >= 0 && igw < ngw && vGW[igw].gf ) {
         GraphFetcher    *gf = vGW[igw].gf;
@@ -321,7 +321,7 @@ void Run::grfRefresh()
 {
     QMutexLocker    ml( &runMtx );
 
-    for( int igw = 0, ngw = vGW.size(); igw < ngw; ++igw )
+    for( int igw = 0, ngw = (int)vGW.size(); igw < ngw; ++igw )
         vGW[igw].gw->eraseGraphs();
 }
 
@@ -332,7 +332,7 @@ void Run::grfShowHideAll()
 
     bool    anyHadFocus = false;
 
-    for( int igw = 0, ngw = vGW.size(); igw < ngw; ++igw ) {
+    for( int igw = 0, ngw = (int)vGW.size(); igw < ngw; ++igw ) {
 
         GraphsWindow    *gw = vGW[igw].gw;
 
@@ -369,7 +369,7 @@ void Run::grfUpdateRHSFlagsAll()
 {
     QMutexLocker    ml( &runMtx );
 
-    for( int igw = 0, ngw = vGW.size(); igw < ngw; ++igw ) {
+    for( int igw = 0, ngw = (int)vGW.size(); igw < ngw; ++igw ) {
 
         QMetaObject::invokeMethod(
             vGW[igw].gw, "updateRHSFlags",
@@ -382,7 +382,7 @@ void Run::grfUpdateProbe( int ip, bool shankMap, bool chanMap )
 {
     QMutexLocker    ml( &runMtx );
 
-    for( int igw = 0, ngw = vGW.size(); igw < ngw; ++igw ) {
+    for( int igw = 0, ngw = (int)vGW.size(); igw < ngw; ++igw ) {
 
         QMetaObject::invokeMethod(
             vGW[igw].gw, "updateProbe",
@@ -417,7 +417,7 @@ void Run::grfUpdateWindowTitles()
 // Apply to graphs windows
 // -----------------------
 
-    for( int igw = 0, ngw = vGW.size(); igw < ngw; ++igw )
+    for( int igw = 0, ngw = (int)vGW.size(); igw < ngw; ++igw )
         vGW[igw].setTitle( igw );
 }
 
@@ -684,7 +684,7 @@ void Run::stopRun()
 
     vGW[0].gw->soStopFetching();
 
-    for( int igw = 0, ngw = vGW.size(); igw < ngw; ++igw )
+    for( int igw = 0, ngw = (int)vGW.size(); igw < ngw; ++igw )
         vGW[igw].stopFetching();
 
 // Note: gate sends messages to trg, so must delete gate before trg.
@@ -713,7 +713,7 @@ void Run::stopRun()
 // talk to graphsWindow. Therefore, we must wait for those threads to
 // complete before tearing graphsWindow down.
 
-    for( int igw = 0, ngw = vGW.size(); igw < ngw; ++igw )
+    for( int igw = 0, ngw = (int)vGW.size(); igw < ngw; ++igw )
         vGW[igw].kill();
 
     vGW.clear();
@@ -881,7 +881,7 @@ void Run::dfSetRecordingEnabled( bool enabled, bool remote )
 
     if( remote ) {
 
-        for( int igw = 0, ngw = vGW.size(); igw < ngw; ++igw ) {
+        for( int igw = 0, ngw = (int)vGW.size(); igw < ngw; ++igw ) {
 
             QMetaObject::invokeMethod(
                 vGW[igw].gw, "remoteSetRecordingEnabled",
@@ -1082,7 +1082,7 @@ QString Run::setAnatomyPP( const QString &s )
 
     QMutexLocker    ml( &runMtx );
 
-    for( int igw = 0, ngw = vGW.size(); igw < ngw; ++igw ) {
+    for( int igw = 0, ngw = (int)vGW.size(); igw < ngw; ++igw ) {
 
         QMetaObject::invokeMethod(
             vGW[igw].gw, "remoteSetAnatomyPP",

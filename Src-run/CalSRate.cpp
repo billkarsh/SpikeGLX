@@ -81,9 +81,9 @@ QString CalSRStream::remark() const
 
 void CalSRWorker::run()
 {
-    int nIM = vIM.size(),
-        nOB = vOB.size(),
-        nNI = vNI.size();
+    int nIM = (int)vIM.size(),
+        nOB = (int)vOB.size(),
+        nNI = (int)vNI.size();
 
     pctCum = 0;
     pctMax = 10*(nIM + nOB + nNI);
@@ -842,10 +842,10 @@ void CalSRRun::fmtResults(
 {
     msg = "Stream  old rate  :  meas rate +/- stderr  :  remarks\n\n";
 
-    for( int is = 0, ns = vIM.size(); is < ns; ++is )
+    for( int is = 0, ns = (int)vIM.size(); is < ns; ++is )
         msg += vIM[is].result();
 
-    for( int is = 0, ns = vOB.size(); is < ns; ++is )
+    for( int is = 0, ns = (int)vOB.size(); is < ns; ++is )
         msg += vOB[is].result();
 
     if( vNI.size() )
@@ -927,7 +927,7 @@ void CalSRRun::finish_cleanup()
         // Imec
         // ----
 
-        for( int is = 0, ns = vIM.size(); is < ns; ++is ) {
+        for( int is = 0, ns = (int)vIM.size(); is < ns; ++is ) {
 
             const CalSRStream   &S = vIM[is];
 
@@ -943,7 +943,7 @@ void CalSRRun::finish_cleanup()
         // Obx
         // ---
 
-        for( int is = 0, ns = vOB.size(); is < ns; ++is ) {
+        for( int is = 0, ns = (int)vOB.size(); is < ns; ++is ) {
 
             const CalSRStream   &S = vOB[is];
 
