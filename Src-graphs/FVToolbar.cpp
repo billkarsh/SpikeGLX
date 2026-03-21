@@ -1,6 +1,6 @@
 
 #include "Pixmaps/shanks.xpm"
-#include "Pixmaps/apply_all.xpm"
+// #include "Pixmaps/apply_all.xpm"
 
 #include "Util.h"
 #include "FileViewerWindow.h"

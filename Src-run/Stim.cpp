@@ -86,11 +86,13 @@ static void ni_destroyTask( TaskHandle &taskHandle )
     }
 }
 
+#if 0
 static QString ni_outChan2dev( const QString &outChan )
 {
     QStringList sl = outChan.split('/');
     return sl[0].trimmed();
 }
+#endif
 
 static TaskHandle ni_outChan2task( const QString &outChan )
 {
@@ -728,6 +730,7 @@ OBX::OBX( int istr )
 /* Debug ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+#if 0
 static void generate_sqrtest()
 {
 #define NDATA   10000
@@ -754,6 +757,7 @@ static void generate_sqrtest()
     (void)f.open( QIODevice::WriteOnly );
     f.write( (char*)&buf[0], NDATA*sizeof(float) );
 }
+#endif
 
 
 void CStim::stimteststart()

@@ -79,9 +79,9 @@ for(dir, SRC_SGLX) {
     include($$dir/$$dir".pri")
 }
 
-# 3rd party
+# 3rd party - deprecate Samplerate
 win32 {
-    win32-g++ {
+    xx_win32-g++ {
         SRC_ALIEN = \
             RtAudio \
             Samplerate
