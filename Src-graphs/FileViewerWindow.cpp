@@ -67,7 +67,7 @@ void DataSource::set_df( DataFile *df )
     this->df = df;
 
     f.setFileName( df->binFileName() );
-    f.open( QIODevice::ReadOnly );
+    (void)f.open( QIODevice::ReadOnly );
 
     flen    = df->sampCount();
     nC      = df->numChans();
@@ -106,7 +106,7 @@ void DataSource::set_df( DataFile *df )
     this->df = df;
 
     f.setFileName( df->binFileName() );
-    f.open( QIODevice::ReadOnly );
+    (void)f.open( QIODevice::ReadOnly );
 
     flen    = df->sampCount();
     nC      = df->numChans();
@@ -239,7 +239,7 @@ void DataSource::set_df( DataFile *df )
     this->df = df;
 
     f.setFileName( df->binFileName() );
-    f.open( QIODevice::ReadOnly );
+    (void)f.open( QIODevice::ReadOnly );
 
     flen        = df->sampCount();
     nC          = df->numChans();

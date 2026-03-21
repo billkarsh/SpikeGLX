@@ -146,9 +146,7 @@ void IMHSTCtl::save()
         QFile   f( fn );
 
         if( f.open( QIODevice::WriteOnly | QIODevice::Text ) ) {
-
             QTextStream ts( &f );
-
             ts << hstUI->outTE->toPlainText();
         }
     }

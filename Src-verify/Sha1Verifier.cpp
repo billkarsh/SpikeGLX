@@ -57,8 +57,8 @@ void Sha1Worker::run()
 
     if( !f.open( QIODevice::ReadOnly ) ) {
         extendedError =
-            QString("Can't open for reading '%1'.")
-            .arg( dataFileNameShort );
+            QString("SHA1 error <%1> opening(read) '%2'.")
+            .arg( f.errorString() ).arg( dataFileNameShort );
         emit result( Failure );
         return;
     }

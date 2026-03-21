@@ -523,7 +523,8 @@ void FVShankViewTab::expBut()
     }
     else {
         QFileInfo   fi( fn );
-        SC->setStatus( QString("Error opening '%1'").arg( fi.fileName() ) );
+        SC->setStatus( QString("File error <%1> opening(write) '%2'")
+        .arg( f.errorString() ).arg( fi.fileName() ) );
         return;
     }
 }

@@ -357,7 +357,7 @@ void CniAcqDmx::run()
     if( qq >= 5.0 && qq < 10.0 ) {
         if( !f.isOpen() ) {
             f.setFileName( "pace.txt" );
-            f.open( QIODevice::WriteOnly | QIODevice::Text );
+            (void)f.open( QIODevice::WriteOnly | QIODevice::Text );
         }
         ts<<QString("%1\t%2\n").arg( qq ).arg( nFetched/kmux );
         if( qq >= 10.0 )

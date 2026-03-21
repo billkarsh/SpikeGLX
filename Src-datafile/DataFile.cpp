@@ -64,7 +64,13 @@ bool DataFile::openForRead( QString &error, const QString &filename )
 // ----------
 
     binFile.setFileName( bFile );
-    binFile.open( QIODevice::ReadOnly );
+
+    if( !binFile.open( QIODevice::ReadOnly ) ) {
+        error = QString("File error <%1> opening(read) '%2'.")
+                .arg( binFile.errorString() ).arg ( bFile );
+        Error() << error;
+        return false;
+    }
 
 // ---------
 // Load meta
@@ -274,8 +280,9 @@ bool DataFile::openForWrite(
     binFile.setFileName( bName );
 
     if( !binFile.open( QIODevice::WriteOnly ) ) {
-
-        Error() << "openForWrite error: Can't open [" << bName << "]";
+        Error() <<
+        QString("File error <%1> opening(write) '%2'.")
+        .arg( binFile.errorString() ).arg( bName );
         return false;
     }
 
@@ -520,8 +527,9 @@ bool DataFile::openForExport(
     binFile.setFileName( bName );
 
     if( !binFile.open( QIODevice::WriteOnly ) ) {
-
-        Error() << "openForExport error: Can't open [" << bName << "].";
+        Error() <<
+        QString("File error <%1> opening(export bin) '%2'.")
+        .arg( binFile.errorString() ).arg( bName );
         return false;
     }
 
@@ -1072,7 +1080,9 @@ bool DataFile::doFileWrite( const vec_i16 &samps )
     statsMtx.unlock();
 
     if( nWrit != n2Write ) {
-        Error() << "File writing error: " << binFile.error();
+        Error() <<
+        QString("File error <%1> writing(bin) '%2'.")
+        .arg( binFile.errorString() ).arg( binFile.fileName() );
         return false;
     }
 

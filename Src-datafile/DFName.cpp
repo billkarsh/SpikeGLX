@@ -333,12 +333,12 @@ int DFName::typeAndIP( int &ip, const QString &name, QString *error )
 bool DFName::isFileReadable( QString &error, const QFileInfo &fi )
 {
     QString path = fi.canonicalFilePath();
+    QFile   f( path );
 
-    if( path.isEmpty() || !QFile( path ).open( QIODevice::ReadOnly ) ) {
-
+    if( path.isEmpty() || !f.open( QIODevice::ReadOnly ) ) {
         error =
-            QString("File cannot be opened for reading '%1'.")
-            .arg( fi.fileName() );
+            QString("DFName file error <%1> opening(read) '%2'.")
+            .arg( f.errorString() ).arg( fi.fileName() );
         return false;
     }
 
@@ -357,8 +357,8 @@ qint64 DFName::fileSize( QString &error, const QFileInfo &fi )
         size = f.size();
     else {
         error =
-            QString("File cannot be opened for reading '%1'.")
-            .arg( fi.fileName() );
+            QString("DFName file error <%1> opening(read) '%2'.")
+            .arg( f.errorString() ).arg( fi.fileName() );
     }
 
     return size;

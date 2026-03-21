@@ -341,7 +341,7 @@ void CalSRWorker::scanDigital(
 QFile f( QString("%1/%2_edges.txt")
         .arg( mainApp()->dataDir() )
         .arg( df->fileLblFromObj() ) );
-f.open( QIODevice::WriteOnly | QIODevice::Text );
+(void)f.open( QIODevice::WriteOnly | QIODevice::Text );
 QTextStream ts( &f );
 #endif
 
@@ -531,7 +531,7 @@ void CalSRWorker::scanAnalog(
 QFile f( QString("%1/%2_edges.txt")
         .arg( mainApp()->dataDir() )
         .arg( df->fileLblFromObj() ) );
-f.open( QIODevice::WriteOnly | QIODevice::Text );
+(void)f.open( QIODevice::WriteOnly | QIODevice::Text );
 QTextStream ts( &f );
 #endif
 

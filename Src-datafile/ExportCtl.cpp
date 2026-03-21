@@ -760,7 +760,9 @@ bool ExportCtl::exportAsText(
     QFile   out( E.filename );
 
     if( !out.open( QIODevice::WriteOnly | QIODevice::Text ) ) {
-        Error() << "Could not open export file for write.";
+        Error() <<
+        QString("File error <%1> opening(export text) '%2'.")
+        .arg( out.errorString() ).arg( E.filename );
         return false;
     }
 

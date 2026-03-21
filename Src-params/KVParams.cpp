@@ -100,19 +100,14 @@ bool KVParams::fromMetaFile( const QString &metaFile )
                 return true;
         }
         else {
-            Error()
-                << "Format error reading metafile '"
-                << metaFile
-                << "'.";
+            Error() <<
+            QString("Format error in metafile '%1'.").arg( metaFile );
         }
     }
     else {
-        Error()
-            << "Couldn't open metafile for reading, error "
-            << f.error()
-            << " '"
-            << metaFile
-            << "'.";
+        Error() <<
+        QString("File error <%1> opening(read meta) '%2'.")
+        .arg( f.errorString() ).arg( metaFile );
     }
 
     clear();
@@ -134,19 +129,14 @@ bool KVParams::toMetaFile( const QString &metaFile ) const
         if( ts.status() == QTextStream::Ok )
             return true;
         else {
-            Error()
-                << "Error writing metafile '"
-                << metaFile
-                << "'.";
+            Error() <<
+            QString("Error writing metafile '%1'.").arg( metaFile );
         }
     }
     else {
-        Error()
-            << "Couldn't open metafile for writing, error "
-            << f.error()
-            << " '"
-            << metaFile
-            << "'.";
+        Error() <<
+        QString("File error <%1> opening(write meta) '%2'.")
+        .arg( f.errorString() ).arg( metaFile );
     }
 
     return false;

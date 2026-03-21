@@ -246,8 +246,8 @@ QString WaveMeta::readTextFile( QString &text, const QString &wave ) const
 
     if( !f.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
         return
-        QString("Waveplayer can't open(read) wave text file '%1'.")
-        .arg( path );
+        QString("Waveplayer file error <%1> open(read text) '%2'.")
+        .arg( f.errorString() ).arg( path );
     }
 
 // Read
@@ -273,8 +273,8 @@ QString WaveMeta::writeTextFile( const QString &wave, const QString &text ) cons
 
     if( !f.open( QIODevice::WriteOnly | QIODevice::Text ) ) {
         return
-        QString("Waveplayer can't open(write) wave text file '%1'.")
-        .arg( path );
+        QString("Waveplayer file error <%1> open(write text) '%2'.")
+        .arg( f.errorString() ).arg( path );
     }
 
 // Write
@@ -635,8 +635,8 @@ QString WaveMeta::i16File2buf( vec_i16 &buf, const QString &wave ) const
 
     if( !f.open( QIODevice::ReadOnly ) ) {
         return
-        QString("Waveplayer can't open wave i16 bin file '%1'.")
-        .arg( path );
+        QString("Waveplayer file error <%1> open(read i16) '%2'.")
+        .arg( f.errorString() ).arg( path );
     }
 
 // Read binary
@@ -670,8 +670,8 @@ QString WaveMeta::f32File2buf( vec_i16 &buf, const QString &wave ) const
 
     if( !f.open( QIODevice::ReadOnly ) ) {
         return
-        QString("Waveplayer can't open wave f32 bin file '%1'.")
-        .arg( path );
+        QString("Waveplayer file error <%1> open(read f32) '%2'.")
+        .arg( f.errorString() ).arg( path );
     }
 
 // Read binary
@@ -751,7 +751,7 @@ static void generate_sqrtest()
 
     QString path = QString("%1/_Waves/sqrtest.bin").arg( appPath() );
     QFile   f( path );
-    f.open( QIODevice::WriteOnly );
+    (void)f.open( QIODevice::WriteOnly );
     f.write( (char*)&buf[0], NDATA*sizeof(float) );
 }
 

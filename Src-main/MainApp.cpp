@@ -224,7 +224,7 @@ void npcallback( int level, time_t ts, const char *module, const char *msg )
 {
     Log()<<QString("L%1 [%2] \"%3\"").arg( level ).arg( module ).arg( msg );
     QFile   fo( "api_out.txt" );
-    fo.open( QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text );
+    (void)fo.open( QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text );
     QTextStream to( &fo );
     to << QString("L%1 [%2] \"%3\"\n").arg( level ).arg( module ).arg( msg );
     fo.flush();
@@ -844,11 +844,11 @@ static void test1()
 {
     QFile   fc( "C:/Users/karshb/Desktop/SGLBUILD/FIXU/CatGT/CatGT-win/catgt_SC048_010121_g0/SC048_010121_g0_tcat.nidq.iXA_4_3.txt" ),
             ft( "C:/Users/karshb/Desktop/SGLBUILD/FIXU/CatGT/CatGT-win/catgt_SC048_010121_g0/SC048_010121_g0_tcat.nidq.XD_7_2_0.txt" );
-    fc.open( QIODevice::ReadOnly | QIODevice::Text );
-    ft.open( QIODevice::ReadOnly | QIODevice::Text );
+    (void)fc.open( QIODevice::ReadOnly | QIODevice::Text );
+    (void)ft.open( QIODevice::ReadOnly | QIODevice::Text );
 
     QFile   fo( "C:/Users/karshb/Desktop/SGLBUILD/FIXU/CatGT/CatGT-win/catgt_SC048_010121_g0/out.txt" );
-    fo.open( QIODevice::WriteOnly | QIODevice::Text );
+    (void)fo.open( QIODevice::WriteOnly | QIODevice::Text );
     QTextStream to( &fo );
 
     for(;;) {
@@ -959,7 +959,7 @@ static void test1()
     }
 
     QFile   fo( "V:/AA_SGLX/UHD2/out.txt" );
-    fo.open( QIODevice::WriteOnly | QIODevice::Text );
+    (void)fo.open( QIODevice::WriteOnly | QIODevice::Text );
     QTextStream to( &fo );
 
     for(int ic = 0; ic < 384; ++ic ) {
@@ -982,7 +982,7 @@ static void test1()
     int low = -0.24*mv2bits;
     int hi = 0.44*mv2bits;
     QFile fi( "V:/AA_SGLX/hctest/latency_meas/cpp_latent_g0_t0.imec0.lf.bin" );
-    fi.open( QIODevice::ReadOnly );
+    (void)fi.open( QIODevice::ReadOnly );
     qint64 N = fi.size() / 2;
     QVector<short> D(N);
     fi.read( (char*)&D[0], 2*N );

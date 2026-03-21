@@ -727,7 +727,7 @@ void TrigBase::statusOnSince( QString &s )
             lastFileT = nowT;
             QFile f( QString("%1/mem.txt")
                     .arg( mainApp()->dataDir() ) );
-            f.open( QIODevice::Append | QIODevice::Text );
+            (void)f.open( QIODevice::Append | QIODevice::Text );
             QTextStream ts( &f );
             ts
             <<(startT >= 0 ? nowT - startT : 0)<<" "

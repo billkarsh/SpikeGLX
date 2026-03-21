@@ -865,7 +865,12 @@ void ImAcqStream::fileMissReport() const
         .arg( ip );
     QFile       f( fname );
     QTextStream ts( &f );
-    f.open( QIODevice::WriteOnly | QIODevice::Text );
+    if( !f.open( QIODevice::WriteOnly | QIODevice::Text ) ) {
+        Error() <<
+        QString("File error <%1> opening(write miss samps) '%2'.")
+        .arg( f.errorString() ).arg( fname );
+        return;
+    }
 
     QMap<quint64,int>::const_iterator
         it  = mtStampMiss.begin(),
@@ -2465,7 +2470,7 @@ if( S.ip == 0 ) {
     if( qq >= 5.0 && qq < 6.0 ) {
         if( !f.isOpen() ) {
             f.setFileName( "pace_T0.txt" );
-            f.open( QIODevice::WriteOnly | QIODevice::Text );
+            (void)f.open( QIODevice::WriteOnly | QIODevice::Text );
         }
         ts<<QString("%1\t%2\n").arg( qq ).arg( out );
         if( qq >= 6.0 )
@@ -2621,7 +2626,7 @@ if( S.ip == 0 && shank == SourceAP ) {
     if( qq >= 5.0 && qq < 6.0 ) {
         if( !f.isOpen() ) {
             f.setFileName( "pace_T2.txt" );
-            f.open( QIODevice::WriteOnly | QIODevice::Text );
+            (void)f.open( QIODevice::WriteOnly | QIODevice::Text );
         }
         ts<<QString("%1\t%2\n").arg( qq ).arg( out );
         if( qq >= 6.0 )
@@ -2746,7 +2751,7 @@ if( S.ip == 0 ) {
     if( qq >= 5.0 && qq < 6.0 ) {
         if( !f.isOpen() ) {
             f.setFileName( "pace_obx.txt" );
-            f.open( QIODevice::WriteOnly | QIODevice::Text );
+            (void)wf.open( QIODevice::WriteOnly | QIODevice::Text );
         }
         ts<<QString("%1\t%2\n").arg( qq ).arg( out );
         if( qq >= 6.0 )

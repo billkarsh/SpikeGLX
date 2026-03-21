@@ -21,7 +21,7 @@ void CProbeTbl::ss2ini()
 {
 // Original imec xlsx -> exported as tab-sep txt
     QFile   fi( FTAB );
-    fi.open( QIODevice::ReadOnly | QIODevice::Text );
+    (void)fi.open( QIODevice::ReadOnly | QIODevice::Text );
 
 // SS cols = ini keys
     QString hdr = fi.readLine().toLower().trimmed();
@@ -39,7 +39,7 @@ void CProbeTbl::ss2ini()
 
 // Open output ini
     QFile   fo( FINI );
-    fo.open( QIODevice::WriteOnly | QIODevice::Text );
+    (void)fo.open( QIODevice::WriteOnly | QIODevice::Text );
     QTextStream ts( &fo );
 
 // Parse lines = probes = group|0 + {vals}|1:k
@@ -433,7 +433,7 @@ static void _sortini( const QString &dst, const QString &src )
     QMap<QString,QMap<QString,int>> D;
 
     QFile   fi( src );
-    fi.open( QIODevice::ReadOnly | QIODevice::Text );
+    (void)fi.open( QIODevice::ReadOnly | QIODevice::Text );
 
     QMap<QString,int>   M;
     QString             L, G;
@@ -458,7 +458,7 @@ static void _sortini( const QString &dst, const QString &src )
     fi.close();
 
     QFile   fo( dst );
-    fo.open( QIODevice::WriteOnly | QIODevice::Text );
+    (void)fo.open( QIODevice::WriteOnly | QIODevice::Text );
     QTextStream ts( &fo );
 
     QMap<QString,QMap<QString,int>>::iterator
@@ -510,7 +510,7 @@ void CProbeTbl::ini2json()
     root["neuropixels_probes"] = probes;
 
     QFile   fo( FJSN );
-    fo.open( QIODevice::WriteOnly | QIODevice::Text );
+    (void)fo.open( QIODevice::WriteOnly | QIODevice::Text );
     fo.write( QJsonDocument( root ).toJson() );
 }
 
@@ -522,7 +522,7 @@ void CProbeTbl::json2ini()
     QJsonValue      vtbl;
     QJsonObject     tbl;
     QFile           fi( FJSN );
-    fi.open( QIODevice::ReadOnly | QIODevice::Text );
+    (void)fi.open( QIODevice::ReadOnly | QIODevice::Text );
     doc = QJsonDocument::fromJson( fi.readAll(), &err );
     if( err.error != QJsonParseError::NoError ) {
         Error() << QString("Json parse error at pos %1 : '%2'.")
@@ -606,7 +606,7 @@ void CProbeTbl::parsejson()
     QJsonParseError err;
     QJsonDocument   doc;
     QFile           fi( FJSN );
-    fi.open( QIODevice::ReadOnly | QIODevice::Text );
+    (void)fi.open( QIODevice::ReadOnly | QIODevice::Text );
     doc = QJsonDocument::fromJson( fi.readAll(), &err );
     if( err.error != QJsonParseError::NoError ) {
         Error() << QString("Json parse error at pos %1 : '%2'.")
