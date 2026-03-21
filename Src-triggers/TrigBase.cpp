@@ -538,9 +538,9 @@ bool TrigBase::writeAndInvalData(
     quint64     headCt )
 {
     switch( js ) {
-        case jsNI: return writeDataNI( data, headCt );
-        case jsOB: return writeDataOB( data, headCt, ip );
-        case jsIM: return writeDataIM( data, headCt, ip );
+        case jsNI:          return writeDataNI( data, headCt );
+        case jsOB:          return writeDataOB( data, headCt, ip );
+        default /*jsIM*/:   return writeDataIM( data, headCt, ip );
     }
 }
 

@@ -821,6 +821,12 @@ int IMROTbl::selectSites4(
             QThread::msleep( 100 );
         }
     }
+#else
+    Q_UNUSED( slot )
+    Q_UNUSED( port )
+    Q_UNUSED( dock )
+    Q_UNUSED( write )
+    Q_UNUSED( check )
 #endif
 
     return 0;
@@ -863,6 +869,10 @@ int IMROTbl::selectRefs4( int slot, int port, int dock ) const
         if( err != SUCCESS )
             return err;
     }
+#else
+    Q_UNUSED( slot )
+    Q_UNUSED( port )
+    Q_UNUSED( dock )
 #endif
 
     return 0;
@@ -908,6 +918,10 @@ int IMROTbl::selectGains4( int slot, int port, int dock ) const
         if( err != SUCCESS )
             return err;
     }
+#else
+    Q_UNUSED( slot )
+    Q_UNUSED( port )
+    Q_UNUSED( dock )
 #endif
 
     return 0;
@@ -930,6 +944,10 @@ int IMROTbl::selectAPFlts4( int slot, int port, int dock ) const
         if( err != SUCCESS )
             return err;
     }
+#else
+    Q_UNUSED( slot )
+    Q_UNUSED( port )
+    Q_UNUSED( dock )
 #endif
 
     return 0;
@@ -1454,7 +1472,8 @@ QString IMROTbl::strTech( int tech )
         case t_tech_opto:       return "opto";
         case t_tech_nxt_ppa:
         case t_tech_nxt_pa:     return "nxt";
-    }
+        default:                return "unknown";
+   }
 }
 
 

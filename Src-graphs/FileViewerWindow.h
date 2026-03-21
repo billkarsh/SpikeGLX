@@ -344,10 +344,10 @@ public:
     int    tbGetyPix() const
         {
             switch( fType ) {
-                case fvAP: return sav.im.yPixAp;
-                case fvLF: return sav.im.yPixLf;
-                case fvOB: return sav.ob.yPix;
-                case fvNI: return sav.ni.yPix;
+                case fvAP:          return sav.im.yPixAp;
+                case fvLF:          return sav.im.yPixLf;
+                case fvOB:          return sav.ob.yPix;
+                default /*fvNI*/:   return sav.ni.yPix;
             }
         }
     double tbGetyScl() const
@@ -378,19 +378,19 @@ public:
     bool    tbGetTnChkOn() const
         {
             switch( fType ) {
-                case fvAP: return sav.im.tnChkOnAp;
-                case fvLF: return sav.im.tnChkOnLf;
-                case fvOB: return false;
-                case fvNI: return sav.ni.tnChkOn;
+                case fvAP:          return sav.im.tnChkOnAp;
+                case fvLF:          return sav.im.tnChkOnLf;
+                case fvOB:          return false;
+                default /*fvNI*/:   return sav.ni.tnChkOn;
             }
         }
     bool    tbGetTxChkOn() const
         {
             switch( fType ) {
                 case fvAP:
-                case fvLF: return false;
-                case fvOB: return sav.ob.txChkOn;
-                case fvNI: return sav.ni.txChkOn;
+                case fvLF:          return false;
+                case fvOB:          return sav.ob.txChkOn;
+                default /*fvNI*/:   return sav.ni.txChkOn;
             }
         }
     int     tbGetBinMax() const
