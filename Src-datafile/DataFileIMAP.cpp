@@ -338,17 +338,17 @@ void DataFileIMAP::subclassSetSNSChanCounts(
 
     memset( imEachTypeCnt, 0, CimCfg::imNTypes*sizeof(int) );
 
-    while( i < n && snsFileChans[i] < cum[CimCfg::imTypeAP] ) {
+    while( i < n && (int)snsFileChans[i] < cum[CimCfg::imTypeAP] ) {
         ++imEachTypeCnt[CimCfg::imTypeAP];
         ++i;
     }
 
-    while( i < n && snsFileChans[i] < cum[CimCfg::imTypeLF] ) {
+    while( i < n && (int)snsFileChans[i] < cum[CimCfg::imTypeLF] ) {
         ++imEachTypeCnt[CimCfg::imTypeLF];
         ++i;
     }
 
-    while( i < n && snsFileChans[i] < cum[CimCfg::imTypeSY] ) {
+    while( i < n && (int)snsFileChans[i] < cum[CimCfg::imTypeSY] ) {
         ++imEachTypeCnt[CimCfg::imTypeSY];
         ++i;
     }

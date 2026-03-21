@@ -230,22 +230,22 @@ void DataFileNI::subclassSetSNSChanCounts(
 
     memset( niEachTypeCnt, 0, CniCfg::niNTypes*sizeof(int) );
 
-    while( i < n && snsFileChans[i] < cum[CniCfg::niTypeMN] ) {
+    while( i < n && (int)snsFileChans[i] < cum[CniCfg::niTypeMN] ) {
         ++niEachTypeCnt[CniCfg::niTypeMN];
         ++i;
     }
 
-    while( i < n && snsFileChans[i] < cum[CniCfg::niTypeMA] ) {
+    while( i < n && (int)snsFileChans[i] < cum[CniCfg::niTypeMA] ) {
         ++niEachTypeCnt[CniCfg::niTypeMA];
         ++i;
     }
 
-    while( i < n && snsFileChans[i] < cum[CniCfg::niTypeXA] ) {
+    while( i < n && (int)snsFileChans[i] < cum[CniCfg::niTypeXA] ) {
         ++niEachTypeCnt[CniCfg::niTypeXA];
         ++i;
     }
 
-    while( i < n && snsFileChans[i] < cum[CniCfg::niTypeXD] ) {
+    while( i < n && (int)snsFileChans[i] < cum[CniCfg::niTypeXD] ) {
         ++niEachTypeCnt[CniCfg::niTypeXD];
         ++i;
     }

@@ -59,8 +59,8 @@ void FVShankCtl_Im::exportHeat( QFile *f, const double *val )
 
 // Full-size probe map
 
-    for( int is = 0; is < smap->ns; ++is ) {
-        for( int ir = 0; ir < smap->nr; ++ir ) {
+    for( uint is = 0; is < smap->ns; ++is ) {
+        for( uint ir = 0; ir < smap->nr; ++ir ) {
             for( int ic = 0; ic < nchwr; ++ic ) {
                 if( ir & 1 )
                     T[ShankMapDesc(is,col2vis_od[ic],ir,0)] = -1;

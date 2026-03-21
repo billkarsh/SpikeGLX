@@ -29,9 +29,9 @@ void FVShankCtl_Ni::exportHeat( QFile *f, const double *val )
 
 // Full-size probe map
 
-    for( int is = 0; is < smap->ns; ++is ) {
-        for( int ir = 0; ir < smap->nr; ++ir ) {
-            for( int ic = 0; ic < smap->nc; ++ic )
+    for( uint is = 0; is < smap->ns; ++is ) {
+        for( uint ir = 0; ir < smap->nr; ++ir ) {
+            for( uint ic = 0; ic < smap->nc; ++ic )
                 T[ShankMapDesc(is,ic,ir,0)] = -1;
         }
     }

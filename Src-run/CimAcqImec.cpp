@@ -212,7 +212,7 @@ bool ImSimApDat::init( QString &err, const QString &pfName )
 
         if( acq[1] ) {
             for( int sy = acq[2]; sy > 0; --sy ) {
-                if( ig2ic[nG-sy] > acq[0] )
+                if( (int)ig2ic[nG-sy] > acq[0] )
                     ig2ic[nG-sy] = acq[0] + acq[2] - sy;
             }
         }

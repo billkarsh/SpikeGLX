@@ -76,7 +76,7 @@ void ShankView::setShankMap( const ShankMap *map )
 
         if( !bnkRws ) {
             col2vis_ev.clear();
-            for( int col = 0; col < map->nc; ++col )
+            for( uint col = 0; col < map->nc; ++col )
                 col2vis_ev.push_back( col );
             col2vis_od = col2vis_ev;
             vis_evn.assign( map->nc, 1 );
@@ -676,7 +676,7 @@ void ShankView::drawBanks()
     float   halfSep = 0.5f * ROWSEP/(1.0f + ROWSEP);
     int     nL      = smap->nr / bnkRws;
 
-    if( nL * bnkRws >= smap->nr )
+    if( nL * bnkRws >= (int)smap->nr )
         --nL;
 
     glColor3f( GRDCLR, GRDCLR, GRDCLR );
@@ -995,7 +995,7 @@ void ShankScroll::scrollToRow( int row )
         sc_max  = verticalScrollBar()->maximum(),
         pos     = verticalScrollBar()->value() + del;
 
-    if( pos < sc_min || row >= theV->smap->nr - 4 )
+    if( pos < sc_min || row >= (int)theV->smap->nr - 4 )
         pos = sc_min;
     else if( pos > sc_max || row <= 4 )
         pos = sc_max;

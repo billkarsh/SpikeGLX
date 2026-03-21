@@ -154,17 +154,17 @@ void DataFileOB::subclassSetSNSChanCounts(
 
     memset( obEachTypeCnt, 0, CimCfg::obNTypes*sizeof(int) );
 
-    while( i < n && snsFileChans[i] < cum[CimCfg::obTypeXA] ) {
+    while( i < n && (int)snsFileChans[i] < cum[CimCfg::obTypeXA] ) {
         ++obEachTypeCnt[CimCfg::obTypeXA];
         ++i;
     }
 
-    while( i < n && snsFileChans[i] < cum[CimCfg::obTypeXD] ) {
+    while( i < n && (int)snsFileChans[i] < cum[CimCfg::obTypeXD] ) {
         ++obEachTypeCnt[CimCfg::obTypeXD];
         ++i;
     }
 
-    while( i < n && snsFileChans[i] < cum[CimCfg::obTypeSY] ) {
+    while( i < n && (int)snsFileChans[i] < cum[CimCfg::obTypeSY] ) {
         ++obEachTypeCnt[CimCfg::obTypeSY];
         ++i;
     }

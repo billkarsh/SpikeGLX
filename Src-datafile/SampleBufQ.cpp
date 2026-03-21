@@ -58,7 +58,7 @@ bool SampleBufQ::dequeue( vec_i16 &dst, bool wait )
 
         if( N >= actionThresh ) {
 
-            for( int i = 0; N > 0 && dst.size() < joinMax; ++i ) {
+            for( ; N > 0 && dst.size() < joinMax; ) {
 
                 vec_i16 &src = dataQ.front().data;
 

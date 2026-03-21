@@ -128,7 +128,7 @@ ShankMap* DataFileIMLF::shankMap( bool forExport ) const
         // generate
 
         int offset = 0; // AP or LF numbered chans?
-        if( snsFileChans[0] >= imCumTypCnt[CimCfg::imTypeAP] )
+        if( (int)snsFileChans[0] >= imCumTypCnt[CimCfg::imTypeAP] )
             offset = imCumTypCnt[CimCfg::imTypeAP];
 
         roTbl->toShankMap_snsFileChans( *shankMap, snsFileChans, offset );
@@ -343,17 +343,17 @@ void DataFileIMLF::subclassSetSNSChanCounts(
 
     memset( imEachTypeCnt, 0, CimCfg::imNTypes*sizeof(int) );
 
-    while( i < n && snsFileChans[i] < cum[CimCfg::imTypeAP] ) {
+    while( i < n && (int)snsFileChans[i] < cum[CimCfg::imTypeAP] ) {
         ++imEachTypeCnt[CimCfg::imTypeAP];
         ++i;
     }
 
-    while( i < n && snsFileChans[i] < cum[CimCfg::imTypeLF] ) {
+    while( i < n && (int)snsFileChans[i] < cum[CimCfg::imTypeLF] ) {
         ++imEachTypeCnt[CimCfg::imTypeLF];
         ++i;
     }
 
-    while( i < n && snsFileChans[i] < cum[CimCfg::imTypeSY] ) {
+    while( i < n && (int)snsFileChans[i] < cum[CimCfg::imTypeSY] ) {
         ++imEachTypeCnt[CimCfg::imTypeSY];
         ++i;
     }
