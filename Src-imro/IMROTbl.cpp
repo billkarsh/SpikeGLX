@@ -954,7 +954,7 @@ bool IMROTbl::edit_isCanonical( tImroROIs vR ) const
 
     int ne = 0;
 
-    for( int ib = 0; ib < vR.size(); ++ib ) {
+    for( int ib = 0; ib < (int)vR.size(); ++ib ) {
 
         const IMRO_ROI  &B = vR[ib];
         int             w  = B.width( _ncolhwr );

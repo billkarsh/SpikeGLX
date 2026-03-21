@@ -118,7 +118,7 @@ void SOWorker::scan( SOGroup &G, SOStream &S )
             if( 1 != S.aiQ->getNSampsFromCt( data, outCt - 32, WAVEMAX ) )
                 break;
 
-            if( data.size() < WAVEMAX * G.nC )
+            if( (int)data.size() < WAVEMAX * G.nC )
                 break;
 
             src  = &data[G.ch];

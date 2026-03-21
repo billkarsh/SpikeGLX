@@ -486,7 +486,7 @@ bool IMROTbl_T2020::edit_isCanonical( tImroROIs vR ) const
 
     int ne[4] = {0,0,0,0};
 
-    for( int ib = 0; ib < vR.size(); ++ib ) {
+    for( int ib = 0; ib < (int)vR.size(); ++ib ) {
 
         const IMRO_ROI  &B = vR[ib];
         int             w  = B.width( _ncolhwr );
