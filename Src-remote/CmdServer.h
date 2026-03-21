@@ -12,7 +12,7 @@ class ConfigCtl;
 class Run;
 
 namespace DAQ {
-class Params;
+struct Params;
 }
 
 class QTcpSocket;
