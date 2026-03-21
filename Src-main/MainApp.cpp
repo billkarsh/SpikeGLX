@@ -1721,7 +1721,7 @@ void MainApp::runLogErrorToDisk( const QString &e )
         QFile f( QString("%1/%2.errors.txt")
                 .arg( dataDir() )
                 .arg( configCtl->acceptedParams.sns.runName ) );
-        f.open( QIODevice::Append | QIODevice::Text );
+        (void)f.open( QIODevice::Append | QIODevice::Text );
         QTextStream ts( &f );
         ts << e << "\n";
     }
