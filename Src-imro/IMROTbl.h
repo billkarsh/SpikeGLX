@@ -228,11 +228,11 @@ public:
     virtual IMRO_Attr edit_Attr_cur() const     {return IMRO_Attr();}
     virtual bool edit_Attr_canonical() const    {return false;}
     virtual void edit_exclude_1( tImroSites vX, const IMRO_Site &s ) const
-        {vX.clear(); Q_UNUSED( s )}
+        {vX.clear(); Q_UNUSED(s)}
     virtual int edit_site2Chan( const IMRO_Site &s ) const
-        {Q_UNUSED( s ) return 0;}
+        {Q_UNUSED(s) return 0;}
     virtual void edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
-        {Q_UNUSED( vR ) Q_UNUSED( A )}
+        {Q_UNUSED(vR) Q_UNUSED(A)}
     virtual void edit_defaultROI( tImroROIs vR ) const;
     virtual bool edit_isCanonical( tImroROIs vR ) const;
     void edit_tbl2ROI( tImroROIs vR ) const;
