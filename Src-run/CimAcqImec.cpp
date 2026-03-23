@@ -1182,7 +1182,7 @@ void ImAcqWorker::run()
 
         switch( S.fetchType ) {
             case t_fetch_np1: ++nT0; lfLast[iID].assign( S.nLF, 0 ); break;
-            case t_fetch_qb:  nSY = 4;
+            case t_fetch_qb:  nSY = 4;[[fallthrough]];
             case t_fetch_np2: ++nT2; T2Chans = qMax( T2Chans, S.nAP ); break;
             case t_fetch_obx: ++nT2; T2Chans = qMax( T2Chans, OBX_N_ACQ ); break;
         }

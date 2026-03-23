@@ -1274,9 +1274,12 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
             case 3021:  // NXT multishank (Ph 1B) with cap
                 type = 3020;
                 supp = true;
+                break;
             case 3022:  // Neuropixels NXT pre-alpha multishank silicon cap
                 type = 3022;
                 supp = true;
+                break;
+            default:
                 break;
         }
     }

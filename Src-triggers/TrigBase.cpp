@@ -459,7 +459,7 @@ bool TrigBase::nSampsFromCt(
             Q  = obQ[ip];
             iq = nNiQ + ip;
             break;
-        case jsIM:
+        default /*jsIM*/:
             Q  = imQ[ip];
             iq = nNiQ + nObQ + ip;
             break;
@@ -1075,7 +1075,7 @@ bool TrigBase::writeDataIM( vec_i16 &data, quint64 headCt, int ip )
 
                 // need enough data to extrapolate
 
-                if( size / p.stream_nChans( jsIM, ip ) > 12-(headCt%12) )
+                if( size / p.stream_nChans( jsIM, ip ) > 12-int(headCt%12) )
                     xtra = true;
             }
 
