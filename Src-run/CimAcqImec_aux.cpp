@@ -133,7 +133,7 @@ bool CimAcqImec::_aux_initObxSlot( int slot )
 
     for( int ic = 0; ic < imOBX_NCHN; ++ic ) {
 
-        bool    isDAC = vAO.contains( ic );
+        bool    isDAC = vAO.contains( (uint)ic );
 
         err = np_DAC_enableOutput( slot, ic, isDAC );
 
@@ -176,7 +176,7 @@ void CimAcqImec::_aux_doneObxSlot( int slot )
 
     for( int ic = 0; ic < imOBX_NCHN; ++ic ) {
 
-        if( vAO.contains( ic ) ) {
+        if( vAO.contains( (uint)ic ) ) {
             np_DAC_setVoltage( slot, ic, 0 );
             np_DAC_enableOutput( slot, ic, false );
         }

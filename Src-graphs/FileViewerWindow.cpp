@@ -2167,7 +2167,7 @@ void FileViewerWindow::channels_Edit()
                 // true channels, hence, span of ic2ig[], so don't
                 // use ic2ig for this lookup.
 
-                int ig = ig2ic.indexOf( chans[ic] );
+                int ig = ig2ic.indexOf( (int)chans[ic] );
 
                 if( ig >= 0 )
                     grfVisBits.setBit( ig );
@@ -2307,7 +2307,7 @@ void FileViewerWindow::shankmap_Edit()
             // true channels, hence, span of ic2ig[], so don't
             // use ic2ig for this lookup.
 
-            int ig = ig2ic.indexOf( chans[ic] );
+            int ig = ig2ic.indexOf( (int)chans[ic] );
 
             if( ig >= 0 )
                 shankMap->e[ig].u = 0;

@@ -131,7 +131,7 @@ void ShankMap::fillDefaultNiSaved( int nChan, const QVector<uint> &saved )
 
             int chan = 2*ir + ic;
 
-            if( chan < nChan && saved.contains( chan ) )
+            if( chan < nChan && saved.contains( (uint)chan ) )
                 e.push_back( ShankMapDesc( 0, ic, ir, 1 ) );
         }
     }

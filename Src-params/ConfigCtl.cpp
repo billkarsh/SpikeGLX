@@ -1814,7 +1814,7 @@ bool ConfigCtl::validNiChannels(
         QString dev;
         CniCfg::parseDIStr( dev, doStartLine, q.ni.startLine );
 
-        if( dev == q.ni.dev1 && vcXD1.contains( doStartLine ) ) {
+        if( dev == q.ni.dev1 && vcXD1.contains( (uint)doStartLine ) ) {
 
             err =
             "Start output line cannot be used as a digital input"
@@ -1829,7 +1829,7 @@ bool ConfigCtl::validNiChannels(
 
         DAQ::SyncSource sourceIdx = syncTab->curSource();
 
-        if( sourceIdx == DAQ::eSyncSourceNI && vcXD1.contains( 0 ) ) {
+        if( sourceIdx == DAQ::eSyncSourceNI && vcXD1.contains( uint(0) ) ) {
 
             err =
             "Sync output line (0) cannot be used as a digital input"
@@ -1975,7 +1975,7 @@ bool ConfigCtl::validNiChannels(
 
     if( doStartLine >= 0 && vcXD2.count() ) {
 
-        if( vcXD2.contains( doStartLine ) ) {
+        if( vcXD2.contains( (uint)doStartLine ) ) {
 
             err =
             "Common start output line cannot be used as digital"
@@ -2383,7 +2383,7 @@ bool ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
             int xdbits1 = 8 * q.ni.xdBytes1;
 
             if( q.sync.niChan < xdbits1
-                && !vc1.contains( q.sync.niChan ) ) {
+                && !vc1.contains( (uint)q.sync.niChan ) ) {
 
                 err =
                 QString(
@@ -2395,7 +2395,7 @@ bool ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
             }
 
             if( q.sync.niChan >= xdbits1
-                && !vc2.contains( q.sync.niChan - xdbits1 ) ) {
+                && !vc2.contains( uint(q.sync.niChan - xdbits1) ) ) {
 
                 err =
                 QString(
@@ -2727,7 +2727,7 @@ bool ConfigCtl::validNiTriggering( QString &err, DAQ::Params &q ) const
         int xdbits1 = 8 * q.ni.xdBytes1;
 
         if( q.trgTTL.bit < xdbits1
-            && !vc1.contains( q.trgTTL.bit ) ) {
+            && !vc1.contains( (uint)q.trgTTL.bit ) ) {
 
             err =
             QString(
@@ -2739,7 +2739,7 @@ bool ConfigCtl::validNiTriggering( QString &err, DAQ::Params &q ) const
         }
 
         if( q.trgTTL.bit >= xdbits1
-            && !vc2.contains( q.trgTTL.bit - xdbits1 ) ) {
+            && !vc2.contains( uint(q.trgTTL.bit - xdbits1) ) ) {
 
             err =
             QString(

@@ -146,7 +146,7 @@ bool DataFile::openForRead( QString &error, const QString &filename )
     }
 
     if( trgChan != -1 ) {
-        if( trgStream != streamFromObj() || !snsFileChans.contains( trgChan ) )
+        if( trgStream != streamFromObj() || !snsFileChans.contains( (uint)trgChan ) )
             trgChan = -1;
     }
 

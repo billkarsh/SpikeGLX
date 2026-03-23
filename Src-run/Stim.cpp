@@ -866,7 +866,7 @@ QString CStim::obx_wave_arm( int istr, int trig, bool loop )
 
     Subset::rngStr2Vec( vCH, X.AOStr() );
 
-    if( !vCH.contains( 0 ) ) {
+    if( !vCH.contains( uint(0) ) ) {
         return
         QString("Waveplayer channel 0 not enabled on Obx %1 slot %2.")
         .arg( istr ).arg( X.slot );
@@ -877,7 +877,7 @@ QString CStim::obx_wave_arm( int istr, int trig, bool loop )
     if( trig >= 0 ) {
 
         Subset::rngStr2Vec( vCH, X.AIStr() );
-        if( !vCH.contains( trig ) ) {
+        if( !vCH.contains( (uint)trig ) ) {
             return
             QString("Trigger channel %1 not enabled on Obx %2 slot %3.")
             .arg( trig ).arg( istr ).arg( X.slot );
@@ -1036,7 +1036,7 @@ QString CStim::obx_set_AO( int istr, const QString &chn_vlt )
             .arg( val[1] ).arg( istr ).arg( X.slot );
         }
 
-        if( !okc || !vAO.contains( c ) ) {
+        if( !okc || !vAO.contains( (uint)c ) ) {
             return
             QString("Channel '%1' not enabled on Obx %2 slot %3.")
             .arg( val[0] ).arg( istr ).arg( X.slot );
