@@ -882,7 +882,7 @@ void ImAcqStream::fileMissReport() const
 
 
 #define STATBRIDGE( A, B )  \
-    ((1<<11) | ((A|B) & ~(1<<6)) | (A&B) & (1<<6))
+    ((1<<11) | ((A|B) & ~(1<<6)) | ((A&B) & (1<<6)))
 
 void ImAcqStream::checkErrs_EPack( electrodePacket* E, int nE )
 {
