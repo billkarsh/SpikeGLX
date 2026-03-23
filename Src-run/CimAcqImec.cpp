@@ -5,7 +5,7 @@
 #include "Util.h"
 #include "MainApp.h"
 #include "ConfigCtl.h"
-#include "MetricsWindow.h"
+#include "MetricsWindow.h"  // IWYU pragma: keep
 #include "Run.h"
 #include "Subset.h"
 #include "Biquad.h"
