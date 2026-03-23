@@ -53,7 +53,7 @@ public:
         double  calRate;
         QString devType;
         int     div;
-        NIRate() : div(0)   {}
+        NIRate() : calRate( 0 ), div(0) {}
     };
 
     // ------

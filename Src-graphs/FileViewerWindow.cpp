@@ -3030,7 +3030,7 @@ void FileViewerWindow::initGraphs()
     QMenu           *subMenu        = 0;
     int             nG              = (int)grfY.size(),
                     igNewSubMenu    = 0,
-                    nAP,
+                    nAP             = 0,
                     maxInt;
 
     switch( fType ) {
@@ -3535,8 +3535,8 @@ void FileViewerWindow::updateGraphs()
             srate   = df->samplingRateHz();
     int     nG      = df->numChans(),
             nVis    = grfVisBits.count( true ),
-            maxInt,
-            stride;
+            maxInt  = 0,
+            stride  = 0;
 
     switch( fType ) {
         case fvAP:

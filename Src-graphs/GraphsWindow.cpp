@@ -513,7 +513,7 @@ void GraphsWindow::installLeft( QSplitter *sp )
     if( !SEL->lChanged() )
         return;
 
-    QWidget *w;
+    QWidget *w      = 0;
     int     ip, js  = SEL->ljsip( ip ),
             jpanel  = 2 * igw;
     bool    vis;
@@ -567,7 +567,7 @@ bool GraphsWindow::installRight( QSplitter *sp )
 
             if( SEL->rChanged() ) {
 
-                QWidget *w;
+                QWidget *w      = 0;
                 int     ip, js  = SEL->rjsip( ip ),
                         jpanel  = 2*igw + 1;
                 bool    vis     = rW->isShankVis();
@@ -611,7 +611,7 @@ bool GraphsWindow::installRight( QSplitter *sp )
 
     if( SEL->grid() ) {
 
-        QWidget *w;
+        QWidget *w      = 0;
         int     ip, js  = SEL->rjsip( ip ),
                 jpanel  = 2*igw + 1;
 
