@@ -412,7 +412,7 @@ void ShankView::resizePads()
                     else
                         c = (visevn[ic] ? GRDCLR : SHKCLR);
 
-                    memset( C, c*255, 4*sizeof(SColor) );
+                    memset( (void*)C, c*255, 4*sizeof(SColor) );
                 }
             }
         }
@@ -442,7 +442,7 @@ void ShankView::resizePads()
         V[7] = T;
 
         if( !E.u )
-            memset( &vRclr[4*i], c, 4*sizeof(SColor) );
+            memset( (void*)&vRclr[4*i], c, 4*sizeof(SColor) );
     }
 }
 
