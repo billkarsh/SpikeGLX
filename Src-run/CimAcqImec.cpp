@@ -759,13 +759,10 @@ ImAcqStream::ImAcqStream(
         nLF = cum[CimCfg::imTypeLF] - nAP;
         nCH = cum[CimCfg::imSumAll];
 
-        const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
-        slot = P.slot;
-        port = P.port;
-        dock = P.dock;
+        adr = T.get_iProbe( ip ).adr;
 
         fetchType   = E.roTbl->apiFetchType();
-        simType     = T.simprb.isSimProbe( slot, port, dock );
+        simType     = T.simprb.isSimProbe( adr );
     }
     else {
 
@@ -778,10 +775,7 @@ ImAcqStream::ImAcqStream(
         nXD = cum[CimCfg::obTypeXD] - nXA;
         nCH = cum[CimCfg::obSumAll];
 
-        const CimCfg::ImProbeDat    &P = T.get_iOneBox( p.im.obx_istr2isel( ip ) );
-        slot = P.slot;
-        port = P.port;
-        dock = P.dock;
+        adr = T.get_iOneBox( p.im.obx_istr2isel( ip ) ).adr;
 
         fetchType = t_fetch_obx;
     }
@@ -1191,9 +1185,9 @@ void ImAcqWorker::run()
 
 #ifdef GENSERDES
         if( S.js == jsIM && GENSERDES == S.ip ) {
-            np_configureSerDesErrorGenerator( S.slot, S.port,
+            np_configureSerDesErrorGenerator( S.adr.slot, S.adr.port,
                 SERDES_ERROR_RATE_MEDIUM, SERDES_ERROR_COUNT_1024 );
-            np_enableSerDesErrorGenerator( S.slot, S.port, true );
+            np_enableSerDesErrorGenerator( S.adr.slot, S.adr.port, true );
         }
 #endif
     }
@@ -1300,7 +1294,7 @@ exit:
 
 #ifdef GENSERDES
         if( S.js == jsIM && GENSERDES == S.ip )
-            np_enableSerDesErrorGenerator( S.slot, S.port, false );
+            np_enableSerDesErrorGenerator( S.adr.slot, S.adr.port, false );
 #endif
     }
 
@@ -1491,7 +1485,8 @@ bool ImAcqWorker::doProbe_T2( vec_i16 &dst1D, ImAcqStream &S )
         int fmin = MAXE * TPNTPERFETCH, fifo, empty;
         if( !S.simType ) {
             for( int is = 0; is < 4; ++is ) {
-                np_getPacketFifoStatus( S.slot, S.port, S.dock,
+                np_getPacketFifoStatus(
+                    S.adr.slot, S.adr.port, S.adr.dock,
                     streamsource_t(is), &fifo, &empty );
                 fmin = qMin( fmin, fifo );
             }
@@ -2172,7 +2167,7 @@ void CimAcqImec::update( int ip )
     const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
     NP_ErrorCode                err;
 
-    pauseSlot( P.slot );
+    pauseSlot( P.adr.slot );
 
     while( !pauseAllAck() )
         QThread::usleep( 100 );
@@ -2181,12 +2176,12 @@ void CimAcqImec::update( int ip )
 // Stop streams this slot
 // ----------------------
 
-    err = np_arm( P.slot );
+    err = np_arm( P.adr.slot );
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC arm(slot %1)%2")
-            .arg( P.slot ).arg( makeErrorString( err ) ) );
+            QString("IMEC arm(%1)%2")
+            .arg( P.adr.tx_s() ).arg( makeErrorString( err ) ) );
         return;
     }
 
@@ -2216,21 +2211,22 @@ void CimAcqImec::update( int ip )
 // Set slot to software triggering
 // -------------------------------
 
-    err = np_switchmatrix_clear( P.slot, SM_Output_AcquisitionTrigger );
+    err = np_switchmatrix_clear( P.adr.slot, SM_Output_AcquisitionTrigger );
 
     if( err != SUCCESS  ) {
         runError(
-            QString("IMEC switchmatrix_clear(slot %1)%2")
-            .arg( P.slot ).arg( makeErrorString( err ) ) );
+            QString("IMEC switchmatrix_clear(%1)%2")
+            .arg( P.adr.tx_s() ).arg( makeErrorString( err ) ) );
         return;
     }
 
-    err = np_switchmatrix_set( P.slot, SM_Output_AcquisitionTrigger, SM_Input_SWTrigger1, true );
+    err = np_switchmatrix_set(
+            P.adr.slot, SM_Output_AcquisitionTrigger, SM_Input_SWTrigger1, true );
 
     if( err != SUCCESS  ) {
         runError(
-            QString("IMEC switchmatrix_set(slot %1)%2")
-            .arg( P.slot ).arg( makeErrorString( err ) ) );
+            QString("IMEC switchmatrix_set(%1)%2")
+            .arg( P.adr.tx_s() ).arg( makeErrorString( err ) ) );
         return;
     }
 
@@ -2238,12 +2234,12 @@ void CimAcqImec::update( int ip )
 // Arm the slot
 // ------------
 
-    err = np_arm( P.slot );
+    err = np_arm( P.adr.slot );
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC arm(slot %1)%2")
-            .arg( P.slot ).arg( makeErrorString( err ) ) );
+            QString("IMEC arm(%1)%2")
+            .arg( P.adr.tx_s() ).arg( makeErrorString( err ) ) );
         return;
     }
 
@@ -2251,12 +2247,12 @@ void CimAcqImec::update( int ip )
 // Restart the slot
 // ----------------
 
-    err = np_setSWTrigger( P.slot );
+    err = np_setSWTrigger( P.adr.slot );
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setSWTrigger(slot %1)%2")
-            .arg( P.slot ).arg( makeErrorString( err ) ) );
+            QString("IMEC setSWTrigger(%1)%2")
+            .arg( P.adr.tx_s() ).arg( makeErrorString( err ) ) );
         return;
     }
 
@@ -2278,7 +2274,7 @@ void CimAcqImec::update( int ip )
     if( p.im.prbAll.qf_on )
         acqShr.updateCAR( ip );
 
-    if( T.simprb.isSimProbe( P.slot, P.port, P.dock ) )
+    if( T.simprb.isSimProbe( P.adr ) )
         return;
 
     if( !_1t_selectElectrodes( P ) )
@@ -2325,11 +2321,12 @@ QString CimAcqImec::opto_getAttens( int ip, int color )
         for( int site = 0; site < nSite; ++site ) {
 
             err = np_getEmissionSiteAttenuation(
-                    P.slot, P.port, P.dock, wavelength_t(color), site, &atten );
+                    P.adr.slot, P.adr.port, P.adr.dock,
+                    wavelength_t(color), site, &atten );
 
             if( err != SUCCESS ) {
-                msg = QString("IMEC getEmissionSiteAttenuation(slot %1, port %2)%3")
-                        .arg( P.slot ).arg( P.port ).arg( makeErrorString( err ) );
+                msg = QString("IMEC getEmissionSiteAttenuation(%1)%2")
+                        .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) );
                 runError( msg );
                 break;
             }
@@ -2354,20 +2351,23 @@ QString CimAcqImec::opto_emit( int ip, int color, int site )
         QString("OPTOEMIT: Probe (ip %1) is not an optical probe.").arg( ip );
     }
     else if( site >= 0 ) {
-        err = np_setEmissionSite( P.slot, P.port, P.dock, wavelength_t(color), site );
+        err = np_setEmissionSite(
+                P.adr.slot, P.adr.port, P.adr.dock,
+                wavelength_t(color), site );
 
         if( err != SUCCESS ) {
-            msg = QString("IMEC setEmissionSite(slot %1, port %2)%3")
-                    .arg( P.slot ).arg( P.port ).arg( makeErrorString( err ) );
+            msg = QString("IMEC setEmissionSite(%1)%2")
+                    .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) );
             runError( msg );
         }
     }
     else {
-        err = np_disableEmissionPath( P.slot, P.port, P.dock, wavelength_t(color) );
+        err = np_disableEmissionPath(
+                P.adr.slot, P.adr.port, P.adr.dock, wavelength_t(color) );
 
         if( err != SUCCESS ) {
-            msg = QString("IMEC disableEmissionPath(slot %1, port %2)%3")
-                    .arg( P.slot ).arg( P.port ).arg( makeErrorString( err ) );
+            msg = QString("IMEC disableEmissionPath(%1)%2")
+                    .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) );
             runError( msg );
         }
     }
@@ -2391,13 +2391,12 @@ void CimAcqImec::pauseSlot( int slot )
 }
 
 
-bool CimAcqImec::pauseAck( int port, int dock )
+bool CimAcqImec::pauseAck( const PAddr& adr )
 {
     QMutexLocker    ml( &runMtx );
-    int             key = 10 * port + dock;
-    bool            wasAck = pausStreamsReported.contains( key );
+    bool            wasAck = pausStreamsReported.contains( adr );
 
-    pausStreamsReported.insert( key );
+    pausStreamsReported.insert( adr );
     return wasAck;
 }
 
@@ -2424,10 +2423,10 @@ bool CimAcqImec::fetchE_T0( int &nE, electrodePacket* E, ImAcqStream &S )
 // Hardware pause acknowledged here
 // --------------------------------
 
-    if( pausedSlot() == S.slot ) {
+    if( pausedSlot() == S.adr.slot ) {
 
 ackPause:
-        if( !pauseAck( S.port, S.dock ) )
+        if( !pauseAck( S.adr ) )
             S.zeroFill = true;
 
         return true;
@@ -2455,8 +2454,10 @@ ackPause:
     int             out;
     NP_ErrorCode    err = SUCCESS;
 
-    if( !S.simType )
-        err = np_readElectrodeData( S.slot, S.port, S.dock, E, &out, MAXE );
+    if( !S.simType ) {
+        err = np_readElectrodeData(
+                S.adr.slot, S.adr.port, S.adr.dock, E, &out, MAXE );
+    }
     else
         simDat[ip2simdat[S.ip]].fetchT0( E, &out );
 
@@ -2482,15 +2483,14 @@ if( S.ip == 0 ) {
     if( err != SUCCESS ) {
 
 #ifdef PAUSEWHOLESLOT
-        if( pausedSlot() == S.slot )
+        if( pausedSlot() == S.adr.slot )
             goto ackPause;
 #endif
 
         runError(
             QString(
-            "IMEC readElectrodeData(slot %1, port %2, dock %3)%4")
-            .arg( S.slot ).arg( S.port ).arg( S.dock )
-            .arg( makeErrorString( err ) ) );
+            "IMEC readElectrodeData(%1)%2")
+            .arg( S.adr.tx_spd() ).arg( makeErrorString( err ) ) );
         return false;
     }
 
@@ -2577,10 +2577,10 @@ bool CimAcqImec::fetchD_T2(
 // Hardware pause acknowledged here
 // --------------------------------
 
-    if( pausedSlot() == S.slot ) {
+    if( pausedSlot() == S.adr.slot ) {
 
 ackPause:
-        if( !pauseAck( S.port, S.dock ) )
+        if( !pauseAck( S.adr ) )
             S.zeroFill = true;
 
         return true;
@@ -2610,7 +2610,7 @@ ackPause:
 
     if( !S.simType ) {
         err = np_readPackets(
-                S.slot, S.port, S.dock, shank,
+                S.adr.slot, S.adr.port, S.adr.dock, shank,
                 H, D, nC, smpMax, &out );
     }
     else
@@ -2638,15 +2638,14 @@ if( S.ip == 0 && shank == SourceAP ) {
     if( err != SUCCESS ) {
 
 #ifdef PAUSEWHOLESLOT
-        if( pausedSlot() == S.slot )
+        if( pausedSlot() == S.adr.slot )
             goto ackPause;
 #endif
 
         runError(
             QString(
-            "IMEC readPackets(slot %1, port %2, dock %3)%4")
-            .arg( S.slot ).arg( S.port ).arg( S.dock )
-            .arg( makeErrorString( err ) ) );
+            "IMEC readPackets(%1)%2")
+            .arg( S.adr.tx_spd() ).arg( makeErrorString( err ) ) );
         return false;
     }
 
@@ -2707,10 +2706,10 @@ bool CimAcqImec::fetch_obx( int &nT, PacketInfo* H, qint16* D, ImAcqStream &S )
 // Hardware pause acknowledged here
 // --------------------------------
 
-    if( pausedSlot() == S.slot ) {
+    if( pausedSlot() == S.adr.slot ) {
 
 ackPause:
-        if( !pauseAck( S.port, S.dock ) )
+        if( !pauseAck( S.adr ) )
             S.zeroFill = true;
 
         return true;
@@ -2739,7 +2738,7 @@ ackPause:
     NP_ErrorCode    err = SUCCESS;
 
     err = np_ADC_readPackets(
-            S.slot, H, D, OBX_N_ACQ, MAXE * TPNTPERFETCH, &out );
+            S.adr.slot, H, D, OBX_N_ACQ, MAXE * TPNTPERFETCH, &out );
 
 // @@@ FIX Experiment to report fetched packet count vs time.
 #ifdef LATENCYFILE
@@ -2763,14 +2762,14 @@ if( S.ip == 0 ) {
     if( err != SUCCESS ) {
 
 #ifdef PAUSEWHOLESLOT
-        if( pausedSlot() == S.slot )
+        if( pausedSlot() == S.adr.slot )
             goto ackPause;
 #endif
 
         runError(
             QString(
-            "IMEC ADC_readPackets(slot %1)%2")
-            .arg( S.slot ).arg( makeErrorString( err ) ) );
+            "IMEC ADC_readPackets(%1)%2")
+            .arg( S.adr.tx_s() ).arg( makeErrorString( err ) ) );
         return false;
     }
 
@@ -2830,7 +2829,7 @@ int CimAcqImec::fifoPct( int *packets, ImAcqStream &S ) const
     int pct = 0;
 
 #ifdef PAUSEWHOLESLOT
-    if( pausedSlot() != S.slot ) {
+    if( pausedSlot() != S.adr.slot ) {
 #else
     if( 1 ) {
 #endif
@@ -2846,22 +2845,22 @@ int CimAcqImec::fifoPct( int *packets, ImAcqStream &S ) const
             switch( S.fetchType ) {
                 case t_fetch_np1:
                     err = np_getElectrodeDataFifoState(
-                            S.slot, S.port, S.dock, packets, &nempty );
+                            S.adr.slot, S.adr.port, S.adr.dock,
+                            packets, &nempty );
                     if( err != SUCCESS ) {
                         Warning() <<
-                            QString("IMEC getElectrodeDataFifoState(slot %1, port %2, dock %3)%4")
-                            .arg( S.slot ).arg( S.port ).arg( S.dock )
-                            .arg( makeErrorString( err ) );
+                            QString("IMEC getElectrodeDataFifoState(%1)%2")
+                            .arg( S.adr.tx_spd() ).arg( makeErrorString( err ) );
                     }
                     break;
                 case t_fetch_np2:
                     err = np_getPacketFifoStatus(
-                            S.slot, S.port, S.dock, SourceAP, packets, &nempty );
+                            S.adr.slot, S.adr.port, S.adr.dock,
+                            SourceAP, packets, &nempty );
                     if( err != SUCCESS ) {
                         Warning() <<
-                            QString("IMEC getPacketFifoStatus(slot %1, port %2, dock %3)%4")
-                            .arg( S.slot ).arg( S.port ).arg( S.dock )
-                            .arg( makeErrorString( err ) );
+                            QString("IMEC getPacketFifoStatus(%1)%2")
+                            .arg( S.adr.tx_spd() ).arg( makeErrorString( err ) );
                     }
                     break;
                 case t_fetch_qb:
@@ -2870,13 +2869,12 @@ int CimAcqImec::fifoPct( int *packets, ImAcqStream &S ) const
                         fmax = 0;
                     for( int is = 0; is < 4; ++is ) {
                         err = np_getPacketFifoStatus(
-                            S.slot, S.port, S.dock,
+                            S.adr.slot, S.adr.port, S.adr.dock,
                             streamsource_t(is), packets, &nempty );
                         if( err != SUCCESS ) {
                             Warning() <<
-                                QString("IMEC getPacketFifoStatus(slot %1, port %2, dock %3)%4")
-                                .arg( S.slot ).arg( S.port ).arg( S.dock )
-                                .arg( makeErrorString( err ) );
+                                QString("IMEC getPacketFifoStatus(%1)%2")
+                                .arg( S.adr.tx_spd() ).arg( makeErrorString( err ) );
                         }
                         S.sqb.each[is] += *packets;
                         fmin = qMin( fmin, *packets );
@@ -2888,11 +2886,12 @@ int CimAcqImec::fifoPct( int *packets, ImAcqStream &S ) const
                     }
                     break;
                 case t_fetch_obx:
-                    err = np_ADC_getPacketFifoStatus( S.slot, packets, &nempty );
+                    err = np_ADC_getPacketFifoStatus(
+                            S.adr.slot, packets, &nempty );
                     if( err != SUCCESS ) {
                         Warning() <<
-                            QString("IMEC ADC_getPacketFifoStatus(slot %1)%2")
-                            .arg( S.slot ).arg( makeErrorString( err ) );
+                            QString("IMEC ADC_getPacketFifoStatus(%1)%2")
+                            .arg( S.adr.tx_s() ).arg( makeErrorString( err ) );
                     }
                     break;
             }

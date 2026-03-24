@@ -1112,7 +1112,7 @@ QString CniCfg::devType( const QString &dev )
     return type;
 }
 #else
-QString CniCfg::devType( const QString &dev )
+QString CniCfg::devType( const QString & )
 {
     return SIMAIDEV;
 }
@@ -1588,10 +1588,8 @@ Error_Out:
     return e;
 }
 #else
-QString CniCfg::setDO( const QString &lines, quint32 bits )
+QString CniCfg::setDO( const QString &, quint32 )
 {
-    Q_UNUSED( lines )
-    Q_UNUSED( bits )
     return QString();
 }
 #endif

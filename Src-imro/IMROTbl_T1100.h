@@ -31,7 +31,7 @@ struct IMROTbl_T1100 : public IMROTbl_T0base
 
 // Hardware
 
-    virtual int selectSites4( int, int, int, bool, bool ) const  {return 0;}
+    virtual int selectSites4( const PAddr&, bool, bool ) const  {return 0;}
 };
 
 #endif  // IMROTBL_T1100_H

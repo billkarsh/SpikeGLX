@@ -1,5 +1,4 @@
 
-#include "SimProbes.h"
 #include "Util.h"
 #include "CimCfg.h"
 
@@ -100,16 +99,16 @@ bool SimProbes::isSimSlot( int slot ) const
 }
 
 
-bool SimProbes::isSimProbe( int slot, int port, int dock ) const
+bool SimProbes::isSimProbe( const PAddr &adr ) const
 {
-    return slot >= CimCfg::imSlotSIMMin ||
-            maddr.contains( SPAddr( slot, port, dock, true ) );
+    return adr.slot >= CimCfg::imSlotSIMMin ||
+           maddr.contains( SPAddr( adr, true ) );
 }
 
 
-QString SimProbes::file( int slot, int port, int dock ) const
+QString SimProbes::file( const PAddr &adr ) const
 {
-    return maddr[SPAddr( slot, port, dock, true )];
+    return maddr[SPAddr( adr, true )];
 }
 
 

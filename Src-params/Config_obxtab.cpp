@@ -147,7 +147,7 @@ QString Config_obxtab::remoteSetObxEach( const QString &s, int istr )
     ConfigCtl           *C      = mainApp()->cfgCtl();
     const DAQ::Params   &p      = C->acceptedParams;
     int                 isel    = p.im.obx_istr2isel( istr ),
-                        slot    = C->prbTab.get_iOneBox( isel ).slot;
+                        slot    = C->prbTab.get_iOneBox( isel ).adr.slot;
     CimCfg::ObxEach     &E      = each[isel];
     QTextStream         ts( s.toUtf8(), QIODevice::ReadOnly | QIODevice::Text );
     QString             line;

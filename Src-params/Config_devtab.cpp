@@ -362,27 +362,27 @@ void Config_devtab::imWriteCurrent()
 
             const CimCfg::ImProbeDat    &P = T.get_kTblEntry( k );
 
-            if( !P.enab || P.slot != it.key() )
+            if( !P.enab || P.adr.slot != it.key() )
                 continue;
 
             imWrite(
-                QString("HS(slot %1, port %2) part number %3")
-                .arg( P.slot ).arg( P.port ).arg( P.hspn ) );
+                QString("HS(%1) part number %2")
+                .arg( P.adr.tx_sp() ).arg( P.hspn ) );
             imWrite(
-                QString("HS(slot %1, port %2) hardware version %3")
-                .arg( P.slot ).arg( P.port ).arg( P.hshw ) );
+                QString("HS(%1) hardware version %2")
+                .arg( P.adr.tx_sp() ).arg( P.hshw ) );
             imWrite(
-                QString("HS(slot %1, port %2) firmware version %3")
-                .arg( P.slot ).arg( P.port ).arg( P.hsfw ) );
+                QString("HS(%1) firmware version %2")
+                .arg( P.adr.tx_sp() ).arg( P.hsfw ) );
             imWrite(
-                QString("FX(slot %1, port %2, dock %3) part number %4")
-                .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( P.fxpn ) );
+                QString("FX(%1) part number %2")
+                .arg( P.adr.tx_spd() ).arg( P.fxpn ) );
             imWrite(
-                QString("FX(slot %1, port %2, dock %3) serial number %4")
-                .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( P.fxsn ) );
+                QString("FX(%1) serial number %2")
+                .arg( P.adr.tx_spd() ).arg( P.fxsn ) );
             imWrite(
-                QString("FX(slot %1, port %2, dock %3) hardware version %4")
-                .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( P.fxhw ) );
+                QString("FX(%1) hardware version %2")
+                .arg( P.adr.tx_spd() ).arg( P.fxhw ) );
         }
     }
 
@@ -540,7 +540,7 @@ void Config_devtab::psvPNRemote( const QVector<int> &vP )
 
     foreach( int ip, vP ) {
         const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
-        key   += QString("(%1,%2) ").arg( P.slot ).arg( P.port );
+        key   += QString("(%1,%2) ").arg( P.adr.slot ).arg( P.adr.port );
         pnval += QString(",%1").arg( P.pn );
         snval += QString(",%1").arg( P.sn );
     }
@@ -574,7 +574,7 @@ void Config_devtab::psvPNDialog( const QVector<int> &vP )
     foreach( int ip, vP ) {
 
         const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
-        key += QString("(%1,%2) ").arg( P.slot ).arg( P.port );
+        key += QString("(%1,%2) ").arg( P.adr.slot ).arg( P.adr.port );
     }
 
     ui.keyLbl->setText( key = key.trimmed() );
@@ -659,13 +659,13 @@ runDialog:
 
         for( int ip = 0, np = vP.size(); ip < np; ++ip ) {
 
-            const CimCfg::ImProbeDat    &P = T.get_iProbe( vP[ip] );
+            const PAddr&    A = T.get_iProbe( vP[ip] ).adr;
 
             for( int k = 0; k < nTbl; ++k ) {
 
                 CimCfg::ImProbeDat  &Ptb = T.mod_iProbe( k );
 
-                if( Ptb.slot == P.slot && Ptb.port == P.port ) {
+                if( Ptb.adr == A ) {
                     Ptb.pn = slpn.at( ip ).trimmed();
                     Ptb.sn = slsn.at( ip ).toLongLong();
                 }
@@ -712,7 +712,7 @@ void Config_devtab::HSSNDialog( const QVector<int> &vP )
     foreach( int ip, vP ) {
 
         const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
-        key += QString("(%1,%2) ").arg( P.slot ).arg( P.port );
+        key += QString("(%1,%2) ").arg( P.adr.slot ).arg( P.adr.port );
     }
 
     ui.keyLbl->setText( key = key.trimmed() );
@@ -759,13 +759,13 @@ runDialog:
 
         for( int ip = 0, np = vP.size(); ip < np; ++ip ) {
 
-            const CimCfg::ImProbeDat    &P = T.get_iProbe( vP[ip] );
+            const PAddr&    A = T.get_iProbe( vP[ip] ).adr;
 
             for( int k = 0; k < nTbl; ++k ) {
 
                 CimCfg::ImProbeDat  &Ptb = T.mod_iProbe( k );
 
-                if( Ptb.slot == P.slot && Ptb.port == P.port )
+                if( Ptb.adr == A )
                     Ptb.hssn = sl.at( ip ).toInt();
             }
         }

@@ -3,7 +3,7 @@
 
 #include "CniAcqDmx.h"
 #include "Util.h"
-#include "MainApp.h"
+#include "MainApp.h"    // IWYU pragma: keep
 #include "Subset.h"
 
 #include <QThread>

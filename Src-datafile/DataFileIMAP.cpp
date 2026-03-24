@@ -246,12 +246,12 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
     kvp["~muxTbl"]          = E.roTbl->muxTable_toString();
 
     kvp["imDatApi"]         = T.api;
-    kvp["imDatBs_fw"]       = T.slot2Vers[P.slot].bsfw;
-    kvp["imDatBsc_pn"]      = T.slot2Vers[P.slot].bscpn;
-    kvp["imDatBsc_sn"]      = T.slot2Vers[P.slot].bscsn;
-    kvp["imDatBsc_hw"]      = T.slot2Vers[P.slot].bschw;
-    kvp["imDatBsc_fw"]      = T.slot2Vers[P.slot].bscfw;
-    kvp["imDatBsc_tech"]    = IMROTbl::strTech( T.slot2Vers[P.slot].bsctech );
+    kvp["imDatBs_fw"]       = T.slot2Vers[P.adr.slot].bsfw;
+    kvp["imDatBsc_pn"]      = T.slot2Vers[P.adr.slot].bscpn;
+    kvp["imDatBsc_sn"]      = T.slot2Vers[P.adr.slot].bscsn;
+    kvp["imDatBsc_hw"]      = T.slot2Vers[P.adr.slot].bschw;
+    kvp["imDatBsc_fw"]      = T.slot2Vers[P.adr.slot].bscfw;
+    kvp["imDatBsc_tech"]    = IMROTbl::strTech( T.slot2Vers[P.adr.slot].bsctech );
     kvp["imDatHs_pn"]       = P.hspn;
     kvp["imDatHs_sn"]       = P.hssn;
     kvp["imDatHs_hw"]       = P.hshw;
@@ -259,10 +259,10 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imDatFx_pn"]       = P.fxpn;
     kvp["imDatFx_sn"]       = P.fxsn;
     kvp["imDatFx_hw"]       = P.fxhw;
-    kvp["imDatPrb_dock"]    = P.dock;
+    kvp["imDatPrb_dock"]    = P.adr.dock;
     kvp["imDatPrb_pn"]      = P.pn;
-    kvp["imDatPrb_port"]    = P.port;
-    kvp["imDatPrb_slot"]    = P.slot;
+    kvp["imDatPrb_port"]    = P.adr.port;
+    kvp["imDatPrb_slot"]    = P.adr.slot;
     kvp["imDatPrb_sn"]      = P.sn;
     kvp["imDatPrb_sr_nok"]  = P.sr_nok;
     kvp["imDatPrb_sr_mask"] = P.sr_mask;

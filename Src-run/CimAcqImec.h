@@ -15,7 +15,7 @@ class QFile;
 using namespace Neuropixels;
 
 // Older method: Do update( int ip ) only if whole slot paused
-//#define PAUSEWHOLESLOT
+// #define PAUSEWHOLESLOT
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
@@ -339,6 +339,7 @@ struct ImAcqStream {
                 errPOP[4],
                 errSYNC[4],
                 errMISS[4];
+    PAddr       adr;
     int         fifoAve,
                 fifoN,
                 sumN;
@@ -349,9 +350,6 @@ struct ImAcqStream {
                 nXA,
                 nXD,
                 nCH,
-                slot,
-                port,
-                dock,
                 fetchType;
     quint16     statusLastFetch;
     bool        simType;
@@ -447,7 +445,7 @@ private:
     std::vector<int>            ip2simdat;
     ImSimPrbThread              *simThd;
 #ifdef PAUSEWHOLESLOT
-    QSet<int>                   pausStreamsReported;
+    QSet<PAddr>                 pausStreamsReported;
     int                         pausStreamsRequired,
                                 pausSlot;
 #endif
@@ -469,7 +467,7 @@ private:
 #ifdef PAUSEWHOLESLOT
     void pauseSlot( int slot );
     int  pausedSlot() const {QMutexLocker ml( &runMtx ); return pausSlot;}
-    bool pauseAck( int port, int dock );
+    bool pauseAck( const PAddr& adr );
     bool pauseAllAck() const;
 #endif
 

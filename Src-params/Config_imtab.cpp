@@ -526,8 +526,10 @@ void Config_imtab::forceBut()
         if( !pn.isEmpty() )
             P.pn = pn;
 
-        if( !sn.isEmpty() || !pn.isEmpty() )
-            CimCfg::forceProbeData( P.slot, P.port, P.dock, sn, pn );
+        if( !sn.isEmpty() || !pn.isEmpty() ) {
+            CimCfg::forceProbeData(
+                P.adr.slot, P.adr.port, P.adr.dock, sn, pn );
+        }
     }
 }
 
@@ -657,10 +659,9 @@ void Config_imtab::onDetect()
         // -----------------------
 
         if( it == end &&
-            cfg->prbTab.simprb.isSimProbe( P.slot, P.port, P.dock ) ) {
+            cfg->prbTab.simprb.isSimProbe( P.adr ) ) {
 
-            QString file = cfg->prbTab.simprb.file( P.slot, P.port, P.dock )
-                            + ".ap.meta";
+            QString file = cfg->prbTab.simprb.file( P.adr ) + ".ap.meta";
 
             KVParams    kvp;
             kvp.fromMetaFile( file );

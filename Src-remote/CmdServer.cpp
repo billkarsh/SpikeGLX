@@ -396,7 +396,7 @@ void CmdWorker::getOneBoxAddrs( QString &resp )
         resp.clear();
         for( int ip = 0; ip < np; ++ip ) {
             const CimCfg::ImProbeDat    &P = T.get_iOneBox( ip );
-            resp += QString("(%1,%2)").arg( ip ).arg( P.slot );
+            resp += QString("(%1,%2)").arg( ip ).arg( P.adr.slot );
         }
     }
 
@@ -526,7 +526,8 @@ void CmdWorker::getProbeAddrs( QString &resp )
         for( int ip = 0; ip < np; ++ip ) {
             const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
             resp += QString("(%1,%2,%3,%4)")
-                    .arg( ip ).arg( P.slot ).arg( P.port ).arg( P.dock );
+                    .arg( ip ).arg( P.adr.slot )
+                    .arg( P.adr.port ).arg( P.adr.dock );
         }
     }
 
@@ -761,7 +762,7 @@ void CmdWorker::getStreamSN( QString &resp, const QStringList &toks )
                 const DAQ::Params           &p = C->acceptedParams;
                 const CimCfg::ImProbeDat    &P = C->prbTab.get_iOneBox(
                                                     p.im.obx_istr2isel( ip ) );
-                resp = QString("%1 %2\n").arg( P.obsn ).arg( P.slot );
+                resp = QString("%1 %2\n").arg( P.obsn ).arg( P.adr.slot );
             }
             break;
         case jsIM:

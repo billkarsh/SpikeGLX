@@ -1157,7 +1157,7 @@ QString ConfigCtl::cmdSrvSelectsDevices( const QString &devstring, int errlvl )
                     int slot = tl[0].toInt();
                     for( int k = 0, nk = prbTab.nTblEntries(); k < nk; ++k ) {
                         CimCfg::ImProbeDat  &P = prbTab.mod_kTblEntry( k );
-                        if( P.slot == slot && P.isOneBox() ) {
+                        if( P.adr.slot == slot && P.isOneBox() ) {
                             P.enab          = true;
                             p.im.enabled    = true;
                             goto next_device;
@@ -1175,12 +1175,10 @@ QString ConfigCtl::cmdSrvSelectsDevices( const QString &devstring, int errlvl )
                 break;
             case 3:
                 {
-                    int slot = tl[0].toInt(),
-                        port = tl[1].toInt(),
-                        dock = tl[2].toInt();
+                    PAddr   A(tl[0].toInt(), tl[1].toInt(), tl[2].toInt());
                     for( int k = 0, nk = prbTab.nTblEntries(); k < nk; ++k ) {
                         CimCfg::ImProbeDat  &P = prbTab.mod_kTblEntry( k );
-                        if( P.slot == slot && P.port == port && P.dock == dock ) {
+                        if( P.adr == A ) {
                             P.enab          = true;
                             p.im.enabled    = true;
                             goto next_device;
@@ -1194,9 +1192,8 @@ QString ConfigCtl::cmdSrvSelectsDevices( const QString &devstring, int errlvl )
                 {
                     QString pn   = tl[2];
                     quint64 sn   = tl[3].toLongLong();
-                    int     slot = tl[0].toInt(),
-                            port = tl[1].toInt(),
-                            type;
+                    PAddr   A( tl[0].toInt(), tl[1].toInt(), 1 );
+                    int     type;
                     IMROTbl::pnToType( type, pn );
                     if( type != 1200 ) {
                         R.put(
@@ -1206,7 +1203,7 @@ QString ConfigCtl::cmdSrvSelectsDevices( const QString &devstring, int errlvl )
                     }
                     for( int k = 0, nk = prbTab.nTblEntries(); k < nk; ++k ) {
                         CimCfg::ImProbeDat  &P = prbTab.mod_kTblEntry( k );
-                        if( P.slot == slot && P.port == port && P.dock == 1 ) {
+                        if( P.adr == A ) {
                             P.pn            = pn;
                             P.sn            = sn;
                             P.enab          = true;
@@ -1470,24 +1467,23 @@ bool ConfigCtl::validImLEDs( QString &err, DAQ::Params &q ) const
 
     for( int ip = np - 1; ip > 0; --ip ) {
 
-        const CimCfg::ImProbeDat  &P = prbTab.get_iProbe( ip );
+        const PAddr&    A2 = prbTab.get_iProbe( ip ).adr;
 
-        if( P.dock != 2 )
+        if( A2.dock != 2 )
             continue;
 
-        const CimCfg::ImProbeDat  &Q = prbTab.get_iProbe( ip -1 );
+        const PAddr&    A1 = prbTab.get_iProbe( ip - 1 ).adr;
 
-        if( Q.dock != 1 || Q.port != P.port || Q.slot != P.slot )
+        if( A1.dock != 1 || !A1.eq_sp( A2 ) )
             continue;
 
         if( q.im.prbj[ip].LEDEnable != q.im.prbj[ip - 1].LEDEnable ) {
 
             err =
             QString(
-            "Probes {%1,%2} are in the same headstage (slot %3, port %4)"
+            "Probes {%1,%2} are in the same headstage(%3)"
             " but their headstage LED settings do not match.")
-            .arg( ip - 1 ).arg( ip )
-            .arg( P.slot ).arg( P.port );
+            .arg( ip - 1 ).arg( ip ).arg( A2.tx_sp() );
             return false;
         }
     }

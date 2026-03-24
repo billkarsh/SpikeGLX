@@ -3,11 +3,7 @@
 
 #include "SGLTypes.h"
 #include "SnsMaps.h"
-#include "IMROTbl.h"
 #include "SimProbes.h"
-
-#include <QMap>
-#include <QSet>
 
 class QSettings;
 class QTableWidget;
@@ -129,10 +125,8 @@ public:
                     sn;         // detect   {UNSET64=unset}
         int         obsn,       // detect   {-1=unset}
                     type;       // detect   {-1=unset}
-        qint16      slot,       // ini
-                    port,       // ini
-                    dock,       // ini
-                    ip,         // calc     {-1=unset}
+        PAddr       adr;        // ini
+        qint16      ip,         // calc     {-1=unset}
                     prbtech,    // detect   {-1=unset}
                     cal;        // detect   {-1=unset,0=N,1=Y}
         uint8_t     sr_mask,    // detect
@@ -141,10 +135,8 @@ public:
         bool        enab;       // ini
 
         ImProbeDat( int slot, int port, int dock, bool enab )
-        :   slot(slot), port(port),
-            dock(dock), enab(enab)  {init();}
-        ImProbeDat()
-        :   enab(false)             {init();}
+        :   adr(slot, port, dock), enab(enab)   {init();}
+        ImProbeDat() : enab(false)              {init();}
 
         void init()
             {
@@ -168,20 +160,10 @@ public:
             }
 
         bool operator<( const ImProbeDat &rhs ) const
-            {
-                if( slot < rhs.slot )
-                    return true;
-                if( slot > rhs.slot )
-                    return false;
-                if( port < rhs.port )
-                    return true;
-                if( port > rhs.port )
-                    return false;
-                return dock < rhs.dock;
-            }
+            {return adr < rhs.adr;}
 
-        bool isProbe() const    {return port != 9;}
-        bool isOneBox() const   {return port == 9;}
+        bool isProbe() const    {return adr.port != 9;}
+        bool isOneBox() const   {return adr.port == 9;}
         bool setProbeType();
         int nHSDocks() const;
         quint64 calSN() const   {return (type == 1200 ? hssn : sn);}
@@ -203,14 +185,10 @@ public:
     };
 
     struct ProbeAddr {
-        QSet<quint16>   addr;
-
-        void clear()
-            {addr.clear();}
-        void store( int slot, int port, int dock )
-            {addr.insert( (slot << 8) + (port << 4) + dock );}
-        bool has( int slot, int port, int dock ) const
-            {return addr.contains( (slot << 8) + (port << 4) + dock );}
+        QSet<PAddr> adrs;
+        void clear()                        {adrs.clear();}
+        void store( const PAddr& adr )      {adrs.insert( adr );}
+        bool has( const PAddr& adr ) const  {return adrs.contains( adr );}
     };
 
     // Probes (port != 9) and OneBoxes (port == 9)
@@ -537,7 +515,7 @@ public:
     // Config
     // ------
 
-    static bool isBSSupported( int slot );
+    static bool isBSSupported4( int slot );
     static void closeAllBS( bool report = true );
     static bool detect(
         ERRLVL                  &R,

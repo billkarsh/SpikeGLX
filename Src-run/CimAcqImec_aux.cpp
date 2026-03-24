@@ -613,9 +613,9 @@ closeMgr:
     return ok;
 
 #else   // VISA disabled
-
+    Q_UNUSED( vslots )
+    Q_UNUSED( srcSlot )
     return true;
-
 #endif
 }
 

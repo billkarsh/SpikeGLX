@@ -105,14 +105,9 @@ struct IMROTbl_T21base : public IMROTbl
 
 // Hardware
 
-    virtual int selectSites4(
-        int     slot,
-        int     port,
-        int     dock,
-        bool    write,
-        bool    check ) const;
-    virtual int selectGains4( int, int, int ) const  {return 0;}
-    virtual int selectAPFlts4( int, int, int ) const {return 0;}
+    virtual int selectSites4( const PAddr& adr, bool write, bool check ) const;
+    virtual int selectGains4( const PAddr& ) const  {return 0;}
+    virtual int selectAPFlts4( const PAddr& ) const {return 0;}
 
 // Edit
 

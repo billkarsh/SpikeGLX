@@ -719,7 +719,7 @@ OBX::OBX( int istr )
     :   C(mainApp()->cfgCtl()), p(C->acceptedParams), istr(istr)
 {
     isel  = p.im.obx_istr2isel( istr );
-    slot  = C->prbTab.get_iOneBox( isel ).slot;
+    slot  = C->prbTab.get_iOneBox( isel ).adr.slot;
 }
 
 /* ---------------------------------------------------------------- */
@@ -839,6 +839,11 @@ QString CStim::obx_wave_download_buf(
         QString("waveplayer_writeBuffer(slot %1)%2")
         .arg( X.slot ).arg( obx_errorString( err ) );
     }
+#else
+    Q_UNUSED( freq )
+    Q_UNUSED( istr )
+    Q_UNUSED( len )
+    Q_UNUSED( src )
 #endif
 
     return QString();
@@ -947,6 +952,10 @@ QString CStim::obx_wave_arm( int istr, int trig, bool loop )
         QString("waveplayer_arm(slot %1, %2)%3")
         .arg( X.slot ).arg( !loop ).arg( obx_errorString( err ) );
     }
+#else
+    Q_UNUSED( istr )
+    Q_UNUSED( trig )
+    Q_UNUSED( loop )
 #endif
 
     return QString();
@@ -975,6 +984,9 @@ QString CStim::obx_wave_start_stop( int istr, bool start )
             .arg( X.slot ).arg( obx_errorString( err ) );
         }
     }
+#else
+    Q_UNUSED( istr )
+    Q_UNUSED( start )
 #endif
 
     return QString();
@@ -1154,6 +1166,11 @@ QString CStim::ni_wave_download_buf(
     }
 
     ni_setTask( outChan, T );
+#else
+    Q_UNUSED( outChan )
+    Q_UNUSED( W )
+    Q_UNUSED( src )
+    Q_UNUSED( loop )
 #endif
 
     return QString();
@@ -1194,6 +1211,9 @@ QString CStim::ni_wave_arm(
             return ni_getError();
         }
     }
+#else
+    Q_UNUSED( outChan )
+    Q_UNUSED( trigTerm )
 #endif
 
     return QString();
@@ -1218,6 +1238,9 @@ QString CStim::ni_wave_start_stop(
         if( DAQmxErrChkNoJump( DAQmxStopTask( T ) ) )
             return ni_getError();
     }
+#else
+    Q_UNUSED( outChan )
+    Q_UNUSED( start )
 #endif
 
     return QString();

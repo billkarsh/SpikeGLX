@@ -36,6 +36,8 @@ ImSimAcqProbe::ImSimAcqProbe(
     int                         ip )
     :   peakDT(0), sumTot(0), totPts(0ULL), Q(Q), ip(ip), sumN(0)
 {
+    Q_UNUSED( T )
+
 #ifdef PROFILE
     sumGet  = 0;
     sumEnq  = 0;
@@ -51,10 +53,6 @@ ImSimAcqProbe::ImSimAcqProbe(
     nAP     = cum[CimCfg::imTypeAP];
     nLF     = cum[CimCfg::imTypeLF] - nAP;
     nCH     = cum[CimCfg::imSumAll];
-
-    const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
-    slot = P.slot;
-    port = P.port;
 
 // Gain table
 

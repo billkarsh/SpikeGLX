@@ -249,7 +249,7 @@ bool SvyPrbRun::nextBank()
         run->grfWaitPaused();
 
         E.roTbl->fillShankAndBank( S, B );
-        E.roTbl->selectSites4( P.slot, P.port, P.dock,
+        E.roTbl->selectSites4( P.adr,
                     true, !p.im.prbAll.srAtDetect || P.srDoCheck() );
         E.sns.chanMapFile.clear();
         cfg->validImMaps( err, E, ip );

@@ -82,12 +82,12 @@ void DataFileOB::subclassStoreMetaData( const DAQ::Params &p )
     kvp["obAiRangeMax"] = E.range.rmax;
 
     kvp["imDatApi"]         = T.api;
-    kvp["imDatBs_fw"]       = T.slot2Vers[P.slot].bsfw;
-    kvp["imDatBsc_pn"]      = T.slot2Vers[P.slot].bscpn;
-    kvp["imDatBsc_sn"]      = T.slot2Vers[P.slot].bscsn;
-    kvp["imDatBsc_hw"]      = T.slot2Vers[P.slot].bschw;
-    kvp["imDatBsc_fw"]      = T.slot2Vers[P.slot].bscfw;
-    kvp["imDatObx_slot"]    = P.slot;
+    kvp["imDatBs_fw"]       = T.slot2Vers[P.adr.slot].bsfw;
+    kvp["imDatBsc_pn"]      = T.slot2Vers[P.adr.slot].bscpn;
+    kvp["imDatBsc_sn"]      = T.slot2Vers[P.adr.slot].bscsn;
+    kvp["imDatBsc_hw"]      = T.slot2Vers[P.adr.slot].bschw;
+    kvp["imDatBsc_fw"]      = T.slot2Vers[P.adr.slot].bscfw;
+    kvp["imDatObx_slot"]    = P.adr.slot;
 
     const int   *cum = E.obCumTypCnt;
 

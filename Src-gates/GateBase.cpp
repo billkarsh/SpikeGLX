@@ -227,7 +227,7 @@ samples_loop_again:;
 
                 if( dst.js == jsIM ) {
                     const CimCfg::ImProbeDat    &P = T.get_iProbe( dst.ip );
-                    if( T.simprb.isSimProbe( P.slot, P.port, P.dock ) )
+                    if( T.simprb.isSimProbe( P.adr ) )
                         dst.bySync = true;
                 }
 

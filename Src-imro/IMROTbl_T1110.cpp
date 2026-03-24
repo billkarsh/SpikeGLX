@@ -442,12 +442,7 @@ void IMROTbl_T1110::muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const
 /* Hardware ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-int IMROTbl_T1110::selectSites4(
-    int     slot,
-    int     port,
-    int     dock,
-    bool    write,
-    bool    check ) const
+int IMROTbl_T1110::selectSites4( const PAddr& adr, bool write, bool check ) const
 {
 #ifdef HAVE_IMEC
 
@@ -457,7 +452,7 @@ int IMROTbl_T1110::selectSites4(
 // Set column mode
 // ---------------
 
-    err = np_selectColumnPattern( slot, port, dock,
+    err = np_selectColumnPattern( adr.slot, adr.port, adr.dock,
             columnpattern_t(ehdr.colmode) );
 
     if( err != SUCCESS )
@@ -471,10 +466,13 @@ int IMROTbl_T1110::selectSites4(
 
         const IMRODesc_T1110    E = e[ig];
 
-        if( ehdr.colmode == ALL )
-            err = np_selectElectrodeGroup( slot, port, dock, ig, E.bankA );
+        if( ehdr.colmode == ALL ) {
+            err = np_selectElectrodeGroup(
+                    adr.slot, adr.port, adr.dock, ig, E.bankA );
+        }
         else {
-            err = np_selectElectrodeGroupMask( slot, port, dock, ig,
+            err = np_selectElectrodeGroupMask(
+                    adr.slot, adr.port, adr.dock, ig,
                     electrodebanks_t((1<<E.bankA) + (1<<E.bankB)) );
         }
 
@@ -483,14 +481,18 @@ int IMROTbl_T1110::selectSites4(
     }
 
     if( write )
-        np_writeProbeConfiguration( slot, port, dock, check );
+        np_writeProbeConfiguration( adr.slot, adr.port, adr.dock, check );
+#else
+    Q_UNUSED( adr )
+    Q_UNUSED( write )
+    Q_UNUSED( check )
 #endif
 
     return 0;
 }
 
 
-int IMROTbl_T1110::selectRefs4( int slot, int port, int dock ) const
+int IMROTbl_T1110::selectRefs4( const PAddr& adr ) const
 {
 #ifdef HAVE_IMEC
 // -----------------------------
@@ -501,12 +503,14 @@ int IMROTbl_T1110::selectRefs4( int slot, int port, int dock ) const
 
         NP_ErrorCode    err;
 
-        err = np_setReference( slot, port, dock, ic,
+        err = np_setReference( adr.slot, adr.port, adr.dock, ic,
                 0, channelreference_t(ehdr.refid), 0 );
 
         if( err != SUCCESS )
             return err;
     }
+#else
+    Q_UNUSED( adr )
 #endif
 
     return 0;
@@ -514,7 +518,7 @@ int IMROTbl_T1110::selectRefs4( int slot, int port, int dock ) const
 
 #if 1
 // True gain setter
-int IMROTbl_T1110::selectGains4( int slot, int port, int dock ) const
+int IMROTbl_T1110::selectGains4( const PAddr& adr ) const
 {
 #ifdef HAVE_IMEC
 // -------------------------
@@ -525,7 +529,7 @@ int IMROTbl_T1110::selectGains4( int slot, int port, int dock ) const
 
         NP_ErrorCode    err;
 
-        err = np_setGain( slot, port, dock, ic,
+        err = np_setGain( adr.slot, adr.port, adr.dock, ic,
                 gainToIdx( ehdr.apgn ),
                 gainToIdx( ehdr.lfgn ) );
 
@@ -544,7 +548,7 @@ int IMROTbl_T1110::selectGains4( int slot, int port, int dock ) const
             lfidx = R->gainToIdx( 50 );
         }
 
-        err = np_setGain( P.slot, P.port, P.dock, ic,
+        err = np_setGain( adr.slot, adr.port, adr.dock, ic,
                 apidx,
                 lfidx );
 #endif
@@ -553,6 +557,8 @@ int IMROTbl_T1110::selectGains4( int slot, int port, int dock ) const
         if( err != SUCCESS )
             return err;
     }
+#else
+    Q_UNUSED( adr )
 #endif
 
     return 0;
@@ -562,7 +568,7 @@ int IMROTbl_T1110::selectGains4( int slot, int port, int dock ) const
 
 #if 0
 // Experiment setting gain by row or col
-int IMROTbl_T1110::selectGains4( int slot, int port, int dock ) const
+int IMROTbl_T1110::selectGains4( const PAddr& adr ) const
 {
 #ifdef HAVE_IMEC
 
@@ -572,11 +578,13 @@ int IMROTbl_T1110::selectGains4( int slot, int port, int dock ) const
 
         int idx = this->col( ic, 0 );
 
-        err = np_setGain( slot, port, dock, ic, idx, idx );
+        err = np_setGain( adr.slot, adr.port, adr.dock, ic, idx, idx );
 
         if( err != SUCCESS )
             return err;
     }
+#else
+    Q_UNUSED( adr )
 #endif
 
     return 0;
@@ -584,7 +592,7 @@ int IMROTbl_T1110::selectGains4( int slot, int port, int dock ) const
 #endif
 
 
-int IMROTbl_T1110::selectAPFlts4( int slot, int port, int dock ) const
+int IMROTbl_T1110::selectAPFlts4( const PAddr& adr ) const
 {
 #ifdef HAVE_IMEC
 // -------------------------
@@ -595,11 +603,14 @@ int IMROTbl_T1110::selectAPFlts4( int slot, int port, int dock ) const
 
         NP_ErrorCode    err;
 
-        err = np_setAPCornerFrequency( slot, port, dock, ic, !ehdr.apflt );
+        err = np_setAPCornerFrequency(
+                adr.slot, adr.port, adr.dock, ic, !ehdr.apflt );
 
         if( err != SUCCESS )
             return err;
     }
+#else
+    Q_UNUSED( adr )
 #endif
 
     return 0;

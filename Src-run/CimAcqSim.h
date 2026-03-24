@@ -63,8 +63,6 @@ struct ImSimAcqProbe {
                         nAP,
                         nLF,
                         nCH,
-                        slot,
-                        port,
                         sumN;
 
     ImSimAcqProbe(
