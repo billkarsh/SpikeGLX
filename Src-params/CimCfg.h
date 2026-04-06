@@ -182,6 +182,7 @@ public:
                     bschw,      // maj.min
                     bscfw;      // maj.min
         int         bsctech;    // T_probe_tech
+        ImSlotVers() : bsctech(-1)  {}
     };
 
     struct ProbeAddr {
@@ -200,7 +201,7 @@ private:
         QVector<int>            iobx2dat;   // sel obxID   -> ImProbeDat
         QVector<int>            slotsUsed;  // used slots
         QMap<int,int>           slot2zIdx;  // slot -> zero-based order idx
-        QMap<int,int>           slot2type;  // slot -> {0=PXI,1=OneBox}
+        QMap<int,int>           slot2type;  // slot -> NPPlatformID_t
         QMap<int,int>           onebx2slot; // Obx ID -> slot
         QMap<quint64,double>    hssn2srate; // hssn -> srate
         QMap<int,double>        obsn2srate; // obsn -> srate
@@ -236,7 +237,7 @@ public:
             {slot2type[slot] = bstype;}
 
         int getSlotType( int slot ) const
-            {return slot2type[slot];}
+            {return slot2type.value( slot, 0 );}
 
         bool anySlotPXIType() const;
         bool anySlotUSBType() const;

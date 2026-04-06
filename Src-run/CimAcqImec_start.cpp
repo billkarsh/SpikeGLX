@@ -11,7 +11,7 @@
 
 // Set all hardware slots to software trigger.
 //
-bool CimAcqImec::_st_setHwrTriggers()
+bool CimAcqImec::_st_setSwrTriggers()
 {
     if( p.stream_nIM() + p.stream_nOB() == 0 )
         return true;
@@ -214,7 +214,7 @@ bool CimAcqImec::_st_setTriggers()
 //@OBX Try software trigger all modules since PXIe chassis
 //@OBX backplane bridge blocks signalling across slots 6-to-7.
 #if TRIGSOFTONLY
-    if( !_st_setHwrTriggers() )
+    if( !_st_setSwrTriggers() )
         return false;
 #else
     if( !_st_setObxTriggers() || !_st_setPXITriggers() )

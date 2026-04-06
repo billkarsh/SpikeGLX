@@ -78,7 +78,7 @@ void ImCfgWorker::run()
         acq->STEPPROBE();
         TSTOPCHECK;
 
-        if( !_mt_selectAPFiltes( P ) )
+        if( !_mt_selectAPFilters( P ) )
             break;
 
         acq->STEPPROBE();
@@ -401,7 +401,7 @@ bool ImCfgWorker::_mt_selectGains( const CimCfg::ImProbeDat &P )
 }
 
 
-bool ImCfgWorker::_mt_selectAPFiltes( const CimCfg::ImProbeDat &P )
+bool ImCfgWorker::_mt_selectAPFilters( const CimCfg::ImProbeDat &P )
 {
     NP_ErrorCode    err = NP_ErrorCode(acq->p.im.prbj[P.ip].roTbl->
                             selectAPFlts4( P.adr ));

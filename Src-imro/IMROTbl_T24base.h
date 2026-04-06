@@ -107,8 +107,8 @@ struct IMROTbl_T24base : public IMROTbl
 
 // Hardware
 
-    virtual int selectGains4( int, int, int ) const  {return 0;}
-    virtual int selectAPFlts4( int, int, int ) const {return 0;}
+    virtual int selectGains4( const PAddr& ) const  {return 0;}
+    virtual int selectAPFlts4( const PAddr& ) const {return 0;}
 
 // Edit
 

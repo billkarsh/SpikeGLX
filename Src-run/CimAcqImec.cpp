@@ -1535,7 +1535,7 @@ bool ImAcqWorker::doProbe_T2( vec_i16 &dst1D, ImAcqStream &S )
 // Report which indices match every ~1 sec.
 #ifdef TESTDUPSAMPS
 {
-    if( S.ip == 1 && nT > 1 ) {
+    if( S.ip == 0 && nT > 1 ) {
         std::vector<int> v;
         int ndup = 0;
         for( int i = 0; i < nT - 1; ++i ) {
@@ -2032,11 +2032,11 @@ CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
 CimAcqImec::~CimAcqImec()
 {
     for( int iThd = 0, nThd = (int)cfgThd.size(); iThd < nThd; ++iThd ) {
-        ImCfgThread *T = cfgThd[iThd];
-        if( T ) {
-            if( T->thread->isRunning() )
-                T->thread->wait( 10000/nThd );
-            delete T;
+        ImCfgThread *thd = cfgThd[iThd];
+        if( thd ) {
+            if( thd->thread->isRunning() )
+                thd->thread->wait( 10000/nThd );
+            delete thd;
         }
     }
 
@@ -2048,11 +2048,11 @@ CimAcqImec::~CimAcqImec()
     }
 
     for( int iThd = 0, nThd = (int)acqThd.size(); iThd < nThd; ++iThd ) {
-        ImAcqThread *T = acqThd[iThd];
-        if( T ) {
-            if( T->thread->isRunning() )
-                T->thread->wait( 10000/nThd );
-            delete T;
+        ImAcqThread *thd = acqThd[iThd];
+        if( thd ) {
+            if( thd->thread->isRunning() )
+                thd->thread->wait( 10000/nThd );
+            delete thd;
         }
     }
 
@@ -2293,7 +2293,6 @@ void CimAcqImec::update( int ip )
         return;
 
     _1t_writeProbe( P );
-
 }
 #endif
 
@@ -2750,7 +2749,7 @@ if( S.ip == 0 ) {
     if( qq >= 5.0 && qq < 6.0 ) {
         if( !f.isOpen() ) {
             f.setFileName( "pace_obx.txt" );
-            (void)wf.open( QIODevice::WriteOnly | QIODevice::Text );
+            (void)f.open( QIODevice::WriteOnly | QIODevice::Text );
         }
         ts<<QString("%1\t%2\n").arg( qq ).arg( out );
         if( qq >= 6.0 )
