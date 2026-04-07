@@ -1977,9 +1977,7 @@ void CimCfg::detect_API(
 {
 #ifdef HAVE_IMEC
     char vers[64];
-
     np_getAPIVersionFull( vers, sizeof(vers) );
-
     T.api = vers;
 #else
     T.api = "0.0";
