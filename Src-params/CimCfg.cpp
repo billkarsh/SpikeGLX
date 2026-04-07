@@ -1983,7 +1983,7 @@ void CimCfg::detect_API(
     T.api = "0.0";
 #endif
 #if DBG
-Log()<<"  np_getAPIVersion done";
+Log()<<"  detect API versions done";
 guiBreathe();
 #endif
 
