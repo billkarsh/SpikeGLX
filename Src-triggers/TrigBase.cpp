@@ -630,7 +630,9 @@ void TrigBase::endRun( const QString &err )
 
     if( !err.isEmpty() ) {
         QString s =
-        QString("Trigger (writing) error [%1]; stopping run.").arg( err );
+        QString(
+        "Trigger (writing) error [%1]; see log for details, stopping run.")
+        .arg( err );
         Error() << s;
         emit daqError( s );
     }

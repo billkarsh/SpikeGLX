@@ -1401,7 +1401,9 @@ QString IMROTbl::default_imroLE( int type )
 
 int IMROTbl::bscpnToTech( const QString &pn )
 {
-    if( pn.isEmpty() || pn == "" || pn == "<empty>" )
+    if( pn == "sim" )
+        return t_tech_sim;
+    else if( pn.isEmpty() || pn == "" || pn == "<empty>" )
         return t_tech_opto;
     else if( pn == "NPNXT_QBSC_01" )
         return t_tech_nxt_pa;
@@ -1430,7 +1432,9 @@ int IMROTbl::bscpnToTech( const QString &pn )
 //
 int IMROTbl::hspnToTech( const QString &pn )
 {
-    if( pn == "NPM_HS_32" || pn == "NPM_HS_32_ext" || pn == "NPM_HSTC_ext" )
+    if( pn == "sim" )
+        return t_tech_sim;
+    else if( pn == "NPM_HS_32" || pn == "NPM_HS_32_ext" || pn == "NPM_HSTC_ext" )
         return t_tech_qb;
     else if( pn == "OPTO_HS_00" )
         return t_tech_opto;

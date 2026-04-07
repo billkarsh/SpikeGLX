@@ -355,12 +355,15 @@ void CalSRateCtl::apply()
             this,
             "No Valid Results",
             "Nothing done: No new results were calculated." );
+        return;
     }
     else if( isGChk ) {
         C->setParams( p, true );
         T.saveProbeSRates();
         T.saveOneBoxSRates();
     }
+
+    write( "\nRates updated." );
 }
 
 /* ---------------------------------------------------------------- */
