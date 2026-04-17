@@ -1126,7 +1126,7 @@ void FileViewerWindow::svyMenuExportHandler() const
                 top     = QString("%1%2_segs/")
                             .arg( runTag.runDir )
                             .arg( runName );
-    if( !QDir().exists( top ) && !QDir().mkdir( top ) ) {
+    if( !QDir( top ).exists() && !QDir().mkdir( top ) ) {
         err = QString("Can't create survey export dir [%1].").arg( top );
         goto exit;
     }
@@ -1154,7 +1154,7 @@ void FileViewerWindow::svyMenuExportHandler() const
 
         rundir = QString("%1%2_g0/").arg( top ).arg( runTag.runName );
 
-        if( !QDir().exists( rundir ) && !QDir().mkdir( rundir ) ) {
+        if( !QDir( rundir ).exists() && !QDir().mkdir( rundir ) ) {
             err = QString("Can't create survey export dir [%1].").arg( rundir );
             goto exit;
         }

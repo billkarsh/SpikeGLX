@@ -514,7 +514,7 @@ next_fetch:
                 Log()<<QString("---------------------- max %1  ave %2  lat %3")
                     .arg( HMAX )
                     .arg( double(num)/den, 0, 'f', 1 )
-                    .arg( 1000*double(num)/den / p.ni.srate, 0, 'f', 2 );
+                    .arg( 1000*double(num)/den/p.ni.srate, 0, 'f', 2 );
                 for( int i = 0; i <= HMAX; ++i ) {
                     uint x = hist[i];
                     if( x )
