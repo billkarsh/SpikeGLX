@@ -301,18 +301,17 @@ void CniAcqDmx::run()
 // Run
 // ---
 
-// daqAIFetchPeriodMillis set to 1 ms for release builds,
-// which would give us a latency of about 1 ms. Profiling
-// for the USB-6366 (slower than PCI/PXI) shows typical
-// loop processing time without digital lines is ~0.1 ms
-// and 1 to 2 ms with digital.
+// daqAIFetchPeriodMillis set to 1 ms for release builds.
+// histogramming is the best tool to gauge true performance,
+// which is a function of num channels, channel types, clock
+// rate, and the sleep algorithm and tuning params. Present
+// tuning has about 2 ms latency with normal yielding.
 
     const int loopPeriod_us =
         1000
         * daqAIFetchPeriodMillis()
         * (kxd1+kxd2 ? 2 : 0.1);
 
-    double  peak_loopT  = 0;
     int32   nFetched;
     int     peak_nWhole = 0,
             nWhole      = 0,
@@ -466,24 +465,74 @@ next_fetch:
         loopT = 1e6*(getTime() - loopT);    // microsec
 
 #if 0
+        static double   peak_loopT  = 0;
+        static double   av_nW       = 0;
+        static double   av_LT       = 0;
+        static double   lastTrate   = 0;
+        static int      av_n        = 0;
         if( loopT > peak_loopT )
             peak_loopT = loopT;
-
-        QString stats =
-            QString(
-            "DAQ rate S/max/millis %1/%2/%3"
-            "   peak S/millis %4/%5")
-            .arg( nWhole, 6 )
-            .arg( maxMuxedSampPerChan, 6 )
-            .arg( loopT/1000, 10, 'f', 2 )
-            .arg( peak_nWhole, 6 )
-            .arg( peak_loopT/1000, 10, 'f', 2 );
-        Log() << stats;
-#else
-    Q_UNUSED( peak_loopT )
+        if( getTime() - lastTrate >= 1.0 && av_n ) {
+            av_nW /= av_n;
+            av_LT /= av_n;
+            Log() <<
+                QString(
+                "DAQ rate S/max/ms/lat %1/%2/%3/%4"
+                "   peak S/ms/lat %5/%6/%7")
+                .arg( av_nW, 6 )
+                .arg( maxMuxedSampPerChan, 6 )
+                .arg( av_LT/1000, 6, 'f', 2 )
+                .arg( 1000*av_nW/p.ni.srate, 6, 'f', 2 )
+                .arg( peak_nWhole, 6 )
+                .arg( peak_loopT/1000, 6, 'f', 2 )
+                .arg( 1000*peak_nWhole/p.ni.srate, 6, 'f', 2 );
+            av_nW       = 0;
+            av_LT       = 0;
+            av_n        = 0;
+            lastTrate   = getTime();
+        }
+        else {
+            av_nW += nWhole;
+            av_LT += loopT;
+            ++av_n;
+        }
 #endif
 
-        if( loopT < loopPeriod_us )
+        if( p.ni.ll_NI_hist ) {
+            #define HMAX 100
+            static std::vector<uint> hist( 2 + HMAX, 0 ); // 0 + [1..HMAX] + oflow
+            static double t_hreport = getTime();
+            double t_hist = getTime() - t_hreport;
+            if( t_hist >= 5.0 ) {
+                // Calc ave
+                uint num = 0,
+                     den = 0;
+                for( int i = 1; i <= HMAX; ++i ) {
+                    num += i * hist[i];
+                    den += hist[i];
+                }
+                Log()<<QString("---------------------- max %1  ave %2  lat %3")
+                    .arg( HMAX )
+                    .arg( double(num)/den, 0, 'f', 1 )
+                    .arg( 1000*double(num)/den / p.ni.srate, 0, 'f', 2 );
+                for( int i = 0; i <= HMAX; ++i ) {
+                    uint x = hist[i];
+                    if( x )
+                        Log()<<QString("%1\t%2").arg( i ).arg( x );
+                }
+                if( hist[HMAX] )
+                    Log()<<QString("OV\t%1").arg( hist[HMAX] );
+
+                hist.assign( 2 + 100, 0 );
+                t_hreport = getTime();
+            }
+            else if( nWhole > HMAX )
+                ++hist[HMAX+1];
+            else
+                ++hist[nWhole];
+        }
+
+        if( !p.ni.ll_NI && loopT < loopPeriod_us )
             QThread::usleep( qMin( 0.5*(loopPeriod_us - loopT), 500.0 ) );
     }
 

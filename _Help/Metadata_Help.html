@@ -174,6 +174,8 @@ snsSaveChanSubset=all</code></pre>
 <pre><code>niClockLine1=PFI2</code></pre>
 <pre><code>niDev1=Dev1</code></pre>
 <pre><code>niDev1ProductName=FakeDAQ</code></pre>
+<pre><code>niLowLatency=false</code></pre>
+<p>This mode runs the NIDQ sample fetching loop faster, which reduces the time to get fresh data. However, this drives the CPU a few % harder and limits the maximum workload of the system a small amount. Use the Metrics window and Task Manager to monitor system stability.</p>
 <pre><code>niMAChans1=6:7</code></pre>
 <pre><code>niMAGain=1.0</code></pre>
 <pre><code>niMaxInt=32768</code></pre>
@@ -336,7 +338,7 @@ bit 11: MISS missed sample</code></pre>
 </blockquote>
 <pre><code>imLEDEnable=false</code></pre>
 <pre><code>imLowLatency=false</code></pre>
-<p>This mode runs the probe sample fetching loop faster, which reduces the time to get fresh data. However, this drives the CPU 50%+ harder and reduces the maximum number of probes you can safely run concurrently.</p>
+<p>This mode runs the probe sample fetching loop faster, which reduces the time to get fresh data. However, this drives the CPU 50%+ harder and limits the maximum number of probes you can safely run concurrently.</p>
 <pre><code>imIsSvyRun=false</code></pre>
 <pre><code>imMaxInt=512</code></pre>
 <p>Maximum amplitude integer encoded in the 16-bit analog channels. Really, in this example [-512..511]. The reason for this apparent asymmetry is that, by convention, zero is grouped with the positive values. The example probe is 10-bit, so encodes 2^10 = 1024 values. There are 512 negative values: [-512..-1] and 512 positives: [0..511]. This convention (zero is a positive number) applies in all signed computer arithmetic.</p>

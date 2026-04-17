@@ -38,6 +38,8 @@
 <ul>
 <li><a href="#clock-source">Clock Source</a></li>
 <li><a href="#optional-start-signal">Optional Start Signal</a></li>
+<li><a href="#low-latency">Low Latency</a></li>
+<li><a href="#latency-histogram">Latency Histogram</a></li>
 </ul></li>
 <li><a href="#maps">Maps</a>
 <ul>
@@ -158,6 +160,34 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 </ul>
 <h3 id="optional-start-signal">Optional Start Signal</h3>
 <p>There is a <code>Start checkbox</code> and a selectable <code>digital output line</code>. If enabled, when the run starts the selected line goes from low to high and stays high until the run is stopped. This is always an option you can use to hardware-trigger other components in your experiment. <em>(Whisper systems require this signal on line0).</em> If this feature is enabled, that line cannot also be listed as a digital input (<strong>XD</strong>) line.</p>
+<h3 id="low-latency">Low Latency</h3>
+<p>Check this box to run the NI sample fetching loops faster, thus reducing latency (sample access time). This costs a few percent of additional CPU effort. You can monitor system performance and stability with the Metrics window and the Windows Task Manager. If the box is checked, latency can go below 0.1 ms, depending upon your device, set clock rate, and the channels selected. If unchecked (normal mode), the latency will be nominally 2 ms.</p>
+<h3 id="latency-histogram">Latency Histogram</h3>
+<p>If checked, every 5 seconds the Console (log) window outputs a histogram showing averaged NI sample fetching performance. A typical histogram looks like this:</p>
+<pre><code>---------------------- max 100  ave 1.2  lat 0.05
+0   726
+1   85196
+2   18129
+3   538
+4   144
+5   48
+6   25
+7   16
+8   27
+9   35
+10  26
+11  3
+12  2
+16  1</code></pre>
+<p>The header line indicates:</p>
+<ul>
+<li>Highest histogram bin (e.g. 100 samples).</li>
+<li>Weighted average of samples fetched.</li>
+<li>Average latency (ms).</li>
+</ul>
+<p>Each line of the histogram is a bin. For example, in the last 5 second period, 538 fetch cycles returned 3 samples, while 726 fetch cycles got no samples. Getting zero samples can happen because the low latency mode may run so fast that there aren't any clocked samples yet. Generally, the histogram collects data for bins [0..100] (samples fetched). Higher counts are collected in an overflow bin labeled &quot;OV.&quot; Only bins with nonzero content are shown for better readability.</p>
+<p>Latency depends upon how many and which types of channels are acquired. To achieve the lowest latency, you should set your NI clock rate to something lower than the &quot;Safe&quot; rate.</p>
+<p>The histogram checkbox resets automatically if you quit/relaunch SpikeGLX.</p>
 <hr />
 <h2 id="maps">Maps</h2>
 <h3 id="shank-map">Shank Map</h3>

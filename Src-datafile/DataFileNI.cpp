@@ -139,6 +139,7 @@ void DataFileNI::subclassStoreMetaData( const DAQ::Params &p )
     kvp["niXDChans1"]           = p.ni.uiXDStr1;
     kvp["niXDBytes1"]           = p.ni.xdBytes1;
     kvp["niMuxFactor"]          = p.ni.muxFactor;
+    kvp["niLowLatency"]         = p.ni.ll_NI;
     kvp["niStartEnable"]        = p.ni.startEnable;
     kvp["niStartLine"]          = p.ni.startLine;
     kvp["niAiTermination"]      = CniCfg::termConfigToString( p.ni.termCfg );

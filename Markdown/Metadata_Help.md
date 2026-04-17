@@ -438,6 +438,15 @@ niDev1ProductName=FakeDAQ
 ```
 
 ```
+niLowLatency=false
+```
+
+This mode runs the NIDQ sample fetching loop faster, which reduces the
+time to get fresh data. However, this drives the CPU a few % harder and
+limits the maximum workload of the system a small amount. Use the Metrics
+window and Task Manager to monitor system stability.
+
+```
 niMAChans1=6:7
 ```
 
@@ -872,7 +881,7 @@ imLowLatency=false
 
 This mode runs the probe sample fetching loop faster, which reduces the
 time to get fresh data. However, this drives the CPU 50%+ harder and
-reduces the maximum number of probes you can safely run concurrently.
+limits the maximum number of probes you can safely run concurrently.
 
 ```
 imIsSvyRun=false

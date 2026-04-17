@@ -324,6 +324,9 @@ void CniCfg::loadSettings( QSettings &S )
     isDualDevMode =
     S.value( "niDualDevMode", false ).toBool();
 
+    ll_NI =
+    S.value( "niLowLatency", false ).toBool();
+
     startEnable =
     S.value( "niStartEnable", false ).toBool();
 
@@ -365,6 +368,7 @@ void CniCfg::saveSettings( QSettings &S ) const
     S.setValue( "niAiTermConfig", int(termCfg) );
     S.setValue( "niEnabled", enabled );
     S.setValue( "niDualDevMode", isDualDevMode );
+    S.setValue( "niLowLatency", ll_NI );
     S.setValue( "niStartEnable", startEnable );
     S.setValue( "niStartLine", startLine );
     S.setValue( "niSnsShankMapFile", sns.shankMapFile );

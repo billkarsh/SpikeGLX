@@ -168,7 +168,12 @@ void Config_nitab::toGUI( const DAQ::Params &p )
         niTabUI->startCB->setCurrentIndex( sel );
     }
 
-// shankMap
+// Low latency
+
+    niTabUI->ll_NIChk->setChecked( p.ni.ll_NI );
+    niTabUI->ll_NI_histChk->setChecked( p.ni.ll_NI_hist );
+
+// ShankMap
 
     QString s = p.ni.sns.shankMapFile;
 
@@ -180,7 +185,7 @@ void Config_nitab::toGUI( const DAQ::Params &p )
     else
         niTabUI->niShkMapLE->setText( s );
 
-// chanMap
+// ChanMap
 
     s = p.ni.sns.chanMapFile;
 
@@ -192,7 +197,7 @@ void Config_nitab::toGUI( const DAQ::Params &p )
     else
         niTabUI->niChnMapLE->setText( s );
 
-// save chans
+// Save chans
 
     niTabUI->niSaveChansLE->setText( p.ni.sns.uiSaveChanStr );
 
@@ -296,6 +301,8 @@ void Config_nitab::fromGUI(
 
     q.ni.enabled        = true;
     q.ni.isDualDevMode  = niTabUI->dev2GB->isChecked();
+    q.ni.ll_NI          = niTabUI->ll_NIChk->isChecked();
+    q.ni.ll_NI_hist     = niTabUI->ll_NI_histChk->isChecked();
     q.ni.startEnable    = niTabUI->startEnabChk->isChecked();
 
     q.ni.sns.shankMapFile   = niTabUI->niShkMapLE->text().trimmed();

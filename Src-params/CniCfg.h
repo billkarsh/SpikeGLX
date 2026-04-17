@@ -98,8 +98,12 @@ public:
     TermConfig      termCfg;
     bool            enabled,
                     isDualDevMode,
+                    ll_NI,
+                    ll_NI_hist,
                     startEnable;
     SnsChansNidq    sns;
+
+    CniCfg() : ll_NI_hist(false)    {}
 
     // -------------
     // Param methods

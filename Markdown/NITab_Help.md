@@ -21,6 +21,8 @@
 * [Timing](#timing)
     + [Clock Source](#clock-source)
     + [Optional Start Signal](#optional-start-signal)
+    + [Low Latency](#low-latency)
+    + [Latency Histogram](#latency-histogram)
 * [Maps](#maps)
     + [Shank Map](#shank-map)
     + [Channel Map](#channel-map)
@@ -275,6 +277,59 @@ can use to hardware-trigger other components in your experiment.
 _(Whisper systems require this signal on line0)._ If this feature
 is enabled, that line cannot also be listed as a digital input
 (**XD**) line.
+
+### Low Latency
+
+Check this box to run the NI sample fetching loops faster, thus reducing
+latency (sample access time). This costs a few percent of additional CPU
+effort. You can monitor system performance and stability with the Metrics
+window and the Windows Task Manager. If the box is checked, latency can go
+below 0.1 ms, depending upon your device, set clock rate, and the channels
+selected. If unchecked (normal mode), the latency will be nominally 2 ms.  
+
+### Latency Histogram
+
+If checked, every 5 seconds the Console (log) window outputs a histogram
+showing averaged NI sample fetching performance. A typical histogram looks
+like this:
+
+```
+---------------------- max 100  ave 1.2  lat 0.05
+0	726
+1	85196
+2	18129
+3	538
+4	144
+5	48
+6	25
+7	16
+8	27
+9	35
+10	26
+11	3
+12	2
+16	1
+```
+
+The header line indicates:
+
+- Highest histogram bin (e.g. 100 samples).
+- Weighted average of samples fetched.
+- Average latency (ms).
+
+Each line of the histogram is a bin. For example, in the last 5 second period,
+538 fetch cycles returned 3 samples, while 726 fetch cycles got no samples.
+Getting zero samples can happen because the low latency mode may run so fast
+that there aren't any clocked samples yet. Generally, the histogram collects
+data for bins [0..100] (samples fetched). Higher counts are collected in an
+overflow bin labeled "OV." Only bins with nonzero content are shown for
+better readability.
+
+Latency depends upon how many and which types of channels are acquired.
+To achieve the lowest latency, you should set your NI clock rate to
+something lower than the "Safe" rate.
+
+The histogram checkbox resets automatically if you quit/relaunch SpikeGLX.
 
 --------
 
