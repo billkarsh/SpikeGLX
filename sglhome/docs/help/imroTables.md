@@ -160,7 +160,7 @@ The on-shnk ref electrodes of any shank are {127,511,895,1279}.
 Type-2013 reference ID values are {0=ext, 1=gnd, [2..5]=tip[0..3]}. On-shank
 reference electrodes are removed from commercial 2.0 probes.
 
-### imro_np2020 (NP 2.0 Quad-probe)
+### imro_np2020 (NP 2.0 quad-probe)
 
 * Channel ID
 * Shank ID (with tips pointing down, shank-0 is left-most)
