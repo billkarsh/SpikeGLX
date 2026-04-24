@@ -14,19 +14,19 @@ to just one bank).
 To apply your own imro table, open any ShankViewer `Edit` tab and `Load`
 your table file.
 
-> Note: If your site selection pattern isn't a `canonical` pattern, that is,
-it cannot be duplicated by the site selection tools offered in the ShankViewer,
-then ShankViewer will disable its pattern editing features so you won't
-accidentally ruin your custom pattern. 
+> Note: If your site selection pattern isn't able to be duplicated by the
+site selection tools currently offered in the ShankViewer, then ShankViewer
+will disable its pattern editing features so you won't accidentally ruin
+your custom pattern.
 
 > Note: When you load your own imro table file for a new run, you'll want
 to select the default option in the `channel map` table column on the
 `IM Setup` tab. The default channel map will order your graphs from the
 tip of the probe to the top (base) according to your imro table.
 
-## Terminology
+# Terminology
 
-### Part Number (pn)
+## Part Number (pn)
 
 Probe models each have an identifying imec catalog part number (pn) usually
 starting with "NP." For example, a commercial 2.0 4-shank probe without
@@ -37,7 +37,7 @@ many features, such as: gain settings, shank counts, acquisition methods,
 and so on. These differences are very important within SpikeGLX. Still,
 the models fall into functional groups that are captured by "probe type..."
 
-### Probe Type
+## Probe Type
 
 SpikeGLX assigns `probe type` codes to groups of probes that are functionally
 similar, so can be handled similarly in software. Of course there are fewer
@@ -48,7 +48,7 @@ imro headers. Prior to that, the imro header encoded the probe type value.
 SpikeGLX 20260115 and later, and **CatGT 5.3** and later, can read either
 imro encoding.
 
-### ProbeTable GitHub Repo
+## ProbeTable GitHub Repo
 
 Bill Karsh, with the help of imec, maintains a repository of all probe models
 and their features and properties [here.](https://github.com/billkarsh/ProbeTable)
@@ -57,7 +57,7 @@ That table connects each probe pn with its corresponding imro file format.
 But we will review key imro-related data here. The names of formats in this
 document are drawn from that table.
 
-## Format Table
+# Format <-> Probe Map
 
 | ProbeTable IMRO Format | Probe Type | Part Numbers |
 | ---------------------- | ---------- | ------------ |
@@ -78,7 +78,7 @@ document are drawn from that table.
 | imro_np2013 | 2013 | NP2013-2014 |
 | imro_np2020 | 2020 | NP2020-2021 |
 
-## Text Examples
+# Text Examples
 
 ```
 Type 0: (NP1000,384)(0 0 0 500 250 1)(1 0 0 500 250 1)(2 0 0 500 250 1)(3 0 0 500 250 1)(4 0 0 500 250 1)(5 0 0 500 250 1)(6 0 0 500 250 1)(7 0 0 500 250 1)(8 0 0 500 250 1)(9 0 0 500 250 1)(10 0 0 500 250 1)(11 0 0 500 250 1)(12 0 0 500 250 1)(13 0 0 500 250 1)(14 0 0 500 250 1)(15 0 0 500 250 1)(16 0 0 500 250 1)(17 0 0 500 250 1)(18 0 0 500 250 1)(19 0 0 500 250 1)(20 0 0 500 250 1)(21 0 0 500 250 1)(22 0 0 500 250 1)(23 0 0 500 250 1)(24 0 0 500 250 1)(25 0 0 500 250 1)(26 0 0 500 250 1)(27 0 0 500 250 1)(28 0 0 500 250 1)(29 0 0 500 250 1)(30 0 0 500 250 1)(31 0 0 500 250 1)(32 0 0 500 250 1)(33 0 0 500 250 1)(34 0 0 500 250 1)(35 0 0 500 250 1)(36 0 0 500 250 1)(37 0 0 500 250 1)(38 0 0 500 250 1)(39 0 0 500 250 1)(40 0 0 500 250 1)(41 0 0 500 250 1)(42 0 0 500 250 1)(43 0 0 500 250 1)(44 0 0 500 250 1)(45 0 0 500 250 1)(46 0 0 500 250 1)(47 0 0 500 250 1)(48 0 0 500 250 1)(49 0 0 500 250 1)(50 0 0 500 250 1)(51 0 0 500 250 1)(52 0 0 500 250 1)(53 0 0 500 250 1)(54 0 0 500 250 1)(55 0 0 500 250 1)(56 0 0 500 250 1)(57 0 0 500 250 1)(58 0 0 500 250 1)(59 0 0 500 250 1)(60 0 0 500 250 1)(61 0 0 500 250 1)(62 0 0 500 250 1)(63 0 0 500 250 1)(64 0 0 500 250 1)(65 0 0 500 250 1)(66 0 0 500 250 1)(67 0 0 500 250 1)(68 0 0 500 250 1)(69 0 0 500 250 1)(70 0 0 500 250 1)(71 0 0 500 250 1)(72 0 0 500 250 1)(73 0 0 500 250 1)(74 0 0 500 250 1)(75 0 0 500 250 1)(76 0 0 500 250 1)(77 0 0 500 250 1)(78 0 0 500 250 1)(79 0 0 500 250 1)(80 0 0 500 250 1)(81 0 0 500 250 1)(82 0 0 500 250 1)(83 0 0 500 250 1)(84 0 0 500 250 1)(85 0 0 500 250 1)(86 0 0 500 250 1)(87 0 0 500 250 1)(88 0 0 500 250 1)(89 0 0 500 250 1)(90 0 0 500 250 1)(91 0 0 500 250 1)(92 0 0 500 250 1)(93 0 0 500 250 1)(94 0 0 500 250 1)(95 0 0 500 250 1)(96 0 0 500 250 1)(97 0 0 500 250 1)(98 0 0 500 250 1)(99 0 0 500 250 1)(100 0 0 500 250 1)(101 0 0 500 250 1)(102 0 0 500 250 1)(103 0 0 500 250 1)(104 0 0 500 250 1)(105 0 0 500 250 1)(106 0 0 500 250 1)(107 0 0 500 250 1)(108 0 0 500 250 1)(109 0 0 500 250 1)(110 0 0 500 250 1)(111 0 0 500 250 1)(112 0 0 500 250 1)(113 0 0 500 250 1)(114 0 0 500 250 1)(115 0 0 500 250 1)(116 0 0 500 250 1)(117 0 0 500 250 1)(118 0 0 500 250 1)(119 0 0 500 250 1)(120 0 0 500 250 1)(121 0 0 500 250 1)(122 0 0 500 250 1)(123 0 0 500 250 1)(124 0 0 500 250 1)(125 0 0 500 250 1)(126 0 0 500 250 1)(127 0 0 500 250 1)(128 0 0 500 250 1)(129 0 0 500 250 1)(130 0 0 500 250 1)(131 0 0 500 250 1)(132 0 0 500 250 1)(133 0 0 500 250 1)(134 0 0 500 250 1)(135 0 0 500 250 1)(136 0 0 500 250 1)(137 0 0 500 250 1)(138 0 0 500 250 1)(139 0 0 500 250 1)(140 0 0 500 250 1)(141 0 0 500 250 1)(142 0 0 500 250 1)(143 0 0 500 250 1)(144 0 0 500 250 1)(145 0 0 500 250 1)(146 0 0 500 250 1)(147 0 0 500 250 1)(148 0 0 500 250 1)(149 0 0 500 250 1)(150 0 0 500 250 1)(151 0 0 500 250 1)(152 0 0 500 250 1)(153 0 0 500 250 1)(154 0 0 500 250 1)(155 0 0 500 250 1)(156 0 0 500 250 1)(157 0 0 500 250 1)(158 0 0 500 250 1)(159 0 0 500 250 1)(160 0 0 500 250 1)(161 0 0 500 250 1)(162 0 0 500 250 1)(163 0 0 500 250 1)(164 0 0 500 250 1)(165 0 0 500 250 1)(166 0 0 500 250 1)(167 0 0 500 250 1)(168 0 0 500 250 1)(169 0 0 500 250 1)(170 0 0 500 250 1)(171 0 0 500 250 1)(172 0 0 500 250 1)(173 0 0 500 250 1)(174 0 0 500 250 1)(175 0 0 500 250 1)(176 0 0 500 250 1)(177 0 0 500 250 1)(178 0 0 500 250 1)(179 0 0 500 250 1)(180 0 0 500 250 1)(181 0 0 500 250 1)(182 0 0 500 250 1)(183 0 0 500 250 1)(184 0 0 500 250 1)(185 0 0 500 250 1)(186 0 0 500 250 1)(187 0 0 500 250 1)(188 0 0 500 250 1)(189 0 0 500 250 1)(190 0 0 500 250 1)(191 0 0 500 250 1)(192 0 0 500 250 1)(193 0 0 500 250 1)(194 0 0 500 250 1)(195 0 0 500 250 1)(196 0 0 500 250 1)(197 0 0 500 250 1)(198 0 0 500 250 1)(199 0 0 500 250 1)(200 0 0 500 250 1)(201 0 0 500 250 1)(202 0 0 500 250 1)(203 0 0 500 250 1)(204 0 0 500 250 1)(205 0 0 500 250 1)(206 0 0 500 250 1)(207 0 0 500 250 1)(208 0 0 500 250 1)(209 0 0 500 250 1)(210 0 0 500 250 1)(211 0 0 500 250 1)(212 0 0 500 250 1)(213 0 0 500 250 1)(214 0 0 500 250 1)(215 0 0 500 250 1)(216 0 0 500 250 1)(217 0 0 500 250 1)(218 0 0 500 250 1)(219 0 0 500 250 1)(220 0 0 500 250 1)(221 0 0 500 250 1)(222 0 0 500 250 1)(223 0 0 500 250 1)(224 0 0 500 250 1)(225 0 0 500 250 1)(226 0 0 500 250 1)(227 0 0 500 250 1)(228 0 0 500 250 1)(229 0 0 500 250 1)(230 0 0 500 250 1)(231 0 0 500 250 1)(232 0 0 500 250 1)(233 0 0 500 250 1)(234 0 0 500 250 1)(235 0 0 500 250 1)(236 0 0 500 250 1)(237 0 0 500 250 1)(238 0 0 500 250 1)(239 0 0 500 250 1)(240 0 0 500 250 1)(241 0 0 500 250 1)(242 0 0 500 250 1)(243 0 0 500 250 1)(244 0 0 500 250 1)(245 0 0 500 250 1)(246 0 0 500 250 1)(247 0 0 500 250 1)(248 0 0 500 250 1)(249 0 0 500 250 1)(250 0 0 500 250 1)(251 0 0 500 250 1)(252 0 0 500 250 1)(253 0 0 500 250 1)(254 0 0 500 250 1)(255 0 0 500 250 1)(256 0 0 500 250 1)(257 0 0 500 250 1)(258 0 0 500 250 1)(259 0 0 500 250 1)(260 0 0 500 250 1)(261 0 0 500 250 1)(262 0 0 500 250 1)(263 0 0 500 250 1)(264 0 0 500 250 1)(265 0 0 500 250 1)(266 0 0 500 250 1)(267 0 0 500 250 1)(268 0 0 500 250 1)(269 0 0 500 250 1)(270 0 0 500 250 1)(271 0 0 500 250 1)(272 0 0 500 250 1)(273 0 0 500 250 1)(274 0 0 500 250 1)(275 0 0 500 250 1)(276 0 0 500 250 1)(277 0 0 500 250 1)(278 0 0 500 250 1)(279 0 0 500 250 1)(280 0 0 500 250 1)(281 0 0 500 250 1)(282 0 0 500 250 1)(283 0 0 500 250 1)(284 0 0 500 250 1)(285 0 0 500 250 1)(286 0 0 500 250 1)(287 0 0 500 250 1)(288 0 0 500 250 1)(289 0 0 500 250 1)(290 0 0 500 250 1)(291 0 0 500 250 1)(292 0 0 500 250 1)(293 0 0 500 250 1)(294 0 0 500 250 1)(295 0 0 500 250 1)(296 0 0 500 250 1)(297 0 0 500 250 1)(298 0 0 500 250 1)(299 0 0 500 250 1)(300 0 0 500 250 1)(301 0 0 500 250 1)(302 0 0 500 250 1)(303 0 0 500 250 1)(304 0 0 500 250 1)(305 0 0 500 250 1)(306 0 0 500 250 1)(307 0 0 500 250 1)(308 0 0 500 250 1)(309 0 0 500 250 1)(310 0 0 500 250 1)(311 0 0 500 250 1)(312 0 0 500 250 1)(313 0 0 500 250 1)(314 0 0 500 250 1)(315 0 0 500 250 1)(316 0 0 500 250 1)(317 0 0 500 250 1)(318 0 0 500 250 1)(319 0 0 500 250 1)(320 0 0 500 250 1)(321 0 0 500 250 1)(322 0 0 500 250 1)(323 0 0 500 250 1)(324 0 0 500 250 1)(325 0 0 500 250 1)(326 0 0 500 250 1)(327 0 0 500 250 1)(328 0 0 500 250 1)(329 0 0 500 250 1)(330 0 0 500 250 1)(331 0 0 500 250 1)(332 0 0 500 250 1)(333 0 0 500 250 1)(334 0 0 500 250 1)(335 0 0 500 250 1)(336 0 0 500 250 1)(337 0 0 500 250 1)(338 0 0 500 250 1)(339 0 0 500 250 1)(340 0 0 500 250 1)(341 0 0 500 250 1)(342 0 0 500 250 1)(343 0 0 500 250 1)(344 0 0 500 250 1)(345 0 0 500 250 1)(346 0 0 500 250 1)(347 0 0 500 250 1)(348 0 0 500 250 1)(349 0 0 500 250 1)(350 0 0 500 250 1)(351 0 0 500 250 1)(352 0 0 500 250 1)(353 0 0 500 250 1)(354 0 0 500 250 1)(355 0 0 500 250 1)(356 0 0 500 250 1)(357 0 0 500 250 1)(358 0 0 500 250 1)(359 0 0 500 250 1)(360 0 0 500 250 1)(361 0 0 500 250 1)(362 0 0 500 250 1)(363 0 0 500 250 1)(364 0 0 500 250 1)(365 0 0 500 250 1)(366 0 0 500 250 1)(367 0 0 500 250 1)(368 0 0 500 250 1)(369 0 0 500 250 1)(370 0 0 500 250 1)(371 0 0 500 250 1)(372 0 0 500 250 1)(373 0 0 500 250 1)(374 0 0 500 250 1)(375 0 0 500 250 1)(376 0 0 500 250 1)(377 0 0 500 250 1)(378 0 0 500 250 1)(379 0 0 500 250 1)(380 0 0 500 250 1)(381 0 0 500 250 1)(382 0 0 500 250 1)(383 0 0 500 250 1)
@@ -88,7 +88,7 @@ Type 2020: (NP2020,1536)(0 0 0 0 0)(1 0 0 0 1)(2 0 0 0 2)(3 0 0 0 3)(4 0 0 0 4)(
 Type 1110: (NP1110,2,0,500,250,1)(0 0 0)(1 0 0)(2 0 0)(3 0 0)(4 0 0)(5 0 0)(6 0 0)(7 0 0)(8 0 0)(9 0 0)(10 0 0)(11 0 0)(12 0 0)(13 0 0)(14 0 0)(15 0 0)(16 0 0)(17 0 0)(18 0 0)(19 0 0)(20 0 0)(21 0 0)(22 0 0)(23 0 0)
 ```
 
-Generally, The UDP probe NP1110 is an outlier requiring unique format...
+Generally, The UHD probe NP1110 is an outlier requiring unique format...
  
 - The first entry () of the table is a header containing
 (identifier,number-of-channels). Prior to SpikeGLX version 20260115 and
@@ -102,11 +102,12 @@ is typically an entry per readout channel.
 
 - Entry values are space-separated.
 
-- A single linefeed `'\n'` terminates the file.
+- The file must include the terminal `)` of the last entry. Addtional
+terminators {CRLF, LF} after that are optional.
 
-## Channel Entries by Format
+# Channel Entries by Format
 
-### imro_np1000 (NP 1.0 like)
+## imro_np1000 (NP 1.0 like)
 
 * Channel ID
 * Bank number of the connected electrode
@@ -118,7 +119,7 @@ is typically an entry per readout channel.
 The reference ID values are {0=ext, 1=tip, [2..4]=on-shnk-ref}.
 The on-shnk ref electrodes are {192,576,960}.
 
-### imro_np2000 (NP 2.0 precommercial, single multiplexed shank)
+## imro_np2000 (NP 2.0 precommercial, single multiplexed shank)
 
 * Channel ID
 * Bank mask (logical OR of {1=bnk-0, 2=bnk-1, 4=bnk-2, 8=bnk-3})
@@ -128,7 +129,7 @@ The on-shnk ref electrodes are {192,576,960}.
 Type-21 reference ID values are {0=ext, 1=tip, [2..5]=on-shnk-ref}.
 The on-shnk ref electrodes are {127,507,887,1251}.
 
-### imro_np2003 (NP 2.0 commercial, single multiplexed shank)
+## imro_np2003 (NP 2.0 commercial, single multiplexed shank)
 
 * Channel ID
 * Bank mask (logical OR of {1=bnk-0, 2=bnk-1, 4=bnk-2, 8=bnk-3})
@@ -138,7 +139,7 @@ The on-shnk ref electrodes are {127,507,887,1251}.
 Type-2003 reference ID values are {0=ext, 1=gnd, 2=tip}. On-shank
 reference electrodes are removed from commercial 2.0 probes.
 
-### imro_np2010 (NP 2.0 precommercial, 4-shank)
+## imro_np2010 (NP 2.0 precommercial, 4-shank)
 
 * Channel ID
 * Shank ID (with tips pointing down, shank-0 is left-most)
@@ -149,7 +150,7 @@ reference electrodes are removed from commercial 2.0 probes.
 Type-24 reference ID values are {0=ext, [1..4]=tip[0..3], [5..8]=on-shnk-0, [9..12]=on-shnk-1, [13..16]=on-shnk-2, [17..20]=on-shnk-3}.
 The on-shnk ref electrodes of any shank are {127,511,895,1279}.
 
-### imro_np2013 (NP 2.0 commercial, 4-shank)
+## imro_np2013 (NP 2.0 commercial, 4-shank)
 
 * Channel ID
 * Shank ID (with tips pointing down, shank-0 is left-most)
@@ -160,7 +161,7 @@ The on-shnk ref electrodes of any shank are {127,511,895,1279}.
 Type-2013 reference ID values are {0=ext, 1=gnd, [2..5]=tip[0..3]}. On-shank
 reference electrodes are removed from commercial 2.0 probes.
 
-### imro_np2020 (NP 2.0 quad-probe)
+## imro_np2020 (NP 2.0 quad-probe)
 
 * Channel ID
 * Shank ID (with tips pointing down, shank-0 is left-most)
@@ -170,7 +171,7 @@ reference electrodes are removed from commercial 2.0 probes.
 
 Quad-base reference ID values are {0=ext, 1=gnd, 2=tip on same shank as electode}.
 
-### imro_np1110 (UHD programmable)
+## imro_np1110 (UHD programmable, aka: Ultra, 1.0 HD)
 
 This has a unique header:
 
@@ -187,7 +188,7 @@ And 24 entries following the header:
 * Bank-A
 * Bank-B
 
-## C Code: Type 0 Default
+# C Code: Type 0 Default
 
 The default for a type-0 probe is to select for each channel: bank=0,
 ref=0, APgain=500, LFgain=250, APfilter=1.
@@ -210,7 +211,7 @@ void DefaultType0()
 }
 ```
 
-## C Code: Type 0 Tetrodes
+# C Code: Type 0 Tetrodes
 
 Each channel will get the default reference, gain and filter settings
 {ref=0, APgain=500, LFgain=250, APfilter=1}.
