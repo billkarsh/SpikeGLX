@@ -139,7 +139,7 @@ bool IMROTbl_T2020::isConnectedSame( const IMROTbl *rhs ) const
 }
 
 
-// Pattern: (type,nchan)(chn shnk bank refid elec)()()...
+// Pattern: (pn,nchan)(chn shnk bank refid elec)()()...
 //
 QString IMROTbl_T2020::toString() const
 {
@@ -147,7 +147,7 @@ QString IMROTbl_T2020::toString() const
     QTextStream ts( &s, QIODevice::WriteOnly );
     int         n = nChan();
 
-    ts << "(" << type << "," << n << ")";
+    ts << "(" << pn << "," << n << ")";
 
     for( int i = 0; i < n; ++i )
         ts << e[i].toString( i );
@@ -156,7 +156,7 @@ QString IMROTbl_T2020::toString() const
 }
 
 
-// Pattern: (type,nchan)(chn shnk bank refid elec)()()...
+// Pattern: (pn,nchan)(chn shnk bank refid elec)()()...
 //
 // Return true if file type compatible.
 //
@@ -175,18 +175,26 @@ bool IMROTbl_T2020::fromString( QString *msg, const QString &s )
 
     if( hl.size() != 2 ) {
         if( msg )
-            *msg = "Wrong imro header format [should be (type,nchan)]";
+            *msg = "Wrong imro header format [should be (pn,nchan)]";
         return false;
     }
 
-    int type = hl[0].toInt();
+    bool    type_ok;
 
-    if( type != typeConst() ) {
-        if( msg ) {
-            *msg = QString("Wrong imro type[%1] for probe type[%2]")
-                    .arg( type ).arg( typeConst() );
+    if( hl[0].toInt( &type_ok ) == typeConst() && type_ok )
+        ;
+    else {
+        int type;
+        type_ok = pnToType( type, hl[0].trimmed() );
+
+        if( !type_ok || type != typeConst() ) {
+            if( msg ) {
+                *msg =
+                QString("Wrong imro header id[%1] for probe pn[%2]")
+                .arg( hl[0].trimmed() ).arg( pn );
+            }
+            return false;
         }
-        return false;
     }
 
 // Entries

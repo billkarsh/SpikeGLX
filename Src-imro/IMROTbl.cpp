@@ -545,8 +545,8 @@ bool IMROTbl::loadFile( QString &msg, const QString &path )
 
         if( fromString( &reason, f.readAll() ) ) {
 
-            msg = QString("Loaded (type=%1) file '%2'")
-                    .arg( type ).arg( fi.fileName() );
+            msg = QString("Loaded (id=%1) file '%2'")
+                    .arg( pn ).arg( fi.fileName() );
             return true;
         }
         else {
@@ -574,8 +574,8 @@ bool IMROTbl::saveFile( QString &msg, const QString &path ) const
 
         if( n > 0 ) {
 
-            msg = QString("Saved (type=%1) file '%2'")
-                    .arg( type )
+            msg = QString("Saved (pn=%1) file '%2'")
+                    .arg( pn )
                     .arg( fi.fileName() );
             return true;
         }

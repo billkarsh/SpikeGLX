@@ -6,6 +6,7 @@
 + Update msvc dll set in releases.
 + Ctrl+Z raises the Console (Log) window.
 + Sync period can be set to {1,2,3} seconds.
++ Imro headers (PN,nchan) instead of (type,nchan).
 + Add NI low latency mode and histogram.
 
 20251218

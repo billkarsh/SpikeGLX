@@ -27,7 +27,7 @@ struct IMROHdr_T1110
         {return apgn==rhs.apgn       && lfgn==rhs.lfgn
             &&  colmode==rhs.colmode && refid==rhs.refid
             &&  apflt==rhs.apflt;}
-    QString toString( int type ) const;
+    QString toString( const QString& pn ) const;
 };
 
 

@@ -14,12 +14,12 @@ using namespace Neuropixels;
 /* struct IMROHdr ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// Pattern: "(type,colmode,refid,apgn,lfgn,apflt)"
+// Pattern: "(pn,colmode,refid,apgn,lfgn,apflt)"
 //
-QString IMROHdr_T1110::toString( int type ) const
+QString IMROHdr_T1110::toString( const QString& pn ) const
 {
     return QString("(%1,%2,%3,%4,%5,%6)")
-            .arg( type ).arg( colmode ).arg( refid )
+            .arg( pn ).arg( colmode ).arg( refid )
             .arg( apgn ).arg( lfgn ).arg( apflt );
 }
 
@@ -115,14 +115,14 @@ bool IMROTbl_T1110::isConnectedSame( const IMROTbl *rhs ) const
 }
 
 
-// Pattern: (type,colmode,refid,apgn,lfgn,apflt)(grp bankA bankB)()()...
+// Pattern: (pn,colmode,refid,apgn,lfgn,apflt)(grp bankA bankB)()()...
 //
 QString IMROTbl_T1110::toString() const
 {
     QString     s;
     QTextStream ts( &s, QIODevice::WriteOnly );
 
-    ts << ehdr.toString( type );
+    ts << ehdr.toString( pn );
 
     for( int ig = 0; ig < imType1110Groups; ++ig )
         ts << e[ig].toString( ig );
@@ -131,7 +131,7 @@ QString IMROTbl_T1110::toString() const
 }
 
 
-// Pattern: (type,colmode,refid,apgn,lfgn,apflt)(grp bankA bankB)()()...
+// Pattern: (pn,colmode,refid,apgn,lfgn,apflt)(grp bankA bankB)()()...
 //
 // Return true if file type compatible.
 //
@@ -154,14 +154,22 @@ bool IMROTbl_T1110::fromString( QString *msg, const QString &s )
         return false;
     }
 
-    int type = hl[0].toInt();
+    bool    type_ok;
 
-    if( type != imType1110Type ) {
-        if( msg ) {
-            *msg = QString("Wrong imro type[%1] for probe type[%2]")
-                    .arg( type ).arg( imType1110Type );
+    if( hl[0].toInt( &type_ok ) == imType1110Type && type_ok )
+        ;
+    else {
+        int type;
+        type_ok = pnToType( type, hl[0].trimmed() );
+
+        if( !type_ok || type != imType1110Type ) {
+            if( msg ) {
+                *msg =
+                QString("Wrong imro header id[%1] for probe pn[%2]")
+                .arg( hl[0].trimmed() ).arg( pn );
+            }
+            return false;
         }
-        return false;
     }
 
     ehdr = IMROHdr_T1110(
