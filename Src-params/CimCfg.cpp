@@ -20,6 +20,7 @@ using namespace Neuropixels;
 #include <QRegularExpression>
 #include <QSettings>
 #include <QTableWidget>
+#include <QThread>  // IWYU pragma: keep
 
 
 /* ---------------------------------------------------------------- */
@@ -2416,6 +2417,7 @@ guiBreathe();
 #if 0
         if( T.slot2Vers[P.adr.slot].bsctech == t_tech_nxt_pa ) {
 
+#if 0
             HardwareID  H;
             np_closeBS( P.adr.slot );
             np_openBS( P.adr.slot );
@@ -2426,6 +2428,20 @@ guiBreathe();
             np_openBS( P.adr.slot );
         //    Log()<<np_getProbeHardwareID(P.adr.slot, P.adr.port, 1, &H);
             Log()<<np_getFlexHardwareID(P.adr.slot, P.adr.port, 1, &H);
+#else
+            HardwareID  H;
+            for( int itry = 1; itry <= 10; ++itry ) {
+                np_closeBS( P.adr.slot );
+                QThread::msleep( 1000 );
+                np_openBS( P.adr.slot );
+                QThread::msleep( 1000 );
+                NP_ErrorCode    res = np_getFlexHardwareID(P.adr.slot, P.adr.port, 1, &H);
+                Log()<<"try result "<<itry<<" "<<res;
+                if( res == Neuropixels::SUCCESS )
+                    break;
+                QThread::msleep( 200 );
+            }
+#endif
         }
 #endif
 
