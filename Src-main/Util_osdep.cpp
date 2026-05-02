@@ -664,7 +664,7 @@ quint64 pCoreAffinityMask()
         return 0;
     }
 
-// First pas: get range of classes
+// First pass: get range of classes
 
     auto    ptr = buffer.data();
     int     cmin = 99, cmax = 0;
