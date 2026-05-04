@@ -464,8 +464,12 @@ int Run::streamSpanMax( const DAQ::Params &p, bool warn )
     bps *= 2.0;
     secs = qBound( 2, int(ram/bps), secsMax );
 
-    if( warn )
-        Warning() << "History length limited to " << secs << " seconds.";
+    if( warn ) {
+        if( secs < secsMax )
+            Warning() << "History length shortened to " << secs << " seconds.";
+        else
+            Log() << "History length at default " << secs << " seconds.";
+    }
 
     return secs;
 }
