@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+May 5, 2026
+
+* CatGT 5.3 (New imros, variable sync period).
+
 March 2, 2026
 
 * SpikeGLX_Linux_offline.
