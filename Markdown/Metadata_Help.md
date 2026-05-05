@@ -1130,6 +1130,12 @@ This is the count of channels, of each type, in each timepoint,
 at acquisition time.
 
 ```
+obA2DThresh=0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25
+```
+
+The set of 12 voltage thresholds for converting the XA values to the XD lines.
+
+```
 obAiRangeMax=5.0
 ```
 

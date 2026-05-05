@@ -111,14 +111,20 @@ bool CimAcqImec::_aux_initObxSlot( int slot )
             return false;
         }
 
+        QStringList sl = E.uiA2DStr.split(
+                            QRegularExpression("^\\s+|\\s*,\\s*"),
+                            Qt::SkipEmptyParts );
+
         for( int ic = 0; ic < imOBX_NCHN; ++ic ) {
 
-            err = np_ADC_setComparatorThreshold( slot, ic, 0.1 * v, 0.1 * v );
+            double  T = sl[ic].toDouble();
+
+            err = np_ADC_setComparatorThreshold( slot, ic, T, T );
 
             if( err != SUCCESS ) {
                 runError(
                     QString("IMEC ADC_setComparatorThreshold(slot %1 chn %2 T %3)%4")
-                    .arg( slot ).arg( ic ).arg( 0.1 * v ).arg( makeErrorString( err ) ) );
+                    .arg( slot ).arg( ic ).arg( T ).arg( makeErrorString( err ) ) );
                 return false;
             }
         }

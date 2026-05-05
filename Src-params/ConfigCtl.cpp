@@ -1566,6 +1566,39 @@ bool ConfigCtl::validObChannels( QString &err, DAQ::Params &q, int istr ) const
         return false;
     }
 
+// A2D
+
+    QStringList sl = E.uiA2DStr.split(
+                        QRegularExpression("^\\s+|\\s*,\\s*"),
+                        Qt::SkipEmptyParts );
+
+    int n = sl.size();
+
+    if( n != 12 ) {
+        err =
+        QString("Obx requires 12 A2D thresholds '%1'.")
+        .arg( E.uiA2DStr );
+        return false;
+    }
+
+    for( int i = 0; i < 12; ++i ) {
+
+        bool    ok;
+        double  T = sl[i].toDouble( &ok );
+        if( !ok ) {
+            err =
+            QString("Obx A2D threshold(%1) [%2] not a float (decimal number).")
+            .arg( i ).arg( sl[i] );
+            return false;
+        }
+        if( T < 0 ) {
+            err =
+            QString("Obx A2D threshold(%1) [%2] < 0.")
+            .arg( i ).arg( sl[i] );
+            return false;
+        }
+    }
+
     return true;
 }
 

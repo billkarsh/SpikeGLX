@@ -80,6 +80,7 @@ void DataFileOB::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imTrgRising"]  = p.im.prbAll.trgRising;
     kvp["obAiRangeMin"] = E.range.rmin;
     kvp["obAiRangeMax"] = E.range.rmax;
+    kvp["obA2DThresh"]  = E.uiA2DStr;
 
     kvp["imDatApi"]         = T.api;
     kvp["imDatBs_fw"]       = T.slot2Vers[P.adr.slot].bsfw;

@@ -450,14 +450,17 @@ public:
         double          srate;
         QString         when,       // last set by user
                         uiXAStr,
-                        uiAOStr;
+                        uiAOStr,
+                        uiA2DStr;   // thresholds
         int             obCumTypCnt[obNTypes];
         bool            isXD;
         SnsChansObx     sns;
 
         ObxEach()
-        :   range(-5,5), srate(imOBX_SRATE),
-            uiXAStr("0:11"), isXD(true) {}
+        :   range(-5,5), srate(imOBX_SRATE), uiXAStr("0:11"),
+            uiA2DStr("0.25,0.25,0.25,0.25,0.25,0.25,"
+                     "0.25,0.25,0.25,0.25,0.25,0.25"),
+            isXD(true) {}
 
         void deriveChanCounts();
 

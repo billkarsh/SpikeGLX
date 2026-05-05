@@ -17,11 +17,12 @@
 #define TBL_SN      0
 #define TBL_RATE    1
 #define TBL_XA      2
-#define TBL_XD      3
-#define TBL_V       4
-#define TBL_AO      5
-#define TBL_CHAN    6
-#define TBL_SAVE    7
+#define TBL_A2D     3
+#define TBL_XD      4
+#define TBL_V       5
+#define TBL_AO      6
+#define TBL_CHAN    7
+#define TBL_SAVE    8
 
 static const char *DEF_OBCHMP_LE = "*Default (acquired channel order)";
 
@@ -163,6 +164,8 @@ QString Config_obxtab::remoteSetObxEach( const QString &s, int istr )
 
             if( k == "obXAChans" )
                 E.uiXAStr = v;
+            else if( k == "obA2DThresh" )
+                E.uiA2DStr = v;
             else if( k == "obDigital" ) {
                 bool    ok;
                 E.isXD = v.toInt( &ok );
@@ -326,6 +329,8 @@ void Config_obxtab::defBut()
     E.range.rmax    = 5.0;
     E.uiXAStr       = "0:11";
     E.uiAOStr       = "";
+    E.uiA2DStr      = "2.25,2.25,2.25,2.25,2.25,2.25,"
+                      "2.25,2.25,2.25,2.25,2.25,2.25";
     E.isXD          = true;
     E.sns.shankMapFile.clear();
     E.sns.chanMapFile.clear();
@@ -482,6 +487,8 @@ void Config_obxtab::toTbl()
         toTbl( ip );
     }
 
+    T->setColumnWidth( TBL_A2D, 72 );
+
     T->resizeColumnToContents( TBL_SN );
     T->resizeColumnToContents( TBL_RATE );
     T->resizeColumnToContents( TBL_XA );
@@ -518,6 +525,20 @@ void Config_obxtab::toTbl( int ip )
     }
 
     ti->setText( E.uiXAStr );
+
+// ---
+// A2D
+// ---
+
+    if( !(ti = T->item( ip, TBL_A2D )) ) {
+        ti = new QTableWidgetItem;
+        T->setItem( ip, TBL_A2D, ti );
+        ti->setFlags( Qt::ItemIsSelectable
+                        | Qt::ItemIsEnabled
+                        | Qt::ItemIsEditable );
+    }
+
+    ti->setText( E.uiA2DStr );
 
 // --
 // XD
@@ -617,6 +638,13 @@ void Config_obxtab::fromTbl( int ip )
 
     ti          = T->item( ip, TBL_XA );
     E.uiXAStr   = ti->text().trimmed();
+
+// ---
+// A2D
+// ---
+
+    ti          = T->item( ip, TBL_A2D );
+    E.uiA2DStr  = ti->text().trimmed();
 
 // --
 // XD

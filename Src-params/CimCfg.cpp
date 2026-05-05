@@ -1602,6 +1602,9 @@ void CimCfg::ObxEach::loadSettings( QSettings &S )
     when                = S.value( "__when", QDateTime::currentDateTime().toString() ).toString();
     uiXAStr             = S.value( "obXAChans", "0:11" ).toString();
     uiAOStr             = S.value( "obAOChans", "" ).toString();
+    uiA2DStr            = S.value( "obA2DThresh",
+                            "0.25,0.25,0.25,0.25,0.25,0.25,"
+                            "0.25,0.25,0.25,0.25,0.25,0.25" ).toString();
     isXD                = S.value( "obDigital", true ).toBool();
     sns.chanMapFile     = S.value( "obSnsChanMapFile", QString() ).toString();
     sns.uiSaveChanStr   = S.value( "obSnsSaveChanSubset", "all" ).toString();
@@ -1614,6 +1617,7 @@ void CimCfg::ObxEach::saveSettings( QSettings &S ) const
     S.setValue( "__when", when );
     S.setValue( "obXAChans", uiXAStr );
     S.setValue( "obAOChans", uiAOStr );
+    S.setValue( "obA2DThresh", uiA2DStr );
     S.setValue( "obDigital", isXD );
     S.setValue( "obSnsChanMapFile", sns.chanMapFile );
     S.setValue( "obSnsSaveChanSubset", sns.uiSaveChanStr );
@@ -1627,6 +1631,7 @@ QString CimCfg::ObxEach::remoteGetObxEach() const
     s  = QString("obAiRangeMax=%1\n").arg( range.rmax );
     s += QString("obXAChans=%1\n").arg( uiXAStr );
     s += QString("obAOChans=%1\n").arg( uiAOStr );
+    s += QString("obA2DThresh=%1\n").arg( uiA2DStr );
     s += QString("obDigital=%1\n").arg( isXD );
     s += QString("obSnsChanMapFile=%1\n").arg( sns.chanMapFile );
     s += QString("obSnsSaveChanSubset=%1\n").arg( sns.uiSaveChanStr );

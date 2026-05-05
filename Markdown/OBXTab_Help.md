@@ -14,6 +14,7 @@ Use this tab to configure parameters for each OneBox, individually.
 * [Measured Sample Rate](#measured-sample-rate)
 * [Editing](#editing)
     + [XA Analog Channels](#xa-analog-channels)
+    + [A2D Thresholds](#a2d-thresholds)
     + [XD Digital Lines](#xd-digital-lines)
     + [AI Range](#ai-range)
     + [AO Analog (DAC) Channels](#ao-analog-dac-channels)
@@ -71,6 +72,7 @@ the calibration procedures on the `Sync` tab (See User Manual).
 For each OneBox, you can edit its:
 
 * XA list of input analog (AI a.k.a. ADC) channels.
+* A2D list of 12 threshold voltages.
 * XD whether to acquire digital lines.
 * AI voltage range: +/- {2, 5, 10} volts.
 * AO list of output analog (DAC) channels.
@@ -92,13 +94,19 @@ If desired, the XA box can be blank (specfying **NO** analog channels).
 
 --------
 
+### A2D Thresholds
+
+This is a list of exactly 12 voltages (V) for converting the 12 XA analog
+channels to TTL values in the XD word.
+
+--------
+
 ### XD Digital Lines
 
 If you enable the XD (digital) option, then, regardless of your XA channel
-list, **ALL 12** analog inputs are digitized using a fixed threshold value
-equal to 10% of: {2.5, 5, 10} as determined by your AI Range selection.
-The 12 resulting digital lines are read out together as the lowest 12 bits
-of a single 16-bit `XD` word.
+list, **ALL 12** analog inputs are digitized using your 12 **A2D threshold**
+voltages. The 12 resulting digital lines are read out together as the lowest
+12 bits of a single 16-bit `XD` word.
 
 In other words, your Obx data stream either has no digital word, or it has
 a single digital word containing 12 digital lines.
@@ -134,7 +142,8 @@ AO channel list.
 >*It is flagged as an error if the same channel is in the XA and the AO list.*
 
 >**CAUTION: You might damage the OneBox or other equipment if you
-cross-connect inputs to outputs.**
+connect external voltage sources to OneBox channels that are configured for
+output (AO).**
 
 >Yes it is safe and permitted, to enable XD and specify AO channels.
 The digital lines for AO channels are disabled and read as zeros.
@@ -181,6 +190,7 @@ and the sync channel.
 This is a handy way to set all of the editable fields:
 
 * XA: 0:11.
+* A2D: 0.25V (all channels).
 * XD: true.
 * AI range: 5V.
 * AO: blank.
