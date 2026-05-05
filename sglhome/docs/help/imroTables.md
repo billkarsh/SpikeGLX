@@ -11,8 +11,8 @@ how to write your own (*.imro) files, at least for NP 1.0 probes, which
 have straightforward internal site selection rules (each channel can connect
 to just one bank).
 
-To apply your own imro table, open any ShankViewer `Edit` tab and `Load`
-your table file.
+To apply your own imro table in SpikeGLX, open any ShankViewer `Edit` tab
+and `Load` your table file.
 
 > Note: If your site selection pattern isn't able to be duplicated by the
 site selection tools currently offered in the ShankViewer, then ShankViewer
@@ -24,6 +24,23 @@ to select the default option in the `channel map` table column on the
 `IM Setup` tab. The default channel map will order your graphs from the
 tip of the probe to the top (base) according to your imro table.
 
+# Parsing and GeomMaps
+
+Whenever SpikeGLX writes metadata, it stores the imro table with tag
+`~imroTbl`, but it also writes a geometry map with tag `~snsGeomMap`
+which is derived from the imro table. More here:
+[Metadata_Help.html.](https://billkarsh.github.io/SpikeGLX/Sgl_help/Metadata_Help.html).
+
+The geomMap records where each selected electrode is on the probe, in
+physical coordinates. The geomMap has a single universal format that works
+for every type of probe. It is designed to simplify parsing the site layout.
+On the other hand, as you will see here, the imro table formats are necessarily
+diverse to accommodate the programmable parameters for each probe type, and
+in most cases this is more info than you need for postprocessing.
+
+We strongly encourage using the geomMap to decode probe layout if that
+suits your purpose.
+
 # Terminology
 
 ## Part Number (pn)
@@ -34,14 +51,19 @@ dovetail has pn `NP2013`. Sometimes the differences between models are very
 minor. For example, the NP2014 is just a NP2013 with an added dovetail cap.
 On the other hand, 1.0 and 2.0 probes are very different with respect to
 many features, such as: gain settings, shank counts, acquisition methods,
-and so on. These differences are very important within SpikeGLX. Still,
-the models fall into functional groups that are captured by "probe type..."
+and so on. SpikeGLX is primarily concerned with the geometric and electronic
+characteristics of probes, and these fall into groups that are captured by
+the internal `probe type` identifier.
 
 ## Probe Type
 
 SpikeGLX assigns `probe type` codes to groups of probes that are functionally
 similar, so can be handled similarly in software. Of course there are fewer
 probe types than part numbers.
+
+Probe type was intended for internal use by SpikeGLX and we would like to
+phase that out of public facing metadata. We want to replace that with the
+already public `pn` identifier.
 
 > Note: As of version **20260115** SpikeGLX began writing pn values into
 imro headers. Prior to that, the imro header encoded the probe type value.
@@ -214,7 +236,7 @@ Type-3010 reference ID values are {0=ext, 1=gnd, 2=tip}.
 
 NXT have 912 channels per full bank.
 
-NXT reference ID values are {0=ext, 1=gnd, [2..5]=tip[0..3]}.
+Type-3020 reference ID values are {0=ext, 1=gnd, [2..5]=tip[0..3]}.
 
 # C Code: Type 0 Default
 

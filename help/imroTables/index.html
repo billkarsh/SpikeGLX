@@ -165,6 +165,11 @@
               </ul>
             </li>
             
+            <li class="nav-item" data-level="1"><a href="#parsing-and-geommaps" class="nav-link">Parsing and GeomMaps</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
             <li class="nav-item" data-level="1"><a href="#terminology" class="nav-link">Terminology</a>
               <ul class="nav flex-column">
             <li class="nav-item" data-level="2"><a href="#part-number-pn" class="nav-link">Part Number (pn)</a>
@@ -257,8 +262,8 @@ but sometimes you may want to do something custom. This document explains
 how to write your own (*.imro) files, at least for NP 1.0 probes, which
 have straightforward internal site selection rules (each channel can connect
 to just one bank).</p>
-<p>To apply your own imro table, open any ShankViewer <code>Edit</code> tab and <code>Load</code>
-your table file.</p>
+<p>To apply your own imro table in SpikeGLX, open any ShankViewer <code>Edit</code> tab
+and <code>Load</code> your table file.</p>
 <blockquote>
 <p>Note: If your site selection pattern isn't able to be duplicated by the
 site selection tools currently offered in the ShankViewer, then ShankViewer
@@ -269,6 +274,19 @@ to select the default option in the <code>channel map</code> table column on the
 <code>IM Setup</code> tab. The default channel map will order your graphs from the
 tip of the probe to the top (base) according to your imro table.</p>
 </blockquote>
+<h1 id="parsing-and-geommaps">Parsing and GeomMaps</h1>
+<p>Whenever SpikeGLX writes metadata, it stores the imro table with tag
+<code>~imroTbl</code>, but it also writes a geometry map with tag <code>~snsGeomMap</code>
+which is derived from the imro table. More here:
+<a href="https://billkarsh.github.io/SpikeGLX/Sgl_help/Metadata_Help.html">Metadata_Help.html.</a>.</p>
+<p>The geomMap records where each selected electrode is on the probe, in
+physical coordinates. The geomMap has a single universal format that works
+for every type of probe. It is designed to simplify parsing the site layout.
+On the other hand, as you will see here, the imro table formats are necessarily
+diverse to accommodate the programmable parameters for each probe type, and
+in most cases this is more info than you need for postprocessing.</p>
+<p>We strongly encourage using the geomMap to decode probe layout if that
+suits your purpose.</p>
 <h1 id="terminology">Terminology</h1>
 <h2 id="part-number-pn">Part Number (pn)</h2>
 <p>Probe models each have an identifying imec catalog part number (pn) usually
@@ -277,12 +295,16 @@ dovetail has pn <code>NP2013</code>. Sometimes the differences between models ar
 minor. For example, the NP2014 is just a NP2013 with an added dovetail cap.
 On the other hand, 1.0 and 2.0 probes are very different with respect to
 many features, such as: gain settings, shank counts, acquisition methods,
-and so on. These differences are very important within SpikeGLX. Still,
-the models fall into functional groups that are captured by "probe type..."</p>
+and so on. SpikeGLX is primarily concerned with the geometric and electronic
+characteristics of probes, and these fall into groups that are captured by
+the internal <code>probe type</code> identifier.</p>
 <h2 id="probe-type">Probe Type</h2>
 <p>SpikeGLX assigns <code>probe type</code> codes to groups of probes that are functionally
 similar, so can be handled similarly in software. Of course there are fewer
 probe types than part numbers.</p>
+<p>Probe type was intended for internal use by SpikeGLX and we would like to
+phase that out of public facing metadata. We want to replace that with the
+already public <code>pn</code> identifier.</p>
 <blockquote>
 <p>Note: As of version <strong>20260115</strong> SpikeGLX began writing pn values into
 imro headers. Prior to that, the imro header encoded the probe type value.
@@ -531,7 +553,7 @@ reference electrodes are removed from commercial 2.0 probes.</p>
 <li>Electrode ID (range [0,1279] on each shank)</li>
 </ul>
 <p>NXT have 912 channels per full bank.</p>
-<p>NXT reference ID values are {0=ext, 1=gnd, [2..5]=tip[0..3]}.</p>
+<p>Type-3020 reference ID values are {0=ext, 1=gnd, [2..5]=tip[0..3]}.</p>
 <h1 id="c-code-type-0-default">C Code: Type 0 Default</h1>
 <p>The default for a type-0 probe is to select for each channel: bank=0,
 ref=0, APgain=500, LFgain=250, APfilter=1.</p>
