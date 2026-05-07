@@ -96,17 +96,18 @@ If desired, the XA box can be blank (specfying **NO** analog channels).
 
 ### A2D Thresholds
 
-This is a list of exactly 12 voltages (V) for converting the 12 XA analog
-channels to TTL values in the XD word.
+This is a list of exactly 12 voltages (V) for converting the 12 analog
+channels to TTL values in the XD word. These operate on both the XA and
+the AO channels.
 
 --------
 
 ### XD Digital Lines
 
-If you enable the XD (digital) option, then, regardless of your XA channel
-list, **ALL 12** analog inputs are digitized using your 12 **A2D threshold**
-voltages. The 12 resulting digital lines are read out together as the lowest
-12 bits of a single 16-bit `XD` word.
+If you enable the XD (digital) option, then **ALL 12** analog channels
+(both inputs and outputs) are digitized using your 12 **A2D threshold**
+voltages. The 12 resulting digital lines are read out together as the
+lowest 12 bits of a single 16-bit `XD` word.
 
 In other words, your Obx data stream either has no digital word, or it has
 a single digital word containing 12 digital lines.
@@ -146,7 +147,7 @@ connect external voltage sources to OneBox channels that are configured for
 output (AO).**
 
 >Yes it is safe and permitted, to enable XD and specify AO channels.
-The digital lines for AO channels are disabled and read as zeros.
+The digital lines for both XA and AO channels are thresholded and recorded.
 
 A OneBox is configured for output if at least one AO channel is listed.
 In SDK remote interface functions you can access the output features for
