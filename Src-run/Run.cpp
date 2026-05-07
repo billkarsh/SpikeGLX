@@ -65,7 +65,6 @@ Run::GWPair::GWPair( const DAQ::Params &p, int igw )
 void Run::GWPair::createWindow( const DAQ::Params &p, int igw )
 {
     gw = new GraphsWindow( p, igw );
-    gw->show();
 
     MainApp *app = mainApp();
     app->act.shwHidGrfsAct->setEnabled( true );
@@ -111,6 +110,7 @@ void Run::GWPair::startFetching( QMutex &runMtx )
 
     runMtx.unlock();
         gw->initViews();
+        gw->show();
     runMtx.lock();
 }
 
