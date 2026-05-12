@@ -834,11 +834,13 @@ void ImAcqStream::sendErrMetrics() const
                 Q_ARG(quint32, errSYNC[is]),
                 Q_ARG(quint32, errMISS[is]) );
 
-            if( uniformDev() < 0.10 ) {
+            static bool forced = false;
+            if( !forced ) {
                 QMetaObject::invokeMethod(
                     mainApp(),
                     "window_RunMetrics",
                     Qt::QueuedConnection );
+                forced = true;
             }
         }
     }
