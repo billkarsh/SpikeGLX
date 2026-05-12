@@ -1475,6 +1475,18 @@ QString IMROTbl::strTech( int tech )
 }
 
 
+// t_tech_nxt_ppa:
+// - type 3010, 3020
+// - OneBox-only
+// - API 4.0.0, 4.0.2
+// - Only {Janelia, JHU}
+//
+// t_tech_nxt_pa:
+// - type 3022
+// - PXI-only
+// - API 4.1.0 - 4.1.3
+// - Only {Janelia, JHU, Princeton}
+//
 void IMROTbl::bscReqVers( QString &bsreq, QString &bscreq, int bsctech )
 {
     switch( bsctech ) {

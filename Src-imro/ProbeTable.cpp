@@ -7,11 +7,11 @@
 #include <QJsonObject>
 #include <QSettings>
 
-#define FTAB    "C:/Users/labadmin/Desktop/ProbeTable/2025_12_10_Probe_feature_table_tab.txt"
+#define FTAB    "C:/Users/labadmin/Desktop/ProbeTable/2025_12_10_BK_Probe_feature_table_tab.txt"
 #define FINI    "C:/Users/labadmin/Desktop/ProbeTable/probe_features.ini"
 #define FJ2I    "C:/Users/labadmin/Desktop/ProbeTable/probe_features_j2i.ini"
 #define FJSN    "C:/Users/labadmin/Desktop/ProbeTable/probe_features.json"
-#define VERS    "1.6"
+#define VERS    "1.7"
 
 /* ---------------------------------------------------------------- */
 /* CProbeTbl ------------------------------------------------------ */
@@ -237,7 +237,7 @@ void CProbeTbl::extini()
             "(%d %d %d %d %d %d)" );
         S.setValue(
             "imro_np1000_val_def",
-            "type:{0,1020,1030,1100,1120,1121,1122,1123,1200,1300}"
+            "type:pn|{0,1020,1030,1100,1120,1121,1122,1123,1200,1300}"
             " num_channels:num_readout_channels"
             " channel:[0,num_readout_channels-1]"
             " bank:[0,banks_per_shank-1]"
@@ -260,7 +260,7 @@ void CProbeTbl::extini()
             "(%d %d %d)" );
         S.setValue(
             "imro_np1110_val_def",
-            "type:1110"
+            "type:pn|1110"
             " col_mode:(0,INNER)(1,OUTER)(2,ALL)"
             " ref_id:(0,ext)(1,tip)"
             " ap_gain:ap_gain_list"
@@ -281,7 +281,7 @@ void CProbeTbl::extini()
             "(%d %d %d %d)" );
         S.setValue(
             "imro_np2000_val_def",
-            "type:21"
+            "type:pn|21"
             " num_channels:num_readout_channels"
             " channel:[0,num_readout_channels-1]"
             " bank_mask:(bit0,bnk0)(bit1,bnk1)(bit2,bnk2)"
@@ -302,7 +302,7 @@ void CProbeTbl::extini()
             "(%d %d %d %d)" );
         S.setValue(
             "imro_np2003_val_def",
-            "type:2003"
+            "type:pn|2003"
             " num_channels:num_readout_channels"
             " channel:[0,num_readout_channels-1]"
             " bank_mask:(bit0,bnk0)(bit1,bnk1)(bit2,bnk2)"
@@ -323,7 +323,7 @@ void CProbeTbl::extini()
             "(%d %d %d %d %d)" );
         S.setValue(
             "imro_np2010_val_def",
-            "type:24"
+            "type:pn|24"
             " num_channels:num_readout_channels"
             " channel:[0,num_readout_channels-1]"
             " bank:[0,banks_per_shank-1]"
@@ -351,7 +351,7 @@ void CProbeTbl::extini()
             "(%d %d %d %d %d)" );
         S.setValue(
             "imro_np2013_val_def",
-            "type:2013"
+            "type:pn|2013"
             " num_channels:num_readout_channels"
             " channel:[0,num_readout_channels-1]"
             " shank:[0,num_shanks-1]"
@@ -373,7 +373,7 @@ void CProbeTbl::extini()
             "(%d %d %d %d %d)" );
         S.setValue(
             "imro_np2020_val_def",
-            "type:2020"
+            "type:pn|2020"
             " num_channels:num_readout_channels"
             " channel:[0,num_readout_channels-1]"
             " shank:[0,num_shanks-1]"
@@ -395,7 +395,7 @@ void CProbeTbl::extini()
             "(%d %d %d %d)" );
         S.setValue(
             "imro_np3010_val_def",
-            "type:3010"
+            "type:pn|3010"
             " num_channels:num_readout_channels"
             " channel:[0,num_readout_channels-1]"
             " bank:[0,banks_per_shank-1]"
@@ -416,7 +416,7 @@ void CProbeTbl::extini()
             "(%d %d %d %d %d)" );
         S.setValue(
             "imro_np3020_val_def",
-            "type:3020"
+            "type:pn|{3020,3022}"
             " num_channels:num_readout_channels"
             " channel:[0,num_readout_channels-1]"
             " shank:[0,num_shanks-1]"
