@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+May 19, 2026
+
+* OverStrike 1.2 (Accept -samp or -samps).
+
 May 5, 2026
 
 * CatGT 5.3 (New imros, variable sync period).

@@ -269,8 +269,8 @@ CatGT, KS2, Noise Cluster Tagging, C_Waves, QC metrics, TPrime.
 Overwrite nasty parts of your binary data with zeros or lines using OverStrike.
 This helps remove artifacts that are too tricky for CatGT.
 
-* [OverStrike 1.1 (Windows)](Support/OverStrikeWinApp.zip)
-* [OverStrike 1.1 (Linux)](Support/OverStrikeLnxApp.zip)
+* [OverStrike 1.2 (Windows)](Support/OverStrikeWinApp.zip)
+* [OverStrike 1.2 (Linux)](Support/OverStrikeLnxApp.zip)
 
 ------
 
