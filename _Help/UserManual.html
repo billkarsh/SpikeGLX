@@ -263,25 +263,25 @@
 <li>Quit and restart SpikeGLX.</li>
 </ol>
 <h4 id="screen-saver-and-power-settings">Screen Saver and Power Settings</h4>
-<p>Use the following computer settings to guard against interruption during prolonged data acquisition runs (running on batteries is discouraged):</p>
-<p>Screen saver settings group:</p>
-<blockquote>
-<p><strong>NEW</strong>: As of version 20250525 The SpikeGLX download folder contains a script named <code>DAQ_power_settings.bat.</code> Double-click on it to run it. It makes the changes listed below, even in versions of the OS that hide the settings.</p>
-</blockquote>
+<ol style="list-style-type: decimal">
+<li>Find the <code>Screen Saver</code> control panel: Type &quot;screen saver&quot; into the <code>Search Box</code> on the <code>Taskbar</code>.</li>
+</ol>
 <ul>
-<li>Screen saver: (None).</li>
+<li>Turn the Screen Saver <code>OFF</code>, or set it to <code>None</code>.</li>
 </ul>
-<blockquote>
-<p>Note 1: The screen saver settings are a control panel and you can get there by typing 'screen saver' into a control panel search box. Screen saver is a program that draws entertaining animation on your otherwise black screen. The running of this class of programs disrupts acquisition. Turn that off.</p>
-</blockquote>
-<blockquote>
-<p>Note 2: In the power settings you can set the time until the screen turns off. This is a safe option. It shouldn't affect anything except that you may have to log in again after the screen blanks.</p>
-</blockquote>
-<p>Power plan settings:</p>
-<blockquote>
-<p>Keep drilling down until you find the following advanced power plan options. If you don't see some of the following settings they are hidden on your machine. In any case, you can use the double-clickable <code>DAQ_power_settings.bat</code> script in your SpikeGLX download to set them automatically.</p>
-</blockquote>
-<p>Set the following values:</p>
+<ol start="2" style="list-style-type: decimal">
+<li>Locate your Power Plan settings: There may be a power settings link in the Screen Saver control panel, or type &quot;power settings&quot; into the <code>Search Box</code>.</li>
+</ol>
+<p>For data acquisition:</p>
+<ul>
+<li>Run plugged in with AC power.</li>
+<li>Select the highest performance plan listed.</li>
+</ul>
+<ol start="3" style="list-style-type: decimal">
+<li><p>Edit the high performance plan for even better performance, in either of two ways:</p>
+<ol style="list-style-type: lower-alpha">
+<li><p>As of version 20250525 The SpikeGLX download folder contains a script named <code>DAQ_power_settings.bat.</code> Double-click on it to run it. It makes the needed changes listed below, even in versions of the OS that hide advanced settings.</p></li>
+<li><p>Set advanced settings manually: Look for <code>Advanced Settings</code> or <code>change plan settings</code> or similar:</p>
 <ul>
 <li>Put the computer to sleep: Never.</li>
 <li>Hard disk/Turn off hard disk after: Never.</li>
@@ -293,7 +293,9 @@
 <li>Processor power management/Minimum processor state: 5%.</li>
 <li>Processor power management/System cooling policy: Active.</li>
 <li>Processor power management/Maximum processor state: 100%.</li>
-</ul>
+</ul></li>
+</ol></li>
+</ol>
 <blockquote>
 <p>Tip: For some settings, 'Never' might not appear as a choice. Try typing either 'never' or '0' directly into the box.</p>
 </blockquote>

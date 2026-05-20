@@ -323,47 +323,41 @@ that's the case, try altering the following Windows setting:
 
 #### Screen Saver and Power Settings
 
-Use the following computer settings to guard against interruption during
-prolonged data acquisition runs (running on batteries is discouraged):
+1. Find the `Screen Saver` control panel: Type "screen saver" into the
+`Search Box` on the `Taskbar`.
 
-Screen saver settings group:
+* Turn the Screen Saver `OFF`, or set it to `None`.
 
-> **NEW**: As of version 20250525 The SpikeGLX download folder contains
-a script named `DAQ_power_settings.bat.` Double-click on it to run it.
-It makes the changes listed below, even in versions of the OS that hide
-the settings.
+2. Locate your Power Plan settings: There may be a power settings link
+in the Screen Saver control panel, or type "power settings" into the
+`Search Box`.
 
-* Screen saver: (None).
+For data acquisition:
 
-> Note 1: The screen saver settings are a control panel and you can get there
-by typing 'screen saver' into a control panel search box. Screen saver is
-a program that draws entertaining animation on your otherwise black screen.
-The running of this class of programs disrupts acquisition. Turn that off.
+* Run plugged in with AC power.
+* Select the highest performance plan listed.
 
-> Note 2: In the power settings you can set the time until the screen turns
-off. This is a safe option. It shouldn't affect anything except that you
-may have to log in again after the screen blanks.
+3. Edit the high performance plan for even better performance, in either
+of two ways:
 
-Power plan settings:
-
-> Keep drilling down until you find the following advanced power plan
-options. If you don't see some of the following settings they are hidden
-on your machine. In any case, you can use the double-clickable
-`DAQ_power_settings.bat` script in your SpikeGLX download to set them
-automatically.
-
-Set the following values:
-
-* Put the computer to sleep: Never.
-* Hard disk/Turn off hard disk after: Never.
-* Sleep/Sleep after: Never.
-* Sleep/Allow wake timers: Disable.
-* USB settings/USB selective suspend setting: Disable.
-* Intel(R) Graphics Settings/Intel(R) Graphics Power Plan: Maximum Performance.
-* PCI Express/Link State Power Management: Off.
-* Processor power management/Minimum processor state: 5%.
-* Processor power management/System cooling policy: Active.
-* Processor power management/Maximum processor state: 100%.
+    a. As of version 20250525 The SpikeGLX download folder contains
+    a script named `DAQ_power_settings.bat.` Double-click on it to run it.
+    It makes the needed changes listed below, even in versions of the OS that
+    hide advanced settings.
+    
+    b. Set advanced settings manually: Look for `Advanced Settings` or 
+    `change plan settings` or similar:
+        
+        * Put the computer to sleep: Never.
+        * Hard disk/Turn off hard disk after: Never.
+        * Sleep/Sleep after: Never.
+        * Sleep/Allow wake timers: Disable.
+        * USB settings/USB selective suspend setting: Disable.
+        * Intel(R) Graphics Settings/Intel(R) Graphics Power Plan: Maximum Performance.
+        * PCI Express/Link State Power Management: Off.
+        * Processor power management/Minimum processor state: 5%.
+        * Processor power management/System cooling policy: Active.
+        * Processor power management/Maximum processor state: 100%.
 
 > Tip: For some settings, 'Never' might not appear as a choice. Try typing
 either 'never' or '0' directly into the box.
