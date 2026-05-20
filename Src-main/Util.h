@@ -303,6 +303,9 @@ bool isWindows7OrLater();
 // Set application process to high priority
 void setHighPriority( bool on );
 
+// Set application long term sleep state
+void setStayAwake( bool on );
+
 // Set higher precision system timing on/off
 void setPreciseTiming( bool on );
 

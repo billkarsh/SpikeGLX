@@ -565,6 +565,31 @@ void setHighPriority( bool on )
 #endif
 
 /* ---------------------------------------------------------------- */
+/* setStayAwake --------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+#ifdef Q_OS_WIN
+
+void setStayAwake( bool on )
+{
+    quint32 state = ES_CONTINUOUS;
+
+    if( on )
+        state |= ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED;
+
+    SetThreadExecutionState( state );
+}
+
+#else
+
+void setStayAwake( bool on )
+{
+    Q_UNUSED( on )
+}
+
+#endif
+
+/* ---------------------------------------------------------------- */
 /* setPreciseTiming ----------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
