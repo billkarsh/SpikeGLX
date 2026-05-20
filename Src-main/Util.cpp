@@ -40,6 +40,42 @@
 namespace Util {
 
 /* ---------------------------------------------------------------- */
+/* Log messages to file ------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+QString Logf::fname;
+
+Logf::Logf() : stream(&str, QIODevice::WriteOnly)
+{
+}
+
+
+Logf::~Logf()
+{
+    static QMutex logMtx;
+    logMtx.lock();
+
+    QString msg =
+        QString("[Thd %1 CPU %2 %3] %4")
+            .arg( quint64(QThread::currentThreadId()) )
+            .arg( getCurProcessorIdx() )
+            .arg( dateTime2Str(
+                    QDateTime::currentDateTime(),
+                    "M/dd/yy hh:mm:ss.zzz" ) )
+            .arg( str );
+
+    QFile   fo( fname );
+    (void)fo.open( QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text );
+    QTextStream to( &fo );
+    to << QString("%1\n").arg( msg );
+    fo.flush();
+    fo.close();
+
+    qDebug( STR2CHR(msg) );
+    logMtx.unlock();
+}
+
+/* ---------------------------------------------------------------- */
 /* Log messages to console ---------------------------------------- */
 /* ---------------------------------------------------------------- */
 

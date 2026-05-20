@@ -39,6 +39,27 @@ namespace Util
 {
 
 /* ---------------------------------------------------------------- */
+/* Log messages to file ------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+class Logf
+{
+private:
+    static QString  fname;
+    QTextStream     stream;
+protected:
+    QString         str;
+public:
+    Logf();
+    virtual ~Logf();
+
+    template <class T>
+    Logf &operator<<( const T &t ) {stream << t; return *this;}
+
+    static void setFName( const QString &name ) {fname = name;}
+};
+
+/* ---------------------------------------------------------------- */
 /* Log messages to console ---------------------------------------- */
 /* ---------------------------------------------------------------- */
 
