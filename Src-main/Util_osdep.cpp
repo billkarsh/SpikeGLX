@@ -625,11 +625,16 @@ int getCurProcessorIdx()
 #endif
 
 /* ---------------------------------------------------------------- */
-/* pCoreAffinityMask ---------------------------------------------- */
+/* coreAffinityMask ----------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
 #ifdef Q_OS_WIN
 
+// Build mask for:
+// - nTop=1: P-cores
+// - nTop=2: P+E
+// - Return 0 if any of {nTop != {1,2}, not hybrid, error}.
+//
 // Notes:
 // - Query key RelationProcessorCore defines union member Processor,
 // which is type _PROCESSOR_RELATIONSHIP.
@@ -638,20 +643,60 @@ int getCurProcessorIdx()
 // member as of Qt 6.9.1, but we can see from microsoft pages that
 // EfficiencyClass maps to Reserved[0].
 // - Higher values of EfficiencyClass -> more power/less efficient.
-// - There can be multiple classes and we want highest value ones.
-// - So first pass assesses range of class values.
-// - Second pass builds mask.
+// - There can be up to two classes {0, 1}.
+// - If this is a hybrid, P- & E-cores share level-3 cache, but LPE do not.
 //
-quint64 pCoreAffinityMask()
+quint64 coreAffinityMask( int nTop )
 {
-// Fetch processor data
+    if( nTop < 1 || nTop > 2 )
+        return 0;
+
+    quint64 mL3Cache = 0, mP = 0;
+
+// Get group mask for level-3 cache: only P- and E-cores share that
 
     DWORD   len = 0;
 
     GetLogicalProcessorInformationEx(
-        RelationProcessorCore, NULL, &len );
+        RelationCache, NULL, &len );
 
     std::vector<BYTE>   buffer( len );
+
+    if( !len ||
+        !GetLogicalProcessorInformationEx(
+            RelationCache,
+            reinterpret_cast<PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX>(
+                buffer.data()),
+            &len) ) {
+
+        Warning() << "Failed to query cache info.";
+        return 0;
+    }
+
+    auto    ptr = buffer.data();
+
+    while( ptr < buffer.data() + len ) {
+
+        auto info =
+        reinterpret_cast<PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX>(ptr);
+
+        if( info->Relationship == RelationCache &&
+            info->Cache.Level == 3 ) {
+            // Store the mask of all logical processors sharing this L3 cache
+            mL3Cache |= info->Cache.GroupMask.Mask;
+        }
+
+        ptr += info->Size;
+    }
+
+// Fetch processor data: build 3 masks
+
+    len = 0;
+
+    GetLogicalProcessorInformationEx(
+        RelationProcessorCore, NULL, &len );
+
+    buffer.resize( len );
 
     if( !len ||
         !GetLogicalProcessorInformationEx(
@@ -664,10 +709,7 @@ quint64 pCoreAffinityMask()
         return 0;
     }
 
-// First pass: get range of classes
-
-    auto    ptr = buffer.data();
-    int     cmin = 99, cmax = 0;
+    ptr = buffer.data();
 
     while( ptr < buffer.data() + len ) {
 
@@ -678,47 +720,28 @@ quint64 pCoreAffinityMask()
 
             auto &core  = info->Processor;
             int  ceff   = core.Reserved[0];
-            cmin = qMin( ceff, cmin );
-            cmax = qMax( ceff, cmax );
+
+            if( ceff == 1 )
+                mP |= core.GroupMask[0].Mask;
         }
 
         ptr += info->Size;
     }
 
-// Second pass: build cmax mask
-
-    if( cmin == cmax )
+    if( !mP )
         return 0;
 
-    DWORD_PTR   mask = 0;
+    if( nTop == 1 )
+        return mP;
 
-    ptr = buffer.data();
-
-    while( ptr < buffer.data() + len ) {
-
-        auto info =
-        reinterpret_cast<PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX>(ptr);
-
-        if( info->Relationship == RelationProcessorCore ) {
-
-            auto &core = info->Processor;
-
-            if( core.Reserved[0] == cmax ) {
-                // core.GroupMask[0].Mask = logical cores for this proc
-                mask |= core.GroupMask[0].Mask;
-            }
-        }
-
-        ptr += info->Size;
-    }
-
-    return mask;
+    return mL3Cache;
 }
 
 #else
 
-quint64 pCoreAffinityMask()
+quint64 coreAffinityMask( int nTop )
 {
+    Q_UNUSED( nTop )
     return 0;
 }
 

@@ -312,8 +312,8 @@ int getNAssignedThreads();
 // Which processor is running calling thread
 int getCurProcessorIdx();
 
-// Mask-bits are p-cores on hybrid system; return zero if not hybrid
-quint64 pCoreAffinityMask();
+// Mask-bits: logical threads with highest nTop power levels
+quint64 coreAffinityMask( int nTop );
 
 // Mask-bits set which logical threads to run on
 void setProcessAffinityMask( quint64 mask );

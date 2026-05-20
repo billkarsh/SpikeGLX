@@ -574,7 +574,10 @@ bool Run::startRun( QString &err )
 
     DAQ::Params &p = app->cfgCtl()->acceptedParams;
 
-    setProcessAffinityMask( pCoreAffinityMask() );
+    quint64 cpus = coreAffinityMask( 1 );
+    if( cpus )
+        setProcessAffinityMask( cpus );
+
     setProcessorMin( 100 );     // Necessary for Xeon
     setHighPriority( true );
     setPreciseTiming( true );
