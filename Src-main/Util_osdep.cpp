@@ -730,15 +730,15 @@ quint64 pCoreAffinityMask()
 
 #ifdef Q_OS_WIN
 
-// Set which cores to run on, or zero for all available.
+// Set which logical threads to run on, or zero for all available.
 //
 // Notes:
 // GetProcessAffinityMask returns 0xF for a single CPU system
 // having 2 cores/4 threads. Therefore, the mask bits refer to
-// threads (virtual/logical "cores").
+// threads.
 //
-// setProcessAffinityMask( 0 ) has no effect.
-// setProcessAffinityMask( 0xFF ) on a 4 thread system is an error:
+// SetProcessAffinityMask( 0 ) has no effect.
+// SetProcessAffinityMask( 0xFF ) on a 4 thread system is an error:
 // the mask bits must be a subset of the system mask bits returned
 // by GetProcessAffinityMask.
 //

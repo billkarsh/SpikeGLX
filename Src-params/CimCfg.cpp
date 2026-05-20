@@ -2912,7 +2912,7 @@ guiBreathe();
         if( !P.setProbeType() ) {
             R.app_put(
                 QString("SpikeGLX setProbeType(%1)"
-                " error 'Probe part number %2 unsupported'.")
+                " error 'Probe part number '%2' unsupported'.")
                 .arg( P.adr.tx_spd() ).arg( P.pn ) );
             R.app_put("Try updating to a newer SpikeGLX/API version.");
             return false;

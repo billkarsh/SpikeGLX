@@ -309,16 +309,16 @@ void setPreciseTiming( bool on );
 // Number of threads currently assigned to process
 int getNAssignedThreads();
 
-// Which processor calling thread is running on
+// Which processor is running calling thread
 int getCurProcessorIdx();
 
 // Mask-bits are p-cores on hybrid system; return zero if not hybrid
 quint64 pCoreAffinityMask();
 
-// Mask-bits set which processors to run on
+// Mask-bits set which logical threads to run on
 void setProcessAffinityMask( quint64 mask );
 
-// Mask-bits set which processors to run on.
+// Mask-bits set which logical threads to run on.
 // Return previous mask, or zero if error.
 quint64 setCurrentThreadAffinityMask( quint64 mask );
 

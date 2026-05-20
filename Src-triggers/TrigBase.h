@@ -90,7 +90,7 @@ public:
         const QVector<AIQ*> &imQ,
         const QVector<AIQ*> &obQ,
         const AIQ           *niQ );
-    virtual ~TrigBase()             {}
+    virtual ~TrigBase() {}
 
     bool allFilesClosed() const;
     bool isInUse( const QFileInfo &fi ) const;
