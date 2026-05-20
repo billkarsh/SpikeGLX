@@ -1099,7 +1099,42 @@ void MainApp::file_NewRun()
 
 bool MainApp::file_AskStopRun()
 {
-    return run->askThenStopRun();
+    if( !run->isRunning() )
+        return true;
+
+    int yesNo = QMessageBox::question(
+        0,
+        "Stop Current Acquisition",
+        "Acquisition in progress.\n"
+        "Are you sure you want to stop?",
+        QMessageBox::Yes | QMessageBox::No,
+        QMessageBox::No );
+
+    processEvents();
+
+    if( yesNo == QMessageBox::Yes ) {
+
+        QMessageBox *M = new QMessageBox(
+            QMessageBox::Information,
+            "Closing Files",
+            "Closing files...please wait.",
+            QMessageBox::NoButton,
+            0 );
+
+        M->show();
+        processEvents();
+        processEvents();
+        processEvents();
+
+        run->stopRun();
+
+        delete M;
+        processEvents();
+
+        return true;
+    }
+
+    return false;
 }
 
 

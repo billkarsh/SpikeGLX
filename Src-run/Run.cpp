@@ -757,46 +757,6 @@ void Run::stopRun()
 }
 
 
-// Return true (and stop) if can stop now.
-//
-bool Run::askThenStopRun()
-{
-    if( !isRunning() )
-        return true;
-
-    int yesNo = QMessageBox::question(
-        0,
-        "Stop Current Acquisition",
-        "Acquisition in progress.\n"
-        "Are you sure you want to stop?",
-        QMessageBox::Yes | QMessageBox::No,
-        QMessageBox::No );
-
-    guiBreathe();
-
-    if( yesNo == QMessageBox::Yes ) {
-
-        QMessageBox *M = new QMessageBox(
-            QMessageBox::Information,
-            "Closing Files",
-            "Closing files...please wait.",
-            QMessageBox::NoButton,
-            0 );
-
-        M->show();
-        guiBreathe();
-
-        stopRun();
-
-        delete M;
-
-        return true;
-    }
-
-    return false;
-}
-
-
 void Run::imecUpdate( int ip )
 {
     QMutexLocker    ml( &runMtx );
@@ -1176,12 +1136,14 @@ void Run::workerStopsRun()
 void Run::setProcessorMin( int pct )
 {
     QStringList cmd;
+    cmd << "& {";
     cmd << "$output = powercfg -getactivescheme\n";
     cmd << "$tokens = $output -split '\\s+'\n";
     cmd << "$GUID = $tokens[3]\n";
     cmd << QString("powercfg /setacvalueindex $GUID SUB_PROCESSOR PROCTHROTTLEMIN %1\n").arg( pct );
     cmd << "powercfg /s $GUID";
-    QProcess::execute( "powershell", cmd );
+    cmd << "}";
+    QProcess::execute( "powershell", QStringList() << "-Command" << cmd.join("") );
 }
 
 

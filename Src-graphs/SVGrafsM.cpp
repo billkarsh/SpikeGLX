@@ -145,7 +145,7 @@ SVGrafsM::SVGrafsM(
     :   gw(gw), shankCtl(0), p(p), hipass(0), lopass(0),
         timStatBar(250, this), js(js), ip(ip), jpanel(jpanel),
         lastMouseOverChan(-1), selected(-1), maximized(-1),
-        externUpdateTimes(true), inConstructor(true)
+        externUpdateTimes(true), inConstructor(true), is_gw(true)
 {
 }
 
@@ -224,8 +224,8 @@ SVGrafsM::~SVGrafsM()
 {
 // Wait here until not drawing
 
-    drawMtx.lock();
-    drawMtx.unlock();
+    if( drawMtx.tryLock( 1000 ) )
+        drawMtx.unlock();
 
 // OK to destroy
 
@@ -234,7 +234,8 @@ SVGrafsM::~SVGrafsM()
         delete shankCtl;
 #endif
 
-    QMutexLocker    ml( &fltMtx );
+    if( fltMtx.tryLock( 1000 ) )
+        fltMtx.unlock();
 
     if( hipass )
         delete hipass;
@@ -490,7 +491,8 @@ void SVGrafsM::dblClickGraph( double x, double y, int iy )
 
 void SVGrafsM::statBarDraw( QString s )
 {
-    gw->statusBar()->showMessage( s );
+    if( is_gw )
+        gw->statusBar()->showMessage( s );
 }
 
 /* ---------------------------------------------------------------- */

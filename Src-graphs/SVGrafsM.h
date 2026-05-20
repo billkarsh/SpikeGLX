@@ -111,7 +111,8 @@ protected:
                             selected,
                             maximized;
     bool                    externUpdateTimes,
-                            inConstructor;
+                            inConstructor,
+                            is_gw;
 
 public:
     SVGrafsM(
@@ -123,6 +124,7 @@ public:
     void init( SVToolsM *tb );
     virtual ~SVGrafsM();
 
+    void setDeleting()      {is_gw = false;}
     QWidget *getGWWidget()  {return (QWidget*)gw;}
     MGraphX *getTheX()      {return theX;}
 

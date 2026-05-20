@@ -116,6 +116,7 @@ private:
 public:
     SOCtl( const DAQ::Params &p, QWidget *parent );
     void predelete();
+    virtual ~SOCtl();
 
     void init();
     void setChan( int gp, int ip, int ch );

@@ -235,14 +235,18 @@ void SOCtl::predelete()
     saveScreenState();
     emit closed( this );
 
+#ifdef Q_OS_LINUX
+    deleteLater();
+#endif
+}
+
+
+SOCtl::~SOCtl()
+{
     if( soUI ) {
         delete soUI;
         soUI = 0;
     }
-
-#ifdef Q_OS_LINUX
-    deleteLater();
-#endif
 }
 
 /* ---------------------------------------------------------------- */

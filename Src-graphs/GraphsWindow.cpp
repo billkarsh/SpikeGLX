@@ -111,11 +111,15 @@ void GraphsWindow::predelete()
 {
 // ShankCtl save screen state
 
-    if( lW )
+    if( lW ) {
+        lW->setDeleting();
         lW->closeShanks();
+    }
 
-    if( rW )
+    if( rW ) {
+        rW->setDeleting();
         rW->closeShanks();
+    }
 
 // ME save screen state
 

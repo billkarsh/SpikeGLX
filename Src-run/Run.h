@@ -95,7 +95,6 @@ public:
     bool isRunning() const;
     bool startRun( QString &err );
     void stopRun();
-    bool askThenStopRun();
     void imecUpdate( int ip );
 
 public slots:
