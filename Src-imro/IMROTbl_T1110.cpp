@@ -1,5 +1,6 @@
 
 #include "IMROTbl_T1110.h"
+#include "Util.h"
 
 #ifdef HAVE_IMEC
 #include "IMEC/NeuropixAPI.h"
@@ -9,6 +10,7 @@ using namespace Neuropixels;
 #include <QIODevice>
 #include <QRegularExpression>
 #include <QTextStream>
+#include <QThread>
 
 /* ---------------------------------------------------------------- */
 /* struct IMROHdr ------------------------------------------------- */
@@ -488,8 +490,27 @@ int IMROTbl_T1110::selectSites4( const PAddr& adr, bool write, bool check ) cons
             return err;
     }
 
-    if( write )
-        np_writeProbeConfiguration( adr.slot, adr.port, adr.dock, check );
+    if( write ) {
+
+        for( int itry = 1; itry <= 10; ++itry ) {
+
+            err = np_writeProbeConfiguration(
+                    adr.slot, adr.port, adr.dock, check );
+
+            if( err == SUCCESS ) {
+                if( itry > 1 ) {
+                    Warning() <<
+                    QString("Probe(%1): writeConfig() took %2 tries.")
+                    .arg( adr.tx_spd() ).arg( itry );
+                }
+                break;
+            }
+
+            QThread::msleep( 100 );
+        }
+
+        return err;
+    }
 #else
     Q_UNUSED( adr )
     Q_UNUSED( write )

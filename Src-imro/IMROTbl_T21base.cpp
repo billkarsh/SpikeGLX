@@ -1,5 +1,6 @@
 
 #include "IMROTbl_T21base.h"
+#include "Util.h"
 
 #ifdef HAVE_IMEC
 #include "IMEC/NeuropixAPI.h"
@@ -9,6 +10,7 @@ using namespace Neuropixels;
 #include <QIODevice>
 #include <QRegularExpression>
 #include <QTextStream>
+#include <QThread>
 
 /* ---------------------------------------------------------------- */
 /* struct IMRODesc ------------------------------------------------ */
@@ -346,15 +348,14 @@ int IMROTbl_T21base::selectSites4( const PAddr& adr, bool write, bool check ) co
 // Connect all according to table banks
 // ------------------------------------
 
+    NP_ErrorCode    err;
+
     for( int ic = 0, nC = nChan(); ic < nC; ++ic ) {
 
         if( chIsRef( ic ) )
             continue;
 
-        int             shank, bank;
-        NP_ErrorCode    err;
-
-        shank = elShankAndBank( bank, ic );
+        int bank, shank = elShankAndBank( bank, ic );
 
         err = np_selectElectrodeMask( adr.slot, adr.port, adr.dock, ic,
                 shank, electrodebanks_t(bank) );
@@ -363,8 +364,27 @@ int IMROTbl_T21base::selectSites4( const PAddr& adr, bool write, bool check ) co
             return err;
     }
 
-    if( write )
-        np_writeProbeConfiguration( adr.slot, adr.port, adr.dock, check );
+    if( write ) {
+
+        for( int itry = 1; itry <= 10; ++itry ) {
+
+            err = np_writeProbeConfiguration(
+                    adr.slot, adr.port, adr.dock, check );
+
+            if( err == SUCCESS ) {
+                if( itry > 1 ) {
+                    Warning() <<
+                    QString("Probe(%1): writeConfig() took %2 tries.")
+                    .arg( adr.tx_spd() ).arg( itry );
+                }
+                break;
+            }
+
+            QThread::msleep( 100 );
+        }
+
+        return err;
+    }
 #else
     Q_UNUSED( adr )
     Q_UNUSED( write )

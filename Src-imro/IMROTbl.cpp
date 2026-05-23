@@ -788,9 +788,7 @@ int IMROTbl::selectSites4( const PAddr& adr, bool write, bool check ) const
         if( chIsRef( ic ) )
             continue;
 
-        int shank, bank;
-
-        shank = elShankAndBank( bank, ic );
+        int bank, shank = elShankAndBank( bank, ic );
 
         err = np_selectElectrode(
                 adr.slot, adr.port, adr.dock, ic, shank, bank );
@@ -817,6 +815,8 @@ int IMROTbl::selectSites4( const PAddr& adr, bool write, bool check ) const
 
             QThread::msleep( 100 );
         }
+
+        return err;
     }
 #else
     Q_UNUSED( adr )
