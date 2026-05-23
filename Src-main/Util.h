@@ -47,7 +47,6 @@ class Logf
 private:
     static QString  fname;
     QTextStream     stream;
-protected:
     QString         str;
 public:
     Logf();

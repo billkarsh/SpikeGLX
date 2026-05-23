@@ -9,7 +9,7 @@
 #include "SVToolsM.h"
 #include "SVShankCtl.h"
 #include "ShankMap.h"
-#include "Biquad.h"
+#include "Biquad.h"   // IWYU pragma: keep
 #include "ColorTTLCtl.h"
 
 #include <QStatusBar>
