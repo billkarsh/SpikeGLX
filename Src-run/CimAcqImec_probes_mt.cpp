@@ -144,7 +144,7 @@ bool ImCfgWorker::_mt_openProbe( const CimCfg::ImProbeDat &P )
             break;
         }
         else if( err == ERROR_SR_CHAIN ) {
-            if( acq->p.im.prbAll.srAtDetect && !P.srDoCheck() )
+            if( !acq->p.im.prbAll.srAtDetect || !P.srDoCheck() )
                 return true;
         }
 
@@ -448,7 +448,7 @@ bool ImCfgWorker::_mt_setStandby( const CimCfg::ImProbeDat &P )
 bool ImCfgWorker::_mt_writeProbe( const CimCfg::ImProbeDat &P )
 {
     NP_ErrorCode    err;
-    bool            check = !acq->p.im.prbAll.srAtDetect || P.srDoCheck();
+    bool            check = acq->p.im.prbAll.srAtDetect && P.srDoCheck();
 
     for( int itry = 1; itry <= 10; ++itry ) {
 
