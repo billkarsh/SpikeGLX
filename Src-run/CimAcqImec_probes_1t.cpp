@@ -190,7 +190,7 @@ warn:
 
 bool CimAcqImec::_1t_calibrateOpto( const CimCfg::ImProbeDat &P )
 {
-    if( p.im.prbj[P.ip].roTbl->probeTech() != t_tech_opto )
+    if( p.im.prbj[P.ip].roTbl->probeTech() != t_tech_opto_p1 )
         return true;
 
     if( p.im.prbAll.calPolicy == 2 ) {

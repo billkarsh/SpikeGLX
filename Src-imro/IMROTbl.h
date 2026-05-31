@@ -23,7 +23,7 @@ enum T_probe_tech {
     t_tech_sim      = 0,
     t_tech_std      = 1,
     t_tech_qb       = 2,
-    t_tech_opto     = 20,
+    t_tech_opto_p1  = 20,
     t_tech_nxt_ppa  = 30,
     t_tech_nxt_pa   = 31
 };

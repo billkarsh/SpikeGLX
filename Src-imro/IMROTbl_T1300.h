@@ -7,7 +7,7 @@
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// Opto
+// Optopix phase1
 //
 struct IMROTbl_T1300 : public IMROTbl_T0base
 {
@@ -26,7 +26,7 @@ struct IMROTbl_T1300 : public IMROTbl_T0base
     virtual int nBanks() const          {return imType1300Banks;}
     virtual int nRefs() const           {return imType1300Refids;}
     virtual int nOptoSites() const      {return 14;}
-    virtual int probeTech() const       {return t_tech_opto;}
+    virtual int probeTech() const       {return t_tech_opto_p1;}
 };
 
 #endif  // IMROTBL_T1300_H

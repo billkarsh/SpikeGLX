@@ -279,7 +279,7 @@ warn:
 
 bool ImCfgWorker::_mt_calibrateOpto( const CimCfg::ImProbeDat &P )
 {
-    if( acq->p.im.prbj[P.ip].roTbl->probeTech() != t_tech_opto )
+    if( acq->p.im.prbj[P.ip].roTbl->probeTech() != t_tech_opto_p1 )
         return true;
 
     if( acq->p.im.prbAll.calPolicy == 2 ) {
