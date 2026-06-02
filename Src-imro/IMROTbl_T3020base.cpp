@@ -521,11 +521,11 @@ bool IMROTbl_T3020base::edit_Attr_canonical() const
 
 void IMROTbl_T3020base::edit_exclude_1( tImroSites vX, const IMRO_Site &s ) const
 {
-    T3020Key    K = s2k[s];
+    const T3020Key  K = s2k[s];
 
     QMap<T3020Key,IMRO_Site>::const_iterator
-        it  = k2s.find( T3020Key( K.c, 0, 0 ) ),
-        end = k2s.end();
+        it  = k2s.constFind( T3020Key( K.c, 0, 0 ) ),
+        end = k2s.constEnd();
 
 // For this mapping:
 // If there is no (shank,bank)=(0,0) entry, then there is also no (0,1).

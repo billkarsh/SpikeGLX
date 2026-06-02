@@ -1,7 +1,7 @@
 #ifndef IMROTBL_T2020_H
 #define IMROTBL_T2020_H
 
-#include "IMROTbl.h"
+#include "IMROTbl_T2020base.h"
 
 #include <QMap>
 #include <QVector>
@@ -40,18 +40,10 @@ struct T2020Key {
 };
 
 
-struct IMROTbl_T2020 : public IMROTbl
+struct IMROTbl_T2020 : public IMROTbl_T2020base
 {
     enum imLims_T2020 {
         imType2020Type      = 2020,
-        imType2020ElPerShk  = 1280,
-        imType2020ChPerShk  = 384,
-        imType2020Shanks    = 4,
-        imType2020Elec      = imType2020Shanks * imType2020ElPerShk,
-        imType2020Chan      = imType2020Shanks * imType2020ChPerShk,
-        imType2020Banks     = 4,
-        imType2020Refids    = 3,
-        imType2020Gain      = 100
     };
 
     QVector<IMRODesc_T2020>             e;
@@ -59,7 +51,7 @@ struct IMROTbl_T2020 : public IMROTbl
     mutable QMap<IMRO_Site,T2020Key>    s2k;
 
     IMROTbl_T2020( const QString &pn )
-        :   IMROTbl(pn, imType2020Type) {}
+        :   IMROTbl_T2020base(pn, imType2020Type)   {}
 
     void setElecs();
 
@@ -74,68 +66,31 @@ struct IMROTbl_T2020 : public IMROTbl
 
     virtual int typeConst() const       {return imType2020Type;}
 
-    virtual int nElec() const           {return imType2020Elec;}
-    virtual int nShank() const          {return imType2020Shanks;}
-    virtual int nSvyShank() const       {return 1;}
     virtual int nChan() const           {return e.size();}
-    virtual int nAP() const             {return imType2020Chan;}
-    virtual int nLF() const             {return 0;}
-    virtual int nSY() const             {return 4;}
-    virtual int nBanks() const          {return imType2020Banks;}
-    virtual int nChanPerBank() const    {return imType2020ChPerShk;}
-    virtual int nRefs() const           {return imType2020Refids;}
-    virtual int maxInt() const          {return 2048;}
-    virtual double maxVolts() const     {return 0.62;}
-    virtual bool needADCCal() const     {return false;}
-    virtual int probeTech() const       {return t_tech_qb;}
-    virtual int apiFetchType() const    {return t_fetch_qb;}
 
     virtual bool operator==( const IMROTbl &rhs ) const
         {return type == rhs.type && e == ((const IMROTbl_T2020*)&rhs)->e;}
-    virtual bool operator!=( const IMROTbl &rhs ) const
-        {return !(*this == rhs);}
 
     virtual bool isConnectedSame( const IMROTbl *rhs ) const;
 
     virtual QString toString() const;
     virtual bool fromString( QString *msg, const QString &s );
 
-    virtual int shnk( int ch ) const                {return e[ch].shnk;}
-    virtual int bank( int ch ) const                {return e[ch].bank;}
+    virtual int shnk( int ch ) const    {return e[ch].shnk;}
+    virtual int bank( int ch ) const    {return e[ch].bank;}
     virtual int elShankAndBank( int &bank, int ch ) const;
     virtual int elShankColRow( int &col, int &row, int ch ) const;
     virtual void eaChansOrder( QVector<int> &v ) const;
-    virtual int refid( int ch ) const               {return e[ch].refid;}
+    virtual int refid( int ch ) const   {return e[ch].refid;}
     virtual int refTypeAndFields( int &shank, int &bank, int ch ) const;
-    virtual int apGain( int /* ch */ ) const        {return imType2020Gain;}
-    virtual int lfGain( int /* ch */ ) const        {return imType2020Gain;}
-    virtual int apFlt( int /* ch */ ) const         {return 0;}
-
-    virtual bool chIsRef( int /* ch */ ) const      {return false;}
-    virtual int idxToGain( int /* idx */ ) const    {return imType2020Gain;}
-    virtual int gainToIdx( int /* gain */ ) const   {return 0;}
-    virtual double unityToVolts( double u ) const   {return 1.24*u - 0.62;}
-    virtual void locFltRadii( int &rin, int &rout, int iflt ) const;    // iflt = {1,2}
-
-    virtual void muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const;
-
-// Hardware
-
-    virtual int selectGains4( const PAddr& ) const  {return 0;}
-    virtual int selectAPFlts4( const PAddr& ) const {return 0;}
 
 // Edit
 
     virtual void edit_init() const;
-    virtual IMRO_GUI edit_GUI() const;
-    virtual IMRO_Attr edit_Attr_def() const;
-    virtual IMRO_Attr edit_Attr_cur() const;
     virtual bool edit_Attr_canonical() const;
     virtual void edit_exclude_1( tImroSites vX, const IMRO_Site &s ) const;
     virtual int edit_site2Chan( const IMRO_Site &s ) const;
     virtual void edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A );
-    virtual void edit_defaultROI( tImroROIs vR ) const;
-    virtual bool edit_isCanonical( tImroROIs vR ) const;
 };
 
 #endif  // IMROTBL_T2020_H

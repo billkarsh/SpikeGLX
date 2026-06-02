@@ -715,11 +715,11 @@ bool IMROTbl_T1110::edit_Attr_canonical() const
 
 void IMROTbl_T1110::edit_exclude_1( tImroSites vX, const IMRO_Site &s ) const
 {
-    T1110Key    K = s2k[s];
+    const T1110Key  K = s2k[s];
 
     QMap<T1110Key,IMRO_Site>::const_iterator
-        it  = k2s.find( T1110Key( K.c, 0 ) ),
-        end = k2s.end();
+        it  = k2s.constFind( T1110Key( K.c, 0 ) ),
+        end = k2s.constEnd();
 
     for( ; it != end; ++it ) {
         const T1110Key  &ik = it.key();

@@ -9,6 +9,7 @@
 + Imro headers (PN,nchan) instead of (type,nchan).
 + Add NI low latency mode and histogram.
 + Add OBX per channel thresholds.
++ Support NP1400, NP2022.
 
 20251218
 --------

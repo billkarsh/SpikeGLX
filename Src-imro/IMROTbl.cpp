@@ -16,6 +16,7 @@
 #include "IMROTbl_T2003.h"
 #include "IMROTbl_T2013.h"
 #include "IMROTbl_T2020.h"
+#include "IMROTbl_T2022.h"
 #include "IMROTbl_T3010.h"
 #include "IMROTbl_T3020.h"
 #include "IMROTbl_T3022.h"
@@ -424,6 +425,19 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _x0_ev      = 27;
                 _x0_od      = 27;
                 _xpitch     = 32;
+                _zpitch     = 15;
+                break;
+            case 2022:  // Neuropixels 2.0 multi shank probe quad base NHP with cap (Ph 2C), cabling, sharpened, sterile packaging
+                _ncolhwr    = 2;
+                _ncolvis    = 4;
+                _col2vis_ev = {1,3};
+                _col2vis_od = {0,2};
+                _shankpitch = 2141.45f;
+                _shankwid   = 70;
+                _tiplength  = 206;
+                _x0_ev      = 27;
+                _x0_od      = 11;
+                _xpitch     = 20;
                 _zpitch     = 15;
                 break;
             case 3000:  // Passive NXT probe
@@ -1254,6 +1268,10 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
                 type = 2020;
                 supp = true;
                 break;
+            case 2022:  // Neuropixels 2.0 multi shank probe quad base NHP with cap (Ph 2C), cabling, sharpened, sterile packaging
+                type = 2022;
+                supp = true;
+                break;
             case 3000:  // Passive NXT probe
                 type = 1200;
                 supp = true;
@@ -1366,6 +1384,8 @@ IMROTbl* IMROTbl::alloc( const QString &pn )
             case 2020:  // Neuropixels 2.0 multi shank probe quad base (Ph 2C)
             case 2021:  // Neuropixels 2.0 multi shank probe quad base with cap (Ph 2C)
                 return new IMROTbl_T2020( pn );
+            case 2022:  // Neuropixels 2.0 multi shank probe quad base NHP with cap (Ph 2C), cabling, sharpened, sterile packaging
+                return new IMROTbl_T2022( pn );
             case 3010:  // Neuropixels NXT phase1B single shank silicon cap
             case 3011:  // Neuropixels NXT phase1B single shank metal cap
                 return new IMROTbl_T3010( pn );
@@ -1391,6 +1411,7 @@ QString IMROTbl::default_imroLE( int type )
         case 21:
         case 2003:
         case 2020:
+        case 2022:
         case 3010:  return "*Default (bank 0, ref ext)";
         case 24:
         case 2013:  return "*Default (shnk 0, bank 0, ref ext)";

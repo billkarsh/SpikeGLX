@@ -472,11 +472,11 @@ bool IMROTbl_T21base::edit_Attr_canonical() const
 
 void IMROTbl_T21base::edit_exclude_1( tImroSites vX, const IMRO_Site &s ) const
 {
-    T21Key  K = s2k[s];
+    const T21Key    K = s2k[s];
 
     QMap<T21Key,IMRO_Site>::const_iterator
-        it  = k2s.find( T21Key( K.c, 1 ) ),
-        end = k2s.end();
+        it  = k2s.constFind( T21Key( K.c, 1 ) ),
+        end = k2s.constEnd();
 
     for( ; it != end; ++it ) {
         const T21Key  &ik = it.key();

@@ -427,11 +427,11 @@ bool IMROTbl_T24base::edit_Attr_canonical() const
 
 void IMROTbl_T24base::edit_exclude_1( tImroSites vX, const IMRO_Site &s ) const
 {
-    T24Key  K = s2k[s];
+    const T24Key    K = s2k[s];
 
     QMap<T24Key,IMRO_Site>::const_iterator
-        it  = k2s.find( T24Key( K.c, 0, 0 ) ),
-        end = k2s.end();
+        it  = k2s.constFind( T24Key( K.c, 0, 0 ) ),
+        end = k2s.constEnd();
 
     for( ; it != end; ++it ) {
         const T24Key  &ik = it.key();

@@ -1,38 +1,88 @@
 
-#include "IMROTbl_T2020.h"
+#include "IMROTbl_T2022.h"
+#include "Util.h"
+
+#ifdef HAVE_IMEC
+#include "IMEC/NeuropixAPI.h"
+using namespace Neuropixels;
+#endif
 
 #include <QIODevice>
 #include <QRegularExpression>
 #include <QTextStream>
+#include <QThread>
 
 /* ---------------------------------------------------------------- */
 /* struct IMRODesc ------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-int IMRODesc_T2020::chToEl( int ch, int bank )
-{
-    ch %= 384;
+static char bF[4] = {1,7,5,3};  // multiplier per bank
+static char bA[4] = {0,4,8,12}; // addend per bank
 
-    return (ch >= 0 ? ch + bank * 384 : 0);
+
+int IMRODesc_T2022::lowBank( int mbank )
+{
+    if( mbank & 1 )
+        return 0;
+    else if( mbank & 2 )
+        return 1;
+    else if( mbank & 4 )
+        return 2;
+
+    return 3;
 }
 
 
-// Pattern: "(chn shank bank refid elec)"
+int IMRODesc_T2022::chToEl( int ch, int mbank )
+{
+    ch %= 384;
+
+    int     bank,
+            blkIdx,
+            rem,
+            irow;
+    bool    bRight = ch & 1;    // RHS column
+
+    blkIdx  = ch / 32;
+    rem     = (ch - 32*blkIdx - bRight) / 2;
+
+// mbank is multibank field, we take only lowest connected bank
+
+    bank = lowBank( mbank );
+
+// Find irow such that its 16-modulus is rem
+
+    for( irow = 0; irow < 16; ++irow ) {
+
+        if( rem == (irow*bF[bank] + bRight*bA[bank]) % 16 )
+            break;
+    }
+
+// Precaution against bad file input
+
+    if( irow > 15 )
+        irow = 0;
+
+    return 384*bank + 32*blkIdx + 2*irow + bRight;
+}
+
+
+// Pattern: "(chn shank mbank refid elec)"
 //
-QString IMRODesc_T2020::toString( int chn ) const
+QString IMRODesc_T2022::toString( int chn ) const
 {
     return QString("(%1 %2 %3 %4 %5)")
             .arg( chn ).arg( shnk )
-            .arg( bank ).arg( refid )
+            .arg( mbank ).arg( refid )
             .arg( elec );
 }
 
 
-// Pattern: "chn shnk bank refid elec"
+// Pattern: "chn shnk mbank refid elec"
 //
 // Note: chn (or -1) is returned; elec is recalculated by caller.
 //
-int IMRODesc_T2020::fromString( QString *msg, const QString &s )
+int IMRODesc_T2022::fromString( QString *msg, const QString &s )
 {
     const QStringList   sl = s.split(
                                 QRegularExpression("\\s+"),
@@ -45,7 +95,7 @@ int IMRODesc_T2020::fromString( QString *msg, const QString &s )
 
     chn     = sl.at( 0 ).toInt( &ok ); if( !ok ) goto fail;
     shnk    = sl.at( 1 ).toInt( &ok ); if( !ok ) goto fail;
-    bank    = sl.at( 2 ).toInt( &ok ); if( !ok ) goto fail;
+    mbank   = sl.at( 2 ).toInt( &ok ); if( !ok ) goto fail;
     refid   = sl.at( 3 ).toInt( &ok ); if( !ok ) goto fail;
 
     return chn;
@@ -53,7 +103,7 @@ int IMRODesc_T2020::fromString( QString *msg, const QString &s )
 fail:
     if( msg ) {
         *msg =
-        QString("Bad IMRO element format (%1), expected (chn shnk bank refid elec)")
+        QString("Bad IMRO element format (%1), expected (chn shnk mbank refid elec)")
         .arg( s );
     }
 
@@ -64,7 +114,7 @@ fail:
 /* struct Key ----------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool T2020Key::operator<( const T2020Key &rhs ) const
+bool T2022Key::operator<( const T2022Key &rhs ) const
 {
     if( c < rhs.c )
         return true;
@@ -74,21 +124,21 @@ bool T2020Key::operator<( const T2020Key &rhs ) const
         return true;
     if( s > rhs.s )
         return false;
-    return b < rhs.b;
+    return m < rhs.m;
 }
 
 /* ---------------------------------------------------------------- */
 /* struct IMROTbl ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void IMROTbl_T2020::setElecs()
+void IMROTbl_T2022::setElecs()
 {
     for( int i = 0, n = nChan(); i < n; ++i )
         e[i].setElec( i );
 }
 
 
-void IMROTbl_T2020::fillDefault()
+void IMROTbl_T2022::fillDefault()
 {
     e.clear();
     e.resize( imType2020baseChan );
@@ -109,13 +159,13 @@ void IMROTbl_T2020::fillDefault()
 
 // All shanks reflect given bank
 //
-void IMROTbl_T2020::fillShankAndBank( int shank, int bank )
+void IMROTbl_T2022::fillShankAndBank( int shank, int bank )
 {
     Q_UNUSED( shank )
 
     for( int i = 0, n = e.size(); i < n; ++i ) {
-        IMRODesc_T2020  &E = e[i];
-        E.bank = qMin( bank, maxBank( i ) );
+        IMRODesc_T2022  &E = e[i];
+        E.mbank = (1 << qMin( bank, maxBank( i ) ));
     }
 
     setElecs();
@@ -124,14 +174,14 @@ void IMROTbl_T2020::fillShankAndBank( int shank, int bank )
 
 // Return true if two tables are same w.r.t connectivity.
 //
-bool IMROTbl_T2020::isConnectedSame( const IMROTbl *rhs ) const
+bool IMROTbl_T2022::isConnectedSame( const IMROTbl *rhs ) const
 {
-    const IMROTbl_T2020 *RHS    = (const IMROTbl_T2020*)rhs;
+    const IMROTbl_T2022 *RHS    = (const IMROTbl_T2022*)rhs;
     int                 n       = nChan();
 
     for( int i = 0; i < n; ++i ) {
 
-        if( e[i].shnk != RHS->e[i].shnk || e[i].bank != RHS->e[i].bank )
+        if( e[i].shnk != RHS->e[i].shnk || e[i].mbank != RHS->e[i].mbank )
             return false;
     }
 
@@ -139,9 +189,9 @@ bool IMROTbl_T2020::isConnectedSame( const IMROTbl *rhs ) const
 }
 
 
-// Pattern: (pn,nchan)(chn shnk bank refid elec)()()...
+// Pattern: (pn,nchan)(chn shnk mbank refid elec)()()...
 //
-QString IMROTbl_T2020::toString() const
+QString IMROTbl_T2022::toString() const
 {
     QString     s;
     QTextStream ts( &s, QIODevice::WriteOnly );
@@ -156,11 +206,11 @@ QString IMROTbl_T2020::toString() const
 }
 
 
-// Pattern: (pn,nchan)(chn shnk bank refid elec)()()...
+// Pattern: (pn,nchan)(chn shnk mbank refid elec)()()...
 //
 // Return true if file type compatible.
 //
-bool IMROTbl_T2020::fromString( QString *msg, const QString &s )
+bool IMROTbl_T2022::fromString( QString *msg, const QString &s )
 {
     QStringList sl = s.split(
                         QRegularExpression("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
@@ -206,7 +256,7 @@ bool IMROTbl_T2020::fromString( QString *msg, const QString &s )
     e.resize( nN );
 
     for( int i = 1; i < n; ++i ) {
-        IMRODesc_T2020  D;
+        IMRODesc_T2022  D;
         int             C = D.fromString( msg, sl[i] );
         if( C >= nN ) {
             if( msg ) {
@@ -237,17 +287,17 @@ bool IMROTbl_T2020::fromString( QString *msg, const QString &s )
 }
 
 
-int IMROTbl_T2020::elShankAndBank( int &bank, int ch ) const
+int IMROTbl_T2022::elShankAndBank( int &bank, int ch ) const
 {
-    const IMRODesc_T2020    &E = e[ch];
-    bank = E.bank;
+    const IMRODesc_T2022    &E = e[ch];
+    bank = E.mbank;
     return E.shnk;
 }
 
 
-int IMROTbl_T2020::elShankColRow( int &col, int &row, int ch ) const
+int IMROTbl_T2022::elShankColRow( int &col, int &row, int ch ) const
 {
-    const IMRODesc_T2020    &E = e[ch];
+    const IMRODesc_T2022    &E = e[ch];
     int                     el = E.elec;
 
     row = el / _ncolhwr;
@@ -257,7 +307,7 @@ int IMROTbl_T2020::elShankColRow( int &col, int &row, int ch ) const
 }
 
 
-void IMROTbl_T2020::eaChansOrder( QVector<int> &v ) const
+void IMROTbl_T2022::eaChansOrder( QVector<int> &v ) const
 {
     int _nAP    = nAP(),
         _nSY    = nSY(),
@@ -276,7 +326,7 @@ void IMROTbl_T2020::eaChansOrder( QVector<int> &v ) const
 
         for( int ic = 0; ic < _nAP; ++ic ) {
 
-            const IMRODesc_T2020    &E = e[ic];
+            const IMRODesc_T2022    &E = e[ic];
 
             if( E.shnk == sh )
                 el2Ch[E.elec] = ic;
@@ -299,9 +349,9 @@ void IMROTbl_T2020::eaChansOrder( QVector<int> &v ) const
 // refid [1]    gnd, shank=s, bank=0.
 // refid [2]    tip, shank=s, bank=0.
 //
-int IMROTbl_T2020::refTypeAndFields( int &shank, int &bank, int ch ) const
+int IMROTbl_T2022::refTypeAndFields( int &shank, int &bank, int ch ) const
 {
-    const IMRODesc_T2020    &E = e[ch];
+    const IMRODesc_T2022    &E = e[ch];
 
     shank = E.shnk;
     bank  = 0;
@@ -315,10 +365,66 @@ int IMROTbl_T2020::refTypeAndFields( int &shank, int &bank, int ch ) const
 }
 
 /* ---------------------------------------------------------------- */
+/* Hardware ------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+// This method connects multiple electrodes per channel.
+//
+int IMROTbl_T2022::selectSites4( const PAddr& adr, bool write, bool check ) const
+{
+#ifdef HAVE_IMEC
+// ------------------------------------
+// Connect all according to table banks
+// ------------------------------------
+
+    NP_ErrorCode    err;
+
+    for( int ic = 0, nC = nChan(); ic < nC; ++ic ) {
+
+        int bank, shank = elShankAndBank( bank, ic );
+
+        err = np_selectElectrodeMask( adr.slot, adr.port, adr.dock, ic,
+                shank, electrodebanks_t(bank) );
+
+        if( err != SUCCESS )
+            return err;
+    }
+
+    if( write ) {
+
+        for( int itry = 1; itry <= 10; ++itry ) {
+
+            err = np_writeProbeConfiguration(
+                    adr.slot, adr.port, adr.dock, check );
+
+            if( err == SUCCESS ) {
+                if( itry > 1 ) {
+                    Warning() <<
+                    QString("Probe(%1): writeConfig() took %2 tries.")
+                    .arg( adr.tx_spd() ).arg( itry );
+                }
+                break;
+            }
+
+            QThread::msleep( 100 );
+        }
+
+        return err;
+    }
+#else
+    Q_UNUSED( adr )
+    Q_UNUSED( write )
+    Q_UNUSED( check )
+#endif
+
+    return 0;
+}
+
+/* ---------------------------------------------------------------- */
 /* Edit ----------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void IMROTbl_T2020::edit_init() const
+void IMROTbl_T2022::edit_init() const
 {
 // forward
 
@@ -328,10 +434,10 @@ void IMROTbl_T2020::edit_init() const
 
         for( int b = 0; b < imType2020baseBanks; ++b ) {
 
-            int e = IMRODesc_T2020::chToEl( c, b );
+            int e = IMRODesc_T2022::chToEl( c, 1 << b );
 
             if( e < imType2020baseElPerShk )
-                k2s[T2020Key( c, s, b )] = IMRO_Site( s, e & 1, e >> 1 );
+                k2s[T2022Key( c, s, 1 << b )] = IMRO_Site( s, e & 1, e >> 1 );
             else
                 break;
         }
@@ -339,7 +445,7 @@ void IMROTbl_T2020::edit_init() const
 
 // inverse
 
-    QMap<T2020Key,IMRO_Site>::iterator
+    QMap<T2022Key,IMRO_Site>::iterator
         it  = k2s.begin(),
         end = k2s.end();
 
@@ -348,7 +454,7 @@ void IMROTbl_T2020::edit_init() const
 }
 
 
-bool IMROTbl_T2020::edit_Attr_canonical() const
+bool IMROTbl_T2022::edit_Attr_canonical() const
 {
     int ne = e.size();
 
@@ -366,31 +472,31 @@ bool IMROTbl_T2020::edit_Attr_canonical() const
 }
 
 
-void IMROTbl_T2020::edit_exclude_1( tImroSites vX, const IMRO_Site &s ) const
+void IMROTbl_T2022::edit_exclude_1( tImroSites vX, const IMRO_Site &s ) const
 {
-    const T2020Key  K = s2k[s];
+    const T2022Key  K = s2k[s];
 
-    QMap<T2020Key,IMRO_Site>::const_iterator
-        it  = k2s.constFind( T2020Key( K.c, K.s, 0 ) ),
+    QMap<T2022Key,IMRO_Site>::const_iterator
+        it  = k2s.constFind( T2022Key( K.c, K.s, 1 ) ),
         end = k2s.constEnd();
 
     for( ; it != end; ++it ) {
-        const T2020Key  &ik = it.key();
+        const T2022Key  &ik = it.key();
         if( ik.c != K.c )
             break;
-        if( ik.b != K.b )
+        if( ik.m != K.m )
             vX.push_back( k2s[ik] );
     }
 }
 
 
-int IMROTbl_T2020::edit_site2Chan( const IMRO_Site &s ) const
+int IMROTbl_T2022::edit_site2Chan( const IMRO_Site &s ) const
 {
     return s2k[s].c;
 }
 
 
-void IMROTbl_T2020::edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
+void IMROTbl_T2022::edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
 {
     e.clear();
     e.resize( imType2020baseChan );
@@ -406,11 +512,11 @@ void IMROTbl_T2020::edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
 
             for( int c = c0; c < cL; ++c ) {
 
-                const T2020Key  &K = s2k[IMRO_Site( B.s, c, r )];
-                IMRODesc_T2020  &E = e[K.c];
+                const T2022Key  &K = s2k[IMRO_Site( B.s, c, r )];
+                IMRODesc_T2022  &E = e[K.c];
 
                 E.shnk  = K.s;
-                E.bank  = K.b;
+                E.mbank = K.m;
                 E.refid = A.refIdx;
             }
         }

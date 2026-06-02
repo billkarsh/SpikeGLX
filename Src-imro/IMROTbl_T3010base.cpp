@@ -386,11 +386,11 @@ bool IMROTbl_T3010base::edit_Attr_canonical() const
 
 void IMROTbl_T3010base::edit_exclude_1( tImroSites vX, const IMRO_Site &s ) const
 {
-    T3010Key    K = s2k[s];
+    const T3010Key  K = s2k[s];
 
     QMap<T3010Key,IMRO_Site>::const_iterator
-        it  = k2s.find( T3010Key( K.c, 0 ) ),
-        end = k2s.end();
+        it  = k2s.constFind( T3010Key( K.c, 0 ) ),
+        end = k2s.constEnd();
 
     for( ; it != end; ++it ) {
         const T3010Key  &ik = it.key();
