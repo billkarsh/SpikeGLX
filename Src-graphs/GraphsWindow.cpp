@@ -302,8 +302,31 @@ void GraphsWindow::blinkTrigger()
 }
 
 
+// #define MEMTRACK
+#ifdef MEMTRACK
+#include <windows.h>
+#include <psapi.h>
+#endif
+
 void GraphsWindow::updateOnTime( const QString &s )
 {
+#ifdef MEMTRACK
+    {
+        static double   lastMonT = 0;
+        if( getTime() - lastMonT > 60 ) {
+            PROCESS_MEMORY_COUNTERS_EX info;
+            DWORD handleCount;
+            GetProcessMemoryInfo( GetCurrentProcess(),
+                (PROCESS_MEMORY_COUNTERS*)&info, sizeof(info) );
+            GetProcessHandleCount( GetCurrentProcess(), &handleCount );
+            double  pk = double(info.PeakWorkingSetSize) / (1024*1024*1024),
+                    cr = double(info.PrivateUsage) / (1024*1024*1024);
+            Log()<< " curGB= " << cr << " peakGB= " << pk << " handles " << handleCount;
+            lastMonT = getTime();
+        }
+    }
+#endif
+
     if( tbar )
         tbar->updateOnTime( s );
 }
