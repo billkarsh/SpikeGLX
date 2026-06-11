@@ -9,7 +9,7 @@ class SVGrafsM;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// Toolbar for SViewM:
+// Toolbar base class for SViewM:
 //
 // Sel Max | [secs^] [scl^] Clr All | [band^] -<Tn> -<S> | -<Tx> | BinMax
 //
@@ -17,16 +17,21 @@ class SVToolsM : public QToolBar
 {
     Q_OBJECT
 
-private:
+protected:
     SVGrafsM    *gr;
 
 public:
-    SVToolsM( SVGrafsM *gr ) : gr(gr) {}
-    void init();
+    SVToolsM( SVGrafsM *gr ) : gr(gr)   {}
+    virtual ~SVToolsM()                 {}
+    virtual void init() = 0;
 
-    void setSelName( const QString &name );
+    virtual void setSelName( const QString &name ) = 0;
+    virtual void update() = 0;
+
     QColor selectColor( QColor inColor );
-    void update();
+
+protected:
+    void qtips( const QString &fHelp );
 };
 
 #endif  // SVTOOLSM_H

@@ -1,5 +1,6 @@
 
-#include "SVToolsM.h"
+#include "SVToolsM0.h"   // IWYU pragma: keep
+#include "SVToolsMX.h"   // IWYU pragma: keep
 #include "SVGrafsM_Im.h"
 #include "SVGrafsM_Ob.h"
 #include "SVGrafsM_Ni.h"
@@ -18,7 +19,7 @@ SViewM_Im::SViewM_Im(
     int                 jpanel )
 {
     vw = new SVGrafsM_Im( gw, p, ip, jpanel );
-    SVToolsM    *tb = new SVToolsM( vw );
+    SVToolsM    *tb = new SVToolsMX( vw );
 
     vw->init( tb );
 
@@ -39,7 +40,7 @@ SViewM_Ob::SViewM_Ob(
     int                 jpanel )
 {
     vw = new SVGrafsM_Ob( gw, p, ip, jpanel );
-    SVToolsM    *tb = new SVToolsM( vw );
+    SVToolsM    *tb = new SVToolsMX( vw );
 
     vw->init( tb );
 
@@ -59,7 +60,7 @@ SViewM_Ni::SViewM_Ni(
     int                 jpanel )
 {
     vw = new SVGrafsM_Ni( gw, p, jpanel );
-    SVToolsM    *tb = new SVToolsM( vw );
+    SVToolsM    *tb = new SVToolsMX( vw );
 
     vw->init( tb );
 

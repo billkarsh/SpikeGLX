@@ -10,6 +10,7 @@
 + Add NI low latency mode and histogram.
 + Add OBX per channel thresholds.
 + Support NP1400, NP2022.
++ Improve Graphs::filters toolbar.
 
 20251218
 --------
