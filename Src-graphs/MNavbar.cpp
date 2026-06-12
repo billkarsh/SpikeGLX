@@ -5,17 +5,15 @@
 #include "SVGrafsM.h"
 #include "MNavbar.h"
 #include "SignalBlocker.h"
+#include "ToolBut.h"
 
 #include <QPushButton>
-#include <QSpinBox>
-#include <QLineEdit>
-#include <QSlider>
-#include <QLabel>
-
-
 
 
 #define LOADICON( xpm ) new QIcon( QPixmap( xpm ) )
+#define LVBUT_STYLE     "font-size: 20px;"
+#define LVLBL_STYLE     "font-size: 14px; color: #444444;"
+#define LVVAL_STYLE     "color: #0078D7; font-weight: bold;"
 
 
 static const QIcon  *shankMapIcon = 0;
@@ -29,9 +27,9 @@ static void initIcons()
 
 MNavbar::MNavbar( SVGrafsM *gr ) : gr(gr)
 {
+    LVBut           *LV;
+    LVE_int         *LVS;
     QPushButton     *B;
-    QSpinBox        *S;
-    QLineEdit       *E;
     QSlider         *Z;
     QLabel          *L;
     int             curNChan;
@@ -55,30 +53,24 @@ MNavbar::MNavbar( SVGrafsM *gr ) : gr(gr)
 
 // NChan
 
-    addSeparator();
+    LVS = new LVE_int(
+                "Set number of channels per page; scroll pages using slider.",
+                "1", this );
 
-    L = new QLabel( "NChan", this );
-    addWidget( L );
+    LVS->m_spinBox->setObjectName( "nchansb" );
+    LVS->m_spinBox->installEventFilter( gr->getGWWidget() );
+    LVS->m_spinBox->setMinimum( 1 );
+    LVS->m_spinBox->setMaximum( qMin( 384, gr->chanCount() ) );
+    curNChan = gr->navNChan();
+    LVS->setValue( QString("%1").arg( curNChan ) );
+    ConnectUI( LVS->m_spinBox, SIGNAL(valueChanged(int)), this, SLOT(nchanChanged(int)) );
 
-    S = new QSpinBox( this );
-    S->setObjectName( "nchansb" );
-    S->installEventFilter( gr->getGWWidget() );
-    S->setMinimum( 1 );
-    S->setMaximum( qMin( 384, gr->chanCount() ) );
-    S->setValue( curNChan = gr->navNChan() );
-    ConnectUI( S, SIGNAL(valueChanged(int)), this, SLOT(nchanChanged(int)) );
-    addWidget( S );
-
-// 1st
-
-    L = new QLabel( "1st", this );
-    addWidget( L );
-
-    E = new QLineEdit( "0", this );
-    E->setObjectName( "1stle" );
-    E->setEnabled( false );
-    E->setFixedWidth( 40 );
-    addWidget( E );
+    LV = new LVBut(
+            "Chan/page", QString("%1").arg( curNChan ),
+            LVBUT_STYLE, LVLBL_STYLE, LVVAL_STYLE,
+            LVS, this );
+    LV->setObjectName( "nchanbut" );
+    addWidget( LV );
 
 // slider
 
@@ -97,7 +89,7 @@ MNavbar::MNavbar( SVGrafsM *gr ) : gr(gr)
 
 void MNavbar::setEnabled( bool enabled )
 {
-    findChild<QSpinBox*>( "nchansb" )->setEnabled( enabled );
+    findChild<LVBut*>( "nchanbut" )->setEnabled( enabled );
     findChild<QSlider*>("slider")->setEnabled( enabled );
 }
 
@@ -154,8 +146,6 @@ void MNavbar::nchanChanged( int val, bool notify )
 void MNavbar::pageChanged( int val, bool notify )
 {
     val *= findChild<QSpinBox*>( "nchansb" )->value();
-
-    findChild<QLineEdit*>( "1stle" )->setText( QString::number( val ) );
 
     if( notify )
         gr->firstChanged( val );

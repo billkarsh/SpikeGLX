@@ -11,6 +11,7 @@
 + Add OBX per channel thresholds.
 + Support NP1400, NP2022.
 + Improve Graphs::filters toolbar.
++ Improve Graphs::navigate toolbar.
 
 20251218
 --------

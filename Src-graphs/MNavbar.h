@@ -11,7 +11,7 @@ class SVGrafsM;
 
 // Toolbar for SVGrafsM:
 //
-// Sort Shnk [NChn^] [1st^] [---|-----]
+// Sort Shnk [NChn^] [---|-----]
 //
 class MNavbar : public QToolBar
 {
