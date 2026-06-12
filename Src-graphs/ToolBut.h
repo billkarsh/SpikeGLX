@@ -23,6 +23,8 @@ public:
     LVEditor( const QString &help, const QString &val, QWidget *parent );
     virtual ~LVEditor() {}
     virtual void setValue( const QString &val ) = 0;
+public slots:
+    virtual void setFocus() = 0;
 signals:
     void finished( QString val );
 };
@@ -40,6 +42,10 @@ public:
         QWidget         *parent );
     virtual void setValue( const QString &val )
     {this->val = val; m_checkBox->setChecked( val == "1" );}
+public slots:
+    virtual void setFocus() {
+        m_checkBox->setFocus();
+    }
 private:
     void onFinished() {
         val = (m_checkBox->isChecked() ? "1" : "0");
@@ -56,6 +62,11 @@ public:
     LVE_int( const QString &help, const QString &val, QWidget *parent );
     virtual void setValue( const QString &val )
     {this->val = val; m_spinBox->setValue( val.toInt() );}
+public slots:
+    virtual void setFocus() {
+        m_spinBox->setFocus();
+        m_spinBox->selectAll();
+    }
 private:
     void onFinished() {
         val = QString("%1").arg( m_spinBox->value() );
@@ -72,6 +83,11 @@ public:
     LVE_dbl( const QString &help, const QString &val, QWidget *parent );
     virtual void setValue( const QString &val )
     {this->val = val; m_spinBox->setValue( val.toDouble() );}
+public slots:
+    virtual void setFocus() {
+        m_spinBox->setFocus();
+        m_spinBox->selectAll();
+    }
 private:
     void onFinished() {
         val = QString("%1").arg( m_spinBox->value() );
@@ -88,6 +104,10 @@ public:
     LVE_cb( const QString &help, QWidget *parent );
     virtual void setValue( const QString &val )
     {this->val = val; m_comboBox->setCurrentIndex( m_comboBox->findText( val ) );}
+public slots:
+    virtual void setFocus() {
+        m_comboBox->setFocus();
+    }
 private:
     void onFinished() {
         val = m_comboBox->currentText();

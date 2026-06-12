@@ -9,7 +9,7 @@
 
 // Toolbar for SViewM:
 //
-// Sel Max | [secs^] [scl^] Clr | [band^] -<Tn> -<S> | -<Tx> | BinMax
+// Sel Clr Max [secs^] [scl^] [band^] -<Tn> -<S> -<Tx> BinMax
 //
 class SVToolsMX : public SVToolsM
 {

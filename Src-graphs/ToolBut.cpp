@@ -3,6 +3,7 @@
 
 #include <QMenu>
 #include <QVBoxLayout>
+#include <QTimer>
 #include <QWidgetAction>
 
 
@@ -114,6 +115,10 @@ LVBut::LVBut(
     widgetAction->setDefaultWidget( editor );
     m_menu->addAction( widgetAction );
     setMenu( m_menu );
+
+    connect( m_menu, &QMenu::aboutToShow, this, [editor]() {
+        QTimer::singleShot( 0, editor, &LVEditor::setFocus );
+    });
 
     connect( editor, &LVEditor::finished, this, [this](QString val) {
         if( m_value != val ) {

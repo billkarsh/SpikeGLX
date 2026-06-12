@@ -17,8 +17,6 @@
 #include <QPainter>
 
 
-
-
 #define LOADICON( xpm ) new QIcon( QPixmap( xpm ) )
 
 

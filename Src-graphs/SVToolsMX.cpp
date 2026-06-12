@@ -11,11 +11,7 @@
 
 #include <QApplication>
 #include <QPushButton>
-#include <QCheckBox>
-#include <QComboBox>
 #include <QPainter>
-
-
 
 
 #define LOADICON( xpm ) new QIcon( QPixmap( xpm ) )
