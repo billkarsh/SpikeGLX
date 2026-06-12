@@ -47,7 +47,6 @@ public slots:
     virtual void sAveSelChanged( int sel );
 
 private slots:
-    virtual void myMouseOverGraph( double x, double y, int iy );
     virtual void myClickGraph( double x, double y, int iy );
     virtual void myRClickGraph( double x, double y, int iy );
 
@@ -72,6 +71,13 @@ protected:
     virtual QString myChanName( int ic ) const;
     virtual const QBitArray& mySaveBits() const;
     virtual int mySetUsrTypes();
+    virtual void computeGraphMouseOverVars(
+        int         ic,
+        double      &y,
+        double      &mean,
+        double      &stdev,
+        double      &rms,
+        const char* &unit ) const;
 
     virtual void loadSettings();
     virtual void saveSettings() const;
@@ -80,13 +86,6 @@ private:
     void setAudio( int LBR );
     void setSpike( int gp );
     double scalePlotValue( double v, double gain ) const;
-    void computeGraphMouseOverVars(
-        int         ic,
-        double      &y,
-        double      &mean,
-        double      &stdev,
-        double      &rms,
-        const char* &unit ) const;
 #ifdef PAUSEWHOLESLOT
     bool okToPause();
 #endif

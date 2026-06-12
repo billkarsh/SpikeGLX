@@ -581,75 +581,6 @@ void SVGrafsM_Im::sAveSelChanged( int sel )
 /* Private slots -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void SVGrafsM_Im::myMouseOverGraph( double x, double y, int iy )
-{
-    if( iy < 0 || iy >= int(theX->Y.size()) ) {
-        timStatBar.latestString( "" );
-        return;
-    }
-
-    int     ic          = lastMouseOverChan = theX->Y[iy]->usrChan;
-    bool    isNowOver   = true;
-
-    if( ic < 0 || ic >= chanCount() ) {
-        timStatBar.latestString( "" );
-        return;
-    }
-
-    QWidget *w = QApplication::widgetAt( QCursor::pos() );
-
-    if( !w || !dynamic_cast<MGraph*>(w) )
-        isNowOver = false;
-
-    double      mean, rms, stdev;
-    QString     msg;
-    const char  *unit,
-                *swhere = (isNowOver ? "Mouse over" : "Last mouse-over");
-    int         h,
-                m;
-
-    h = int(x / 3600);
-    x = x - h * 3600;
-    m = x / 60;
-    x = x - m * 60;
-
-    if( ic < neurChanCount() ) {
-
-        // neural readout
-
-        computeGraphMouseOverVars( ic, y, mean, stdev, rms, unit );
-
-        msg = QString(
-            "%1 %2 @ pos (%3h%4m%5s, %6 %7)"
-            " -- {mean, rms, stdv} %7: {%8, %9, %10}")
-            .arg( swhere )
-            .arg( myChanName( ic ) )
-            .arg( h, 2, 10, QChar('0') )
-            .arg( m, 2, 10, QChar('0') )
-            .arg( x, 0, 'f', 3 )
-            .arg( y, 0, 'f', 4 )
-            .arg( unit )
-            .arg( mean, 0, 'f', 4 )
-            .arg( rms, 0, 'f', 4 )
-            .arg( stdev, 0, 'f', 4 );
-    }
-    else {
-
-        // sync readout
-
-        msg = QString(
-            "%1 %2 @ pos %3h%4m%5s")
-            .arg( swhere )
-            .arg( myChanName( ic ) )
-            .arg( h, 2, 10, QChar('0') )
-            .arg( m, 2, 10, QChar('0') )
-            .arg( x, 0, 'f', 3 );
-    }
-
-    timStatBar.latestString( msg );
-}
-
-
 void SVGrafsM_Im::myClickGraph( double x, double y, int iy )
 {
     myMouseOverGraph( x, y, iy );
@@ -906,6 +837,50 @@ int SVGrafsM_Im::mySetUsrTypes()
 }
 
 
+// Call this only for neural channels!
+//
+void SVGrafsM_Im::computeGraphMouseOverVars(
+    int         ic,
+    double      &y,
+    double      &mean,
+    double      &stdev,
+    double      &rms,
+    const char* &unit ) const
+{
+    const CimCfg::PrbEach   &E      = p.im.prbj[ip];
+    const GraphStats        &stat   = ic2stat[ic];
+
+    double  gain = E.chanGain( ic ),
+            vmax;
+
+    y       = scalePlotValue( y, gain );
+
+    drawMtx.lock();
+    mean    = scalePlotValue( stat.mean(), gain );
+    stdev   = scalePlotValue( stat.stdDev(), gain );
+    rms     = scalePlotValue( stat.rms(), gain );
+    drawMtx.unlock();
+
+    vmax = E.roTbl->maxVolts() / (ic2Y[ic].yscl * gain);
+    unit = "V";
+
+    if( vmax < 0.001 ) {
+        y       *= 1e6;
+        mean    *= 1e6;
+        stdev   *= 1e6;
+        rms     *= 1e6;
+        unit     = "uV";
+    }
+    else if( vmax < 1.0 ) {
+        y       *= 1e3;
+        mean    *= 1e3;
+        stdev   *= 1e3;
+        rms     *= 1e3;
+        unit     = "mV";
+    }
+}
+
+
 // Called only from init().
 //
 void SVGrafsM_Im::loadSettings()
@@ -978,50 +953,6 @@ void SVGrafsM_Im::setSpike( int gp )
 double SVGrafsM_Im::scalePlotValue( double v, double gain ) const
 {
     return p.im.prbj[ip].roTbl->unityToVolts( (v+1)/2 ) / gain;
-}
-
-
-// Call this only for neural channels!
-//
-void SVGrafsM_Im::computeGraphMouseOverVars(
-    int         ic,
-    double      &y,
-    double      &mean,
-    double      &stdev,
-    double      &rms,
-    const char* &unit ) const
-{
-    const CimCfg::PrbEach   &E      = p.im.prbj[ip];
-    const GraphStats        &stat   = ic2stat[ic];
-
-    double  gain = E.chanGain( ic ),
-            vmax;
-
-    y       = scalePlotValue( y, gain );
-
-    drawMtx.lock();
-    mean    = scalePlotValue( stat.mean(), gain );
-    stdev   = scalePlotValue( stat.stdDev(), gain );
-    rms     = scalePlotValue( stat.rms(), gain );
-    drawMtx.unlock();
-
-    vmax = E.roTbl->maxVolts() / (ic2Y[ic].yscl * gain);
-    unit = "V";
-
-    if( vmax < 0.001 ) {
-        y       *= 1e6;
-        mean    *= 1e6;
-        stdev   *= 1e6;
-        rms     *= 1e6;
-        unit     = "uV";
-    }
-    else if( vmax < 1.0 ) {
-        y       *= 1e3;
-        mean    *= 1e3;
-        stdev   *= 1e3;
-        rms     *= 1e3;
-        unit     = "mV";
-    }
 }
 
 

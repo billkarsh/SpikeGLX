@@ -478,6 +478,45 @@ void SVGrafsM::colorTTL()
     gw->getTTLColorCtl()->showDialog();
 }
 
+void SVGrafsM::myMouseOverGraph( double x, double y, int iy )
+{
+    Q_UNUSED( x )
+
+    if( iy < 0 || iy >= int(theX->Y.size()) ) {
+        timStatBar.latestString( "" );
+        return;
+    }
+
+    int ic  = lastMouseOverChan = theX->Y[iy]->usrChan;
+
+    if( ic < 0 || ic >= chanCount() ) {
+        timStatBar.latestString( "" );
+        return;
+    }
+
+    double      mean, rms, stdev;
+    QString     msg;
+    const char  *unit;
+
+    if( ic < analogChanCount() ) {
+
+        // analog readout
+
+        computeGraphMouseOverVars( ic, y, mean, stdev, rms, unit );
+
+        msg = QString(
+            "%1  Y= %2 %3 -- {mean, rms, stdv} %3: {%4, %5, %6}")
+            .arg( myChanName( ic ) )
+            .arg( y, 0, 'f', 3 )
+            .arg( unit )
+            .arg( mean, 0, 'f', 3 )
+            .arg( rms, 0, 'f', 3 )
+            .arg( stdev, 0, 'f', 3 );
+    }
+
+    timStatBar.latestString( msg );
+}
+
 /* ---------------------------------------------------------------- */
 /* Private slots -------------------------------------------------- */
 /* ---------------------------------------------------------------- */

@@ -177,9 +177,9 @@ public slots:
     // Right-click
     void refresh();
     void colorTTL();
+    void myMouseOverGraph( double x, double y, int iy );
 
 private slots:
-    virtual void myMouseOverGraph( double x, double y, int iy ) = 0;
     virtual void myClickGraph( double x, double y, int iy ) = 0;
     void dblClickGraph( double x, double y, int iy );
     virtual void myRClickGraph( double x, double y, int iy ) = 0;
@@ -195,6 +195,13 @@ protected:
     virtual QString myChanName( int ic ) const = 0;
     virtual const QBitArray& mySaveBits() const = 0;
     virtual int mySetUsrTypes() = 0;
+    virtual void computeGraphMouseOverVars(
+        int         ic,
+        double      &y,
+        double      &mean,
+        double      &stdev,
+        double      &rms,
+        const char* &unit ) const = 0;
 
     virtual void loadSettings() = 0;
     virtual void saveSettings() const = 0;

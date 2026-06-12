@@ -350,75 +350,6 @@ void SVGrafsM_Ob::setLocalFilters( int &rin, int &rout, int iflt )
 /* Private slots -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void SVGrafsM_Ob::myMouseOverGraph( double x, double y, int iy )
-{
-    if( iy < 0 || iy >= int(theX->Y.size()) ) {
-        timStatBar.latestString( "" );
-        return;
-    }
-
-    int     ic          = lastMouseOverChan = theX->Y[iy]->usrChan;
-    bool    isNowOver   = true;
-
-    if( ic < 0 || ic >= chanCount() ) {
-        timStatBar.latestString( "" );
-        return;
-    }
-
-    QWidget *w = QApplication::widgetAt( QCursor::pos() );
-
-    if( !w || !dynamic_cast<MGraph*>(w) )
-        isNowOver = false;
-
-    double      mean, rms, stdev;
-    QString     msg;
-    const char  *unit,
-                *swhere = (isNowOver ? "Mouse over" : "Last mouse-over");
-    int         h,
-                m;
-
-    h = int(x / 3600);
-    x = x - h * 3600;
-    m = x / 60;
-    x = x - m * 60;
-
-    if( ic < analogChanCount() ) {
-
-        // analog readout
-
-        computeGraphMouseOverVars( ic, y, mean, stdev, rms, unit );
-
-        msg = QString(
-            "%1 %2 @ pos (%3h%4m%5s, %6 %7)"
-            " -- {mean, rms, stdv} %7: {%8, %9, %10}")
-            .arg( swhere )
-            .arg( myChanName( ic ) )
-            .arg( h, 2, 10, QChar('0') )
-            .arg( m, 2, 10, QChar('0') )
-            .arg( x, 0, 'f', 3 )
-            .arg( y, 0, 'f', 4 )
-            .arg( unit )
-            .arg( mean, 0, 'f', 4 )
-            .arg( rms, 0, 'f', 4 )
-            .arg( stdev, 0, 'f', 4 );
-    }
-    else {
-
-        // digital readout
-
-        msg = QString(
-            "%1 %2 @ pos %3h%4m%5s")
-            .arg( swhere )
-            .arg( myChanName( ic ) )
-            .arg( h, 2, 10, QChar('0') )
-            .arg( m, 2, 10, QChar('0') )
-            .arg( x, 0, 'f', 3 );
-    }
-
-    timStatBar.latestString( msg );
-}
-
-
 void SVGrafsM_Ob::myClickGraph( double x, double y, int iy )
 {
     myMouseOverGraph( x, y, iy );
@@ -559,6 +490,48 @@ int SVGrafsM_Ob::mySetUsrTypes()
 }
 
 
+// Call this only for analog channels!
+//
+void SVGrafsM_Ob::computeGraphMouseOverVars(
+    int         ic,
+    double      &y,
+    double      &mean,
+    double      &stdev,
+    double      &rms,
+    const char* &unit ) const
+{
+    const GraphStats    &stat = ic2stat[ic];
+
+    double  vmax;
+
+    y       = scalePlotValue( y );
+
+    drawMtx.lock();
+    mean    = scalePlotValue( stat.mean() );
+    stdev   = scalePlotValue( stat.stdDev() );
+    rms     = scalePlotValue( stat.rms() );
+    drawMtx.unlock();
+
+    vmax = p.im.get_iStrOneBox( ip ).range.rmax / ic2Y[ic].yscl;
+    unit = "V";
+
+    if( vmax < 0.001 ) {
+        y       *= 1e6;
+        mean    *= 1e6;
+        stdev   *= 1e6;
+        rms     *= 1e6;
+        unit     = "uV";
+    }
+    else if( vmax < 1.0 ) {
+        y       *= 1e3;
+        mean    *= 1e3;
+        stdev   *= 1e3;
+        rms     *= 1e3;
+        unit     = "mV";
+    }
+}
+
+
 // Called only from init().
 //
 void SVGrafsM_Ob::loadSettings()
@@ -619,48 +592,6 @@ void SVGrafsM_Ob::setAudio( int LBR )
 double SVGrafsM_Ob::scalePlotValue( double v ) const
 {
     return p.im.get_iStrOneBox( ip ).range.unityToVolts( (v+1)/2 );
-}
-
-
-// Call this only for analog channels!
-//
-void SVGrafsM_Ob::computeGraphMouseOverVars(
-    int         ic,
-    double      &y,
-    double      &mean,
-    double      &stdev,
-    double      &rms,
-    const char* &unit ) const
-{
-    const GraphStats    &stat = ic2stat[ic];
-
-    double  vmax;
-
-    y       = scalePlotValue( y );
-
-    drawMtx.lock();
-    mean    = scalePlotValue( stat.mean() );
-    stdev   = scalePlotValue( stat.stdDev() );
-    rms     = scalePlotValue( stat.rms() );
-    drawMtx.unlock();
-
-    vmax = p.im.get_iStrOneBox( ip ).range.rmax / ic2Y[ic].yscl;
-    unit = "V";
-
-    if( vmax < 0.001 ) {
-        y       *= 1e6;
-        mean    *= 1e6;
-        stdev   *= 1e6;
-        rms     *= 1e6;
-        unit     = "uV";
-    }
-    else if( vmax < 1.0 ) {
-        y       *= 1e3;
-        mean    *= 1e3;
-        stdev   *= 1e3;
-        rms     *= 1e3;
-        unit     = "mV";
-    }
 }
 
 

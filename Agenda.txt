@@ -12,6 +12,7 @@
 + Support NP1400, NP2022.
 + Improve Graphs::filters toolbar.
 + Improve Graphs::navigate toolbar.
++ Improve Graphs::voltage readout.
 
 20251218
 --------
