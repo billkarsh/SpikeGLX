@@ -82,7 +82,7 @@ snsSaveChanSubset=all</code></pre>
 <li><p>zero-based shank # (with tips pointing down, shank-0 is left-most),</p></li>
 <li><p>zero-based col #,</p></li>
 <li><p>zero-based row #,</p></li>
-<li><p>0/1 &quot;used,&quot; or, (u-flag), indicating if the electrode should be drawn in the FileViewer and ShankViewer windows, and if it should be included in spatial average &lt;S&gt; calculations.</p></li>
+<li><p>0/1 &quot;used,&quot; or, (u-flag), indicating if the electrode should be drawn in the FileViewer and ShankViewer windows, and if it should be included in spatial average CAR calculations.</p></li>
 </ol>
 <blockquote>
 <p>Note: There are electrode entries only for saved channels.</p>
@@ -412,7 +412,7 @@ bit 11: MISS missed sample</code></pre>
 <li><p>zero-based shank # (with tips pointing down, shank-0 is left-most),</p></li>
 <li><p>x-coordinate (um) of <strong>electrode center</strong>,</p></li>
 <li><p>z-coordinate (um) of <strong>electrode center</strong>,</p></li>
-<li><p>0/1 &quot;used,&quot; or, (u-flag), indicating if the electrode should be drawn in the FileViewer and ShankViewer windows, and if it should be included in spatial average &lt;S&gt; calculations.</p></li>
+<li><p>0/1 &quot;used,&quot; or, (u-flag), indicating if the electrode should be drawn in the FileViewer and ShankViewer windows, and if it should be included in spatial average CAR calculations.</p></li>
 </ol>
 <blockquote>
 <p><strong>(X,Z) Coordinates</strong>: Looking face-on at a probe with tip pointing downward, X is measured along the width of the probe, from left to right. The X-origin is the left edge of the shank. Z is measured along the shank of the probe, from tip, upward, toward the probe base. The Z-origin is the center of the bottom-most electrode row (closest to the tip). Note that for a multi-shank probe, each shank has its own (X,Z) origin and coordinate system. That is, the (X,Z) location of an electrode is given relative to its own shank (with tips pointing down, shank-0 is left-most).</p>

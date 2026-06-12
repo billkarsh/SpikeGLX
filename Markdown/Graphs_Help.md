@@ -60,18 +60,18 @@ any graph to select it. The current graph is the target of several
 controls such as the axis scaling boxes. Click on the channel-name
 string in the toolbar to switch to the page containing the current selection.
 
+* `Clr`: Click this button to get a Color picking dialog whereby you can
+define an alternate color for the **data trace** in the selected graph.
+This only works for analog channels; digital traces are auto-colored.
+
 * `Expand`: This button toggles between showing just the selected channel,
 and the standard multi-channel view. You can also double-click a graph
 to select it and expand/contract it.
 
-* `Sec`: Enter a value in range [0.001..30.0] seconds to set the time span.
+* `X`: Enter a value in range [0.001..30.0] seconds to set the time span.
 
-* `Yscl`: Enter a value in range [0.0..9999.0] to set a vertical graph
+* `Y`: Enter a value in range [0.0..9999.0] to set a vertical graph
 magnification.
-
-* `Clr`: Click this button to get a Color picking dialog whereby you can
-define an alternate color for the **data trace** in the selected graph.
-This only works for analog channels; digital traces are auto-colored.
 
 #### Filters Applied Only to Neural Channels
 
@@ -84,12 +84,12 @@ filters off to understand what is coming out of the hardware.
 
 ##### General Filters
 
-* `-<Tn>` (`-<Tx>`): Neural (auxiliary analog) time averaging. Samples the
+* `DCn` (`DCx`): Neural (auxiliary analog) time averaging. Samples the
 data stream per channel to calculate and then subtract the time average
 value; effectively subtracting the DC component. The value is updated every
 5 seconds. This may create artifactual steps at update boundaries.
 
-* `BinMax`: If checked, we report the extrema in each downsample bin.
+* `BM`: (BinMax) If checked, we report the extrema in each downsample bin.
 This avoids missing events when showing long time spans. It's especially
 useful for high sample rates. This exaggerates apparent background noise.
 Uncheck the box to visualize noise more accurately.
@@ -107,15 +107,15 @@ For 2.0, the `native` data are full-band, there is no separate LF band.
 
 The filter selector applies software operations to these `native` signals:
 
-* `AP Native`: No software filter is applied.
+* `Off`: No software filter is applied.
 * `300 - INF`: A software high pass filter is applied to all AP channels.
 * `0.5 - 500`: A software low pass filter is applied to all AP channels.
-* `AP = AP+LF`: All AP channels are graphed as the simple sum of the AP
-and corresponding LF band signal.
+* `+LF`: All AP channels are graphed as the simple sum of the AP and
+corresponding LF band signal (if present).
 
 **Spatial averaging**
 
-* `-<S>`: At each timepoint a neighborhood of electrodes per channel is
+* `CAR`: At each timepoint a neighborhood of electrodes per channel is
 averaged; the result is subtracted from that channel. The locations of
 electrodes are known from your imro table or nidq shank map.
     + Notes:
@@ -135,7 +135,7 @@ electrodes are known from your imro table or nidq shank map.
 
 ##### Nidq Stream Filters
 
-* `Bandpass`: Applies optional bandpass filtering to neural MN
+* `BP`: Applies optional bandpass filtering to neural MN
 channels.
 
 ### Page Toolbar Controls
@@ -146,10 +146,8 @@ channel order and that specified by your custom [channel map](#channel-map).
 * `Shank View`: Opens the [Shank Viewer](ShankView_Help.html) window for
 this stream.
 
-* `NChan`: Specifies how many graphs to show per page. When the value is
+* `Chan/page`: Specifies how many graphs to show per page. When the value is
 changed SpikeGLX selects a page that keeps the middle graph visible.
-
-* `1st`: Shows the index number of the first graph on the current page.
 
 * `Slider`: Change pages.
 

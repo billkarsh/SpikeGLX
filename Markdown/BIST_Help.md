@@ -256,11 +256,11 @@ the ShankViewer to apply both band-pass filtering and CAR (Gbldmx).
 
 4. In the Graphs Window apply these Settings:
 
-* `Secs`: 0.1
-* `Band-pass`: 300-INF
-* `-<T>`: ON
-* `-<S>`: Gbl Dmx
-* `BinMax`: OFF
+* `X`: 0.1
+* `AP`: 300-INF
+* `DCn`: 1
+* `CAR`: Gbl Dmx
+* `BM`: 1
 
 As you hover the mouse over the traces, observe `stdv` readouts at the
 bottom of the Graphs Window (stdv is effectively RMS-offset). Depending
@@ -293,11 +293,11 @@ the ShankViewer to apply only high-pass filtering.
 
 4. In the Graphs Window apply these Settings:
 
-* `Secs`: 0.1
-* `Band-pass`: AP Native (OFF)
-* `-<T>`: ON
-* `-<S>`: OFF
-* `BinMax`: OFF
+* `X`: 0.1
+* `AP`: Off
+* `DCn`: 1
+* `CAR`: Off
+* `BM`: 1
 
 Now `stdv` readouts will be much larger but that's not a bad probe. It's
 your call how much noise pickup is OK. If the noise is greater than 15 uV

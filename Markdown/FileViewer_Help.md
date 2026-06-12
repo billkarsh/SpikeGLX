@@ -272,7 +272,7 @@ features.
 ### ShankMap (GeomMap) Operators
 
 The operations in this menu turn on/off channel `used-flags` (u-flags).
-The u-flag controls if that channel is included in spatial averaging `-<S>`
+The u-flag controls if that channel is included in spatial averaging `CAR`
 filters. Noisy (bad) channels diminish the effectiveness of such filters.
 
 * `ShankMap: Toggle This Chan`: Right-click on a spiking channel,
@@ -330,6 +330,8 @@ As with most views in SpikeGLX, to scroll with the mouse wheel, hover the
 cursor over the desired scroll bar, then roll the wheel.
 
 To scroll faster, hold the shift key down while rolling the wheel.
+
+> *Your mouse may work differently. Check `Mouse control panel settings`.*
 
 --------
 

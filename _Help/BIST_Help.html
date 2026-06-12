@@ -184,11 +184,11 @@
 <li><p>In the Graphs Window apply these Settings:</p></li>
 </ol>
 <ul>
-<li><code>Secs</code>: 0.1</li>
-<li><code>Band-pass</code>: 300-INF</li>
-<li><code>-&lt;T&gt;</code>: ON</li>
-<li><code>-&lt;S&gt;</code>: Gbl Dmx</li>
-<li><code>BinMax</code>: OFF</li>
+<li><code>X</code>: 0.1</li>
+<li><code>AP</code>: 300-INF</li>
+<li><code>DCn</code>: 1</li>
+<li><code>CAR</code>: Gbl Dmx</li>
+<li><code>BM</code>: 1</li>
 </ul>
 <p>As you hover the mouse over the traces, observe <code>stdv</code> readouts at the bottom of the Graphs Window (stdv is effectively RMS-offset). Depending upon probe model, the specs for this are 7-9 uV, but in practice, anything below 10 uV means the probe is ok. Remember there will always be a handful of outlier channels.</p>
 <ol start="5" style="list-style-type: decimal">
@@ -211,11 +211,11 @@
 <li><p>In the Graphs Window apply these Settings:</p></li>
 </ol>
 <ul>
-<li><code>Secs</code>: 0.1</li>
-<li><code>Band-pass</code>: AP Native (OFF)</li>
-<li><code>-&lt;T&gt;</code>: ON</li>
-<li><code>-&lt;S&gt;</code>: OFF</li>
-<li><code>BinMax</code>: OFF</li>
+<li><code>X</code>: 0.1</li>
+<li><code>AP</code>: Off</li>
+<li><code>DCn</code>: 1</li>
+<li><code>CAR</code>: Off</li>
+<li><code>BM</code>: 1</li>
 </ul>
 <p>Now <code>stdv</code> readouts will be much larger but that's not a bad probe. It's your call how much noise pickup is OK. If the noise is greater than 15 uV you could have a poor connection in the ref or ground wire path. Check your solder joints.</p>
 <p>This is a good time to poke the probe wires with a stick. Also poke the flex connector. The signals should be quite steady under poking. If the noise bounces when you poke then something is too loose.</p>

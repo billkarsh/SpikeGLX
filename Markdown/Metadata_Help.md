@@ -190,7 +190,7 @@ Each following electrode entry has four values (s:c:r:u):
 
 4. 0/1 "used," or, (u-flag), indicating if the electrode should be drawn
 in the FileViewer and ShankViewer windows, and if it should be included in
-spatial average \<S\> calculations.
+spatial average CAR calculations.
 
 >Note: There are electrode entries only for saved channels.
 
@@ -1090,7 +1090,7 @@ four values (s:x:z:u):
 
 4. 0/1 "used," or, (u-flag), indicating if the electrode should be drawn
 in the FileViewer and ShankViewer windows, and if it should be included in
-spatial average \<S\> calculations.
+spatial average CAR calculations.
 
 > **(X,Z) Coordinates**: Looking face-on at a probe with tip pointing
 downward, X is measured along the width of the probe, from left to right.
