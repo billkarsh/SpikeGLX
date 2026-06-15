@@ -76,6 +76,7 @@ void DataFileOB::subclassStoreMetaData( const DAQ::Params &p )
     kvp["typeThis"]     = "obx";
     kvp["obSampRate"]   = sRate;
     kvp["obMaxInt"]     = 32768;
+    kvp["obLowLatency"] = p.im.prbAll.lowLatency;
     kvp["imTrgSource"]  = p.im.prbAll.trgSource;
     kvp["imTrgRising"]  = p.im.prbAll.trgRising;
     kvp["obAiRangeMin"] = E.range.rmin;

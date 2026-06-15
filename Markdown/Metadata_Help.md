@@ -879,9 +879,10 @@ imLEDEnable=false
 imLowLatency=false
 ```
 
-This mode runs the probe sample fetching loop faster, which reduces the
-time to get fresh data. However, this drives the CPU 50%+ harder and
-limits the maximum number of probes you can safely run concurrently.
+This mode runs the probe (and OneBox) sample fetching loop faster, which
+reduces the time to get fresh data. However, this drives the CPU 50%+
+harder and limits the maximum number of probes you can safely run
+concurrently.
 
 ```
 imIsSvyRun=false
@@ -959,6 +960,20 @@ imTrgSource=0
 ```
 
 Selects the type of trigger that starts the run: {0=software}.
+
+```
+imVigilant=false
+```
+
+If you are running probes, and if the `Vigilant` box is checked on the
+`IM Setup` tab, the computer is commanded to stay awake during the run.
+This reduces system latency when responding to sudden surges in background
+activity. It can help an underperforming CPU avoid POP errors and keep up
+with high channel count acquisition. The downside is the computer runs
+warmer and the lifespan of thermal paste may be shortened. So we advise
+using Vigilant mode only if your system is not performing adequately. We
+found that might be the case when running quad-base probes on a laptop
+with a lower performance Core-Ultra CPU, for example, Mercury Lake.
 
 ```
 imX0EvenRow=27
@@ -1213,6 +1228,15 @@ from the neighbor status words.
 
 >It is possible to see which region of recorded data experienced these
 errors if you see blips on those bits.
+
+```
+obLowLatency=false
+```
+
+This mode runs the probe (and OneBox) sample fetching loop faster, which
+reduces the time to get fresh data. However, this drives the CPU 50%+
+harder and limits the maximum number of probes you can safely run
+concurrently.
 
 ```
 obMaxInt=32768

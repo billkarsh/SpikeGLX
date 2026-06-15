@@ -638,6 +638,17 @@ int CimCfg::ImProbeTable::nQualStreamsThisSlot( int slot ) const
 }
 
 
+bool CimCfg::ImProbeTable::isAnyQuadBase() const
+{
+    for( int ip = 0, np = nSelProbes(); ip < np; ++ip ) {
+        if( get_iProbe( ip ).isQuadBase() )
+            return true;
+    }
+
+    return false;
+}
+
+
 double CimCfg::ImProbeTable::get_iProbe_SRate( int i ) const
 {
     if( i < iprb2dat.size() )
@@ -1240,6 +1251,7 @@ void CimCfg::PrbAll::loadSettings( QSettings &S )
     srAtDetect      = S.value( "imSRAtDetect", true ).toBool();
     psbAtDetect     = S.value( "imPSBAtDetect", true ).toBool();
     lowLatency      = S.value( "imLowLatency", false ).toBool();
+    vigilant        = S.value( "imVigilant", false ).toBool();
     trgRising       = S.value( "imTrgRising", true ).toBool();
     isSvyRun        = false;
     qf_on           = S.value( "imQfOn", true ).toBool();
@@ -1258,6 +1270,7 @@ void CimCfg::PrbAll::saveSettings( QSettings &S ) const
     S.setValue( "imSRAtDetect", srAtDetect );
     S.setValue( "imPSBAtDetect", psbAtDetect );
     S.setValue( "imLowLatency", lowLatency );
+    S.setValue( "imVigilant", vigilant );
     S.setValue( "imTrgRising", trgRising );
     S.setValue( "imQfOn", qf_on );
 }

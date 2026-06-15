@@ -164,6 +164,7 @@ public:
 
         bool isProbe() const    {return adr.port != 9;}
         bool isOneBox() const   {return adr.port == 9;}
+        bool isQuadBase() const {return prbtech == t_tech_qb;}
         bool setProbeType();
         int nHSDocks() const;
         quint64 calSN() const   {return (type == 1200 ? hssn : sn);}
@@ -267,6 +268,8 @@ public:
 
         int nQualStreamsThisSlot( int slot ) const;
 
+        bool isAnyQuadBase() const;
+
         double get_iProbe_SRate( int i ) const;
         void set_iProbe_SRate( int i, double srate )
             {hssn2srate[probes[iprb2dat[i]].hssn] = srate;}
@@ -316,6 +319,7 @@ public:
         bool    srAtDetect,
                 psbAtDetect,
                 lowLatency,
+                vigilant,
                 trgRising,
                 isSvyRun,
                 qf_on;
@@ -324,7 +328,8 @@ public:
         :   qf_secsStr( ".5" ), qf_loCutStr( "300" ), qf_hiCutStr( "9000" ),
             calPolicy(0), trgSource(0), svySettleSec(2), svySecPerBnk(35),
             srAtDetect(true), psbAtDetect(true), lowLatency(false),
-            trgRising(true), isSvyRun(false), qf_on(true)   {}
+            vigilant(false), trgRising(true), isSvyRun(false), qf_on(true)
+            {}
 
         void loadSettings( QSettings &S );
         void saveSettings( QSettings &S ) const;

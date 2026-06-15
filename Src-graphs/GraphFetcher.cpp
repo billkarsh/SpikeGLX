@@ -137,7 +137,9 @@ GraphFetcher::GraphFetcher()
     Connect( worker, SIGNAL(finished()), worker, SLOT(deleteLater()) );
     Connect( worker, SIGNAL(destroyed()), thread, SLOT(quit()), Qt::DirectConnection );
 
+    thread->setServiceLevel( QThread::QualityOfService::Eco );
     thread->start();
+    thread->setPriority( QThread::LowPriority );
 }
 
 

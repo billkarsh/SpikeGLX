@@ -338,7 +338,7 @@ bit 11: MISS missed sample</code></pre>
 </blockquote>
 <pre><code>imLEDEnable=false</code></pre>
 <pre><code>imLowLatency=false</code></pre>
-<p>This mode runs the probe sample fetching loop faster, which reduces the time to get fresh data. However, this drives the CPU 50%+ harder and limits the maximum number of probes you can safely run concurrently.</p>
+<p>This mode runs the probe (and OneBox) sample fetching loop faster, which reduces the time to get fresh data. However, this drives the CPU 50%+ harder and limits the maximum number of probes you can safely run concurrently.</p>
 <pre><code>imIsSvyRun=false</code></pre>
 <pre><code>imMaxInt=512</code></pre>
 <p>Maximum amplitude integer encoded in the 16-bit analog channels. Really, in this example [-512..511]. The reason for this apparent asymmetry is that, by convention, zero is grouped with the positive values. The example probe is 10-bit, so encodes 2^10 = 1024 values. There are 512 negative values: [-512..-1] and 512 positives: [0..511]. This convention (zero is a positive number) applies in all signed computer arithmetic.</p>
@@ -360,6 +360,8 @@ bit 11: MISS missed sample</code></pre>
 <p>Selects whether external trigger detects a rising or falling edge.</p>
 <pre><code>imTrgSource=0</code></pre>
 <p>Selects the type of trigger that starts the run: {0=software}.</p>
+<pre><code>imVigilant=false</code></pre>
+<p>If you are running probes, and if the <code>Vigilant</code> box is checked on the <code>IM Setup</code> tab, the computer is commanded to stay awake during the run. This reduces system latency when responding to sudden surges in background activity. It can help an underperforming CPU avoid POP errors and keep up with high channel count acquisition. The downside is the computer runs warmer and the lifespan of thermal paste may be shortened. So we advise using Vigilant mode only if your system is not performing adequately. We found that might be the case when running quad-base probes on a laptop with a lower performance Core-Ultra CPU, for example, Mercury Lake.</p>
 <pre><code>imX0EvenRow=27</code></pre>
 <p>Number of microns from left edge of shank to left-most electrode center on an even numbered row.</p>
 <pre><code>imX0OddRow=27</code></pre>
@@ -468,6 +470,8 @@ bit 11: MISS missed sample</code></pre>
 <blockquote>
 <p>It is possible to see which region of recorded data experienced these errors if you see blips on those bits.</p>
 </blockquote>
+<pre><code>obLowLatency=false</code></pre>
+<p>This mode runs the probe (and OneBox) sample fetching loop faster, which reduces the time to get fresh data. However, this drives the CPU 50%+ harder and limits the maximum number of probes you can safely run concurrently.</p>
 <pre><code>obMaxInt=32768</code></pre>
 <p>Maximum amplitude integer encoded in the 16-bit analog channels. Really, in this example [-32768..32767]. The reason for this apparent asymmetry is that, by convention, zero is grouped with the positive values. The stream is 16-bit so can encode 2^16 = 65536 values. There are 32768 negative values: [-32768..-1] and 32768 positives: [0..32767]. This convention (zero is a positive number) applies in all signed computer arithmetic.</p>
 <pre><code>obSampRate=30000</code></pre>

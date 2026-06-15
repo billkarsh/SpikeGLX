@@ -12,6 +12,7 @@ Use this tab to configure parameters for each probe, individually.
 * [All Probes](#all-probes)
     + [Calibration Policy](#calibration-policy)
     + [Low Latency Mode](#low-latency-mode)
+    + [Vigilant Mode](#vigilant-mode)
     + [Acquisition Start Signal](#acquisition-start-signal)
     + [Survey all probe banks](#survey-all-probe-banks)
         + [Max bank](#max-bank)
@@ -53,6 +54,18 @@ which reduces the time to get fresh data. However, this drives the
 CPU 50%+ harder and reduces the maximum number of probes you can safely
 run concurrently. Pay attention to the Metrics Window and Task Manager
 Performance readouts to make sure your runs are stable under load.
+
+### Vigilant Mode
+
+If you are running probes, and if the `Vigilant` box is checked,
+the computer is commanded to stay awake during the run.
+This reduces system latency when responding to sudden surges in background
+activity. It can help an underperforming CPU avoid POP errors and keep up
+with high channel count acquisition. The downside is the computer runs
+warmer and the lifespan of thermal paste may be shortened. So we advise
+using Vigilant mode only if your system is not performing adequately. We
+found that might be the case when running quad-base probes on a laptop
+with a lower performance Core-Ultra CPU, for example, Mercury Lake.
 
 ### Acquisition Start Signal
 

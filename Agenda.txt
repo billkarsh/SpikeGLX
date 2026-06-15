@@ -9,6 +9,7 @@
 + Imro headers (PN,nchan) instead of (type,nchan).
 + Add NI low latency mode and histogram.
 + Add OBX per channel thresholds.
++ Adjust runtime states and load balancing.
 + Support NP1400, NP2022.
 + Improve Graphs::filters toolbar.
 + Improve Graphs::navigate toolbar.

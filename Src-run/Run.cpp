@@ -574,7 +574,7 @@ bool Run::startRun( QString &err )
 
     DAQ::Params &p = app->cfgCtl()->acceptedParams;
 
-    quint64 cpus = coreAffinityMask( 1 );
+    quint64 cpus = coreAffinityMask( 2 );
     if( cpus )
         setProcessAffinityMask( cpus );
 
@@ -590,6 +590,9 @@ bool Run::startRun( QString &err )
         nIM         = p.stream_nIM(),
         nOB         = p.stream_nOB(),
         nNI         = p.stream_nNI();
+
+    if( nIM && p.im.prbAll.vigilant )
+        setStayAwake( true );
 
     for( int ip = 0; ip < nIM; ++ip ) {
         imQ.push_back( new AIQ(
@@ -743,6 +746,7 @@ void Run::stopRun()
     imQ.clear();
 
     setPreciseTiming( false );
+    setStayAwake( false );
     setHighPriority( false );
     setProcessorMin( 5 );
     setProcessAffinityMask( 0 );

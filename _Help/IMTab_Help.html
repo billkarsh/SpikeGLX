@@ -19,6 +19,7 @@
 <ul>
 <li><a href="#calibration-policy">Calibration Policy</a></li>
 <li><a href="#low-latency-mode">Low Latency Mode</a></li>
+<li><a href="#vigilant-mode">Vigilant Mode</a></li>
 <li><a href="#acquisition-start-signal">Acquisition Start Signal</a></li>
 <li><a href="#survey-all-probe-banks">Survey all probe banks</a>
 <ul>
@@ -57,6 +58,8 @@
 </ul>
 <h3 id="low-latency-mode">Low Latency Mode</h3>
 <p>This mode runs the probe (and Obx ADC) sample fetching loop faster, which reduces the time to get fresh data. However, this drives the CPU 50%+ harder and reduces the maximum number of probes you can safely run concurrently. Pay attention to the Metrics Window and Task Manager Performance readouts to make sure your runs are stable under load.</p>
+<h3 id="vigilant-mode">Vigilant Mode</h3>
+<p>If you are running probes, and if the <code>Vigilant</code> box is checked, the computer is commanded to stay awake during the run. This reduces system latency when responding to sudden surges in background activity. It can help an underperforming CPU avoid POP errors and keep up with high channel count acquisition. The downside is the computer runs warmer and the lifespan of thermal paste may be shortened. So we advise using Vigilant mode only if your system is not performing adequately. We found that might be the case when running quad-base probes on a laptop with a lower performance Core-Ultra CPU, for example, Mercury Lake.</p>
 <h3 id="acquisition-start-signal">Acquisition Start Signal</h3>
 <p>Currently we are only supporting software-based initiation of imec data streaming. That is, the data acquisition starts manually when you click the <code>Run</code> button in the configuration dialog.</p>
 <h3 id="survey-all-probe-banks">Survey all probe banks</h3>

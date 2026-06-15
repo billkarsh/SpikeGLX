@@ -454,6 +454,13 @@
          </widget>
         </item>
         <item>
+         <widget class="QCheckBox" name="vigilantChk">
+          <property name="text">
+           <string>Vigilant</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="horizontalSpacer_2">
           <property name="orientation">
            <enum>Qt::Orientation::Horizontal</enum>
@@ -659,6 +666,7 @@
  <tabstops>
   <tabstop>calCB</tabstop>
   <tabstop>lowLatChk</tabstop>
+  <tabstop>vigilantChk</tabstop>
   <tabstop>trgSrcCB</tabstop>
   <tabstop>trgEdgeCB</tabstop>
   <tabstop>svyChk</tabstop>

@@ -493,7 +493,7 @@ private:
     void STEPSTART();
 
 // Config common aux
-    bool _aux_sizeStreamBufs();
+    bool _aux_sizeStreamBufs( const CimCfg::ImProbeTable &T );
     bool _aux_initObxSlot( int slot );
     void _aux_doneObxSlot( int slot );
     bool _aux_open( const CimCfg::ImProbeTable &T );

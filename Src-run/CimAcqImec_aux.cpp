@@ -16,7 +16,6 @@
 #define STOPCHECK   if( isStopped() ) return false;
 
 
-// @@@ FIX Leave buffers at defaults until understand better.
 // Setting is system-wide, affecting PXI and OneBox.
 // NP_PARAM_INPUT_LATENCY_US:   default 132, ~ 4 samples
 //
@@ -26,14 +25,18 @@
 //  up from screen saver.
 // - Performance looks stable at 100 and 132 (default), that was
 //  tested with eight NP2.0 probes in a single BS.
-// - Other values have not been tested.
+// - At higher values than 132 latency tuning tail slowly increases.
 //
-bool CimAcqImec::_aux_sizeStreamBufs()
+// Current logic:
+// - Actively set API4 to either 132 (default) or twice that for
+//  quad-base to reduce buffer backpressure events {POP, disparity}.
+//
+bool CimAcqImec::_aux_sizeStreamBufs( const CimCfg::ImProbeTable &T )
 {
-#if 0
     NP_ErrorCode    err;
 
-    err = np_setParameter( NP_PARAM_INPUT_LATENCY_US, 132 );
+    err = np_setParameter( NP_PARAM_INPUT_LATENCY_US,
+            (T.isAnyQuadBase() ? 264 : 132) );
 
     if( err != SUCCESS ) {
         runError(
@@ -41,7 +44,6 @@ bool CimAcqImec::_aux_sizeStreamBufs()
             .arg( makeErrorString( err ) ) );
         return false;
     }
-#endif
 
     return true;
 }
@@ -702,7 +704,7 @@ bool CimAcqImec::_aux_config()
 {
     STOPCHECK;
 
-    if( !_aux_sizeStreamBufs() )
+    if( !_aux_sizeStreamBufs( T ) )
         return false;
 
     STEPAUX();
