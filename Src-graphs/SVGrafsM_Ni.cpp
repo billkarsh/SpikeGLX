@@ -693,6 +693,7 @@ int SVGrafsM_Ni::mySetUsrTypes()
 void SVGrafsM_Ni::computeGraphMouseOverVars(
     int         ic,
     double      &y,
+    double      &vmax,
     double      &mean,
     double      &stdev,
     double      &rms,
@@ -700,8 +701,7 @@ void SVGrafsM_Ni::computeGraphMouseOverVars(
 {
     const GraphStats    &stat = ic2stat[ic];
 
-    double  gain = p.ni.chanGain( ic ),
-            vmax;
+    double  gain = p.ni.chanGain( ic );
 
     y       = scalePlotValue( y, gain );
 
@@ -716,6 +716,7 @@ void SVGrafsM_Ni::computeGraphMouseOverVars(
 
     if( vmax < 0.001 ) {
         y       *= 1e6;
+        vmax    *= 1e6;
         mean    *= 1e6;
         stdev   *= 1e6;
         rms     *= 1e6;
@@ -723,6 +724,7 @@ void SVGrafsM_Ni::computeGraphMouseOverVars(
     }
     else if( vmax < 1.0 ) {
         y       *= 1e3;
+        vmax    *= 1e3;
         mean    *= 1e3;
         stdev   *= 1e3;
         rms     *= 1e3;

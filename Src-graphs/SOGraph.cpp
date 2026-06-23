@@ -448,6 +448,7 @@ static inline void transformPoint(
 }
 
 
+[[ maybe_unused ]]
 static inline bool project(
     GLdouble        *winx,
     GLdouble        *winy,

@@ -198,6 +198,7 @@ protected:
     virtual void computeGraphMouseOverVars(
         int         ic,
         double      &y,
+        double      &vmax,
         double      &mean,
         double      &stdev,
         double      &rms,

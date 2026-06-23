@@ -11,6 +11,7 @@
 + Add OBX per channel thresholds.
 + Adjust runtime states and load balancing.
 + Support NP1400, NP2022.
++ Improve FVW::filters toolbar.
 + Improve Graphs::filters toolbar.
 + Improve Graphs::navigate toolbar.
 + Improve Graphs::voltage readout.
@@ -738,6 +739,8 @@ API4    (build):     Qt 6.9.1  MinGW 13.1.0  64bit.
 API4    (tested):    Qt 6.9.3  MinGW 13.1.0  64bit.
 API4    (tested):    Qt 6.10.2 MinGW 13.1.0  64bit.
 API4    (tested):    Qt 6.10.2 MSVC  2026-18 64bit.
+API4    (build):     Qt 6.10.3 MinGW 13.1.0  64bit.
+API5    (build):     Qt 6.10.3 MSVC  2026-18 64bit.
 
 
 // LOOSE ENDS

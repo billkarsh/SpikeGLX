@@ -120,7 +120,7 @@ public:
     void setXSelRange( float begin_x, float end_x );
     void setXSelEnabled( bool onoff );
     bool isXSelVisible() const;
-    void getXSelVerts( float v[8] ) const;
+    void getXSelVerts( float *v ) const;
 
     void evQReset();
     void evQExtendLast( double end, double minSecs, int clr );

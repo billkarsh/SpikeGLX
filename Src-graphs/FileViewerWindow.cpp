@@ -373,7 +373,7 @@ void FileViewerWindow::SaveAll::loadSettings( QSettings &S, double minSpan )
     fOffset         = 0;
     xSpan           = S.value( "xSpan", 4.0 ).toDouble();
     ySclAux         = S.value( "ySclAux", 1.0 ).toDouble();
-    nDivs           = S.value( "nDivs", 4 ).toInt();
+    nDivs           = 1;    // S.value( "nDivs", 4 ).toInt();
     sortUserOrder   = S.value( "sortUserOrder", false ).toBool();
     manualUpdate    = S.value( "manualUpdate", false ).toBool();
     S.endGroup();
@@ -3977,14 +3977,14 @@ double FileViewerWindow::scalePlotValue( double v, double gain )
 void FileViewerWindow::computeGraphMouseOverVars(
     int         ig,
     double      &y,
+    double      &vmax,
     double      &mean,
     double      &stdev,
     double      &rms,
     const char* &unit )
 {
     const GraphStats    &stat   = grfStats[ig];
-    double              gain    = grfParams[ig].gain,
-                        vmax;
+    double              gain    = grfParams[ig].gain;
 
     y       = scalePlotValue( y, gain );
     mean    = scalePlotValue( stat.mean(), gain );
@@ -3996,6 +3996,7 @@ void FileViewerWindow::computeGraphMouseOverVars(
 
     if( vmax < 0.001 ) {
         y       *= 1e6;
+        vmax    *= 1e6;
         mean    *= 1e6;
         stdev   *= 1e6;
         rms     *= 1e6;
@@ -4003,6 +4004,7 @@ void FileViewerWindow::computeGraphMouseOverVars(
     }
     else if( vmax < 1.0 ) {
         y       *= 1e3;
+        vmax    *= 1e3;
         mean    *= 1e3;
         stdev   *= 1e3;
         rms     *= 1e3;
@@ -4029,22 +4031,23 @@ void FileViewerWindow::printStatusMessage()
         // Analog channels
         // ---------------
 
-        double      mean, rms, stdev;
+        double      vmax, mean, rms, stdev;
         const char  *unit;
 
-        computeGraphMouseOverVars( ig, y, mean, stdev, rms, unit );
+        computeGraphMouseOverVars( ig, y, vmax, mean, stdev, rms, unit );
 
-        msg = QString("Mouse tracking Graph %1 @ pos (%2 s, %3 %4)")
+        msg = QString("%1  (X,Y)= (%2 s, %3 / %4 %5)")
                 .arg( grfY[ig].lhsLabel )
                 .arg( t, 0, 'f', 4 )
-                .arg( y, 0, 'f', 4 )
+                .arg( y, 0, 'f', 3 )
+                .arg( vmax, 0, 'f', 3 )
                 .arg( unit );
 
         stat = QString(" -- {mean, rms, stdv} %1: {%2, %3, %4}")
                 .arg( unit )
-                .arg( mean, 0, 'f', 4 )
-                .arg( rms, 0, 'f', 4 )
-                .arg( stdev, 0, 'f', 4 );
+                .arg( mean, 0, 'f', 3 )
+                .arg( rms, 0, 'f', 3 )
+                .arg( stdev, 0, 'f', 3 );
     }
     else {
 
@@ -4052,7 +4055,7 @@ void FileViewerWindow::printStatusMessage()
         // Digital
         // -------
 
-        msg = QString("Mouse tracking Graph %1 @ pos (%2 s)")
+        msg = QString("%1  X= %2 s")
                 .arg( grfY[ig].lhsLabel )
                 .arg( t, 0, 'f', 4 );
     }

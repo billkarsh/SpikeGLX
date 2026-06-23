@@ -12,6 +12,7 @@
 <h1 id="spikeglx-broken-shank-support">SpikeGLX Broken Shank Support</h1>
 <p><strong>Topics</strong>:</p>
 <ul>
+<li><a href="#overview">Overview</a></li>
 <li><a href="#shift-register-errors">Shift Register Errors</a></li>
 <li><a href="#prior-policy">Prior Policy</a></li>
 <li><a href="#new-policy">New Policy</a></li>
@@ -32,6 +33,8 @@
 <li><a href="#electrode-mixing">Electrode Mixing</a></li>
 </ul></li>
 </ul>
+<h1 id="overview">Overview</h1>
+<p>If you actually physically snap a shank off of the probe you will certainly get a shift register error. However, the vast majority of shank failures are internal without any externally visible sign. Internal damage may arise due to shank flexing or exposure to caustic materials. This can effect internal component characteristics or continuity. The built-in shift register test (BIST SR) is our principal tool for detecting shank integrity.</p>
 <h1 id="shift-register-errors">Shift Register Errors</h1>
 <p>A shift register is a circuit element that stores a value. When you load a new value into it, the old value is pushed out:</p>
 <pre><code>new--&gt;| value |--&gt;old</code></pre>
@@ -41,7 +44,7 @@ Push C: -&gt;| C |-&gt;| X |-&gt;| Y |-&gt; collected {Z}
 Push B: -&gt;| B |-&gt;| C |-&gt;| X |-&gt; collected {Y Z}
 Push A: -&gt;| A |-&gt;| B |-&gt;| C |-&gt; collected {X Y Z}</code></pre>
 <p>We can test if we successfully loaded {A B C} into the registers by pushing {A B C} twice. On pass 1 we will collect the original data, as demonstrated for {X Y Z}, but that does not tell us about {A B C}. However, if we push {A B C} again, we should collect {A B C}. If we collect anything else then something is not working. That's a shift register chain error. This is how Neuropixels probes program electrode and reference selections into a shank. The first pass programs shank registers, the second pass checks for error.</p>
-<p>At present, SR-chain error checking is unsophisticated: either there is a perfect match, or an SR-chain error is reported for that shank. There is no additional detail available about what elements of the chain are working or if the chain is severed. That is, it is possible that some registers hold the intended values, but it is possible that none of them do. We can not tell.</p>
+<p>SR-chain error checking is unsophisticated: either there is a perfect match, or an SR-chain error is reported for that shank. There is no additional detail available about what elements of the chain are working or if the chain is severed. That is, it is possible that some registers hold the intended values, but it is possible that none of them do. We can not tell.</p>
 <hr />
 <h1 id="prior-policy">Prior Policy</h1>
 <p>Prior to SpikeGLX version 20250930 we had a very conservative policy regarding data integrity. We would always program your electrode and reference selections with full error checking enabled. If <strong>any</strong> error occurred (SR-chain or otherwise) at runtime, you would get an error message about the type of failure, and the run would be prevented.</p>

@@ -23,10 +23,10 @@ else {
 CONFIG(debug, debug|release) {
     win32-g++ {
         contains(QT_ARCH, x86_64) {
-            DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/DEBUG64
+            DESTDIR = C:/Users/billk/Desktop/SGLTARGET/DEBUG64
         }
         else {
-            DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/DEBUG510
+            DESTDIR = C:/Users/billk/Desktop/SGLTARGET/DEBUG510
         }
     }
 
@@ -37,15 +37,15 @@ CONFIG(debug, debug|release) {
 else {
     win32-g++ {
         contains(QT_ARCH, x86_64) {
-            DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/Release64
+            DESTDIR = C:/Users/billk/Desktop/SGLTARGET/Release64
         }
         else {
-            DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/SpikeGLX510
+            DESTDIR = C:/Users/billk/Desktop/SGLTARGET/SpikeGLX510
         }
     }
 
     win32-msvc {
-        DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/MSVC510
+        DESTDIR = C:/Users/billk/Desktop/SGLTARGET/MSVC510
     }
 
     unix {

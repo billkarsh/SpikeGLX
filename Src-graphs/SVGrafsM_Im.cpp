@@ -842,6 +842,7 @@ int SVGrafsM_Im::mySetUsrTypes()
 void SVGrafsM_Im::computeGraphMouseOverVars(
     int         ic,
     double      &y,
+    double      &vmax,
     double      &mean,
     double      &stdev,
     double      &rms,
@@ -850,8 +851,7 @@ void SVGrafsM_Im::computeGraphMouseOverVars(
     const CimCfg::PrbEach   &E      = p.im.prbj[ip];
     const GraphStats        &stat   = ic2stat[ic];
 
-    double  gain = E.chanGain( ic ),
-            vmax;
+    double  gain = E.chanGain( ic );
 
     y       = scalePlotValue( y, gain );
 
@@ -866,6 +866,7 @@ void SVGrafsM_Im::computeGraphMouseOverVars(
 
     if( vmax < 0.001 ) {
         y       *= 1e6;
+        vmax    *= 1e6;
         mean    *= 1e6;
         stdev   *= 1e6;
         rms     *= 1e6;
@@ -873,6 +874,7 @@ void SVGrafsM_Im::computeGraphMouseOverVars(
     }
     else if( vmax < 1.0 ) {
         y       *= 1e3;
+        vmax    *= 1e3;
         mean    *= 1e3;
         stdev   *= 1e3;
         rms     *= 1e3;

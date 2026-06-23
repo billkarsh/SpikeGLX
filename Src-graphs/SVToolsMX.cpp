@@ -88,7 +88,7 @@ void SVToolsMX::init()
 // Seconds
 
     LVD = new LVE_dbl(
-                "Set the graph window time span in seconds.",
+                "Set Graphs window time span in seconds.",
                 "1", this );
 
     LVD->m_spinBox->installEventFilter( gr->getGWWidget() );
@@ -107,7 +107,7 @@ void SVToolsMX::init()
 // Yscale
 
     LVD = new LVE_dbl(
-                "Set the graph vertical magnification factor.",
+                "Set graph vertical magnification factor.",
                 "1", this );
 
     LVD->m_spinBox->installEventFilter( gr->getGWWidget() );
@@ -141,7 +141,6 @@ void SVToolsMX::init()
             LVB = new LVE_cb(
                         "Band-pass filter applied to neural channels.",
                         this );
-            LVB->m_comboBox->setToolTip( "Applied only to neural channels" );
             LVB->m_comboBox->addItem( "Off" );
             LVB->m_comboBox->addItem( "300-INF" );
             LVB->m_comboBox->addItem( "0.1-300" );
@@ -175,10 +174,10 @@ void SVToolsMX::init()
 
         LVB = new LVE_cb(
                     "Spatially average AP-band channels"
-                    " and subtract out common signal.\n"
-                    " - Loc I,O = local donut {in,out} radii (sites)\n"
-                    " - Glb All = average all channels\n"
-                    " - Gbl Dmx = ave chans with shared multiplex phase",
+                    " and subtract common signal.\n"
+                    " - Loc I,O\t= local donut {in,out} radii (sites)\n"
+                    " - Glb All\t= average all channels\n"
+                    " - Gbl Dmx\t= ave chans with shared multiplex phase",
                     this );
         LVB->m_comboBox->addItem( "Off" );
         gr->nameLocalFilters( LVB->m_comboBox );
@@ -221,7 +220,7 @@ void SVToolsMX::init()
 
     LVC = new LVE_chk(
                 "BinMax",
-                "Downsample by selecting extreme values in each bin;"
+                "Draw extreme values in each downsample bin;"
                 " helps catch rare signals.",
                 (gr->isBinMaxOn() ? "1" : "0"), this );
     ConnectUI( LVC->m_checkBox, SIGNAL(clicked(bool)), gr, SLOT(binMaxChkClicked(bool)) );

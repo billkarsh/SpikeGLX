@@ -6,6 +6,7 @@
 #include "FileViewerWindow.h"
 #include "FVToolbar.h"
 #include "SignalBlocker.h"
+#include "ToolBut.h"
 
 #include <QApplication>
 #include <QDoubleSpinBox>
@@ -15,17 +16,20 @@
 #include <QLabel>
 
 
+#define LVBUT_STYLE     "font-size: 20px;"
+#define LVLBL_STYLE     "font-size: 14px; color: #444444;"
+#define LVVAL_STYLE     "color: #0078D7; font-weight: bold;"
 
 
 FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
 {
-    QDoubleSpinBox  *S;
-    QSpinBox        *V;
+    LVBut           *LV;
+    LVE_chk         *LVC;
+    LVE_int         *LVI;
+    LVE_dbl         *LVD;
+    LVE_cb          *LVB;
     QPushButton     *B;
-    QCheckBox       *C;
-    QComboBox       *CB;
     QAction         *A;
-    QLabel          *L;
 
     toggleViewAction()->setEnabled( false );    // can't hide toolbar
 
@@ -58,69 +62,79 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
 
 // X-Scale
 
-    addSeparator();
+    LVD = new LVE_dbl(
+                "Set window time span in seconds.\n"
+                "Tip: Scan faster with short span.",
+                QString("%1").arg( fv->tbGetxSpanSecs() ), this );
 
-    L = new QLabel( "Secs", this );
-    addWidget( L );
+    LVD->m_spinBox->setDecimals( 3 );
+    LVD->m_spinBox->setRange( .001, qMin( 30.0, fv->tbGetfileSecs() ) );
+    LVD->m_spinBox->setSingleStep( 0.25 );
+    ConnectUI( LVD->m_spinBox, SIGNAL(valueChanged(double)), fv, SLOT(tbSetXScale(double)) );
 
-    S = new QDoubleSpinBox( this );
-    S->setObjectName( "xscalesb" );
-    S->setToolTip( "Scan much faster with short span ~1sec" );
-    S->setDecimals( 4 );
-    S->setRange( 0.0001, qMin( 30.0, fv->tbGetfileSecs() ) );
-    S->setSingleStep( 0.25 );
-    S->setValue( fv->tbGetxSpanSecs() );
-    ConnectUI( S, SIGNAL(valueChanged(double)), fv, SLOT(tbSetXScale(double)) );
-    addWidget( S );
+    LV = new LVBut(
+            "X", QString("%1").arg( fv->tbGetxSpanSecs() ),
+            LVBUT_STYLE, LVLBL_STYLE, LVVAL_STYLE,
+            LVD, this );
+    LV->setObjectName( "xspin" );
+    addWidget( LV );
 
 // YPix
 
-    addSeparator();
+    LVI = new LVE_int(
+                "Set graph height in pixels.",
+                QString("%1").arg( fv->tbGetyPix() ), this );
 
-    L = new QLabel( "YPix", this );
-    addWidget( L );
+    LVI->m_spinBox->setMinimum( 4 );
+    LVI->m_spinBox->setMaximum( 500 );
+    ConnectUI( LVI->m_spinBox, SIGNAL(valueChanged(int)), fv, SLOT(tbSetYPix(int)) );
 
-    V = new QSpinBox( this );
-    V->setObjectName( "ypixsb" );
-    V->setToolTip( "Height on screen (all graphs)" );
-    V->setMinimum( 4 );
-    V->setMaximum( 500 );
-    V->setValue( fv->tbGetyPix() );
-    ConnectUI( V, SIGNAL(valueChanged(int)), fv, SLOT(tbSetYPix(int)) );
-    addWidget( V );
+    LV = new LVBut(
+            "Ypix", QString("%1").arg( fv->tbGetyPix() ),
+            LVBUT_STYLE, LVLBL_STYLE, LVVAL_STYLE,
+            LVI, this );
+    LV->setObjectName( "ypix" );
+    addWidget( LV );
 
 // YScale
 
-    L = new QLabel( "YScale", this );
-    addWidget( L );
+    LVD = new LVE_dbl(
+                "Set vertical magnification factor.",
+                "1", this );
 
-    S = new QDoubleSpinBox( this );
-    S->setObjectName( "yscalesb" );
-    S->setToolTip( "Y magnifier (sel graph)" );
-    S->setRange( 0.0, 999.0 );
-    S->setSingleStep( 0.25 );
-    S->setValue( fv->tbGetyScl() );
-    ConnectUI( S, SIGNAL(valueChanged(double)), fv, SLOT(tbSetYScale(double)) );
-    addWidget( S );
+    LVD->m_spinBox->setRange( 0.0, 999.0 );
+    LVD->m_spinBox->setSingleStep( 0.25 );
+    ConnectUI( LVD->m_spinBox, SIGNAL(valueChanged(double)), fv, SLOT(tbSetYScale(double)) );
+
+    LV = new LVBut(
+            "Ymag", "1",
+            LVBUT_STYLE, LVLBL_STYLE, LVVAL_STYLE,
+            LVD, this );
+    LV->setObjectName( "ymag" );
+    addWidget( LV );
 
 // Gain
 
-    L = new QLabel( "Gain", this );
-    addWidget( L );
+    LVD = new LVE_dbl(
+                "Amplifier gain (read-only).",
+                "1", this );
 
-    S = new QDoubleSpinBox( this );
-    S->setObjectName( "gainsb" );
-    S->setToolTip( "Amplifier gain (sel graph)" );
-    S->setEnabled( false );
-    S->setDecimals( 3 );
-    S->setRange( 0.001, 1e6 );
-    ConnectUI( S, SIGNAL(valueChanged(double)), fv, SLOT(tbSetMuxGain(double)) );
-    addWidget( S );
+    LVD->m_spinBox->setEnabled( false );
+    LVD->m_spinBox->setDecimals( 3 );
+    LVD->m_spinBox->setRange( 0.001, 1e6 );
+    ConnectUI( LVD->m_spinBox, SIGNAL(valueChanged(double)), fv, SLOT(tbSetMuxGain(double)) );
+
+    LV = new LVBut(
+            "Gn", "1",
+            LVBUT_STYLE, LVLBL_STYLE, LVVAL_STYLE,
+            LVD, this );
+    LV->setObjectName( "gain" );
+    addWidget( LV );
 
 // NDivs
+// Retired v 20260115
 
-    addSeparator();
-
+#if 0
     L = new QLabel( "NDivs", this );
     addWidget( L );
 
@@ -135,6 +149,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
     L = new QLabel( " Boxes - x -", this );
     L->setObjectName( "divlbl" );
     addWidget( L );
+#endif
 
 // Neural
 
@@ -146,53 +161,71 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
 
         if( fType != fvLF ) {
 
-            CB = new QComboBox( this );
-            CB->setToolTip( "Applied only to neural channels" );
-
             if( fType == fvAP ) {
-                CB->addItem( "AP Native" );
-                CB->addItem( "300 - INF" );
-                CB->addItem( "0.5 - 500" );
+                LVB = new LVE_cb(
+                            "Band-pass filter applied to AP-band channels.",
+                            this );
+                LVB->m_comboBox->addItem( "Off" );
+                LVB->m_comboBox->addItem( "300-INF" );
+                LVB->m_comboBox->addItem( "0.5-500" );
             }
             else {
-                CB->addItem( "Pass All" );
-                CB->addItem( "300 - INF" );
-                CB->addItem( "0.1 - 300" );
+                LVB = new LVE_cb(
+                            "Band-pass filter applied to neural channels.",
+                            this );
+                LVB->m_comboBox->addItem( "Off" );
+                LVB->m_comboBox->addItem( "300-INF" );
+                LVB->m_comboBox->addItem( "0.1-300" );
             }
+            LVB->m_comboBox->setCurrentIndex( fv->tbGetBandSel() );
+            LVB->setValue( LVB->m_comboBox->currentText() );
+            ConnectUI( LVB->m_comboBox, SIGNAL(currentIndexChanged(int)), fv, SLOT(tbBandSelChanged(int)) );
 
-            CB->setCurrentIndex( fv->tbGetBandSel() );
-            ConnectUI( CB, SIGNAL(currentIndexChanged(int)), fv, SLOT(tbBandSelChanged(int)) );
-            addWidget( CB );
+            LV = new LVBut(
+                    (fType == fvAP ? "AP" : "BP"), LVB->m_comboBox->currentText(),
+                    LVBUT_STYLE, LVLBL_STYLE, LVVAL_STYLE,
+                    LVB, this );
+            addWidget( LV );
         }
 
         // -<Tn> (DC filter)
 
-        C = new QCheckBox( "-<Tn>", this );
-        C->setStyleSheet( "padding-left: 4px; padding-right: 4px" );
-        C->setToolTip( "Temporally average neural channels" );
-        C->setChecked( fv->tbGetTnChkOn() );
-        ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbTnClicked(bool)) );
-        addWidget( C );
+        LVC = new LVE_chk(
+                    "DCneural",
+                    "Subtract window-averaged DC level of neural channels.",
+                    (fv->tbGetTnChkOn() ? "1" : "0"), this );
+        ConnectUI( LVC->m_checkBox, SIGNAL(clicked(bool)), fv, SLOT(tbTnClicked(bool)) );
+
+        LV = new LVBut(
+                "DCn", (fv->tbGetTnChkOn() ? "1" : "0"),
+                LVBUT_STYLE, LVLBL_STYLE, LVVAL_STYLE,
+                LVC, this );
+        addWidget( LV );
 
         // -<S> (spatial average)
 
         if( fType != fvLF ) {
 
-            L = new QLabel( "-<S>", this );
-            L->setTextFormat( Qt::PlainText );
-            L->setToolTip( "Spatially average spike channels" );
-            L->setStyleSheet( "padding-bottom: 1px" );
-            addWidget( L );
+            LVB = new LVE_cb(
+                        "Spatially average AP-band channels"
+                        " and subtract common signal.\n"
+                        " - Loc I,O\t= local donut {in,out} radii (sites)\n"
+                        " - Glb All\t= average all channels\n"
+                        " - Gbl Dmx\t= ave chans with shared multiplex phase",
+                        this );
+            LVB->m_comboBox->addItem( "Off" );
+            fv->tbNameLocalFilters( LVB->m_comboBox );
+            LVB->m_comboBox->addItem( "Glb All" );
+            LVB->m_comboBox->addItem( "Glb Dmx" );
+            LVB->m_comboBox->setCurrentIndex( fv->tbGetSAveSel() );
+            LVB->setValue( LVB->m_comboBox->currentText() );
+            ConnectUI( LVB->m_comboBox, SIGNAL(currentIndexChanged(int)), fv, SLOT(tbSAveSelChanged(int)) );
 
-            CB = new QComboBox( this );
-            CB->setToolTip( "Spatially average spike channels" );
-            CB->addItem( "Off" );
-            fv->tbNameLocalFilters( CB );
-            CB->addItem( "Glb All" );
-            CB->addItem( "Glb Dmx" );
-            CB->setCurrentIndex( fv->tbGetSAveSel() );
-            ConnectUI( CB, SIGNAL(currentIndexChanged(int)), fv, SLOT(tbSAveSelChanged(int)) );
-            addWidget( CB );
+            LV = new LVBut(
+                    "CAR", LVB->m_comboBox->currentText(),
+                    LVBUT_STYLE, LVLBL_STYLE, LVVAL_STYLE,
+                    LVB, this );
+            addWidget( LV );
         }
     }
 
@@ -200,38 +233,46 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
 
     if( fv->tbGetAnaChans() > fv->tbGetNeurChans() ) {
 
-        addSeparator();
-
         // -<Tx> (DC filter)
 
-        C = new QCheckBox( "-<Tx>", this );
-        C->setToolTip( "Temporally average auxiliary analog channels" );
-        C->setChecked( fv->tbGetTxChkOn() );
-        ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbTxClicked(bool)) );
-        addWidget( C );
+        LVC = new LVE_chk(
+                    "DCaux",
+                    "Subtract window-averaged DC level of AUX channels.",
+                    (fv->tbGetTxChkOn() ? "1" : "0"), this );
+        ConnectUI( LVC->m_checkBox, SIGNAL(clicked(bool)), fv, SLOT(tbTxClicked(bool)) );
+
+        LV = new LVBut(
+                "DCx", (fv->tbGetTxChkOn() ? "1" : "0"),
+                LVBUT_STYLE, LVLBL_STYLE, LVVAL_STYLE,
+                LVC, this );
+        addWidget( LV );
     }
 
 // BinMax
 
     if( fType != fvLF ) {
 
-        addSeparator();
+        LVB = new LVE_cb(
+                    "Draw extreme values in each downsample bin;"
+                    " helps catch rare signals.\n"
+                    " - 0 = Off\n"
+                    " - 1 = Slow\t: Examine every sample\n"
+                    " - 2 = Fast\t: Examine every 2nd sample\n"
+                    " - 3 = Faster\t: Examine every 3rd sample",
+                    this );
+        LVB->m_comboBox->addItem( "0" );
+        LVB->m_comboBox->addItem( "1" );
+        LVB->m_comboBox->addItem( "2" );
+        LVB->m_comboBox->addItem( "3" );
+        LVB->m_comboBox->setCurrentIndex( fv->tbGetBinMax() );
+        LVB->setValue( LVB->m_comboBox->currentText() );
+        ConnectUI( LVB->m_comboBox, SIGNAL(currentIndexChanged(int)), fv, SLOT(tbBinMaxChanged(int)) );
 
-        L = new QLabel( "BinMax", this );
-        L->setTextFormat( Qt::PlainText );
-        L->setToolTip( "Draw peaks of each downsample bin" );
-        L->setStyleSheet( "padding-bottom: 1px" );
-        addWidget( L );
-
-        CB = new QComboBox( this );
-        CB->setToolTip( "Draw peaks of each downsample bin" );
-        CB->addItem( "Off" );
-        CB->addItem( "Slow" );
-        CB->addItem( "Fast" );
-        CB->addItem( "Faster" );
-        CB->setCurrentIndex( fv->tbGetBinMax() );
-        ConnectUI( CB, SIGNAL(currentIndexChanged(int)), fv, SLOT(tbBinMaxChanged(int)) );
-        addWidget( CB );
+        LV = new LVBut(
+                "BM", LVB->m_comboBox->currentText(),
+                LVBUT_STYLE, LVLBL_STYLE, LVVAL_STYLE,
+                LVB, this );
+        addWidget( LV );
     }
 
 // Apply all
@@ -274,17 +315,17 @@ void FVToolbar::setSelName( const QString &name )
 
 void FVToolbar::setXScale( double secs )
 {
-    QDoubleSpinBox  *XS = findChild<QDoubleSpinBox*>( "xscalesb" );
+    LVBut   *xspin = findChild<LVBut*>( "xspin" );
 
-    SignalBlocker   b0(XS);
+    SignalBlocker   b0(xspin);
 
-    XS->setValue( secs );
+    xspin->setValue( QString("%1").arg( secs ) );
 }
 
 
 void FVToolbar::enableYPix( bool enabled )
 {
-    QSpinBox    *V = findChild<QSpinBox*>( "ypixsb" );
+    LVBut   *V = findChild<LVBut*>( "ypix" );
 
     V->setEnabled( enabled );
 }
@@ -292,13 +333,13 @@ void FVToolbar::enableYPix( bool enabled )
 
 void FVToolbar::setYSclAndGain( double yScl, double gain, bool enabled )
 {
-    QDoubleSpinBox  *YS = findChild<QDoubleSpinBox*>( "yscalesb" );
-    QDoubleSpinBox  *GN = findChild<QDoubleSpinBox*>( "gainsb" );
+    LVBut   *YS = findChild<LVBut*>( "ymag" );
+    LVBut   *GN = findChild<LVBut*>( "gain" );
 
     SignalBlocker   b0(YS), b1(GN);
 
-    YS->setValue( yScl );
-    GN->setValue( gain );
+    YS->setValue( QString("%1").arg( yScl ) );
+    GN->setValue( QString("%1").arg( gain ) );
 
     YS->setEnabled( enabled );
 //    GN->setEnabled( enabled );
@@ -309,7 +350,8 @@ void FVToolbar::setNDivText( const QString &s )
 {
     QLabel  *L = findChild<QLabel*>( "divlbl" );
 
-    L->setText( s );
+    if( L )
+        L->setText( s );
 }
 
 

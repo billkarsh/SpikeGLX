@@ -494,7 +494,7 @@ void SVGrafsM::myMouseOverGraph( double x, double y, int iy )
         return;
     }
 
-    double      mean, rms, stdev;
+    double      vmax, mean, rms, stdev;
     QString     msg;
     const char  *unit;
 
@@ -502,12 +502,13 @@ void SVGrafsM::myMouseOverGraph( double x, double y, int iy )
 
         // analog readout
 
-        computeGraphMouseOverVars( ic, y, mean, stdev, rms, unit );
+        computeGraphMouseOverVars( ic, y, vmax, mean, stdev, rms, unit );
 
         msg = QString(
-            "%1  Y= %2 %3 -- {mean, rms, stdv} %3: {%4, %5, %6}")
+            "%1  Y= %2 / %3 %4 -- {mean, rms, stdv} %4: {%5, %6, %7}")
             .arg( myChanName( ic ) )
             .arg( y, 0, 'f', 3 )
+            .arg( vmax, 0, 'f', 3 )
             .arg( unit )
             .arg( mean, 0, 'f', 3 )
             .arg( rms, 0, 'f', 3 )

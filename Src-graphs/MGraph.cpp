@@ -275,7 +275,7 @@ bool MGraphX::isXSelVisible() const
 // |    |    |        |
 // B----C  (2,3)----(4,5)
 //
-void MGraphX::getXSelVerts( float v[] ) const
+void MGraphX::getXSelVerts( float *v ) const
 {
     v[0] = v[2] = xSelBegin;
     v[4] = v[6] = xSelEnd;

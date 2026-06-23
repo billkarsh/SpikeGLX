@@ -2,6 +2,7 @@
 
 **Topics**:
 
+* [Overview](#overview)
 * [Shift Register Errors](#shift-register-errors)
 * [Prior Policy](#prior-policy)
 * [New Policy](#new-policy)
@@ -18,6 +19,15 @@
     + [Reference Noise](#reference-noise)
     + [Electrode Mixing](#electrode-mixing)
 
+
+# Overview
+
+If you actually physically snap a shank off of the probe you will certainly
+get a shift register error. However, the vast majority of shank failures are
+internal without any externally visible sign. Internal damage may arise due
+to shank flexing or exposure to caustic materials. This can effect internal
+component characteristics or continuity. The built-in shift register test
+(BIST SR) is our principal tool for detecting shank integrity.
 
 # Shift Register Errors
 
@@ -47,12 +57,11 @@ something is not working. That's a shift register chain error. This is how
 Neuropixels probes program electrode and reference selections into a shank.
 The first pass programs shank registers, the second pass checks for error.
 
-At present, SR-chain error checking is unsophisticated: either there is a
-perfect match, or an SR-chain error is reported for that shank. There is
-no additional detail available about what elements of the chain are working
-or if the chain is severed. That is, it is possible that some registers
-hold the intended values, but it is possible that none of them do. We can
-not tell.
+SR-chain error checking is unsophisticated: either there is a perfect match,
+or an SR-chain error is reported for that shank. There is no additional
+detail available about what elements of the chain are working or if the
+chain is severed. That is, it is possible that some registers hold the
+intended values, but it is possible that none of them do. We can not tell.
 
 --------
 

@@ -18,7 +18,8 @@
 *.pch
 
 # Qt generated
-build-*
+.qtcreator
+build*
 Makefile
 Makefile.*
 moc_*.cpp

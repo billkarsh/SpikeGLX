@@ -85,8 +85,10 @@ public:
     {this->val = val; m_spinBox->setValue( val.toDouble() );}
 public slots:
     virtual void setFocus() {
-        m_spinBox->setFocus();
-        m_spinBox->selectAll();
+        if( m_spinBox->isEnabled() ) {
+            m_spinBox->setFocus();
+            m_spinBox->selectAll();
+        }
     }
 private:
     void onFinished() {

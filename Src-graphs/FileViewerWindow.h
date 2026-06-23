@@ -540,6 +540,7 @@ private:
     void computeGraphMouseOverVars(
         int         ig,
         double      &y,
+        double      &vmax,
         double      &mean,
         double      &stdev,
         double      &rms,
