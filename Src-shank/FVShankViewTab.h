@@ -79,7 +79,7 @@ public:
         const DataFile  *df );
     virtual ~FVShankViewTab();
 
-    void init( const ShankMap *map );
+    void init( const ShankMap *map, bool autosize );
     void setAnatomyPP( const QString &elems, int sk );
     void colorTraces( MGraphX *theX, std::vector<MGraphY> &vY );
     QString getLbl( int s, int r ) const;

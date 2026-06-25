@@ -75,8 +75,13 @@ SVShankViewTab::~SVShankViewTab()
 /* Public --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void SVShankViewTab::init()
+void SVShankViewTab::init( bool autosize )
 {
+    if( autosize ) {
+        set.yPix = 8;
+        SC->saveSettings();
+    }
+
     SC->view()->setRowPix( set.yPix );
     SC->syncYPix( set.yPix );
 

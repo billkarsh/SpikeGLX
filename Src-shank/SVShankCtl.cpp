@@ -55,14 +55,12 @@ void SVShankCtl::parInit( int js, int ip )
 
     loadSettings();
 
-    svTab->init();
+    restoreScreenState();   // sets autosize for nerxt call
+
+    svTab->init( autosize );
 
     mapChanged();
     selChan( 0, "" );
-
-// Window
-
-    restoreScreenState();
 }
 
 

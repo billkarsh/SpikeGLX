@@ -56,7 +56,7 @@ public:
         int                 ip );
     virtual ~SVShankViewTab();
 
-    void init();
+    void init( bool autosize );
     void qf_enable();
     void setAnatomyPP( const QString &elems, int ip, int sk );
     void colorTraces( MGraphX *theX, std::vector<MGraphY> &vY );

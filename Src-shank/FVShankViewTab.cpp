@@ -91,8 +91,13 @@ FVShankViewTab::~FVShankViewTab()
 /* Public --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void FVShankViewTab::init( const ShankMap *map )
+void FVShankViewTab::init( const ShankMap *map, bool autosize )
 {
+    if( autosize ) {
+        set.yPix = 8;
+        SC->saveSettings();
+    }
+
     SC->view()->setRowPix( set.yPix );
     SC->syncYPix( set.yPix );
 

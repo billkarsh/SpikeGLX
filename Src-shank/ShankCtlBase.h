@@ -30,7 +30,8 @@ protected:
     ShankEditTab        *seTab;
     ShankMap            *modal_map;
     uint8_t             sr_mask;
-    bool                modal;
+    bool                modal,
+                        autosize;
 
 public:
     mutable QMutex      drawMtx;

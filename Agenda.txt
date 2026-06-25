@@ -15,6 +15,7 @@
 + Improve Graphs::filters toolbar.
 + Improve Graphs::navigate toolbar.
 + Improve Graphs::voltage readout.
++ Default size ShankView.
 
 20251218
 --------

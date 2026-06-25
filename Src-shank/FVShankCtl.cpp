@@ -60,11 +60,11 @@ void FVShankCtl::parInit( const ShankMap *map )
 
     loadSettings();
 
-    svTab->init( map );
+    restoreScreenState();   // sets autosize for nerxt call
+
+    svTab->init( map, autosize );
 
 // Window
-
-    restoreScreenState();
 
     QString type = df->fileLblFromObj();
     type.front() = type.front().toUpper();

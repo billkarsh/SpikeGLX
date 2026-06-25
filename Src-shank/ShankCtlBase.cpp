@@ -19,7 +19,7 @@
 
 ShankCtlBase::ShankCtlBase( QWidget *parent, uint8_t sr_mask, bool modal )
     :   QDialog(modal ? 0 : parent), cfgdlg(parent), scUI(0), _scroll(0),
-        seTab(0), modal_map(0), sr_mask(sr_mask), modal(modal)
+        seTab(0), modal_map(0), sr_mask(sr_mask), modal(modal), autosize(false)
 {
 }
 
@@ -171,6 +171,12 @@ void ShankCtlBase::showDialog()
     _scroll->scrollToSelected();
 
     if( !modal ) {
+        if( autosize ) {
+            QSize   S = size();
+            S.setWidth( S.width() + view()->deltaWidth() );
+            resize( S );
+            autosize = false;
+        }
         qf_enable();
         mainApp()->modelessOpened( this );
     }
@@ -295,7 +301,7 @@ void ShankCtlBase::restoreScreenState()
     if( !restoreGeometry(
         settings.value( screenStateName() ).toByteArray() ) ) {
 
-        // Get size from form, or do nothing.
+        autosize = true;
     }
 }
 
