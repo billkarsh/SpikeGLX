@@ -114,7 +114,7 @@ SpikeGLX\
 
 These required driver files are not included in your SpikeGLX release.
 
-1. Click the link below for your Windows OS version.
+1. Click the link below for your API vand Windows OS version.
 2. Unzip the folder into your local folder of SpikeGLX-related stuff.
 3. Follow the installation ReadMe in the download.
 
@@ -122,6 +122,12 @@ These required driver files are not included in your SpikeGLX release.
 along with development and support tools. There are several FPGAs used in
 the Neuropixels hardware, including a Xilinx Zynq model, often referred to
 as 'the enclustra'.
+
+For API4 and later:
+
+* [Windows 11](Support/Enclustra_API4_API5_Win11.zip)
+
+For API3 and earlier:
 
 * [Windows 7 & 8](Support/Enclustra_Win7&8.zip)
 * [Windows 10 & 11](Support/Enclustra_Win10&11.zip)
@@ -202,7 +208,7 @@ on SpikeGLX output files (all probe types):
 
 * [CatGT 5.3 (Windows)](Support/CatGTWinApp.zip)
 * [CatGT 5.3 (Linux)](Support/CatGTLnxApp.zip)
-* [CatGT ReadMe](CatGT_help/CatGT_ReadMe.html)
+* [CatGT ReadMe](More_help/CatGT_ReadMe.html)
 
 ------
 
@@ -337,7 +343,7 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.
 * [SpikeGLX UCL Course 2024](Support/UCL-Course-BillKarsh-2024.html)
 * [SpikeGLX FAQ](Sgl_help/SpikeGLX_FAQ.html)
 * [Metadata Help](Sgl_help/Metadata_Help.html)
-* [CatGT ReadMe](CatGT_help/CatGT_ReadMe.html)
+* [CatGT ReadMe](More_help/CatGT_ReadMe.html)
 * [CatGT: Tshift, CAR, Gfix](help/catgt_tshift/catgt_tshift/)
 * [Sync: Aligning with Edges](help/syncEdges/Sync_edges/)
 * [IMRO Table Anatomy](help/imroTables/)
