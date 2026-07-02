@@ -7,11 +7,11 @@
 #include <QJsonObject>
 #include <QSettings>
 
-#define FTAB    "C:/Users/labadmin/Desktop/ProbeTable/2025_12_10_BK_Probe_feature_table_tab.txt"
+#define FTAB    "C:/Users/labadmin/Desktop/ProbeTable/2026_05_11_Probe_feature_table_tab.txt"
 #define FINI    "C:/Users/labadmin/Desktop/ProbeTable/probe_features.ini"
 #define FJ2I    "C:/Users/labadmin/Desktop/ProbeTable/probe_features_j2i.ini"
 #define FJSN    "C:/Users/labadmin/Desktop/ProbeTable/probe_features.json"
-#define VERS    "1.7"
+#define VERS    "1.8"
 
 /* ---------------------------------------------------------------- */
 /* CProbeTbl ------------------------------------------------------ */
@@ -137,35 +137,45 @@ void CProbeTbl::extini()
         S.endGroup();
     }
 
-// Insert lf_sample_frequency_hz
+// Fix cols_per_shank
 
     foreach( const QString &grp, S.childGroups() ) {
         S.beginGroup( grp );
-        int lf_frq = 2500;
-        if( S.value( "lf_gain_list" ).toString() == "1" )
-            lf_frq = 0;
-        S.setValue( "lf_sample_frequency_hz", lf_frq );
+        QString val;
+        if( grp == "NP2006" || grp == "NP2022" )
+            S.setValue( "cols_per_shank", 2 );
         S.endGroup();
     }
+
+// Insert lf_sample_frequency_hz
+
+    // foreach( const QString &grp, S.childGroups() ) {
+    //     S.beginGroup( grp );
+    //     int lf_frq = 2500;
+    //     if( S.value( "lf_gain_list" ).toString() == "1" )
+    //         lf_frq = 0;
+    //     S.setValue( "lf_sample_frequency_hz", lf_frq );
+    //     S.endGroup();
+    // }
 
 // Insert shank_tip_to_base_um
 
-    foreach( const QString &grp, S.childGroups() ) {
-        S.beginGroup( grp );
-        QString desc = S.value( "description" ).toString();
-        int     slen = 10000;
-        if( desc.contains( "NHP MEDIUM", Qt::CaseInsensitive ) ||
-            desc.contains( "25mm", Qt::CaseInsensitive ) ) {
-            slen = 25000;
-        }
-        if( desc.contains( "NHP LONG", Qt::CaseInsensitive ) ||
-            desc.contains( "NHP MAX", Qt::CaseInsensitive )  ||
-            desc.contains( "45mm", Qt::CaseInsensitive ) ) {
-            slen = 45000;
-        }
-        S.setValue( "shank_tip_to_base_um", slen );
-        S.endGroup();
-    }
+    // foreach( const QString &grp, S.childGroups() ) {
+    //     S.beginGroup( grp );
+    //     QString desc = S.value( "description" ).toString();
+    //     int     slen = 10000;
+    //     if( desc.contains( "NHP MEDIUM", Qt::CaseInsensitive ) ||
+    //         desc.contains( "25mm", Qt::CaseInsensitive ) ) {
+    //         slen = 25000;
+    //     }
+    //     if( desc.contains( "NHP LONG", Qt::CaseInsensitive ) ||
+    //         desc.contains( "NHP MAX", Qt::CaseInsensitive )  ||
+    //         desc.contains( "45mm", Qt::CaseInsensitive ) ) {
+    //         slen = 45000;
+    //     }
+    //     S.setValue( "shank_tip_to_base_um", slen );
+    //     S.endGroup();
+    // }
 
 // Insert imro type column
 
