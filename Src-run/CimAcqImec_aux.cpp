@@ -12,6 +12,7 @@
 #endif
 
 #include <QRegularExpression>
+#include <QThread>  // IWYU pragma: keep
 
 #define STOPCHECK   if( isStopped() ) return false;
 
@@ -209,6 +210,39 @@ bool CimAcqImec::_aux_open( const CimCfg::ImProbeTable &T )
                 .arg( slot ).arg( makeErrorString( err ) ) );
             return false;
         }
+
+        // ----------------------------------
+        // @@@ Experiment to fix NXT timeouts
+        // ----------------------------------
+
+#if 0
+        if( T.slot2Vers[slot].bsctech == t_tech_nxt_pa ) {
+            HardwareID      H;
+            int             np = p.stream_nIM();
+            NP_ErrorCode    res;
+            for( int itry = 1; itry <= 10; ++itry ) {
+                np_closeBS( slot );
+                QThread::msleep( 1000 );
+                np_openBS( slot );
+                QThread::msleep( 1000 );
+                bool ok = true;
+                for( int ip = 0; ip < np; ++ip ) {
+                    const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
+                    if( P.adr.slot != slot )
+                        continue;
+                    res = np_getFlexHardwareID( P.adr.slot, P.adr.port, 1, &H );
+                    Log()<<"run ip try result "<<ip<<" "<<itry<<" "<<res;
+                    if( res != Neuropixels::SUCCESS ) {
+                        ok = false;
+                        break;
+                    }
+                }
+                if( ok )
+                    break;
+                QThread::msleep( 200 );
+            }
+        }
+#endif
 
         if( T.isSlotUSBType( slot ) ) {
             if( !_aux_initObxSlot( slot ) )

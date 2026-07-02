@@ -52,8 +52,11 @@ Logf::Logf() : stream(&str, QIODevice::WriteOnly)
 
 Logf::~Logf()
 {
-    static QMutex logMtx;
-    logMtx.lock();
+    static QMutex   logMtx;
+    QMutexLocker    ml( &logMtx );
+
+    if( fname.isEmpty() )
+        return;
 
     QString msg =
         QString("[Thd %1 CPU %2 %3] %4")
@@ -72,7 +75,6 @@ Logf::~Logf()
     fo.close();
 
     qDebug( STR2CHR(msg) );
-    logMtx.unlock();
 }
 
 /* ---------------------------------------------------------------- */
