@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,14 +10,15 @@
         <link rel="shortcut icon" href="../../img/favicon.ico">
         <title>IMRO Table Anatomy - SpikeGLX</title>
         <link href="../../css/bootstrap.min.css" rel="stylesheet">
-        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../css/brands.min.css" rel="stylesheet">
+        <link href="../../css/solid.min.css" rel="stylesheet">
+        <link href="../../css/v4-font-face.min.css" rel="stylesheet">
         <link href="../../css/base.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
-
-        <script src="../../js/jquery-1.10.2.min.js" defer></script>
-        <script src="../../js/bootstrap.min.js" defer></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
-        <script>hljs.initHighlightingOnLoad();</script> 
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
     </head>
 
     <body>
@@ -25,7 +26,7 @@
             <div class="container">
                 <a class="navbar-brand" href="../..">SpikeGLX</a>
                 <!-- Expander button -->
-                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
@@ -33,17 +34,17 @@
                 <div id="navbar-collapse" class="navbar-collapse collapse">
                         <!-- Main navigation -->
                         <ul class="nav navbar-nav">
-                            <li class="navitem">
+                            <li class="nav-item">
                                 <a href="../../" class="nav-link">Home</a>
                             </li>
-                            <li class="navitem">
+                            <li class="nav-item">
                                 <a href="../../firmware/" class="nav-link">Firmware</a>
                             </li>
-                            <li class="navitem">
+                            <li class="nav-item">
                                 <a href="../../legacy/" class="nav-link">Legacy</a>
                             </li>
-                            <li class="dropdown">
-                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Help <b class="caret"></b></a>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Help</a>
                                 <ul class="dropdown-menu">
                                     
 <li>
@@ -131,14 +132,14 @@
 </li>
                                 </ul>
                             </li>
-                            <li class="navitem">
+                            <li class="nav-item">
                                 <a href="../../new/" class="nav-link">New</a>
                             </li>
                         </ul>
 
-                    <ul class="nav navbar-nav ml-auto">
+                    <ul class="nav navbar-nav ms-md-auto">
                         <li class="nav-item">
-                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
                                 <i class="fa fa-search"></i> Search
                             </a>
                         </li>
@@ -149,101 +150,101 @@
 
         <div class="container">
             <div class="row">
-                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
     <div class="navbar-header">
-        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
             <span class="fa fa-angle-down"></span>
         </button>
     </div>
 
     
-    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-level="1"><a href="#imro-table-anatomy" class="nav-link">IMRO Table Anatomy</a>
+            <li class="nav-item" data-bs-level="1"><a href="#imro-table-anatomy" class="nav-link">IMRO Table Anatomy</a>
               <ul class="nav flex-column">
               </ul>
             </li>
             
-            <li class="nav-item" data-level="1"><a href="#parsing-and-geommaps" class="nav-link">Parsing and GeomMaps</a>
+            <li class="nav-item" data-bs-level="1"><a href="#parsing-and-geommaps" class="nav-link">Parsing and GeomMaps</a>
               <ul class="nav flex-column">
               </ul>
             </li>
             
-            <li class="nav-item" data-level="1"><a href="#terminology" class="nav-link">Terminology</a>
+            <li class="nav-item" data-bs-level="1"><a href="#terminology" class="nav-link">Terminology</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#part-number-pn" class="nav-link">Part Number (pn)</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#probe-type" class="nav-link">Probe Type</a>
+            <li class="nav-item" data-bs-level="2"><a href="#part-number-pn" class="nav-link">Part Number (pn)</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#probetable-github-repo" class="nav-link">ProbeTable GitHub Repo</a>
+            <li class="nav-item" data-bs-level="2"><a href="#probe-type" class="nav-link">Probe Type</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-              </ul>
-            </li>
-            
-            <li class="nav-item" data-level="1"><a href="#format-probe-map" class="nav-link">Format &lt;-&gt; Probe Map</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            
-            <li class="nav-item" data-level="1"><a href="#text-examples" class="nav-link">Text Examples</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            
-            <li class="nav-item" data-level="1"><a href="#channel-entries-by-format" class="nav-link">Channel Entries by Format</a>
-              <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#imro_np1000-np-10-like" class="nav-link">imro_np1000 (NP 1.0 like)</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#imro_np2000-np-20-precommercial-single-multiplexed-shank" class="nav-link">imro_np2000 (NP 2.0 precommercial, single multiplexed shank)</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#imro_np2003-np-20-commercial-single-multiplexed-shank" class="nav-link">imro_np2003 (NP 2.0 commercial, single multiplexed shank)</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#imro_np2010-np-20-precommercial-4-shank" class="nav-link">imro_np2010 (NP 2.0 precommercial, 4-shank)</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#imro_np2013-np-20-commercial-4-shank" class="nav-link">imro_np2013 (NP 2.0 commercial, 4-shank)</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#imro_np2020-np-20-quad-probe" class="nav-link">imro_np2020 (NP 2.0 quad-probe)</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#imro_np1110-uhd-programmable-aka-ultra-10-hd" class="nav-link">imro_np1110 (UHD programmable, aka: Ultra, 1.0 HD)</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#imro_np3010-np-30-nxt-single-shank" class="nav-link">imro_np3010 (NP 3.0 NXT single shank)</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#imro_np3020-np-30-nxt-4-shank" class="nav-link">imro_np3020 (NP 3.0 NXT 4-shank)</a>
+            <li class="nav-item" data-bs-level="2"><a href="#probetable-github-repo" class="nav-link">ProbeTable GitHub Repo</a>
               <ul class="nav flex-column">
               </ul>
             </li>
               </ul>
             </li>
             
-            <li class="nav-item" data-level="1"><a href="#c-code-type-0-default" class="nav-link">C Code: Type 0 Default</a>
+            <li class="nav-item" data-bs-level="1"><a href="#format-probe-map" class="nav-link">Format &lt;-&gt; Probe Map</a>
               <ul class="nav flex-column">
               </ul>
             </li>
             
-            <li class="nav-item" data-level="1"><a href="#c-code-type-0-tetrodes" class="nav-link">C Code: Type 0 Tetrodes</a>
+            <li class="nav-item" data-bs-level="1"><a href="#text-examples" class="nav-link">Text Examples</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="1"><a href="#channel-entries-by-format" class="nav-link">Channel Entries by Format</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#imro_np1000-np-10-like" class="nav-link">imro_np1000 (NP 1.0 like)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#imro_np2000-np-20-precommercial-single-multiplexed-shank" class="nav-link">imro_np2000 (NP 2.0 precommercial, single multiplexed shank)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#imro_np2003-np-20-commercial-single-multiplexed-shank" class="nav-link">imro_np2003 (NP 2.0 commercial, single multiplexed shank)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#imro_np2010-np-20-precommercial-4-shank" class="nav-link">imro_np2010 (NP 2.0 precommercial, 4-shank)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#imro_np2013-np-20-commercial-4-shank" class="nav-link">imro_np2013 (NP 2.0 commercial, 4-shank)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#imro_np2020-np-20-quad-probe" class="nav-link">imro_np2020 (NP 2.0 quad-probe)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#imro_np1110-uhd-programmable-aka-ultra-10-hd" class="nav-link">imro_np1110 (UHD programmable, aka: Ultra, 1.0 HD)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#imro_np3010-np-30-nxt-single-shank" class="nav-link">imro_np3010 (NP 3.0 NXT single shank)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#imro_np3020-np-30-nxt-4-shank" class="nav-link">imro_np3020 (NP 3.0 NXT 4-shank)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="1"><a href="#c-code-type-0-default" class="nav-link">C Code: Type 0 Default</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="1"><a href="#c-code-type-0-tetrodes" class="nav-link">C Code: Type 0 Tetrodes</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -613,31 +614,29 @@ cover banks zero and one.</p>
             <hr>
             <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
+        <script src="../../js/bootstrap.bundle.min.js"></script>
         <script>
             var base_url = "../..",
                 shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
         </script>
-        <script src="../../js/base.js" defer></script>
-        <script src="../../search/main.js" defer></script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/main.js"></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title" id="searchModalLabel">Search</h4>
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>
-                    From here you can search these documents. Enter
-                    your search terms below.
-                </p>
+                <p>From here you can search these documents. Enter your search terms below.</p>
                 <form>
                     <div class="form-group">
                         <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
                     </div>
                 </form>
-                <div id="mkdocs-search-results"></div>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
             </div>
             <div class="modal-footer">
             </div>
@@ -648,7 +647,7 @@ cover banks zero and one.</p>
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
               <table class="table">
