@@ -1,22 +1,45 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta http-equiv="Content-Style-Type" content="text/css" />
-  <meta name="generator" content="pandoc" />
-  <title></title>
-  <style type="text/css">code{white-space: pre;}</style>
-  <link href="data:text/css;charset=utf-8,body%20%7B%0Amargin%3A%20auto%3B%0Apadding%2Dright%3A%201em%3B%0Apadding%2Dleft%3A%201em%3B%0Amax%2Dwidth%3A%2068em%3B%20%0Aborder%2Dleft%3A%201px%20solid%20black%3B%0Aborder%2Dright%3A%201px%20solid%20black%3B%0Acolor%3A%20black%3B%0Afont%2Dfamily%3A%20Verdana%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%20100%25%3B%0Aline%2Dheight%3A%20140%25%3B%0Acolor%3A%20%23333%3B%0A%7D%0Ablockquote%20%7B%0Aborder%2Dleft%3A%205px%20solid%20%23cccccc%3B%0Amargin%2Dleft%3A%2020px%3B%0Apadding%3A%200%200%200%2015px%3B%0A%7D%0Apre%20%7B%0Aborder%3A%201px%20dotted%20gray%3B%0Aborder%2Dstyle%3A%20dotted%3B%0Abackground%2Dcolor%3A%20%23f5f5f5%3B%20%0Adisplay%3A%20block%3B%0Acolor%3A%20%23f5f5f5%3B%0Apadding%2Dtop%3A%200%3B%0Apadding%2Dbottom%3A%200%3B%0A%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20monospace%3B%0Afont%2Dsize%3A%20115%25%3B%0Abackground%2Dcolor%3A%20transparent%3B%0Acolor%3A%20%231d9d1d%3B%0A%7D%0Ah1%20a%2C%20h2%20a%2C%20h3%20a%2C%20h4%20a%2C%20h5%20a%20%7B%0Atext%2Ddecoration%3A%20none%3B%0Acolor%3A%20%237a5ada%3B%0A%7D%0Ah1%2C%20h2%2C%20h3%2C%20h4%2C%20h5%20%7B%0Afont%2Dfamily%3A%20verdana%3B%0Afont%2Dweight%3A%20bold%3B%0Aborder%2Dbottom%3A%20none%3B%20%0Acolor%3A%20%237a5ada%3B%20%7D%0Ah1%20%7B%0Afont%2Dsize%3A%20130%25%3B%0A%7D%0Ah2%20%7B%0Afont%2Dsize%3A%20110%25%3B%0A%7D%0Ah3%20%7B%0Afont%2Dsize%3A%2095%25%3B%0A%7D%0Ah4%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah5%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah1%2Etitle%20%7B%0Afont%2Dsize%3A%20200%25%3B%0Afont%2Dweight%3A%20bold%3B%0Apadding%2Dtop%3A%200%2E2em%3B%0Apadding%2Dbottom%3A%200%2E2em%3B%0Atext%2Dalign%3A%20left%3B%0Aborder%3A%20none%3B%0A%7D%0Adt%20code%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Add%20p%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0A%23footer%20%7B%0Apadding%2Dtop%3A%201em%3B%0Afont%2Dsize%3A%2070%25%3B%0Acolor%3A%20gray%3B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Atable%20%7B%0Amargin%2Dbottom%3A%202em%3B%0Aborder%2Dbottom%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dright%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dspacing%3A%200%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Apadding%3A%20%2E2em%201em%3B%0Abackground%2Dcolor%3A%20%23eee%3B%0Aborder%2Dtop%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dleft%3A%201px%20solid%20%23ddd%3B%0A%7D%0Atable%20td%20%7B%0Apadding%3A%20%2E2em%201em%3B%0Aborder%2Dtop%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dleft%3A%201px%20solid%20%23ddd%3B%0Avertical%2Dalign%3A%20top%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>OBXTab_Help</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">body {margin: auto;padding-right: 1em;padding-left: 1em;max-width: 68em; border-left: 1px solid black;border-right: 1px solid black;color: black;font-family: Verdana, sans-serif;font-size: 100%;line-height: 140%;color: #333;}blockquote {border-left: 5px solid #cccccc;margin-left: 20px;padding: 0 0 0 15px;}pre {border: 1px dotted gray;border-style: dotted;background-color: #f5f5f5; display: block;color: #f5f5f5;padding-top: 0;padding-bottom: 0;}code {font-family: monospace;font-size: 115%;background-color: transparent;color: #1d9d1d;}h1 a, h2 a, h3 a, h4 a, h5 a {text-decoration: none;color: #7a5ada;}h1, h2, h3, h4, h5 {font-family: verdana;font-weight: bold;border-bottom: none; color: #7a5ada; }h1 {font-size: 130%;}h2 {font-size: 110%;}h3 {font-size: 95%;}h4 {font-size: 90%;font-style: italic;}h5 {font-size: 90%;font-style: italic;}h1.title {font-size: 200%;font-weight: bold;padding-top: 0.2em;padding-bottom: 0.2em;text-align: left;border: none;}dt code {font-weight: bold;}dd p {margin-top: 0;}#footer {padding-top: 1em;font-size: 70%;color: gray;text-align: center;}table {margin-bottom: 2em;border-bottom: 1px solid #ddd;border-right: 1px solid #ddd;border-spacing: 0;border-collapse: collapse;}table th {padding: .2em 1em;background-color: #eee;border-top: 1px solid #ddd;border-left: 1px solid #ddd;}table td {padding: .2em 1em;border-top: 1px solid #ddd;border-left: 1px solid #ddd;vertical-align: top;}</style>
 </head>
 <body>
 <h2 id="onebox-obx-tab">OneBox (Obx) Tab</h2>
 <p><strong>In brief: Detailed settings for each OneBox.</strong></p>
-<p>On the <code>Devices</code> tab you checked the <code>enable</code> boxes for the OneBoxes you want to run and then clicked <code>Detect</code>.</p>
-<p>Use this tab to configure parameters for each OneBox, individually.</p>
+<p>On the <code>Devices</code> tab you checked the <code>enable</code>
+boxes for the OneBoxes you want to run and then clicked
+<code>Detect</code>.</p>
+<p>Use this tab to configure parameters for each OneBox,
+individually.</p>
 <p><strong>Topics:</strong></p>
 <ul>
 <li><a href="#onebox-database">OneBox Database</a></li>
-<li><a href="#table-viewing-and-sizing">Table Viewing and Sizing</a></li>
+<li><a href="#table-viewing-and-sizing">Table Viewing and
+Sizing</a></li>
 <li><a href="#measured-sample-rate">Measured Sample Rate</a></li>
 <li><a href="#editing">Editing</a>
 <ul>
@@ -36,27 +59,40 @@
 </ul>
 <hr />
 <h2 id="onebox-database">OneBox Database</h2>
-<p>SpikeGLX maintains a database of OneBox settings in the _Calibration folder. The settings are keyed to the OneBox's serial number. There is one entry per device, hence, the software remembers the last thing you did with that OneBox. The entries are each time-stamped. Individual entries are discarded after three years of disuse.</p>
-<p>When you click <code>Detect</code> we look for each selected OneBox in the database. If found, the stored settings are used. If no entry is found, the OneBox gets default settings.</p>
-<p>You can always see and edit those settings using the <code>Each OneBox</code> table on the <code>Obx Setup</code> tab.</p>
-<p>Upon clicking <code>Verify</code> or <code>Run</code> the table values are transferred to the database for future runs.</p>
+<p>SpikeGLX maintains a database of OneBox settings in the _Calibration
+folder. The settings are keyed to the OneBox’s serial number. There is
+one entry per device, hence, the software remembers the last thing you
+did with that OneBox. The entries are each time-stamped. Individual
+entries are discarded after three years of disuse.</p>
+<p>When you click <code>Detect</code> we look for each selected OneBox
+in the database. If found, the stored settings are used. If no entry is
+found, the OneBox gets default settings.</p>
+<p>You can always see and edit those settings using the
+<code>Each OneBox</code> table on the <code>Obx Setup</code> tab.</p>
+<p>Upon clicking <code>Verify</code> or <code>Run</code> the table
+values are transferred to the database for future runs.</p>
 <hr />
 <h2 id="table-viewing-and-sizing">Table Viewing and Sizing</h2>
 <ul>
 <li>The OneBox table scrolls!</li>
-<li>Resize columns by clicking on the dividers between column headers.</li>
+<li>Resize columns by clicking on the dividers between column
+headers.</li>
 <li>Double-click on a divider to auto-size that column.</li>
-<li>Drag the <code>Configure</code> dialog's outer edges or corners to resize all content.</li>
+<li>Drag the <code>Configure</code> dialog’s outer edges or corners to
+resize all content.</li>
 </ul>
 <hr />
 <h2 id="measured-sample-rate">Measured Sample Rate</h2>
 <p>Not editable.</p>
-<p>This is the OneBox's measured input sample rate as determined by the calibration procedures on the <code>Sync</code> tab (See User Manual).</p>
+<p>This is the OneBox’s measured input sample rate as determined by the
+calibration procedures on the <code>Sync</code> tab (See User
+Manual).</p>
 <hr />
 <h2 id="editing">Editing</h2>
 <ul>
 <li>Select a table row, then click <code>Default</code>, or,</li>
-<li><strong>Double-click</strong> in a table cell to edit that item.</li>
+<li><strong>Double-click</strong> in a table cell to edit that
+item.</li>
 </ul>
 <p>For each OneBox, you can edit its:</p>
 <ul>
@@ -71,56 +107,88 @@
 <p>More details below.</p>
 <hr />
 <h3 id="xa-analog-channels">XA Analog Channels</h3>
-<p>Edit directly in the table cell by specifying a channel list, just as you do for saved channels. E.g., 0:3,7.</p>
+<p>Edit directly in the table cell by specifying a channel list, just as
+you do for saved channels. E.g., 0:3,7.</p>
 <p>Each OneBox can record from up to 12 16-bit analog channels.</p>
-<p>If desired, the XA box can be blank (specfying <strong>NO</strong> analog channels).</p>
+<p>If desired, the XA box can be blank (specfying <strong>NO</strong>
+analog channels).</p>
 <hr />
 <h3 id="a2d-thresholds">A2D Thresholds</h3>
-<p>This is a list of exactly 12 voltages (V) for converting the 12 analog channels to TTL values in the XD word. These operate on both the XA and the AO channels.</p>
+<p>This is a list of exactly 12 voltages (V) for converting the 12
+analog channels to TTL values in the XD word. These operate on both the
+XA and the AO channels.</p>
 <hr />
 <h3 id="xd-digital-lines">XD Digital Lines</h3>
-<p>If you enable the XD (digital) option, then <strong>ALL 12</strong> analog channels (both inputs and outputs) are digitized using your 12 <strong>A2D threshold</strong> voltages. The 12 resulting digital lines are read out together as the lowest 12 bits of a single 16-bit <code>XD</code> word.</p>
-<p>In other words, your Obx data stream either has no digital word, or it has a single digital word containing 12 digital lines.</p>
-<p>A OneBox Obx stream is configured for recording if at least one XA channel is listed, or if XD is enabled. In this case, the OneBox is assigned a logical recording stream ID index that you can see in the big Probes table of the Devices tab. In SDK remote interface functions you can access this device using indices: <code>(js,ip) = (1,ID)</code>.</p>
+<p>If you enable the XD (digital) option, then <strong>ALL 12</strong>
+analog channels (both inputs and outputs) are digitized using your 12
+<strong>A2D threshold</strong> voltages. The 12 resulting digital lines
+are read out together as the lowest 12 bits of a single 16-bit
+<code>XD</code> word.</p>
+<p>In other words, your Obx data stream either has no digital word, or
+it has a single digital word containing 12 digital lines.</p>
+<p>A OneBox Obx stream is configured for recording if at least one XA
+channel is listed, or if XD is enabled. In this case, the OneBox is
+assigned a logical recording stream ID index that you can see in the big
+Probes table of the Devices tab. In SDK remote interface functions you
+can access this device using indices: <code>(js,ip) = (1,ID)</code>.</p>
 <hr />
 <h3 id="ai-range">AI Range</h3>
-<p>The selected scale +/- {2.5,5,10} volts is applied to all input analog channels.</p>
+<p>The selected scale +/- {2.5,5,10} volts is applied to all input
+analog channels.</p>
 <hr />
 <h3 id="ao-analog-dac-channels">AO Analog (DAC) Channels</h3>
-<p>Edit directly in the table cell by specifying a channel list, just as you do for saved channels. E.g., 0:3,7.</p>
+<p>Edit directly in the table cell by specifying a channel list, just as
+you do for saved channels. E.g., 0:3,7.</p>
 <p>Each OneBox can output voltages on up to 12 analog channels.</p>
 <p>Each of the 12 channels can only be an input or an output.</p>
-<p>Only channel-0 is programmable for <a href="WavePlan_Help.html">WavePlayer</a> output. If you intend to generate stimulus waveforms, be sure to include <code>0</code> in the AO channel list.</p>
+<p>Only channel-0 is programmable for <a href="WavePlan_Help.html">WavePlayer</a> output. If you intend to
+generate stimulus waveforms, be sure to include <code>0</code> in the AO
+channel list.</p>
 <blockquote>
-<p><em>It is flagged as an error if the same channel is in the XA and the AO list.</em></p>
+<p><em>It is flagged as an error if the same channel is in the XA and
+the AO list.</em></p>
 </blockquote>
 <blockquote>
-<p><strong>CAUTION: You might damage the OneBox or other equipment if you connect external voltage sources to OneBox channels that are configured for output (AO).</strong></p>
+<p><strong>CAUTION: You might damage the OneBox or other equipment if
+you connect external voltage sources to OneBox channels that are
+configured for output (AO).</strong></p>
 </blockquote>
 <blockquote>
-<p>Yes it is safe and permitted, to enable XD and specify AO channels. The digital lines for both XA and AO channels are thresholded and recorded.</p>
+<p>Yes it is safe and permitted, to enable XD and specify AO channels.
+The digital lines for both XA and AO channels are thresholded and
+recorded.</p>
 </blockquote>
-<p>A OneBox is configured for output if at least one AO channel is listed. In SDK remote interface functions you can access the output features for this device using its assigned <code>slot number</code>.</p>
+<p>A OneBox is configured for output if at least one AO channel is
+listed. In SDK remote interface functions you can access the output
+features for this device using its assigned
+<code>slot number</code>.</p>
 <h4 id="ao-voltages">AO Voltages</h4>
 <ul>
-<li>Use the SDK during a run to set constant AO voltage levels: range +/- 5V.</li>
-<li>All listed AO channels are initialized to zero when a run starts.</li>
+<li>Use the SDK during a run to set constant AO voltage levels: range
++/- 5V.</li>
+<li>All listed AO channels are initialized to zero when a run
+starts.</li>
 </ul>
 <hr />
 <h3 id="channel-map">Channel Map</h3>
-<p>This lets you group/sort/order the channels in SpikeGLX graph windows. It has no effect on how binary data are stored.</p>
+<p>This lets you group/sort/order the channels in SpikeGLX graph
+windows. It has no effect on how binary data are stored.</p>
 <hr />
 <h3 id="save-channels">Save Channels</h3>
 <p>Edit directly in the table cell by specifying a channel list.</p>
-<p>You can save all of the channels being acquired by setting the list to any of:</p>
+<p>You can save all of the channels being acquired by setting the list
+to any of:</p>
 <ul>
 <li>blank</li>
-<li>'*'</li>
-<li>'all'</li>
+<li>’*’</li>
+<li>‘all’</li>
 </ul>
-<p>You can save any arbitrary subset of channels using a printer-page-like list of individual channels and/or ranges, like: 1:4,6,8:10.</p>
+<p>You can save any arbitrary subset of channels using a
+printer-page-like list of individual channels and/or ranges, like:
+1:4,6,8:10.</p>
 <blockquote>
-<p>The SY channel is always added to your list because it carries error flags and the sync channel.</p>
+<p>The SY channel is always added to your list because it carries error
+flags and the sync channel.</p>
 </blockquote>
 <hr />
 <h2 id="default">Default</h2>
@@ -136,7 +204,8 @@
 </ul>
 <hr />
 <h2 id="copy">Copy</h2>
-<p>Select a OneBox and copy its settings to a specified other OneBox, or to all other OneBoxes.</p>
+<p>Select a OneBox and copy its settings to a specified other OneBox, or
+to all other OneBoxes.</p>
 <ul>
 <li>This does NOT copy <code>measured sample rates</code>.</li>
 </ul>

@@ -1,33 +1,67 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta http-equiv="Content-Style-Type" content="text/css" />
-  <meta name="generator" content="pandoc" />
-  <title></title>
-  <style type="text/css">code{white-space: pre;}</style>
-  <link href="data:text/css;charset=utf-8,body%20%7B%0Amargin%3A%20auto%3B%0Apadding%2Dright%3A%201em%3B%0Apadding%2Dleft%3A%201em%3B%0Amax%2Dwidth%3A%2068em%3B%20%0Aborder%2Dleft%3A%201px%20solid%20black%3B%0Aborder%2Dright%3A%201px%20solid%20black%3B%0Acolor%3A%20black%3B%0Afont%2Dfamily%3A%20Verdana%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%20100%25%3B%0Aline%2Dheight%3A%20140%25%3B%0Acolor%3A%20%23333%3B%0A%7D%0Ablockquote%20%7B%0Aborder%2Dleft%3A%205px%20solid%20%23cccccc%3B%0Amargin%2Dleft%3A%2020px%3B%0Apadding%3A%200%200%200%2015px%3B%0A%7D%0Apre%20%7B%0Aborder%3A%201px%20dotted%20gray%3B%0Aborder%2Dstyle%3A%20dotted%3B%0Abackground%2Dcolor%3A%20%23f5f5f5%3B%20%0Adisplay%3A%20block%3B%0Acolor%3A%20%23f5f5f5%3B%0Apadding%2Dtop%3A%200%3B%0Apadding%2Dbottom%3A%200%3B%0A%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20monospace%3B%0Afont%2Dsize%3A%20115%25%3B%0Abackground%2Dcolor%3A%20transparent%3B%0Acolor%3A%20%231d9d1d%3B%0A%7D%0Ah1%20a%2C%20h2%20a%2C%20h3%20a%2C%20h4%20a%2C%20h5%20a%20%7B%0Atext%2Ddecoration%3A%20none%3B%0Acolor%3A%20%237a5ada%3B%0A%7D%0Ah1%2C%20h2%2C%20h3%2C%20h4%2C%20h5%20%7B%0Afont%2Dfamily%3A%20verdana%3B%0Afont%2Dweight%3A%20bold%3B%0Aborder%2Dbottom%3A%20none%3B%20%0Acolor%3A%20%237a5ada%3B%20%7D%0Ah1%20%7B%0Afont%2Dsize%3A%20130%25%3B%0A%7D%0Ah2%20%7B%0Afont%2Dsize%3A%20110%25%3B%0A%7D%0Ah3%20%7B%0Afont%2Dsize%3A%2095%25%3B%0A%7D%0Ah4%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah5%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah1%2Etitle%20%7B%0Afont%2Dsize%3A%20200%25%3B%0Afont%2Dweight%3A%20bold%3B%0Apadding%2Dtop%3A%200%2E2em%3B%0Apadding%2Dbottom%3A%200%2E2em%3B%0Atext%2Dalign%3A%20left%3B%0Aborder%3A%20none%3B%0A%7D%0Adt%20code%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Add%20p%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0A%23footer%20%7B%0Apadding%2Dtop%3A%201em%3B%0Afont%2Dsize%3A%2070%25%3B%0Acolor%3A%20gray%3B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Atable%20%7B%0Amargin%2Dbottom%3A%202em%3B%0Aborder%2Dbottom%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dright%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dspacing%3A%200%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Apadding%3A%20%2E2em%201em%3B%0Abackground%2Dcolor%3A%20%23eee%3B%0Aborder%2Dtop%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dleft%3A%201px%20solid%20%23ddd%3B%0A%7D%0Atable%20td%20%7B%0Apadding%3A%20%2E2em%201em%3B%0Aborder%2Dtop%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dleft%3A%201px%20solid%20%23ddd%3B%0Avertical%2Dalign%3A%20top%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>SpikeView_Help</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">body {margin: auto;padding-right: 1em;padding-left: 1em;max-width: 68em; border-left: 1px solid black;border-right: 1px solid black;color: black;font-family: Verdana, sans-serif;font-size: 100%;line-height: 140%;color: #333;}blockquote {border-left: 5px solid #cccccc;margin-left: 20px;padding: 0 0 0 15px;}pre {border: 1px dotted gray;border-style: dotted;background-color: #f5f5f5; display: block;color: #f5f5f5;padding-top: 0;padding-bottom: 0;}code {font-family: monospace;font-size: 115%;background-color: transparent;color: #1d9d1d;}h1 a, h2 a, h3 a, h4 a, h5 a {text-decoration: none;color: #7a5ada;}h1, h2, h3, h4, h5 {font-family: verdana;font-weight: bold;border-bottom: none; color: #7a5ada; }h1 {font-size: 130%;}h2 {font-size: 110%;}h3 {font-size: 95%;}h4 {font-size: 90%;font-style: italic;}h5 {font-size: 90%;font-style: italic;}h1.title {font-size: 200%;font-weight: bold;padding-top: 0.2em;padding-bottom: 0.2em;text-align: left;border: none;}dt code {font-weight: bold;}dd p {margin-top: 0;}#footer {padding-top: 1em;font-size: 70%;color: gray;text-align: center;}table {margin-bottom: 2em;border-bottom: 1px solid #ddd;border-right: 1px solid #ddd;border-spacing: 0;border-collapse: collapse;}table th {padding: .2em 1em;background-color: #eee;border-top: 1px solid #ddd;border-left: 1px solid #ddd;}table td {padding: .2em 1em;border-top: 1px solid #ddd;border-left: 1px solid #ddd;vertical-align: top;}</style>
 </head>
 <body>
-<h2 id="spikeviewer-display-spikes-on-up-to-4-independent-channels">SpikeViewer: Display spikes on up to 4 independent channels</h2>
+<h2 id="spikeviewer-display-spikes-on-up-to-4-independent-channels">SpikeViewer:
+Display spikes on up to 4 independent channels</h2>
 <h3 id="detection">Detection</h3>
-<p>Spikes are detected on the given {probe, channel} when the voltage crosses from above to below the given threshold (negative microvolts) and stays below threshold for at least <strong>3 consecutive samples</strong>.</p>
+<p>Spikes are detected on the given {probe, channel} when the voltage
+crosses from above to below the given threshold (negative microvolts)
+and stays below threshold for at least <strong>3 consecutive
+samples</strong>.</p>
 <p>Spikes are each 64 samples long.</p>
-<p>Up to 32 time-stamped spikes at a time are maintained in a FIFO buffer.</p>
-<p>New spikes replace the oldest spikes. Each spike is retained no longer than 30 seconds after it was detected.</p>
+<p>Up to 32 time-stamped spikes at a time are maintained in a FIFO
+buffer.</p>
+<p>New spikes replace the oldest spikes. Each spike is retained no
+longer than 30 seconds after it was detected.</p>
 <h3 id="waveforms">Waveforms</h3>
-<p>Individual spikes are displayed (yellow) and are used to calculate their mean waveform (green) and average spike rate (blue bar on a log scale).</p>
+<p>Individual spikes are displayed (yellow) and are used to calculate
+their mean waveform (green) and average spike rate (blue bar on a log
+scale).</p>
 <p>Spike waveforms are aligned to their minima.</p>
-<p>The vertical full-scale voltage is set by the <code>yscl</code> spinner control in microvolts. The baseline (y-axis) is adjusted automatically.</p>
+<p>The vertical full-scale voltage is set by the <code>yscl</code>
+spinner control in microvolts. The baseline (y-axis) is adjusted
+automatically.</p>
 <h3 id="showing-the-window">Showing the window</h3>
 <ul>
-<li>Open window and apply last settings with menu item: <code>Window/SpikeViewer...</code></li>
+<li>Open window and apply last settings with menu item:
+<code>Window/SpikeViewer...</code></li>
 </ul>
-<h3 id="picking-channels-also-opens-window">Picking channels (Also opens window)</h3>
+<h3 id="picking-channels-also-opens-window">Picking channels (Also opens
+window)</h3>
 <ul>
-<li><p>Right-click on ShankViewer site; select <code>SpikeViewer N</code> from popup menu.</p></li>
-<li><p>Right-click on Graph window trace; select <code>SpikeViewer N</code> from popup menu.</p></li>
-<li><p>Use the <code>probe</code> and <code>channel</code> spinners for that viewer.</p></li>
+<li><p>Right-click on ShankViewer site; select
+<code>SpikeViewer N</code> from popup menu.</p></li>
+<li><p>Right-click on Graph window trace; select
+<code>SpikeViewer N</code> from popup menu.</p></li>
+<li><p>Use the <code>probe</code> and <code>channel</code> spinners for
+that viewer.</p></li>
 </ul>
 <p><em>fin</em></p>
 </body>

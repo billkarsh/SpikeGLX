@@ -1,12 +1,14 @@
 ## System Requirements for Neuropixels
 
-**>> Updated: January, 2026 <<**
+**>> Updated: July, 2026 <<**
 
 What's new:
 
 * Chassis notes, tested NI-1090.
-* Avoid Core Ultra (Meteor Lake) CPU.
-* What About This CPU?
+* New acquisition computer guidelines for:
+    + CPU
+    + GPU
+    + RAM
 
 --------
 
@@ -30,13 +32,17 @@ What's new:
         * [Intel vs AMD](#intel-vs-amd)
         * [Is My Current Computer Good Enough?](#is-my-current-computer-good-enough)
         * [WorkStation vs Laptop](#workStation-vs-laptop)
-        * [RAM](#ram)
         * [Acquisition CPU](#acquisition-cpu)
+            * [CPU overview](#cpu-overview)
+            * [Cooling](#coolings)
             * [For 384-channel probes](#for-384-channel-probes)
             * [For 1536-channel probes](#for-1536-channel-probes)
-            * [Skip Core Ultra](#skip-core-ultra)
-            * [What About This CPU?](#what-about-this-cpu)
         * [Acquisition GPU](#acquisition-gpu)
+            * [iGPU v dGPU](#igpu-v-dgpu)
+            * [dGPU](#dgpu)
+        * [RAM](#ram)
+            * [DDR4 RAM](#ddr4-ram)
+            * [DDR5 RAM](#ddr5-ram)
         * [Drive](#drive)
         * [Slots and Ports](#slots-and-ports)
         * [Settings and Behavior](#settings-and-behavior)
@@ -414,38 +420,64 @@ if you will run only modest numbers of probes. To put a number on it, **if you
 are planning to run more than (8) 384-channel probes or more than (2) quad-base
 1536-channel probes, you probably should get a workstation**.
 
-### RAM
-
-* **Minimum 32 GB RAM**
-* **Populate all RAM slots**:
-
-SpikeGLX needs only 7 GB of total RAM to run (32) 384-channel probes plus
-8 NI channels. Rather than memory size, what matters most are more CPU cores
-and *faster memory access*. It makes a huge difference how the RAM DIMMS
-(memory sticks) are populated into the slots on the motherboard, that is,
-how many RAM channels are operational (see performance table below).
-
-Computers can be designed with {single, dual, quad, octa}-channel memory.
-For example, a dual-channel setup has twice the bandwidth (speed) of a
-single-channel setup, and so on. However, to enable dual-channel mode,
-you need at least two properly matched memory sticks placed into the
-correct slots. If you can buy the same dual-channel laptop configured
-either with one 32 GB stick or with two 16 GB sticks, they will both have
-32 GB of RAM, but the two-stick setup is likely twice as fast at computation
-and multithreading applications. Not all vendors make this detail available.
-Try looking for an option to do a custom build.
-
-If you are putting RAM in yourself, the user manual for the motherboard
-will explain which slots should be populated, and you should buy your add-in
-RAM as a kit designed to support N-channel setups, so the memory modules
-are properly matched to each other and to your hardware.
-
-> You can see how the RAM slots are populated in the Memory panel of
-the Windows Task Manager/Performance tab.
-
-Check out ["Guide to RAM Memory Channels as Fast As Possible."](https://www.youtube.com/watch?v=-D8fhsXqq4o)
+> *There are Core-i9 and Core-Ultra laptops with workstation-level performance;
+they carry workstation-level pricetags.*
 
 ### Acquisition CPU
+
+#### CPU overview
+
+SpikeGLX likes: {P-cores, clock speed, low latency}.
+
+**Cores**:
+
+CPU cores come in three types:
+
+* Performance P-cores : excellent
+* Efficient E-cores : alright for non-DAQ tasks
+* Low power LPE-cores : AVOID
+
+*As of SpikeGLX 20260115 we tell the OS to use only {P,E} cores to run SpikeGLX,
+even if the CPU has LPE cores.*
+
+**Speed**:
+
+Our clock speed specs apply to the P-cores.
+
+*As of SpikeGLX 20260115 we tell the OS to prefer the P-cores for DAQ and
+E-cores for visuals.*
+
+**Latency**:
+
+Recently we've learned much about latency; the key to tuning SpikeGLX 20260115
+to better exploit Core Ultra. That's important because Intel is retiring
+Core-i and replacing it with Ultra. The new document
+[DAQ_and_CPU_Latency](https://billkarsh.github.io/SpikeGLX/More_help/DAQ_and_CPU_Latency.html)
+explains how CPU families compare regarding cores and latency. The document
+also explains why we now prefer built-in graphics over separate cards for
+laptops.
+
+Summary comparison of CPU types for DAQ:
+
+| Family | Use | Best models | Cores | Speed | Latency | Stars |
+| ------ | --- | ----------- | ----- | ----- | ------- | ----- |
+| Xeon | desktop | all | {P} | medium | low | 5 |
+| Core-i | old laptop | i7, i9; HX, H | {P,E} | high | low | 4.5 |
+| Core Ultra | new laptop | Ultra 7,9; HX, H | {P,E,LPE} | high | medium | 4 |
+
+#### Cooling
+
+Thermal management is very important. A high performance CPU can't deliver peak
+performance if it's overheating: "thermal throttling."
+
+Xeon is a winner because it is slow and steady with high availability. Moreover,
+workstations have the power budget and space to use effective thermal management
+components: big heat sinks and multiple fans.
+
+Laptops are tricky to cool well enough to get steady high performance. Be aware that
+top of the line CPUs run hotter, so aren't necessarily better for DAQ. Pay attention
+to reviews of the cooling system performance. Performance that is reliable is worth
+more than peak performance.
 
 #### For 384-channel probes
 
@@ -454,13 +486,13 @@ Check out ["Guide to RAM Memory Channels as Fast As Possible."](https://www.yout
 
 **To run N 384-channel probes:**
 
-| Max Probes | CPU Cores | RAM Channels |
-| ---------- | --------- | ------------ |
-| 4          | 4         | 1            |
-| 8          | 6         | 1            |
-| 16         | 6         | 2            |
-| 20\*       | 8         | 2            |
-| 32\*       | 12        | 2            |
+| Max Probes | P-Cores | RAM Channels |
+| ---------- | ------- | ------------ |
+| 4          | 4       | 1            |
+| 8          | 6       | 1            |
+| 16         | 6       | 2            |
+| 20\*       | 8       | 2            |
+| 32\*       | 12      | 2            |
 
 > *\* Note: For 20 probes or more the CPU will be working very hard to keep
 up. In the 20-probe case, that CPU was running in its turbo mode at over
@@ -479,61 +511,97 @@ will be safe with a
 
 **To run N 1536-channel probes:**
 
-| Max Probes | CPU Cores |
-| ---------- | --------- |
-| 2          | 4         |
-| 4\*        | 6 (8 preferred) |
-| 8\*        | 20 (*to be tested*) |
-
-> *\* Note: 6 cores (workstation or laptop) is marginally adequate for
-(4) 1536-channel probes, meaning that any other activity on the machine could
-easily cause the run to quit. We are more comfortable recommending 8 cores
-to run 4 probes. For 8 probes, you will be safe with a
-[PassMark Multi-thread](https://www.cpubenchmark.net/multithread/) score >= 50000.*
-
-#### Skip Core Ultra
-
-For robust real-time data acquisition we want sustained high performance.
-
-However, Intel's 14th generation 'Meteor Lake' CPU architecture (also
-branded as 'Core Ultra') is highly optimized for energy efficiency as
-opposed to high performance. We have confirmed this. We bought a Lenovo P16
-laptop with Intel 'Core Ultra 9 185H CPU.' Although it has impressive looking
-clock rates, core count and PassMark specs, it's a poor performer for SpikeGLX.
-It can just barely run (2) quad-probes. Almost any additional activity while
-running, like opening a text document, will trigger core power throttling
-and bring the run to a halt. We tried everything. Reinstall the OS, update
-drivers, tune power plan settings..., yet nothing can convince this CPU
-to give SpikeGLX sustained CPU performance. Avoid this processor family.
-
-On the other hand, Intel's 14th generation includes another family called
-'Refreshed Raptor Lake' (or 'Core HX') with examples such as the 'i9-14900HX.'
-These are performance oriented CPUs that should be fine. We have tested
-13th generation 'Raptor Lake' CPUs such as the 'Core 5 210H' and the
-'i7-13700H' which are actually less expensive than the Core Ultras yet
-work flawlessly. These are better choices at this time. 
-
-#### What About This CPU?
-
-When shopping for computer systems you are likely to come across CPU models
-that we haven't specifically tested. It's pretty useful to use ChatGPT to
-ask "Is the intel XXX CPU or its CPU family more oriented toward energy
-efficiency or toward high performance?" If there is any suggestion in the
-answer that efficiency is a primary goal, then avoid that CPU. The best
-choices will have a clear performance orientation.
+| Max Probes | P-Cores | PassMark Multi-thread |
+| ---------- | ------- | --------------------- |
+| 2          | 4       | 24000                 |
+| 4          | 6       | 29000                 |
+| 8          | 8       | 50000                 |
 
 ### Acquisition GPU
 
-* **Graphics Card: [PassMark G3D](https://www.videocardbenchmark.net/high_end_gpus.html) score > 3000**.
+#### iGPU v dGPU
+
+**Probably use built-in graphics**
+
+Read [this](https://billkarsh.github.io/SpikeGLX/More_help/DAQ_and_CPU_Latency.html#optimal-graphics-for-daq)
+for a detailed discussion of which graphics device is the best choice.
+
+Here's the summary...
+
+A separate high performance card (dGPU, e.g. GeForce) is superior in rendering performance
+to a CPU's built-in Intel graphics (iGPU), but it has a huge disadvantage. If the display
+is actually plugged into the Intel graphics device, the card has to push all those pixels over
+to the iGPU to display anything and that is a massive latency hit that competes with DAQ.
+Therefore, if the iGPU is already "good enough" then Intel is the better choice for SpikeGLX.
+
+OK, what is good enough? Intel graphics performance can be captured by "execution units."
+We want at least 64 execution units. Intel also specs graphics in terms of Xe cores, each
+of which is 16 execution units, so we want at least 4 Xe cores. These engines are generally
+good enough:
+
+- Intel Arc (Core-Ultra)
+- Intel Graphics 4-core
+- Intel Iris Xe (11th-gen through 13th-gen Core-i)
+
+These are generally not good enough:
+
+- Intel UHD Graphics (early laptops and most desktops)
+
+#### dGPU
+
+You'll need a dGPU for an old computer, or to configure a Xeon setup (Xeon CPUs lack
+iGPUs or they are super basic). The requirements for acquisition are pretty modest:
+
+[PassMark G3D](https://www.videocardbenchmark.net/high_end_gpus.html) score > 3000**.
 
 > Note: Your computer power supply should be rated at greater than 2.5 X
 the GPU power requirement. Power supplies are pretty affordable; **get the
 largest power supply offered when configuring a workstation**.
 
-Built-in (integrated) graphics controllers steal compute power from the
-CPU. Rather, we want a separate graphics card doing as much drawing work
-as possible. Make sure the OS's graphics settings run SpikeGLX with the
-graphics card ("high performance mode").
+### RAM
+
+* **Minimum 32 GB RAM**
+
+SpikeGLX needs only 7 GB of total RAM to run (32) 384-channel probes plus
+8 NI channels. Rather than memory size, what matters most are more CPU cores
+and feeding those cores data using *faster memory access*.
+
+Computers can be designed with {single, dual, quad, octa}-channel memory.
+For example, a dual-channel setup has twice the bandwidth (speed) of a
+single-channel setup, and so on. It makes a huge difference how many RAM
+channels are operational, and how you ensure that depends upon the type
+of memory the CPU uses: DDR4 or DDR5.
+
+#### DDR4 RAM
+
+* **Populate all RAM slots if DDR4**:
+
+To enable dual-channel mode, you need at least two properly matched RAM
+DIMMs (memory sticks) placed into the correct slots. If you can buy the
+same dual-channel laptop configured either with one 32 GB stick or with
+two 16 GB sticks, they will both have 32 GB of RAM, but the two-stick setup
+is likely twice as fast at computation and multithreading applications.
+Not all vendors make this detail available. Try looking for an option to
+do a custom build.
+
+If you are putting RAM in yourself, the user manual for the motherboard
+will explain which slots should be populated, and you should buy your add-in
+RAM as a kit designed to support N-channel setups, so the memory modules
+are properly matched to each other and to your hardware.
+
+> You can see how the RAM slots are populated in the Memory panel of
+the Windows Task Manager/Performance tab.
+
+Check out ["Guide to RAM Memory Channels as Fast As Possible."](https://www.youtube.com/watch?v=-D8fhsXqq4o)
+
+#### DDR5 RAM
+
+* **Populate one RAM slot if DDR5**:
+
+Each DDR5 DIMM has 2 sub-channels, so for a dual-channel CPU, a single DIMM
+performs nearly as well as two separate DIMMs. A single DIMM is easier to
+upgrade later: you can just add a DIMM instead of replacing both. Also a
+single DIMM runs a little cooler which is better for thermal management.
 
 ### Drive
 
@@ -608,7 +676,7 @@ All users should be mindful about things that can disrupt data flow and
 cause a run to shut down. Note that SpikeGLX monitors its own performance
 and if it isn't able to maintain data integrity it will stop the run.
 
-* Follow our UserManual power settings to prevent subsystems from sleeping.
+* Follow our UserManual `Optimal Computer Settings` guide.
 * Don't launch resource hungry programs like MATLAB, while a run is going.
 * Minimize running other apps during data acquisition.
 * Minimize presence of background apps that do installs or housekeeping at

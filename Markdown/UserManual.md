@@ -9,17 +9,21 @@
         + [Quadbase Probes](#quadbase-probes)
         + [Help](#help)
     + [SpikeGLX Ecosystem](#spikeglx-ecosystem)
-    + [Installation and Setup](#installation-and-setup)
+    + [Installing SpikeGLX](#installing-spikeglx)
+        + [_Configs Folder](#_configs-folder)
         + [Calibration Data](#calibration-data)
         + [Remote Command Servers](#remote-command-servers)
         + [Data Directory](#data-directory)
         + [Multidrive Run Splitting](#multidrive-run-splitting)
-        + [Display Settings](#display-settings)
+    + [Optimal Computer Settings](#optimal-computer-settings)
+        + [Run Fewer Apps](#run-fewer-apps)
+        + [If Windows 10](#if-windows-10)
         + [Screen Saver and Power Settings](#screen-saver-and-power-settings)
-        + [Power Mode Slider](#power-mode-slider)
-        + [Power Notes](#power-notes)
+        + [Power Mode Controls](#power-mode-controls)
+        + [Graphics Settings](#graphics-settings)
         + [Graphics Problems](#graphics-problems)
-        + [Overnight POP Errors](#overnight-pop-errors)
+        + [Vigilant Mode](#vigilant-mode)
+        + [Network Adapter Settings](#network-adapter-settings)
     + [Data Stream](#data-stream)
     + [Supported Streams](#supported-streams)
         + [Stream Length](#stream-length)
@@ -139,7 +143,7 @@ which hosts a community of ~3000 users.
 
 --------
 
-### Installation and Setup
+### Installing SpikeGLX
 
 To install SpikeGLX on a new system, just copy a virgin SpikeGLX folder
 to your C-drive and double click SpikeGLX.exe to begin.
@@ -298,28 +302,47 @@ The result is as follows:
 >The mod operation is just the remainder when dividing j by N. For example,
 7 mod 3 = 1.
 
-#### Display Settings
+### Optimal Computer Settings
 
-Make sure SpikeGLX is taking advantage of your add-on graphics card instead
-of the built-in graphics. Doing this will boost acquisition performance and
-improve the aesthetics:
+Real-time data acquisition (DAQ) is a demanding process. SpikeGLX monitors its 
+performance and when it's not working well, there are two principal symptoms.
+(1) You'll get POP errors, which means an internal data buffer is overflowing
+because the computer isn't keeping up with the data acquisition rate. Use the
+[`Metrics Window`](#run-metrics-window) (Ctrl+M) and the Help file there to
+learn more about that. (2) SpikeGLX will command the run to stop if performance
+lag is too severe.
 
-1. Type "Graphics settings" into the search box of the Windows Taskbar.
-2. Select `Desktop app` and below that click `Browse`.
-3. Navigate to and select SpikeGLX.exe.
-4. SpikeGLX now appears below the `Browse` button; click on it.
-5. Click `Options`; select the `High performance` option and `Save`.
-6. Restart SpikeGLX.
+The following sections recommend computer usage/settings that either (A) Minimize
+non-essential activity (B) Allow the computer to operate at higher power levels,
+or, (C) Keep the system components from falling asleep on the job. You don't
+necessarily need to do everything listed here; it depends upon how well your
+system is keeping up with your experiment demands. The most impactful things
+are listed first, so try them in this order.
 
-Depending upon your monitor size and resolution, you might find that the
-text in menus, buttons and lists is either fuzzy or too small to read. If
-that's the case, try altering the following Windows setting:
+#### Run Fewer Apps
 
-1. Right-click on your Windows desktop and select 'Display settings.'
-2. Click 'Advanced scaling settings.'
-3. Find the button called 'Let Windows try to fix apps so they're not blurry.'
-4. Turn this feature **OFF**. -- Yes, disable it.
-5. Quit and restart SpikeGLX.
+Don't make SpikeGLX compete with other processes for CPU and system resources.
+Run what you must for your experiment, but no more than that.
+
+Your computer may contain a dozen background tasks that run at inopportune
+times. For example, Windows Update, or NI Updater. After a disruptive event
+use the System Event Viewer: Right-click `Start` button, select `Event Viewer.`
+Look at the logged time that the run stopped and search the `Windows Logs,`
+particularly the `Application` and `System` logs for events immediately prior
+to the disturbance. See if you can disable the offending task.
+
+Note that when the computer boots up it can take several minutes to fully
+configure the OS and start all of its supporting software components. It's
+a good idea to wait 5 minutes after a reboot before starting a DAQ run.
+
+#### If Windows 10
+
+The Windows 10 Task Scheduler runs "Microsoft Compatibility Appraiser" every
+day at around 3am or 4am in the morning. This task checks whether you should
+be notified to update your system from Windows 10 to 11. The scan drives CPU
+usage to 100% for several seconds and can disrupt a DAQ run, causing POP errors.
+If this is happening to you, Double-click the `Disable_MS_Compat_Appraiser.bat`
+script in your SpikeGLX download.
 
 #### Screen Saver and Power Settings
 
@@ -341,9 +364,9 @@ For data acquisition:
 of two ways:
 
     a. As of version 20250525 The SpikeGLX download folder contains
-    a script named `DAQ_power_settings.bat.` Double-click on it to run it.
-    It makes the needed changes listed below, even in versions of the OS that
-    hide advanced settings.
+    a script named `DAQ_power_settings.bat.` Double-click to run it.
+    It makes the needed changes listed below, even in versions of the
+    OS that hide advanced settings.
     
     b. Set advanced settings manually: Look for `Advanced Settings` or 
     `change plan settings` or similar:
@@ -362,27 +385,58 @@ of two ways:
 > Tip: For some settings, 'Never' might not appear as a choice. Try typing
 either 'never' or '0' directly into the box.
 
-#### Power Mode Slider
+#### Power Mode Controls
 
-First, a reminder to acquire data plugged into AC power. In some versions
-of Windows 10, for some laptops, there is a user control that impacts the
-performance of your machine. Look in the System Tray area of the Windows
-Task Bar for the battery icon. Open that window. If you see a slider called
-`Power mode`, then (while on AC power) slide it all the way to the right
-before doing acquisition runs.
+First, a reminder to acquire data plugged into AC power. Many computers
+have a utility to control performance. Perhaps a `Power Mode` slider in
+the System Tray, or a custom control panel to switch performance modes.
+Familiarize yourself with the controls provided by the computer's vendor
+and be sure to set the highest performance option for DAQ runs.
 
-#### Power Notes
+On many computers `Airplane Mode` not only manages network connectivity,
+but also throttles power settings. So disable Airplane Mode for DAQ runs.
 
-Be aware that the Lenovo `Vantage` applications include a setting for
-`Airplane Power Mode` which, if enabled, cause the machine to run at
-half speed, even when plugged in. This is not what you want for data
-acquisition. Other laptops may have similar energy saving modes that
-you should probably disable when you need maximum performance.
+#### Graphics Settings
 
-Do not do acquisition runs immediatly after a reboot! Whenever you reboot
-the computer, allow at least 2 minutes (5 is better) for the OS to complete
-the launching and initialization of services and apps. The computer can be
-very busy during startup, which can destabilize the run.
+Tell Windows to use the appropriate graphics device for SpikeGLX:
+
+1. Type "Graphics settings" into the search box of the Windows Taskbar.
+2. Select `Add desktop app.`
+3. Navigate to and select SpikeGLX.exe.
+4. SpikeGLX now appears in the list; click on it.
+5. Select either`Power Saving (intel graphics)` or `High Performance (your card)`.
+6. Restart SpikeGLX.
+
+Read [this](https://billkarsh.github.io/SpikeGLX/More_help/DAQ_and_CPU_Latency.html#optimal-graphics-for-daq)
+for a detailed discussion of which graphics device is the best choice.
+
+Here's the summary...
+
+A separate high performance card (dGPU, e.g. GeForce) is superior in rendering performance
+to a CPU's built-in Intel graphics (iGPU), but it has a huge disadvantage. If the display
+is actually plugged into the Intel graphics device, the card has to push all those pixels over
+to the iGPU to display anything and that is a massive latency hit that competes with DAQ.
+Therefore, if the iGPU is already "good enough" then Intel is the better choice for SpikeGLX.
+
+OK, what is good enough? Intel graphics performance can be captured by "execution units."
+We want at least 64 execution units. Intel also specs graphics in terms of Xe cores, each
+of which is 16 execution units, so we want at least 4 Xe cores. These engines are generally
+good enough:
+
+- Intel Arc (Core-Ultra)
+- Intel Graphics 4-core
+- Intel Iris Xe (11th-gen through 13th-gen Core-i)
+
+These are generally not good enough:
+
+- Intel UHD Graphics (early laptops and most desktops)
+
+The best way to get the specs for your CPU's built-in graphics is to do a Web search for
+your full processor model name, like "Intel Ultra 9 275HX" and then click the link for
+the Intel spec sheet.
+
+> *Note that many desktop CPUs don't have an iGPU, so if you only have a dGPU there is no
+need to set the graphics device at all: it will always use the dGPU by default.* 
 
 #### Graphics Problems
 
@@ -390,15 +444,29 @@ If your Graph windows or Shank viewers appear black, or if they flash
 or flicker, there are solutions on the
 [SpikeGLX FAQ](SpikeGLX_FAQ.html#graphics-problems) page.
 
-#### Overnight POP Errors
+#### Vigilant Mode
 
-Windows Task Scheduler runs "Microsoft Compatibility Appraiser" every day
-at around 3am or 4am in the morning. This task checks whether you should
-be notified to update your system from Windows 10 to 11. The scan drives
-CPU usage to 100% for several seconds and can disrupt a data acquisition
-run. The evidence for that is POP errors (visible in SpikeGLX Metrics
-Window). If this is happening to you, run the double-clickable
-`Disable_MS_Compat_Appraiser.bat` script in your SpikeGLX download.
+Check this box on the [IM Setup tab](IMTab_Help.html#vigilant-mode) to keep the computer
+more alert during DAQ runs.
+
+#### Network Adapter Settings
+
+The settings listed here will minimize the impact of network traffic on
+data acquisition tasks by keeping the network components active, thus
+reducing latency.
+
+1. Open the Device Manager: Right-click Windows `Start Button` and select
+Device Manager.
+2. Click open `Network adapters` and find your Ethernet device.
+3. Double-click it to get the `Properties` dialog.
+4. On `Power Management` tab, uncheck `Allow the computer to turn off this device to save power`.
+5. On `Advanced` tab, make these choices (the ones you have):
+
+- Green Ethernet: Disable.
+- Energy Efficient Ethernet: Disable.
+- Interrupt Moderation: Disable.
+- System Idle Power Saver: Disable
+- Ultra Low Power Mode: Disable
 
 --------
 

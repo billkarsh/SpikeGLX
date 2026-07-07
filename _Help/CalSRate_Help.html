@@ -1,33 +1,71 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta http-equiv="Content-Style-Type" content="text/css" />
-  <meta name="generator" content="pandoc" />
-  <title></title>
-  <style type="text/css">code{white-space: pre;}</style>
-  <link href="data:text/css;charset=utf-8,body%20%7B%0Amargin%3A%20auto%3B%0Apadding%2Dright%3A%201em%3B%0Apadding%2Dleft%3A%201em%3B%0Amax%2Dwidth%3A%2068em%3B%20%0Aborder%2Dleft%3A%201px%20solid%20black%3B%0Aborder%2Dright%3A%201px%20solid%20black%3B%0Acolor%3A%20black%3B%0Afont%2Dfamily%3A%20Verdana%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%20100%25%3B%0Aline%2Dheight%3A%20140%25%3B%0Acolor%3A%20%23333%3B%0A%7D%0Ablockquote%20%7B%0Aborder%2Dleft%3A%205px%20solid%20%23cccccc%3B%0Amargin%2Dleft%3A%2020px%3B%0Apadding%3A%200%200%200%2015px%3B%0A%7D%0Apre%20%7B%0Aborder%3A%201px%20dotted%20gray%3B%0Aborder%2Dstyle%3A%20dotted%3B%0Abackground%2Dcolor%3A%20%23f5f5f5%3B%20%0Adisplay%3A%20block%3B%0Acolor%3A%20%23f5f5f5%3B%0Apadding%2Dtop%3A%200%3B%0Apadding%2Dbottom%3A%200%3B%0A%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20monospace%3B%0Afont%2Dsize%3A%20115%25%3B%0Abackground%2Dcolor%3A%20transparent%3B%0Acolor%3A%20%231d9d1d%3B%0A%7D%0Ah1%20a%2C%20h2%20a%2C%20h3%20a%2C%20h4%20a%2C%20h5%20a%20%7B%0Atext%2Ddecoration%3A%20none%3B%0Acolor%3A%20%237a5ada%3B%0A%7D%0Ah1%2C%20h2%2C%20h3%2C%20h4%2C%20h5%20%7B%0Afont%2Dfamily%3A%20verdana%3B%0Afont%2Dweight%3A%20bold%3B%0Aborder%2Dbottom%3A%20none%3B%20%0Acolor%3A%20%237a5ada%3B%20%7D%0Ah1%20%7B%0Afont%2Dsize%3A%20130%25%3B%0A%7D%0Ah2%20%7B%0Afont%2Dsize%3A%20110%25%3B%0A%7D%0Ah3%20%7B%0Afont%2Dsize%3A%2095%25%3B%0A%7D%0Ah4%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah5%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah1%2Etitle%20%7B%0Afont%2Dsize%3A%20200%25%3B%0Afont%2Dweight%3A%20bold%3B%0Apadding%2Dtop%3A%200%2E2em%3B%0Apadding%2Dbottom%3A%200%2E2em%3B%0Atext%2Dalign%3A%20left%3B%0Aborder%3A%20none%3B%0A%7D%0Adt%20code%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Add%20p%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0A%23footer%20%7B%0Apadding%2Dtop%3A%201em%3B%0Afont%2Dsize%3A%2070%25%3B%0Acolor%3A%20gray%3B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Atable%20%7B%0Amargin%2Dbottom%3A%202em%3B%0Aborder%2Dbottom%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dright%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dspacing%3A%200%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Apadding%3A%20%2E2em%201em%3B%0Abackground%2Dcolor%3A%20%23eee%3B%0Aborder%2Dtop%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dleft%3A%201px%20solid%20%23ddd%3B%0A%7D%0Atable%20td%20%7B%0Apadding%3A%20%2E2em%201em%3B%0Aborder%2Dtop%3A%201px%20solid%20%23ddd%3B%0Aborder%2Dleft%3A%201px%20solid%20%23ddd%3B%0Avertical%2Dalign%3A%20top%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CalSRate_Help</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">body {margin: auto;padding-right: 1em;padding-left: 1em;max-width: 68em; border-left: 1px solid black;border-right: 1px solid black;color: black;font-family: Verdana, sans-serif;font-size: 100%;line-height: 140%;color: #333;}blockquote {border-left: 5px solid #cccccc;margin-left: 20px;padding: 0 0 0 15px;}pre {border: 1px dotted gray;border-style: dotted;background-color: #f5f5f5; display: block;color: #f5f5f5;padding-top: 0;padding-bottom: 0;}code {font-family: monospace;font-size: 115%;background-color: transparent;color: #1d9d1d;}h1 a, h2 a, h3 a, h4 a, h5 a {text-decoration: none;color: #7a5ada;}h1, h2, h3, h4, h5 {font-family: verdana;font-weight: bold;border-bottom: none; color: #7a5ada; }h1 {font-size: 130%;}h2 {font-size: 110%;}h3 {font-size: 95%;}h4 {font-size: 90%;font-style: italic;}h5 {font-size: 90%;font-style: italic;}h1.title {font-size: 200%;font-weight: bold;padding-top: 0.2em;padding-bottom: 0.2em;text-align: left;border: none;}dt code {font-weight: bold;}dd p {margin-top: 0;}#footer {padding-top: 1em;font-size: 70%;color: gray;text-align: center;}table {margin-bottom: 2em;border-bottom: 1px solid #ddd;border-right: 1px solid #ddd;border-spacing: 0;border-collapse: collapse;}table th {padding: .2em 1em;background-color: #eee;border-top: 1px solid #ddd;border-left: 1px solid #ddd;}table td {padding: .2em 1em;border-top: 1px solid #ddd;border-left: 1px solid #ddd;vertical-align: top;}</style>
 </head>
 <body>
-<h2 id="calibration-from-existing-runs">Calibration from Existing Runs</h2>
+<h2 id="calibration-from-existing-runs">Calibration from Existing
+Runs</h2>
 <h3 id="overview">Overview</h3>
-<p>Use this dialog to analyze the sample rates in any existing runs that were acquired with square wave inputs.</p>
+<p>Use this dialog to analyze the sample rates in any existing runs that
+were acquired with square wave inputs.</p>
 <h4 id="specify-operation">Specify Operation</h4>
-<ol style="list-style-type: decimal">
+<ol type="1">
 <li>Select any single binary file from a run of interest.</li>
-<li>Choose whether to analyze only that stream or all the streams in the run.</li>
+<li>Choose whether to analyze only that stream or all the streams in the
+run.</li>
 <li>Click <code>Go</code> to start analysis.</li>
 </ol>
 <h4 id="output">Output</h4>
-<p>This box shows analysis progress and then the old and newly analyzed results for the selected streams.</p>
+<p>This box shows analysis progress and then the old and newly analyzed
+results for the selected streams.</p>
 <h4 id="evaluating-the-results">Evaluating the Results</h4>
 <ul>
-<li><p>Standard errors on measurements spanning 20 minutes or longer should be less than ~0.01 Hz. If larger, there is some instability to fix before trusting the measurement.</p></li>
-<li><p>If you are measuring a given clock for the first time, the difference from the manufacturer's uncalibrated rate should be less than ~2 Hz.</p></li>
-<li><p>If you are remeasuring a calibrated clock, the new and old rate should be within ~0.1 Hz of each other. Otherwise, one of the calibrations may have failed.</p></li>
+<li><p>Standard errors on measurements spanning 20 minutes or longer
+should be less than ~0.01 Hz. If larger, there is some instability to
+fix before trusting the measurement.</p></li>
+<li><p>If you are measuring a given clock for the first time, the
+difference from the manufacturer’s uncalibrated rate should be less than
+~2 Hz.</p></li>
+<li><p>If you are remeasuring a calibrated clock, the new and old rate
+should be within ~0.1 Hz of each other. Otherwise, one of the
+calibrations may have failed.</p></li>
 </ul>
-<p>If you don't trust the results, do not click 'Apply.' Rather, try to find the problem, and then repeat the measurement. Good places to look for issues are the reported error and warning messages in the <code>Log</code> window. Also, try running with the <code>Metrics</code> window (Ctrl+M) open to look for warning signs. Note that imec error flags, which signify possibly dropped samples, are visible in the Metrics window and are always recorded in probe metadata files.</p>
-<p>Note too, that whether doing an online calibration run, or calculating rates from an existing run, 20 minutes should be considered an absolute minimum time span for calibration, but 40 minutes or longer is preferred.</p>
+<p>If you don’t trust the results, do not click ‘Apply.’ Rather, try to
+find the problem, and then repeat the measurement. Good places to look
+for issues are the reported error and warning messages in the
+<code>Log</code> window. Also, try running with the <code>Metrics</code>
+window (Ctrl+M) open to look for warning signs. Note that imec error
+flags, which signify possibly dropped samples, are visible in the
+Metrics window and are always recorded in probe metadata files.</p>
+<p>Note too, that whether doing an online calibration run, or
+calculating rates from an existing run, 20 minutes should be considered
+an absolute minimum time span for calibration, but 40 minutes or longer
+is preferred.</p>
 <h4 id="apply">Apply</h4>
 <p>All results producing (measured rate +/- std error) are applied.</p>
 <p>Select whether to use the results to:</p>

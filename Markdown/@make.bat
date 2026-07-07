@@ -36,4 +36,5 @@ pandoc -s -c pandoc.css --embed-resources --standalone WavePlan_Help.md -o ../_H
 ::pandoc -s -c pandoc.css --embed-resources --standalone IMRO_T0_Help.md -o ../_Help/IMRO_T0_Help.html
 ::pandoc -s -c pandoc.css --embed-resources --standalone SystemRequirements_PXI.md -o SystemRequirements_PXI.html
 ::pandoc -s -c pandoc.css --embed-resources --standalone SystemRequirements_Xilinx.md -o SystemRequirements_Xilinx.html
+::pandoc -s -c pandoc.css --embed-resources --standalone DAQ_and_CPU_Latency.md -o DAQ_and_CPU_Latency.html
 

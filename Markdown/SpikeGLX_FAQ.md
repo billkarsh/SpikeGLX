@@ -271,15 +271,17 @@ card.
 
 "Why do the Graph window panels appear to flash or flicker?"
 
-Windows may be using your computer's built-in graphics instead of your
-higher performance graphics card. Follow these steps:
+This is usually due to older slow graphics hardware...
 
-1. Type "Graphics settings" into the search box of the Windows Taskbar.
-2. Select `Desktop app` and below that click `Browse`.
-3. Navigate to and select SpikeGLX.exe.
-4. SpikeGLX now appears below the `Browse` button; click on it.
-5. Click `Options`; select the `High performance` option and `Save`.
-6. Restart SpikeGLX.
+Optimal display settings are discussed [here](UserManual.html#graphics-settings) in
+the User Manual. Follow those guidelines first, which are oriented toward optimizing
+DAQ performance.
+
+If flicker persists, try updating your graphics drivers, and if that still doesn't
+help, you can try changing the `Graphics Control Panel` setting to use the separate
+dGPU card for SpikeGLX. Core-i7, Core-i9 and Xeon are perfectly fine using a dGPU.
+Core-Ultra has longer latency, so in this case, be mindful that using the dGPU isn't
+dragging down your DAQ performance.
 
 --------
 
