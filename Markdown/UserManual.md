@@ -398,6 +398,12 @@ but also throttles power settings. So disable Airplane Mode for DAQ runs.
 
 #### Graphics Settings
 
++ iGPU = Built-in "integrated" graphics processor
++ dGPU = Separate "discrete" graphics card
+
+> *Note that many desktop CPUs don't have an iGPU, so if you only have a dGPU there is no
+need to set the graphics device at all: it will always use the dGPU by default.* 
+
 Tell Windows to use the appropriate graphics device for SpikeGLX:
 
 1. Type "Graphics settings" into the search box of the Windows Taskbar.
@@ -434,9 +440,6 @@ These are generally not good enough:
 The best way to get the specs for your CPU's built-in graphics is to do a Web search for
 your full processor model name, like "Intel Ultra 9 275HX" and then click the link for
 the Intel spec sheet.
-
-> *Note that many desktop CPUs don't have an iGPU, so if you only have a dGPU there is no
-need to set the graphics device at all: it will always use the dGPU by default.* 
 
 #### Graphics Problems
 

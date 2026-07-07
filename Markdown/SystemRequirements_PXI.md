@@ -519,6 +519,9 @@ will be safe with a
 
 ### Acquisition GPU
 
++ iGPU = Built-in "integrated" graphics processor
++ dGPU = Separate "discrete" graphics card
+
 #### iGPU v dGPU
 
 **Probably use built-in graphics**

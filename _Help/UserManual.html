@@ -455,6 +455,15 @@ highest performance option for DAQ runs.</p>
 connectivity, but also throttles power settings. So disable Airplane
 Mode for DAQ runs.</p>
 <h4 id="graphics-settings">Graphics Settings</h4>
+<ul>
+<li>iGPU = Built-in “integrated” graphics processor</li>
+<li>dGPU = Separate “discrete” graphics card</li>
+</ul>
+<blockquote>
+<p><em>Note that many desktop CPUs don’t have an iGPU, so if you only
+have a dGPU there is no need to set the graphics device at all: it will
+always use the dGPU by default.</em></p>
+</blockquote>
 <p>Tell Windows to use the appropriate graphics device for SpikeGLX:</p>
 <ol type="1">
 <li>Type “Graphics settings” into the search box of the Windows
@@ -494,11 +503,6 @@ enough:</p>
 <p>The best way to get the specs for your CPU’s built-in graphics is to
 do a Web search for your full processor model name, like “Intel Ultra 9
 275HX” and then click the link for the Intel spec sheet.</p>
-<blockquote>
-<p><em>Note that many desktop CPUs don’t have an iGPU, so if you only
-have a dGPU there is no need to set the graphics device at all: it will
-always use the dGPU by default.</em></p>
-</blockquote>
 <h4 id="graphics-problems">Graphics Problems</h4>
 <p>If your Graph windows or Shank viewers appear black, or if they flash
 or flicker, there are solutions on the <a href="SpikeGLX_FAQ.html#graphics-problems">SpikeGLX FAQ</a> page.</p>
