@@ -272,10 +272,16 @@ current version of OpenGL, enabled features, and more.</p>
 your card.</p>
 <h3 id="graphs-flicker">Graphs Flicker</h3>
 <p>“Why do the Graph window panels appear to flash or flicker?”</p>
-<p>This is usually due to slow graphics hardware…</p>
+<p>This is usually due to older slow graphics hardware…</p>
 <p>Optimal display settings are discussed <a href="UserManual.html#graphics-settings">here</a> in the User Manual.
-Follow those guidelines first.</p>
-<p>If flicker persists, try updating your graphics drivers.</p>
+Follow those guidelines first, which are oriented toward optimizing DAQ
+performance.</p>
+<p>If flicker persists, try updating your graphics drivers, and if that
+still doesn’t help, you can try changing the
+<code>Graphics Control Panel</code> setting to use the separate dGPU
+card for SpikeGLX. Core-i7, Core-i9 and Xeon are perfectly fine using a
+dGPU. Core-Ultra has longer latency, so in this case, be mindful that
+using the dGPU isn’t dragging down your DAQ performance.</p>
 <hr />
 <h2 id="remote-desktop">Remote Desktop</h2>
 <p>“Can I use Windows Remote Desktop Services (RDP) to check up on
