@@ -371,7 +371,7 @@ simply make sure the computer meets the combined requirements for both*.
 * Intel can run PXI or OneBox.
 * AMD can run OneBox.
 
-For PXI acquisition, Imec believes that AMD CPUs are not compatible with
+For PXI acquisition, imec believes that AMD CPUs are not compatible with
 the required enclustra drivers. We have not tested this ourselves, but we
 are aware that one or two users have had success with AMD systems. We need
 more data about this. If you have an AMD system, please try it and report
@@ -442,7 +442,7 @@ even if the CPU has LPE cores.*
 
 **Speed**:
 
-Our clock speed specs apply to the P-cores.
+Our clock speed specs apply to the P-core base frequency.
 
 *As of SpikeGLX 20260115 we tell the OS to prefer the P-cores for DAQ and
 E-cores for visuals.*
@@ -481,7 +481,7 @@ more than peak performance.
 
 #### For 384-channel probes
 
-* **CPU clock speed >= 2.5 GHz**
+* **CPU P-core base clock speed >= 2.5 GHz**
 * **[PassMark Single-thread](https://www.cpubenchmark.net/single-thread/) score >= 2500**
 
 **To run N 384-channel probes:**
@@ -506,7 +506,7 @@ will be safe with a
 
 #### For 1536-channel probes
 
-* **CPU clock speed >= 3.0 GHz**
+* **CPU P-core base clock speed >= 3.0 GHz**
 * **[PassMark Single-thread](https://www.cpubenchmark.net/single-thread/) score >= 3000**
 
 **To run N 1536-channel probes:**
@@ -521,6 +521,9 @@ will be safe with a
 
 + iGPU = Built-in "integrated" graphics processor
 + dGPU = Separate "discrete" graphics card
+
+> Note: Workstation CPUs most often lack iGPUs, so if configuring a workstation
+skip down to the [dGPU](#dgpu) section.
 
 #### iGPU v dGPU
 
@@ -552,8 +555,9 @@ These are generally not good enough:
 
 #### dGPU
 
-You'll need a dGPU for an old computer, or to configure a Xeon setup (Xeon CPUs lack
-iGPUs or they are super basic). The requirements for acquisition are pretty modest:
+You'll need a dGPU for an old computer, or to configure a workstation (workstation
+CPUs such as Xeon lack iGPUs or they are super basic). The requirements for acquisition
+are pretty modest:
 
 [PassMark G3D](https://www.videocardbenchmark.net/high_end_gpus.html) score > 3000**.
 
@@ -702,6 +706,10 @@ enclustra device in the list, and choose `Uninstall device` under the
 hardware changes` under the `Actions` menu. If that doesn't work,
 try a complete power cycle, again, starting the chassis first, then the PC.
 
+It's also worth mentioning that hot-plugging the chassis will frequently cause a
+"blue screen" and require a computer restart. That's not the fault of SpikeGLX
+or Open Ephys. It's a Thunderbolt plug-and-play problem.
+
 ### Test Performance
 
 In SpikeGLX select menu item `Window\Run Metrics` to display a window
@@ -749,26 +757,22 @@ Specs for a spike sorting machine:
 ### Graphics Card (GPU)
 
 The most important spec for your GPU card is that it be compatible with
-MATLAB (Kilosort) and with the PyTorch machine learning package used by
-both Kilosort 4, and the latest YASS replacement from Julien Boussard in
-the Paninski lab. That means you want a card that uses
-[Nvidia CUDA toolkit,](https://en.wikipedia.org/wiki/CUDA)
-version 11.6 or 11.7. To be on the safe side, we recommend a graphics card
-that is labeled as a 'GeForce card.' Such cards incorporate a chipset made
-by Nvidia and definitely run CUDA. So, we recommend:
+the [Nvidia CUDA toolkit](https://en.wikipedia.org/wiki/CUDA), used by
+Kilosort 4 through PyTorch, and earlier versions of Kilosort through MATLAB.
 
-* A GeForce card; made by Nvidia, MSI or Gigabyte. We have tested
+* An Nvidia technology card made by: Nvidia, MSI or Gigabyte. We have tested
 all of these.
 
 * The card should have a `Compute Capability` rating of 6.0 or greater.
 These ratings can be obtained on [this Nvidia page.](https://developer.nvidia.com/cuda-gpus)
 
-* The GPU card should have at least 8 GB of onboard RAM if your unit counts
-are in the hundreds. For unit counts in the thousands get 12 GB of GPU RAM.
+* The GPU card should have at least 12 GB of onboard RAM if your unit counts
+are in the hundreds. For unit counts in the thousands get 20 GB of GPU RAM.
 Note that you can adjust Kilosort's RAM usage via its `ops.NT` (batch size)
 parameter if you are running out of GPU RAM. In Kilosort 4, you can also set
 the 'clear_cache' parameter to 'true' (which tells it to do more garbage
-collection).
+collection). Another helpful trick, available both in Kilosort 4 and via
+preprocessors like CatGT, is to sort the shanks separately.
 
 > Note: Your computer power supply should be rated at greater than 2.5 X
 the GPU power requirement. Power supplies are pretty affordable; **get the
