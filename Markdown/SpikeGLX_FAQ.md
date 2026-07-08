@@ -11,6 +11,7 @@
     + [Crash](#crash)
 * [Gauging System Health](#gauging-system-health)
 * [How to Report Bugs](#how-to-report-bugs)
+* [Memory Leak](#memory-leak)
 * [Graphics Problems](#graphics-problems)
     + [Fuzzy Text](#fuzzy-text)
     + [Black Graphics](#black-graphics)
@@ -230,6 +231,21 @@ meta files. It's called `runname.errors.txt`.
 If the computer is hung so you can't save files, the next best thing is
 to write down any error messages you see in dialog boxes and the Console
 window.
+
+--------
+
+## Memory Leak
+
+Many users reported memory leaks, especially when using Nvidia cards after
+updating to Windows 11 version 24H2 in late 2024 and early 2025. Windows
+updates KB5058499 and KB5060999 should have fixed this issue.
+
+Separately, Nvidia acknowledged a potential memory leak when using NVENC
+hardware encoding. They provided a fix in GeForce driver 581.29, released on
+September 10, 2025.
+
+We experienced this issue ourselves and repaired by getting the latest
+Nvidia drivers.
 
 --------
 
