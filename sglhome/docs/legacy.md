@@ -11,7 +11,9 @@ for your needs. Release software packages are labeled as phase3A, phase3B1,
 phase3B2, phase20, phase30 or phase40. All early releases having no phase
 label are actually phase3A. All releases support NI-DAQ based acquisition.
 
-Summaries of development phases (newest to oldest):
+Summaries of development phases (newest file:///D:/github/Release_Page/sglhome/docs/new.md
+file:///D:/github/Release_Page/sglhome/docs/index.md
+to oldest):
 
 * **API4**: (Main branch) In 2025 Imec introduced API 4.0, which extends
 support to three technologies (tech): {STD=NP1+NP2, OPTO, NXT=NP3}. There
@@ -57,6 +59,7 @@ HS and BSC parts are specific to phase3A.
 
 **API4**:
 
+* [Release 20251218-api4](../App/Release_v20251218-api4.zip)...[Readme](../Readme/Readme_v20251218-api4.txt) : Export survey, SDK selectDevices, api v4.1.3
 * [Release 20251201-api4](../App/Release_v20251201-api4.zip)...[Readme](../Readme/Readme_v20251201-api4.txt) : Fix survey, aux BinMax, api v4.1.3
 * [Release 20250930-api4](../App/Release_v20250930-api4.zip)...[Readme](../Readme/Readme_v20250930-api4.txt) : Broken shanks, api v4.1.3
 * [Release 20250915-api4](../App/Release_v20250915-api4.zip)...[Readme](../Readme/Readme_v20250915-api4.txt) : Quadbase, API4, Qt6, api v4.1.3

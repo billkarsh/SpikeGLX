@@ -1,5 +1,10 @@
 # What's New On The Site?
 
+July 8, 2026
+
+* SpikeGLX 20260115-api4 (Core Ultra, better QB, new look, api v4.1.3).
+* Updated requirements doc.
+
 June 26, 2026
 
 * Enclustra_API4_API5_Win11.

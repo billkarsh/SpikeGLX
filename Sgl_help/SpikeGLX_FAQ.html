@@ -43,6 +43,7 @@ SpikeGLX</a></li>
 </ul></li>
 <li><a href="#gauging-system-health">Gauging System Health</a></li>
 <li><a href="#how-to-report-bugs">How to Report Bugs</a></li>
+<li><a href="#memory-leak">Memory Leak</a></li>
 <li><a href="#graphics-problems">Graphics Problems</a>
 <ul>
 <li><a href="#fuzzy-text">Fuzzy Text</a></li>
@@ -239,6 +240,17 @@ same name as your run and next to the bin and meta files. It’s called
 <p>If the computer is hung so you can’t save files, the next best thing
 is to write down any error messages you see in dialog boxes and the
 Console window.</p>
+<hr />
+<h2 id="memory-leak">Memory Leak</h2>
+<p>Many users reported memory leaks, especially when using Nvidia cards
+after updating to Windows 11 version 24H2 in late 2024 and early 2025.
+Windows updates KB5058499 and KB5060999 should have fixed this
+issue.</p>
+<p>Separately, Nvidia acknowledged a potential memory leak when using
+NVENC hardware encoding. They provided a fix in GeForce driver 581.29,
+released on September 10, 2025.</p>
+<p>We experienced this issue ourselves and repaired by getting the
+latest Nvidia drivers.</p>
 <hr />
 <h2 id="graphics-problems">Graphics Problems</h2>
 <h3 id="fuzzy-text">Fuzzy Text</h3>
