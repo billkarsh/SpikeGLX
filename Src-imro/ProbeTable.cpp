@@ -7,10 +7,10 @@
 #include <QJsonObject>
 #include <QSettings>
 
-#define FTAB    "C:/Users/labadmin/Desktop/ProbeTable/2026_05_11_Probe_feature_table_tab.txt"
-#define FINI    "C:/Users/labadmin/Desktop/ProbeTable/probe_features.ini"
-#define FJ2I    "C:/Users/labadmin/Desktop/ProbeTable/probe_features_j2i.ini"
-#define FJSN    "C:/Users/labadmin/Desktop/ProbeTable/probe_features.json"
+#define FTAB    "C:/Users/billk/Desktop/DT-4b/ProbeTable/2026_05_25_Probe_feature_table_tab.txt"
+#define FINI    "C:/Users/billk/Desktop/DT-4b/ProbeTable/probe_features.ini"
+#define FJ2I    "C:/Users/billk/Desktop/DT-4b/ProbeTable/probe_features_j2i.ini"
+#define FJSN    "C:/Users/billk/Desktop/DT-4b/ProbeTable/probe_features.json"
 #define VERS    "1.8"
 
 /* ---------------------------------------------------------------- */
@@ -139,13 +139,13 @@ void CProbeTbl::extini()
 
 // Fix cols_per_shank
 
-    foreach( const QString &grp, S.childGroups() ) {
-        S.beginGroup( grp );
-        QString val;
-        if( grp == "NP2006" || grp == "NP2022" )
-            S.setValue( "cols_per_shank", 2 );
-        S.endGroup();
-    }
+    // foreach( const QString &grp, S.childGroups() ) {
+    //     S.beginGroup( grp );
+    //     QString val;
+    //     if( grp == "NP2006" || grp == "NP2022" )
+    //         S.setValue( "cols_per_shank", 2 );
+    //     S.endGroup();
+    // }
 
 // Insert lf_sample_frequency_hz
 
