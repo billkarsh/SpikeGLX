@@ -9,12 +9,12 @@
 #define VERS_PXI_STD_BSC        "4.0.233"
 
 // API < 4.2.0
-#define VERS_PXI_OPTO_P1_BS     "3.0.196"
-#define VERS_PXI_OPTO_P1_BSC    "4.0.17"
+// #define VERS_PXI_OPTO_P1_BS     "3.0.196"
+// #define VERS_PXI_OPTO_P1_BSC    "4.0.17"
 
 // API >= 4.2.0
-// #define VERS_PXI_OPTO_P1_BS     "3.0.226"
-// #define VERS_PXI_OPTO_P1_BSC    "4.0.19"
+#define VERS_PXI_OPTO_P1_BS     "3.0.226"
+#define VERS_PXI_OPTO_P1_BSC    "4.0.19"
 
 #define VERS_PXI_NXT_PA_BS      "3.0.196"
 #define VERS_PXI_NXT_PA_BSC     "4.0.216"

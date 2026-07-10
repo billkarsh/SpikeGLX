@@ -1427,7 +1427,7 @@ int IMROTbl::bscpnToTech( const QString &pn )
 {
     if( pn == "sim" )
         return t_tech_sim;
-    else if( pn.isEmpty() || pn == "" || pn == "<empty>" )
+    else if( pn == "NPOPTO_BS_00" || pn.isEmpty() || pn == "" || pn == "<empty>" )
         return t_tech_opto_p1;
     else if( pn == "NPNXT_QBSC_01" )
         return t_tech_nxt_pa;
