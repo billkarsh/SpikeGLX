@@ -241,6 +241,11 @@ public:
     virtual int lfGain( int ch ) const = 0;
     virtual int apFlt( int ch ) const = 0;
 
+    virtual void optoSetCur( int color, int site )
+        {Q_UNUSED(color); Q_UNUSED(site)}
+    virtual int optoGetCur( std::vector<int> &vChan, int color ) const
+        {Q_UNUSED(vChan); Q_UNUSED(color); return -1;}
+
     virtual bool chIsRef( int ch ) const = 0;
     virtual int idxToGain( int idx ) const = 0;
     virtual int gainToIdx( int gain ) const = 0;

@@ -19,8 +19,9 @@ MGraphY::MGraphY()
 {
     yscl        = 1.0;
     usrChan     = 0;
-    iclr        = 0;
     anaclr      = -1;
+    iclr        = 0;
+    rhsLabel    = 0;
     drawBinMax  = false;
     isDigType   = false;
 }
@@ -782,7 +783,8 @@ void MGraph::drawLabels()
 
     QFontMetrics    FM( font );
     int             clipHgt = height(),
-                    right   = width() - 4,
+                    right   = width(),
+                    rhsW    = FM.boundingRect( 'M' ).width() + 4,
                     ftHt    = FM.boundingRect( 'A' ).height(),
                     fontMid = ftHt / 2 - X->clipTop;
     float           offset  = (X->ypxPerGrf > 2.25f * ftHt ? 0.25f : 0.5f);
@@ -790,7 +792,7 @@ void MGraph::drawLabels()
     for( int iy = 0, ny = (int)X->Y.size(); iy < ny; ++iy ) {
 
         bool    isL = !X->Y[iy]->lhsLabel.isEmpty(),
-                isR = !X->Y[iy]->rhsLabel.isEmpty();
+                isR =  X->Y[iy]->rhsLabel != 0;
 
         if( !(isL || isR) )
             continue;
@@ -800,22 +802,20 @@ void MGraph::drawLabels()
         if( y_base < 0 || y_base > clipHgt )
             continue;
 
-        if( isL ) {
+        if( isL )
+            renderTextWin( 4, y_base, X->Y[iy]->lhsLabel, font );
 
-            renderTextWin(
-                4,
-                y_base,
-                X->Y[iy]->lhsLabel, font );
+        if( X->Y[iy]->rhsLabel & rhsSave )
+            renderTextWin( right -   rhsW, y_base, "S", font );
+        if( X->Y[iy]->rhsLabel & rhsAudio )
+            renderTextWin( right - 2*rhsW, y_base, "A", font );
+        if( X->Y[iy]->rhsLabel & rhsBlue ) {
+            renderTextWin( right - 3*rhsW,
+                y_base, (X->Y[iy]->rhsLabel & rhsLocase ? "b" : "B"), font );
         }
-
-        if( isR ) {
-
-            renderTextWin(
-                right
-                    - X->Y[iy]->rhsLabel.size()
-                    * FM.boundingRect( 'S' ).width(),
-                y_base,
-                X->Y[iy]->rhsLabel, font );
+        if( X->Y[iy]->rhsLabel & rhsRed ) {
+            renderTextWin( right - 3*rhsW - (X->Y[iy]->rhsLabel & rhsBlue ? rhsW/2 : 0),
+                y_base, (X->Y[iy]->rhsLabel & rhsLocase ? "r" : "R"), font );
         }
     }
 

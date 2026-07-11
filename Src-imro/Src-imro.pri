@@ -52,6 +52,7 @@ SOURCES += \
     $$PWD/IMROTbl_T1123.cpp \
     $$PWD/IMROTbl_T1200.cpp \
     $$PWD/IMROTbl_T1221.cpp \
+    $$PWD/IMROTbl_T1300.cpp \
     $$PWD/IMROTbl_T2003.cpp \
     $$PWD/IMROTbl_T2013.cpp \
     $$PWD/IMROTbl_T2020.cpp \

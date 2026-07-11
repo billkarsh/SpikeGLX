@@ -31,6 +31,14 @@ struct EvtSpan {
 /* MGraphY -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+enum MGraph_rhsLabel {
+    rhsSave     = 1,
+    rhsAudio    = 2,
+    rhsBlue     = 4,
+    rhsRed      = 8,
+    rhsLocase   = 16
+};
+
 // Generally, client owns these and the MGraph package just
 // points to the active ones.
 //
@@ -40,13 +48,13 @@ public:
     double          yscl;
     WrapT<float>    yval,
                     yval2;          // used for binMax
-    QString         lhsLabel,
-                    rhsLabel;
+    QString         lhsLabel;
     int             usrChan,
                     anarow,
                     anaclr,
                     iclr;
-    qint16          usrType,
+    qint16          rhsLabel,
+                    usrType,
                     anashank;
     bool            drawBinMax,
                     isDigType;

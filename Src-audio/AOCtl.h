@@ -88,7 +88,7 @@ public:
     AOCtl( const DAQ::Params &p );
     void predelete();
 
-    bool uniqueAIs( std::vector<int> &vAI, const QString &stream ) const;
+    bool uniqueChans( std::vector<int> &vChan, const QString &stream ) const;
 
     bool showDialog( QWidget *parent = 0 );
 

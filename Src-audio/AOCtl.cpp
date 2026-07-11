@@ -260,9 +260,9 @@ void AOCtl::predelete()
 //
 // Callable from any thread.
 //
-bool AOCtl::uniqueAIs( std::vector<int> &vAI, const QString &stream ) const
+bool AOCtl::uniqueChans(std::vector<int> &vChan, const QString &stream ) const
 {
-    vAI.clear();
+    vChan.clear();
 
 // --------
 // Matches?
@@ -280,10 +280,10 @@ bool AOCtl::uniqueAIs( std::vector<int> &vAI, const QString &stream ) const
         QMutexLocker        ml( &aoMtx );
         const EachStream    &E = usr.each[p.stream2iq( stream )];
 
-        vAI.push_back( E.left );
+        vChan.push_back( E.left );
 
         if( nDevChans > 1 && E.right != E.left )
-            vAI.push_back( E.right );
+            vChan.push_back( E.right );
     }
 
     return true;

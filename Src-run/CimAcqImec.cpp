@@ -2343,11 +2343,11 @@ QString CimAcqImec::opto_getAttens( int ip, int color )
 QString CimAcqImec::opto_emit( int ip, int color, int site )
 {
     QString                     msg;
-    const CimCfg::ImProbeDat    &P      = T.get_iProbe( ip );
-    int                         nSite   = p.im.prbj[ip].roTbl->nOptoSites();
-    NP_ErrorCode                err;
+    const CimCfg::ImProbeDat    &P  = T.get_iProbe( ip );
+    IMROTbl                     *R  = p.im.prbj[ip].roTbl;
+    NP_ErrorCode                err = FAILED;
 
-    if( !nSite ) {
+    if( !R->nOptoSites() ) {
         msg =
         QString("OPTOEMIT: Probe (ip %1) is not an optical probe.").arg( ip );
     }
@@ -2371,6 +2371,11 @@ QString CimAcqImec::opto_emit( int ip, int color, int site )
                     .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) );
             runError( msg );
         }
+    }
+
+    if( err == SUCCESS ) {
+        R->optoSetCur( color, site );
+        mainApp()->getRun()->grfUpdateRHSFlagsAll();
     }
 
     return msg;

@@ -281,35 +281,21 @@ void SVGrafsM_Ob::updateRHSFlags()
     QMutexLocker    ml( &drawMtx );
     QMutexLocker    ml2( &theX->dataMtx );
 
-// First consider only save flags for all channels
+// Init and do save flags
 
     const QBitArray &saveBits = p.im.get_iStrOneBox( ip ).sns.saveBits;
 
-    for( int ic = 0, nC = (int)ic2Y.size(); ic < nC; ++ic ) {
+    for( int ic = 0, nC = (int)ic2Y.size(); ic < nC; ++ic )
+        ic2Y[ic].rhsLabel = (saveBits.testBit( ic ) ? rhsSave : 0);
 
-        MGraphY &Y = ic2Y[ic];
+// Audio
 
-        if( saveBits.testBit( ic ) )
-            Y.rhsLabel = "S";
-        else
-            Y.rhsLabel.clear();
-    }
+    std::vector<int>    vChan;
 
-// Next rewrite the few audio channels
+    if( mainApp()->getAOCtl()->uniqueChans( vChan, p.jsip2stream( jsOB, ip ) ) ) {
 
-    std::vector<int>    vAI;
-
-    if( mainApp()->getAOCtl()->uniqueAIs( vAI, p.jsip2stream( jsOB, ip ) ) ) {
-
-        for( int ic : vAI ) {
-
-            MGraphY &Y = ic2Y[ic];
-
-            if( saveBits.testBit( ic ) )
-                Y.rhsLabel = "A S";
-            else
-                Y.rhsLabel = "A  ";
-        }
+        for( int ic : vChan )
+            ic2Y[ic].rhsLabel |= rhsAudio;
     }
 }
 

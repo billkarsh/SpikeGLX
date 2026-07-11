@@ -31,7 +31,9 @@ SVGrafsM_Ni::SVGrafsM_Ni(
     int                 jpanel )
     :   SVGrafsM(gw, p, jsNI, 0, jpanel)
 {
-    if( neurChanCount() ) {
+    int nN = p.ni.niCumTypCnt[CniCfg::niSumNeural];
+
+    if( nN ) {
         shankCtl = new SVShankCtl_Ni( p, jpanel, this );
         shankCtl->init();
         ConnectUI( shankCtl, SIGNAL(selChanged(int,bool)), this, SLOT(externSelectChan(int)) );
@@ -61,7 +63,7 @@ SVGrafsM_Ni::SVGrafsM_Ni(
     cTTLAction = new QAction( "Color TTL Events...", this );
     ConnectUI( cTTLAction, SIGNAL(triggered()), this, SLOT(colorTTL()) );
 
-    car.setChans( chanCount(), neurChanCount() );
+    car.setChans( p.stream_nChans( jsNI, 0 ), nN );
     car.setSU( &p.ni.sns.shankMap );
 }
 
@@ -385,35 +387,21 @@ void SVGrafsM_Ni::updateRHSFlags()
     QMutexLocker    ml( &drawMtx );
     QMutexLocker    ml2( &theX->dataMtx );
 
-// First consider only save flags for all channels
+// Init and do save flags
 
     const QBitArray &saveBits = p.ni.sns.saveBits;
 
-    for( int ic = 0, nC = (int)ic2Y.size(); ic < nC; ++ic ) {
+    for( int ic = 0, nC = (int)ic2Y.size(); ic < nC; ++ic )
+        ic2Y[ic].rhsLabel = (saveBits.testBit( ic ) ? rhsSave : 0);
 
-        MGraphY &Y = ic2Y[ic];
+// Audio
 
-        if( saveBits.testBit( ic ) )
-            Y.rhsLabel = "S";
-        else
-            Y.rhsLabel.clear();
-    }
+    std::vector<int>    vChan;
 
-// Next rewrite the few audio channels
+    if( mainApp()->getAOCtl()->uniqueChans( vChan, p.jsip2stream( jsNI, 0 ) ) ) {
 
-    std::vector<int>    vAI;
-
-    if( mainApp()->getAOCtl()->uniqueAIs( vAI, p.jsip2stream( jsNI, 0 ) ) ) {
-
-        for( int ic : vAI ) {
-
-            MGraphY &Y = ic2Y[ic];
-
-            if( saveBits.testBit( ic ) )
-                Y.rhsLabel = "A S";
-            else
-                Y.rhsLabel = "A  ";
-        }
+        for( int ic : vChan )
+            ic2Y[ic].rhsLabel |= rhsAudio;
     }
 }
 

@@ -78,7 +78,7 @@ SVGrafsM_Im::SVGrafsM_Im(
     ConnectUI( cTTLAction, SIGNAL(triggered()), this, SLOT(colorTTL()) );
 
     car.setAuto( p.im.prbj[ip].roTbl );
-    car.setChans( chanCount(), neurChanCount() );
+    car.setChans( p.stream_nChans( jsIM, ip ), p.im.prbj[ip].imCumTypCnt[CimCfg::imSumNeural] );
     car.setSU( &p.im.prbj[ip].sns.shankMap );
 }
 
@@ -430,34 +430,41 @@ void SVGrafsM_Im::updateRHSFlags()
     QMutexLocker    ml( &drawMtx );
     QMutexLocker    ml2( &theX->dataMtx );
 
-// First consider only save flags for all channels
+// Init and do save flags
 
-    const QBitArray &saveBits = p.im.prbj[ip].sns.saveBits;
+    const CimCfg::PrbEach   &E          = p.im.prbj[ip];
+    const QBitArray         &saveBits   = E.sns.saveBits;
 
-    for( int ic = 0, nC = (int)ic2Y.size(); ic < nC; ++ic ) {
+    for( int ic = 0, nC = (int)ic2Y.size(); ic < nC; ++ic )
+        ic2Y[ic].rhsLabel = (saveBits.testBit( ic ) ? rhsSave : 0);
 
-        MGraphY &Y = ic2Y[ic];
+// Audio
 
-        if( saveBits.testBit( ic ) )
-            Y.rhsLabel = "S";
-        else
-            Y.rhsLabel.clear();
+    std::vector<int>    vChan;
+
+    if( mainApp()->getAOCtl()->uniqueChans( vChan, p.jsip2stream( jsIM, ip ) ) ) {
+
+        for( int ic : vChan )
+            ic2Y[ic].rhsLabel |= rhsAudio;
     }
 
-// Next rewrite the few audio channels
+// Opto
 
-    std::vector<int>    vAI;
-
-    if( mainApp()->getAOCtl()->uniqueAIs( vAI, p.jsip2stream( jsIM, ip ) ) ) {
-
-        for( int ic : vAI ) {
-
-            MGraphY &Y = ic2Y[ic];
-
-            if( saveBits.testBit( ic ) )
-                Y.rhsLabel = "A S";
+    if( E.roTbl->optoGetCur( vChan, 0 ) >= 0 ) {
+        for( int ic : vChan ) {
+            if( ic >= 100000 )
+                ic2Y[ic - 100000].rhsLabel |= rhsBlue | rhsLocase;
             else
-                Y.rhsLabel = "A  ";
+                ic2Y[ic].rhsLabel |= rhsBlue;
+        }
+    }
+
+    if( E.roTbl->optoGetCur( vChan, 1 ) >= 0 ) {
+        for( int ic : vChan ) {
+            if( ic >= 100000 )
+                ic2Y[ic - 100000].rhsLabel |= rhsRed | rhsLocase;
+            else
+                ic2Y[ic].rhsLabel |= rhsRed;
         }
     }
 }
