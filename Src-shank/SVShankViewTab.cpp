@@ -145,6 +145,12 @@ void SVShankViewTab::setAnatomyPP( const QString &elems, int ip, int sk )
 }
 
 
+void SVShankViewTab::setEmitters( int blue, int red )
+{
+    SC->view()->setEmitters( blue, red );
+}
+
+
 void SVShankViewTab::colorTraces( MGraphX *theX, std::vector<MGraphY> &vY )
 {
     anat.colorTraces( theX, vY, svTabUI->tracesChk->isChecked() );

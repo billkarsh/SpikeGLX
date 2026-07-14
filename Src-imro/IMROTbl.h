@@ -241,9 +241,13 @@ public:
     virtual int lfGain( int ch ) const = 0;
     virtual int apFlt( int ch ) const = 0;
 
+    virtual void optoGetEmts( std::vector<float> &vRows, int color ) const
+        {vRows.clear(); Q_UNUSED(color);}
     virtual void optoSetCur( int color, int site )
         {Q_UNUSED(color); Q_UNUSED(site)}
-    virtual int optoGetCur( std::vector<int> &vChan, int color ) const
+    virtual int optoGetCur( int color ) const
+        {Q_UNUSED(color); return -1;}
+    virtual int optoGetNeib( std::vector<int> &vChan, int color ) const
         {Q_UNUSED(vChan); Q_UNUSED(color); return -1;}
 
     virtual bool chIsRef( int ch ) const = 0;

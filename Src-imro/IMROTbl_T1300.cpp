@@ -1,9 +1,39 @@
 
 #include "IMROTbl_T1300.h"
 
+#define blue_emitter0_dist_from_elec0_um    74
+#define  red_emitter0_dist_from_elec0_um    68
+#define emitter_pitch_um                    100
+#define blue_emitter_count                  14
+#define  red_emitter_count                  14
+
+
 /* ---------------------------------------------------------------- */
 /* struct IMROTbl ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+// Get array of emitter v-centers in units of rows.
+//
+void IMROTbl_T1300::optoGetEmts( std::vector<float> &vRows, int color ) const
+{
+    vRows.clear();
+
+    if( color ) {
+        for( int i = 0; i < red_emitter_count; ++i ) {
+            vRows.push_back(
+                ((float)red_emitter0_dist_from_elec0_um
+                + i * emitter_pitch_um) / _zpitch );
+        }
+    }
+    else {
+        for( int i = 0; i < blue_emitter_count; ++i ) {
+            vRows.push_back(
+                ((float)blue_emitter0_dist_from_elec0_um
+                + i * emitter_pitch_um) / _zpitch );
+        }
+    }
+}
+
 
 void IMROTbl_T1300::optoSetCur( int color, int site )
 {
@@ -14,16 +44,23 @@ void IMROTbl_T1300::optoSetCur( int color, int site )
 }
 
 
+int IMROTbl_T1300::optoGetCur( int color ) const
+{
+    if( color )
+        return curRed;
+    else
+        return curBlue;
+}
+
+
 // If an emitter is enabled (>=0) vChan gets a neighborhood of channels.
 // The channel is [0..nC] if its row is within in_rad  of emitter.
 // 100,000 is added if its row is within out_rad of emitter.
 //
-int IMROTbl_T1300::optoGetCur( std::vector<int> &vChan, int color ) const
+// Return enabled emitter index or -1.
+//
+int IMROTbl_T1300::optoGetNeib( std::vector<int> &vChan, int color ) const
 {
-#define blue_emitter0_dist_from_elec0_um    74
-#define  red_emitter0_dist_from_elec0_um    68
-#define emitter_pitch_um                    100
-
     vChan.clear();
 
     if( color ) {

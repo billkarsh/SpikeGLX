@@ -40,7 +40,9 @@ private:
     QMap<ShankMapDesc,uint>     ISM;
     std::vector<SVAnaRgn>       vA;
     std::vector<float>          vG,     // virtual grid
-                                vR;     // active sites
+                                vR,     // active sites
+                                vBlue,  // blue emitter centers
+                                vRed;   // red emitter centers
     std::vector<SColor>         vGclr,  // grid cell visibility
                                 vRclr;  // active colors
     std::vector<int>            col2vis_ev,
@@ -60,7 +62,9 @@ private:
                                 slidePos,
                                 vBot,
                                 vTop,
-                                sel;
+                                sel,
+                                iBlue,
+                                iRed;
     uint8_t                     sr_mask;
 
 public:
@@ -84,6 +88,8 @@ public:
     void colorPads( const double *val, double rngMax );
     void setAnatomy( const std::vector<SVAnaRgn> &vA )
         {QMutexLocker ml( &dataMtx ); this->vA = vA;}
+    void setEmitters( int blue, int red )
+        {QMutexLocker ml( &dataMtx ); iBlue = blue, iRed = red;}
 
 signals:
     void cursorOver( int ic, bool shift );
@@ -118,6 +124,7 @@ private:
     void drawPads();
     void drawSel();
     void drawBanks();
+    void drawOpto();
     void drawExcludes();
     void drawROIs();
     void drawTri( float l, float t, float w, float h, SColor c );

@@ -59,6 +59,7 @@ public:
     void init( bool autosize );
     void qf_enable();
     void setAnatomyPP( const QString &elems, int ip, int sk );
+    void setEmitters( int blue, int red );
     void colorTraces( MGraphX *theX, std::vector<MGraphY> &vY );
     QString getLbl( int s, int r ) const    {return anat.getLbl( s, r );}
 

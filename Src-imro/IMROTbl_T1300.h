@@ -32,8 +32,10 @@ struct IMROTbl_T1300 : public IMROTbl_T0base
     virtual int nOptoSites() const      {return 14;}
     virtual int probeTech() const       {return t_tech_opto_p1;}
 
+    virtual void optoGetEmts( std::vector<float> &vRows, int color ) const;
     virtual void optoSetCur( int color, int site );
-    virtual int optoGetCur( std::vector<int> &vChan, int color ) const;
+    virtual int optoGetCur( int color ) const;
+    virtual int optoGetNeib( std::vector<int> &vChan, int color ) const;
 
 private:
     void neighbors( std::vector<int> &vChan, double zE ) const;

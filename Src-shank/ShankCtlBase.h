@@ -56,6 +56,8 @@ public:
         {}
     virtual void setAnatomyPP( const QString& /*elems*/, int /*sk*/ )
         {}
+    virtual void setEmitters( int /*blue*/, int /*red*/ )
+        {}
     virtual void colorTraces( MGraphX* /*theX*/, std::vector<MGraphY>& /*vY*/ )
         {}
     virtual QString getLbl( int /*s*/, int /*r*/ ) const

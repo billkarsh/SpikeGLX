@@ -450,7 +450,7 @@ void SVGrafsM_Im::updateRHSFlags()
 
 // Opto
 
-    if( E.roTbl->optoGetCur( vChan, 0 ) >= 0 ) {
+    if( E.roTbl->optoGetNeib( vChan, 0 ) >= 0 ) {
         for( int ic : vChan ) {
             if( ic >= 100000 )
                 ic2Y[ic - 100000].rhsLabel |= rhsBlue | rhsLocase;
@@ -459,7 +459,7 @@ void SVGrafsM_Im::updateRHSFlags()
         }
     }
 
-    if( E.roTbl->optoGetCur( vChan, 1 ) >= 0 ) {
+    if( E.roTbl->optoGetNeib( vChan, 1 ) >= 0 ) {
         for( int ic : vChan ) {
             if( ic >= 100000 )
                 ic2Y[ic - 100000].rhsLabel |= rhsRed | rhsLocase;
@@ -467,6 +467,10 @@ void SVGrafsM_Im::updateRHSFlags()
                 ic2Y[ic].rhsLabel |= rhsRed;
         }
     }
+
+    shankCtl->setEmitters(
+        E.roTbl->optoGetCur( 0 ),
+        E.roTbl->optoGetCur( 1 ) );
 }
 
 

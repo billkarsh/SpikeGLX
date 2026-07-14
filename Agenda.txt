@@ -5,6 +5,7 @@
 --------
 + Enable OPTO-II BS.
 + OPTO trace labels.
++ OPTO ShankView emitters.
 
 20260115
 --------

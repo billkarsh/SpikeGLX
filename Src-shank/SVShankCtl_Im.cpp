@@ -67,6 +67,12 @@ void SVShankCtl_Im::setAnatomyPP( const QString &elems, int sk )
 }
 
 
+void SVShankCtl_Im::setEmitters( int blue, int red )
+{
+    svTab->setEmitters( blue, red );
+}
+
+
 void SVShankCtl_Im::colorTraces( MGraphX *theX, std::vector<MGraphY> &vY )
 {
     svTab->colorTraces( theX, vY );

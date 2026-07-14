@@ -17,6 +17,11 @@
 // x-coords are in range [-1,1].
 // y-coords are in range [0,spanPix()].
 
+// User vert scaling var: rowPix = padPix + sepPix.
+// We define separator as a frac of pad height: ROWSEP,
+// so rowPix = padPix(1 + ROWSEP), or, padPix = rowPix/(1+ROWSEP).
+// sepPix = rowPix - padPix = rowPix * ROWSEP/(1+ROWSEP).
+
 #define MRGPX   8
 #define ROIPX   16
 #define PADMRG  2
@@ -35,7 +40,8 @@
 
 ShankView::ShankView( QWidget *parent )
     :   QOpenGLWidget(parent),
-        smap(0), rowPix(8), bnkRws(0), slidePos(0), sel(0), sr_mask(-1)
+        smap(0), rowPix(8), bnkRws(0), slidePos(0), sel(0),
+        iBlue(-1), iRed(-1), sr_mask(-1)
 {
     setAutoFillBackground( false );
     setUpdatesEnabled( true );
@@ -107,6 +113,9 @@ void ShankView::setSel( int ic, bool update )
 void ShankView::setImro( const IMROTbl *R, uint8_t sr_mask )
 {
     QMutexLocker    ml( &dataMtx );
+
+    R->optoGetEmts( vBlue, 0 );
+    R->optoGetEmts( vRed, 1 );
 
     col2vis_ev = R->col2vis_ev();
     col2vis_od = R->col2vis_od();
@@ -233,6 +242,7 @@ void ShankView::paintGL()
     drawGrid();
     drawPads();
     drawBanks();
+    drawOpto();
     drawExcludes();
     drawROIs();
     drawSel();
@@ -458,7 +468,7 @@ void ShankView::drawAnatomy()
     if( !nA || !smap || !bnkRws )
         return;
 
-    float   vsep    = ROWSEP/(1.0f + ROWSEP),
+    float   vsep    = ROWSEP/(1.0f+ROWSEP),
             dv      = 0.5f * vsep * rowPix;
     int     ns1     = smap->ns - 1;
 
@@ -673,7 +683,7 @@ void ShankView::drawBanks()
 
     GLfloat h[] = {-1.0f, 0.0f, 1.0f, 0.0f};
 
-    float   halfSep = 0.5f * ROWSEP/(1.0f + ROWSEP);
+    float   halfSep = 0.5f * ROWSEP/(1.0f+ROWSEP);
     int     nL      = smap->nr / bnkRws;
 
     if( nL * bnkRws >= (int)smap->nr )
@@ -687,6 +697,90 @@ void ShankView::drawBanks()
 
         glVertexPointer( 2, GL_FLOAT, 0, h );
         glDrawArrays( GL_LINES, 0, 2 );
+    }
+}
+
+
+// A - D
+// |   |
+// B - C
+//
+void ShankView::drawOpto()
+{
+    if( vBlue.size() ) {
+
+        glLineWidth( 1.0f );
+        glColor3f( GRDCLR, GRDCLR, GRDCLR );
+        glPolygonMode( GL_FRONT, GL_FILL );
+
+        GLfloat vert[8], eon[8];
+        float   edg = -hlfWid,
+                wid = edg - VLFT,
+                cen = edg - wid/2;
+
+        wid *= 0.20f;
+        vert[0] = vert[2] = cen - wid;
+        vert[4] = vert[6] = cen + wid;
+
+        for( int ie = 0, ne = (int)vBlue.size(); ie < ne; ++ie ) {
+
+            float   mid = TIPPX + vBlue[ie] * rowPix;
+
+            vert[1] = vert[7] = mid - rowPix;
+            vert[3] = vert[5] = mid + rowPix;
+
+            if( ie == iBlue )
+                memcpy( eon, vert, 8*sizeof(GLfloat) );
+
+            glVertexPointer( 2, GL_FLOAT, 0, vert );
+            glDrawArrays( GL_QUADS, 0, 4 );
+        }
+
+        if( iBlue >= 0 ) {
+            glColor3f( 0, 1.0f, 1.0f );
+            glVertexPointer( 2, GL_FLOAT, 0, eon );
+            glDrawArrays( GL_QUADS, 0, 4 );
+        }
+
+        glLineWidth( 1.0f );
+    }
+
+    if( vRed.size() ) {
+
+        glLineWidth( 1.0f );
+        glColor3f( GRDCLR, GRDCLR, GRDCLR );
+        glPolygonMode( GL_FRONT, GL_FILL );
+
+        GLfloat vert[8], eon[8];
+        float   edg = -hlfWid + shkWid,
+                wid = VRGT - edg,
+                cen = edg + wid/2;
+
+        wid *= 0.20f;
+        vert[0] = vert[2] = cen - wid;
+        vert[4] = vert[6] = cen + wid;
+
+        for( int ie = 0, ne = (int)vRed.size(); ie < ne; ++ie ) {
+
+            float   mid = TIPPX + vRed[ie] * rowPix;
+
+            vert[1] = vert[7] = mid - rowPix;
+            vert[3] = vert[5] = mid + rowPix;
+
+            if( ie == iRed )
+                memcpy( eon, vert, 8*sizeof(GLfloat) );
+
+            glVertexPointer( 2, GL_FLOAT, 0, vert );
+            glDrawArrays( GL_QUADS, 0, 4 );
+        }
+
+        if( iRed >= 0 ) {
+            glColor3f( 1.0f, 0, 0.3f );
+            glVertexPointer( 2, GL_FLOAT, 0, eon );
+            glDrawArrays( GL_QUADS, 0, 4 );
+        }
+
+        glLineWidth( 1.0f );
     }
 }
 
@@ -755,7 +849,7 @@ void ShankView::drawROIs()
     glColor3f( 0.0f, 0.75f, 0.0f );
     glPolygonMode( GL_FRONT, GL_LINE );
 
-    float   vsep    = ROWSEP/(1.0f + ROWSEP),
+    float   vsep    = ROWSEP/(1.0f+ROWSEP),
             dv      = 0.33f * vsep * rowPix,
             dh      = 0.20f * colWid*COLSEP;
     int     nc      = smap->nc,
