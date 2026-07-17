@@ -26,7 +26,7 @@ void ShankEditTab::Click::down( int s, int c, int r, bool ctrl )
 
     if( selected( c, r, true ) )
         se->setSel( s, sel_ib, true );
-    else if( se->canEdit && selected( c, r, false ) )
+    else if( se->canEdit && !ctrl && selected( c, r, false ) )
         se->setSel( s, sel_ib, false );
     else if( !se->canEdit && !ctrl ) {
         se->beep( "Non-standard IMRO; can not be edited" );

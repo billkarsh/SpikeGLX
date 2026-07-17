@@ -861,9 +861,9 @@ void ShankView::drawIncludes()
     int     nc      = smap->nc,
             nr      = smap->nr;
 
-    glLineWidth( 1.0f );
+    glLineWidth( 3.0f );
 
-    glColor3f( 0.9f, 0.9f, 0 );
+    glColor3f( 0, 0, 1.0f );
     glPolygonMode( GL_FRONT, GL_LINE );
 
     for( int ii = 0; ii < nI; ++ii ) {
@@ -965,12 +965,12 @@ void ShankView::drawWheres()
 
     glLineWidth( 3.0f );
 
-    glColor3f( 0.9f, 0.9f, 0 );
+    glColor3f( 0, 0, 1.0f );
     glPolygonMode( GL_FRONT, GL_LINE );
 
     float   vsep    = ROWSEP/(1.0f+ROWSEP),
-            dv      = 0.25f * vsep * rowPix,
-            dh      = 0.15f * colWid*COLSEP;
+            dv      = 0.05f * vsep * rowPix,
+            dh      = 0.05f * colWid*COLSEP;
     int     nc      = smap->nc,
             nr      = smap->nr;
 

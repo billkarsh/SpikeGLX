@@ -44,7 +44,7 @@ vertical-align: middle;
 <li><a href="#making-new-boxes">Making New Boxes</a></li>
 <li><a href="#resizing-boxes">Resizing Boxes</a></li>
 <li><a href="#clearingerasing-boxes">Clearing/Erasing Boxes</a></li>
-<li><a href="#show-source">Show Source</a></li>
+<li><a href="#resolve-site-conflicts">Resolve Site Conflicts</a></li>
 <li><a href="#boxes-file-chans">Boxes =&gt; file chans</a></li>
 </ul></li>
 </ul></li>
@@ -123,25 +123,29 @@ bottom edge.</li>
 <li>The <code>Clear All</code> button erases all boxes.</li>
 <li><code>Shift-click</code> in a box to clear it.</li>
 </ul>
-<h4 id="show-source">Show Source</h4>
-<ul>
-<li>Ctrl-click to place a yellow box and see its associated sites.</li>
-<li>The size and shape controls work on both green and yellow
-boxes.</li>
-<li>You can make several yellow boxes.</li>
-<li>Click-and-drag to resize them.</li>
-<li>Placement is limited by other yellow objects, and by Rqd.</li>
-<li>Shift-click to erase them.</li>
-</ul>
+<h4 id="resolve-site-conflicts">Resolve Site Conflicts</h4>
 <p>Suppose you’ve made a set of green ROI boxes but you’ve now got
 forbidden sites right over a key activity hotspot. Can you fix that?
-Place a yellow box on the hotspot to see which green box is associated
+Place a blue box on the hotspot to see which green box is associated
 with that hotspot, and which other locations on the probe would be
 affected if you edit that green box.</p>
+<ul>
+<li>Ctrl-click to place a blue box and see its associated sites.</li>
+<li>The size and shape controls work on both green and blue boxes.</li>
+<li>You can make several blue boxes.</li>
+<li>Click-and-drag to resize them.</li>
+<li>Placement is limited by other blue objects, and by Rqd.</li>
+<li>Shift-click to erase them.</li>
+</ul>
 <blockquote>
 <p><em>Tip: To lasso a hotspot, set Nrows small and ctrl-click in the
 center of the target hotspot. Then click-and-drag just inside the
 top/bottom of the lasso to cover neatly.</em></p>
+</blockquote>
+<blockquote>
+<p><em>Note: Blue boxes only go away when you manually shift-click in
+them. Otherwise they stay put even if you load alternative IMRO
+files.</em></p>
 </blockquote>
 <h4 id="boxes-file-chans">Boxes =&gt; file chans</h4>
 <ul>

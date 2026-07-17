@@ -12,7 +12,7 @@
         + [Making New Boxes](#making-new-boxes)
         + [Resizing Boxes](#resizing-boxes)
         + [Clearing/Erasing Boxes](#clearingerasing-boxes)
-        + [Show Source](#show-source)
+        + [Resolve Site Conflicts](#resolve-site-conflicts)
         + [Boxes => file chans](#boxes-file-chans)
 * [View Tab](#view-tab-quick-reference)
     + [Online Data Flow](#online-data-flow)
@@ -83,24 +83,27 @@ When you click in an existing box `Sel` reads out its size, in channels.
 * The `Clear All` button erases all boxes.
 * `Shift-click` in a box to clear it.
 
-#### Show Source
-
-* Ctrl-click to place a yellow box and see its associated sites.
-* The size and shape controls work on both green and yellow boxes.
-* You can make several yellow boxes.
-* Click-and-drag to resize them.
-* Placement is limited by other yellow objects, and by Rqd.
-* Shift-click to erase them.
+#### Resolve Site Conflicts
 
 Suppose you've made a set of green ROI boxes but you've now got forbidden
-sites right over a key activity hotspot. Can you fix that? Place a yellow
+sites right over a key activity hotspot. Can you fix that? Place a blue
 box on the hotspot to see which green box is associated with that hotspot,
 and which other locations on the probe would be affected if you edit that
 green box.
 
+* Ctrl-click to place a blue box and see its associated sites.
+* The size and shape controls work on both green and blue boxes.
+* You can make several blue boxes.
+* Click-and-drag to resize them.
+* Placement is limited by other blue objects, and by Rqd.
+* Shift-click to erase them.
+
 >*Tip: To lasso a hotspot, set Nrows small and ctrl-click in the center
 of the target hotspot. Then click-and-drag just inside the top/bottom
 of the lasso to cover neatly.*
+
+>*Note: Blue boxes only go away when you manually shift-click in them.
+Otherwise they stay put even if you load alternative IMRO files.*
 
 #### Boxes => file chans
 
