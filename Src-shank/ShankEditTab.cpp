@@ -188,38 +188,59 @@ void ShankEditTab::Click::sel_set_gap0( int sel_FLR )
             gap0 = B.rLim;
     }
 
-    if( isW ) {
-        gap0 = sel_edge0 -
-                qMin( se->rowsShortfallW( se->vW[sel_ib] ),
-                sel_edge0 - gap0 );
-        return;
-    }
-
 // Scan vX (sorted)
 
-    const IMRO_ROI  &B = se->vR[sel_ib];
+    if( isW ) {
+        const IMRO_ROI  &B = se->vW[sel_ib];
 
-    for( int ix = 0, nx = (int)se->vX.size(); ix < nx; ++ix ) {
+        for( int ix = 0, nx = (int)se->vI.size(); ix < nx; ++ix ) {
 
-        const IMRO_Site &S = se->vX[ix];
+            const IMRO_Site &S = se->vI[ix];
 
-        if( S.s < s )
-            continue;
-        else if( S.s > s )
-            break;
-        if( !B.containsC( S.c ) )
-            continue;
-        if( S.r >= sel_edge0 )
-            break;
-        if( S.r + 1 > gap0 )
-            gap0 = S.r + 1;
+            if( S.s < s )
+                continue;
+            else if( S.s > s )
+                break;
+            if( !B.containsC( S.c ) )
+                continue;
+            if( S.r >= sel_edge0 )
+                break;
+            if( S.r + 1 > gap0 )
+                gap0 = S.r + 1;
+        }
+    }
+    else {
+        const IMRO_ROI  &B = se->vR[sel_ib];
+
+        for( int ix = 0, nx = (int)se->vX.size(); ix < nx; ++ix ) {
+
+            const IMRO_Site &S = se->vX[ix];
+
+            if( S.s < s )
+                continue;
+            else if( S.s > s )
+                break;
+            if( !B.containsC( S.c ) )
+                continue;
+            if( S.r >= sel_edge0 )
+                break;
+            if( S.r + 1 > gap0 )
+                gap0 = S.r + 1;
+        }
     }
 
 // Apply Rqd limit
 
-    gap0 = sel_edge0 -
-            qMin( se->rowsShortfall( se->vR[sel_ib] ),
-            sel_edge0 - gap0 );
+    if( isW ) {
+        gap0 = sel_edge0 -
+                qMin( se->rowsShortfallW( se->vW[sel_ib] ),
+                sel_edge0 - gap0 );
+    }
+    else {
+        gap0 = sel_edge0 -
+                qMin( se->rowsShortfall( se->vR[sel_ib] ),
+                sel_edge0 - gap0 );
+    }
 }
 
 
@@ -251,40 +272,63 @@ void ShankEditTab::Click::sel_set_gapLim( int sel_FLR )
             gapLim = B.r0;
     }
 
-    if( isW ) {
-        gapLim = sel_edge0 +
-                    qMin( se->rowsShortfallW( se->vW[sel_ib] ),
-                    gapLim - sel_edge0 );
-        return;
-    }
-
 // Scan vX (sorted)
 
-    const IMRO_ROI  &B = se->vR[sel_ib];
+    if( isW ) {
+        const IMRO_ROI  &B = se->vW[sel_ib];
 
-    for( int ix = 0, nx = (int)se->vX.size(); ix < nx; ++ix ) {
+        for( int ix = 0, nx = (int)se->vI.size(); ix < nx; ++ix ) {
 
-        const IMRO_Site &S = se->vX[ix];
+            const IMRO_Site &S = se->vI[ix];
 
-        if( S.s < s )
-            continue;
-        else if( S.s > s )
-            break;
-        if( !B.containsC( S.c ) )
-            continue;
-        if( S.r < sel_edge0 )
-            continue;
-        if( S.r < gapLim )
-            gapLim = S.r;
-        else
-            break;
+            if( S.s < s )
+                continue;
+            else if( S.s > s )
+                break;
+            if( !B.containsC( S.c ) )
+                continue;
+            if( S.r < sel_edge0 )
+                continue;
+            if( S.r < gapLim )
+                gapLim = S.r;
+            else
+                break;
+        }
+    }
+    else {
+        const IMRO_ROI  &B = se->vR[sel_ib];
+
+        for( int ix = 0, nx = (int)se->vX.size(); ix < nx; ++ix ) {
+
+            const IMRO_Site &S = se->vX[ix];
+
+            if( S.s < s )
+                continue;
+            else if( S.s > s )
+                break;
+            if( !B.containsC( S.c ) )
+                continue;
+            if( S.r < sel_edge0 )
+                continue;
+            if( S.r < gapLim )
+                gapLim = S.r;
+            else
+                break;
+        }
     }
 
 // Apply Rqd limit
 
-    gapLim = sel_edge0 +
-                qMin( se->rowsShortfall( se->vR[sel_ib] ),
-                gapLim - sel_edge0 );
+    if( isW ) {
+        gapLim = sel_edge0 +
+                    qMin( se->rowsShortfallW( se->vW[sel_ib] ),
+                    gapLim - sel_edge0 );
+    }
+    else {
+        gapLim = sel_edge0 +
+                    qMin( se->rowsShortfall( se->vR[sel_ib] ),
+                    gapLim - sel_edge0 );
+    }
 }
 
 
@@ -362,49 +406,35 @@ void ShankEditTab::Click::buildTestBoxes( tImroROIs vT, int click_FLR, int h )
         }
     }
 
-    if( !isW ) {
+// Assemble vX on pertinent colums, into boxes
 
-        // Assemble vX on pertinent colums, into boxes
+    int r0 = -1, nr = 0,
+        nx = (isW ? (int)se->vI.size() : (int)se->vX.size());
 
-        int r0 = -1, nr = 0;
+    for( int ix = 0; ix < nx; ++ix ) {
 
-        for( int ix = 0, nx = (int)se->vX.size(); ix < nx; ++ix ) {
+        const IMRO_Site &S = (isW ? se->vI[ix] : se->vX[ix]);
 
-            const IMRO_Site &S = se->vX[ix];
+        if( S.s < s )
+            continue;
+        else if( S.s > s )
+            break;
 
-            if( S.s < s )
-                continue;
-            else if( S.s > s )
-                break;
+        if( click_FLR == 1 && S.c >= h )
+            continue;
+        if( click_FLR == 2 && S.c < h )
+            continue;
 
-            if( click_FLR == 1 && S.c >= h )
-                continue;
-            if( click_FLR == 2 && S.c < h )
-                continue;
-
-            if( r0 == -1 ) {
-                // new box
-                r0 = S.r;
-                nr = 1;
-            }
-            else if( S.r < r0 + nr )
-                ;
-            else if( S.r == r0 + nr )
-                ++nr;
-            else {
-                int c0 = -1,
-                    cL = -1;
-                if( click_FLR == 1 )
-                    cL = h;
-                else if( click_FLR  == 2 )
-                    c0 = h;
-                vT.push_back( IMRO_ROI( s, r0, r0 + nr, c0, cL ) );
-                r0 = S.r;
-                nr = 1;
-            }
+        if( r0 == -1 ) {
+            // new box
+            r0 = S.r;
+            nr = 1;
         }
-
-        if( r0 >= 0 ) {
+        else if( S.r < r0 + nr )
+            ;
+        else if( S.r == r0 + nr )
+            ++nr;
+        else {
             int c0 = -1,
                 cL = -1;
             if( click_FLR == 1 )
@@ -412,7 +442,19 @@ void ShankEditTab::Click::buildTestBoxes( tImroROIs vT, int click_FLR, int h )
             else if( click_FLR  == 2 )
                 c0 = h;
             vT.push_back( IMRO_ROI( s, r0, r0 + nr, c0, cL ) );
+            r0 = S.r;
+            nr = 1;
         }
+    }
+
+    if( r0 >= 0 ) {
+        int c0 = -1,
+            cL = -1;
+        if( click_FLR == 1 )
+            cL = h;
+        else if( click_FLR  == 2 )
+            c0 = h;
+        vT.push_back( IMRO_ROI( s, r0, r0 + nr, c0, cL ) );
     }
 
     std::sort( vT.begin(), vT.end() );

@@ -86,15 +86,21 @@ When you click in an existing box `Sel` reads out its size, in channels.
 #### Show Source
 
 * Ctrl-click to place a yellow box and see its associated sites.
+* The size and shape controls work on both green and yellow boxes.
 * You can make several yellow boxes.
 * Click-and-drag to resize them.
+* Placement is limited by other yellow objects, and by Rqd.
 * Shift-click to erase them.
 
-Suppose you've make a set of green ROI boxes but you've now got forbidden
+Suppose you've made a set of green ROI boxes but you've now got forbidden
 sites right over a key activity hotspot. Can you fix that? Place a yellow
 box on the hotspot to see which green box is associated with that hotspot,
 and which other locations on the probe would be affected if you edit that
-green box. 
+green box.
+
+>*Tip: To lasso a hotspot, set Nrows small and ctrl-click in the center
+of the target hotspot. Then click-and-drag just inside the top/bottom
+of the lasso to cover neatly.*
 
 #### Boxes => file chans
 
