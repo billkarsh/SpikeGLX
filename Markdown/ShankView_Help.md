@@ -12,6 +12,7 @@
         + [Making New Boxes](#making-new-boxes)
         + [Resizing Boxes](#resizing-boxes)
         + [Clearing/Erasing Boxes](#clearingerasing-boxes)
+        + [Show Source](#show-source)
         + [Boxes => file chans](#boxes-file-chans)
 * [View Tab](#view-tab-quick-reference)
     + [Online Data Flow](#online-data-flow)
@@ -81,6 +82,19 @@ When you click in an existing box `Sel` reads out its size, in channels.
 
 * The `Clear All` button erases all boxes.
 * `Shift-click` in a box to clear it.
+
+#### Show Source
+
+* Ctrl-click to place a yellow box and see its associated sites.
+* You can make several yellow boxes.
+* Click-and-drag to resize them.
+* Shift-click to erase them.
+
+Suppose you've make a set of green ROI boxes but you've now got forbidden
+sites right over a key activity hotspot. Can you fix that? Place a yellow
+box on the hotspot to see which green box is associated with that hotspot,
+and which other locations on the probe would be affected if you edit that
+green box. 
 
 #### Boxes => file chans
 

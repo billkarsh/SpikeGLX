@@ -49,8 +49,10 @@ private:
                                 col2vis_od;
     std::vector<qint16>         vis_evn,
                                 vis_odd;
-    std::vector<IMRO_Site>      vX;
-    std::vector<IMRO_ROI>       vROI;
+    std::vector<IMRO_Site>      vX,     // excludes
+                                vI;     // includes
+    std::vector<IMRO_ROI>       vROI,
+                                vW;     // where
     mutable QMutex              dataMtx;
     float                       shkWid,
                                 hlfWid,
@@ -82,8 +84,10 @@ public:
     int getSel()                {return sel;}
 
     void setImro( const IMROTbl *R, uint8_t sr_mask );
-    void setExcludes( tconstImroSites vX )  {QMutexLocker ml( &dataMtx ); this->vX = vX;}
-    void setROI( tconstImroROIs vR )        {QMutexLocker ml( &dataMtx ); vROI = vR;}
+    void setROI( tconstImroROIs vR, tconstImroSites vX )
+        {QMutexLocker ml( &dataMtx ); vROI = vR; this->vX = vX;}
+    void setWhere( tconstImroROIs vW, tconstImroSites vI )
+        {QMutexLocker ml( &dataMtx ); this->vW = vW; this->vI = vI;}
 
     void colorPads( const double *val, double rngMax );
     void setAnatomy( const std::vector<SVAnaRgn> &vA )
@@ -96,7 +100,7 @@ signals:
     void lbutClicked( int ic, bool shift );
     void lbutReleased();
     void gridHover( int s, int r, bool quiet = false );
-    void gridClicked( int s, int c, int r, bool shift );
+    void gridClicked( int s, int c, int r, bool shift, bool ctrl );
 
 public slots:
     void updateNow()    {update();}
@@ -126,7 +130,9 @@ private:
     void drawBanks();
     void drawOpto();
     void drawExcludes();
+    void drawIncludes();
     void drawROIs();
+    void drawWheres();
     void drawTri( float l, float t, float w, float h, SColor c );
     void drawRect( float l, float t, float w, float h, SColor c );
     bool evt2Pad( int &s, int &c, int &r, const QMouseEvent *evt );

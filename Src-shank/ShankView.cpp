@@ -244,7 +244,9 @@ void ShankView::paintGL()
     drawBanks();
     drawOpto();
     drawExcludes();
+    drawIncludes();
     drawROIs();
+    drawWheres();
     drawSel();
 
 // -------
@@ -264,6 +266,11 @@ void ShankView::mouseMoveEvent( QMouseEvent *evt )
         it = ISM.find( ShankMapDesc( s, c, r, 1 ) );
 
         if( it != ISM.end() ) {
+
+            // We don't make ISM for the grid, so if there is one
+            // it's for the view tab. The view tab will update
+            // hover readouts already, so we tell gridHover to be
+            // quiet in that respect.
 
             emit( cursorOver( it.value(), evt->modifiers() & Qt::SHIFT ) );
             emit( gridHover( s, r, true ) );
@@ -294,7 +301,7 @@ void ShankView::mousePressEvent( QMouseEvent *evt )
         if( it != ISM.end() )
             emit( lbutClicked( it.value(), shift ) );
 
-        emit( gridClicked( s, c, r, shift ) );
+        emit( gridClicked( s, c, r, shift, evt->modifiers() & Qt::CTRL ) );
     }
 }
 
@@ -834,6 +841,55 @@ void ShankView::drawExcludes()
 }
 
 
+// A - D
+// |   |
+// B - C
+//
+void ShankView::drawIncludes()
+{
+    if( !bnkRws )
+        return;
+
+    int nI = (int)vI.size();
+
+    if( !nI )
+        return;
+
+    GLfloat vert[8];
+    float   xoff    = 2*(VRGT-VLFT)/(width()-2*MRGPX),
+            yoff    = 2;
+    int     nc      = smap->nc,
+            nr      = smap->nr;
+
+    glLineWidth( 1.0f );
+
+    glColor3f( 0.9f, 0.9f, 0 );
+    glPolygonMode( GL_FRONT, GL_LINE );
+
+    for( int ii = 0; ii < nI; ++ii ) {
+
+        IMRO_Site   &S = vI[ii];
+
+        int     c  = (S.r & 1 ? col2vis_od[S.c] : col2vis_ev[S.c]);
+        float   *V = &vG[8*(S.s*(nc*nr)+c*nr+S.r)];
+
+        vert[0] = V[0] - xoff;
+        vert[1] = V[1] + yoff;
+        vert[2] = V[2] - xoff;
+        vert[3] = V[3] - yoff;
+        vert[4] = V[4] + xoff;
+        vert[5] = V[5] - yoff;
+        vert[6] = V[6] + xoff;
+        vert[7] = V[7] + yoff;
+
+        glVertexPointer( 2, GL_FLOAT, 0, vert );
+        glDrawArrays( GL_QUADS, 0, 4 );
+    }
+
+    glLineWidth( 1.0f );
+}
+
+
 void ShankView::drawROIs()
 {
     if( !bnkRws )
@@ -858,6 +914,69 @@ void ShankView::drawROIs()
     for( int ib = 0; ib < nb; ++ib ) {
 
         IMRO_ROI    &B      = vROI[ib];
+        float       *V;
+        float       vert[8];
+        int         nrow    = B.height(),
+                    c0      = B.c_0(),
+                    cL      = B.c_lim( _ncolhwr ) - 1;
+
+        if( nrow > 1 ) {
+            c0 = qMin( col2vis_ev[c0], col2vis_od[c0] );
+            cL = qMax( col2vis_ev[cL], col2vis_od[cL] );
+        }
+        else if( B.r0 & 1 ) {
+            c0 = col2vis_od[c0];
+            cL = col2vis_od[cL];
+        }
+        else {
+            c0 = col2vis_ev[c0];
+            cL = col2vis_ev[cL];
+        }
+
+        V  = &vG[8*(B.s*nc*nr+c0*nr)];
+        vert[0] = vert[2] = V[0] - dh;
+
+        V  = &vG[8*(B.s*nc*nr+cL*nr)];
+        vert[4] = vert[6] = V[6] + dh;
+
+        V = &vG[8*(B.rLim-1)];
+        vert[1] = vert[7] = V[1] + dv;
+
+        V = &vG[8*B.r0];
+        vert[3] = vert[5] = V[3] - dv;
+
+        glVertexPointer( 2, GL_FLOAT, 0, vert );
+        glDrawArrays( GL_QUADS, 0, 4 );
+    }
+
+    glLineWidth( 1.0f );
+}
+
+
+void ShankView::drawWheres()
+{
+    if( !bnkRws )
+        return;
+
+    int nb = (int)vW.size();
+
+    if( !nb )
+        return;
+
+    glLineWidth( 3.0f );
+
+    glColor3f( 0.9f, 0.9f, 0 );
+    glPolygonMode( GL_FRONT, GL_LINE );
+
+    float   vsep    = ROWSEP/(1.0f+ROWSEP),
+            dv      = 0.25f * vsep * rowPix,
+            dh      = 0.15f * colWid*COLSEP;
+    int     nc      = smap->nc,
+            nr      = smap->nr;
+
+    for( int ib = 0; ib < nb; ++ib ) {
+
+        IMRO_ROI    &B      = vW[ib];
         float       *V;
         float       vert[8];
         int         nrow    = B.height(),
@@ -957,7 +1076,11 @@ bool ShankView::evt2Pad( int &s, int &c, int &r, const QMouseEvent *evt )
     float   ds = shkWid*(1.0f+SHKSEP),
             dc = colWid*(1.0f+COLSEP);
 
-    s  = x / ds;
+    s = x / ds;
+
+    if( s >= int(smap->ns) )
+        return false;
+
     x -= s*ds;
 
     if( x > shkWid )

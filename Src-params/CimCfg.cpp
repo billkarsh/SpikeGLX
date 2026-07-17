@@ -2455,7 +2455,7 @@ guiBreathe();
                 np_openBS( P.adr.slot );
                 QThread::msleep( 1000 );
                 res = np_getFlexHardwareID( P.adr.slot, P.adr.port, 1, &H );
-                Log()<<"detect try result "<<itry<<" "<<res;
+                Log()<<"detect ip try result "<<ip<<" "<<itry<<" "<<res;
                 if( res == Neuropixels::SUCCESS )
                     break;
                 QThread::msleep( 200 );

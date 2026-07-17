@@ -6,6 +6,7 @@
 + Enable OPTO-II BS.
 + OPTO trace labels.
 + OPTO ShankView emitters.
++ IMRO editor shows source box.
 
 20260115
 --------

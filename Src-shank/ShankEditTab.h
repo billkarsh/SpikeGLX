@@ -32,14 +32,15 @@ private:
                         sel_edge0,  // dragging-edge initial row
                         code,       // {-1,0,1,2} = {vX,new,lower,upper}
                         gap0,       // lower bound
-                        gapLim;     // uppe bound
+                        gapLim;     // upper bound
+        bool            isW;
 
-        Click( ShankEditTab *se ) : se(se), sel_ib(-1)  {}
-        void down( int s, int c, int r );
+        Click( ShankEditTab *se ) : se(se), sel_ib(-1), isW(false)  {}
+        void down( int s, int c, int r, bool ctrl );
         void drag( int s, int r );
         void up();
     private:
-        bool selected( int c, int r );
+        bool selected( int c, int r, bool testW );
         void sel_set_gap0( int sel_FLR );
         void sel_set_gapLim( int sel_FLR );
         void where( int c );
@@ -56,8 +57,10 @@ private:
                             *R;
     Click                   click;
     IMRO_GUI                G;
-    std::vector<IMRO_Site>  vX;
-    std::vector<IMRO_ROI>   vR;
+    std::vector<IMRO_Site>  vX,
+                            vI;
+    std::vector<IMRO_ROI>   vR,
+                            vW;
     QString                 filename,
                             lastDir;
     bool                    canEdit;
@@ -76,7 +79,7 @@ public:
     void renameApplyRevert();
     void syncYPix( int y );
     void gridHover( int s, int r, bool quiet );
-    void gridClicked( int s, int c, int r, bool shift );
+    void gridClicked( int s, int c, int r, bool shift, bool ctrl );
     void lbutReleased();
     void beep( const QString &msg );
 
@@ -111,14 +114,17 @@ private:
     bool isDone();
     bool isFull( int s );
     void addBox( const IMRO_ROI &B );
+    void addW( const IMRO_ROI &B );
     void updateAll( int s, int ib );
+    void updateW( int s, int ib );
     void updateSums( int s );
     int rowsShortfall( const IMRO_ROI &B );
+    int rowsShortfallW( const IMRO_ROI &B );
     int getSum( int s );
-    int getRqd( int s );
-    void setSel( int s, int ib );
+    int getSumW( int s );
+    int getRqd();
+    void setSel( int s, int ib, bool isW );
     QLabel *getSumObj( int s );
-    QLabel *getRqdObj( int s );
     void color();
     void loadSettings();
     void saveSettings() const;
