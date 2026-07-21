@@ -193,7 +193,6 @@ These come as zip files. To install one:
 .zip file, select **Properties**, check the **Unblock** box at the
 bottom, and click **Apply**. *Failure to do this may cause Windows
 to block the demo scripts*.
-
 2. Extract the contained folder to any destination you like.
 3. Keep the folder contents together, as you do with the SpikeGLX folder.
 4. Read the contained `ReadMe.txt` for instructions.

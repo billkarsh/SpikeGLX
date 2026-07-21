@@ -2,7 +2,8 @@
 
 July 21, 2026
 
-* Add digital signatures to:
+Add digital signatures to:
+
 - SpikeGLX 20260115-api4
 - Cpp SDK
 - HelloSGLX
