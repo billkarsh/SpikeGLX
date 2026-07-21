@@ -1,5 +1,17 @@
 # What's New On The Site?
 
+July 21, 2026
+
+* Add digital signatures to:
+- SpikeGLX 20260115-api4
+- Cpp SDK
+- HelloSGLX
+- CatGT
+- TPrime
+- C_Waves
+- NIScaler
+- OverStrike
+
 July 8, 2026
 
 * SpikeGLX 20260115-api4 (Core Ultra, better QB, new look, api v4.1.3).

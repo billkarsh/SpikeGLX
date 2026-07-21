@@ -84,6 +84,11 @@ Latest release highlights:
 
 * [Release 20260115-api4](App/Release_v20260115-api4.zip)...[Readme](Readme/Readme_v20260115-api4.txt) : Core Ultra, better QB, new look, api v4.1.3
 
+>**IMPORTANT!!**: Before extracting, right-click the downloaded
+.zip file, select **Properties**, check the **Unblock** box at the
+bottom, and click **Apply**. *Failure to do this may cause Windows
+to block included scripts*.
+
 >*Release downloads come with two executables*:
 >
 >- **SpikeGLX.exe**: *Runs {imec probes, OneBox, NI, FileViewer}, but you need
@@ -184,10 +189,15 @@ start/stop runs and file writing. Get it [here](https://github.com/billkarsh).
 
 These come as zip files. To install one:
 
-1. Extract the contained folder to any destination you like.
-2. Keep the folder contents together, as you do with the SpikeGLX folder.
-3. Read the contained `ReadMe.txt` for instructions.
-4. Look at the `runit.bat` example batch script.
+1. **IMPORTANT!!**: Before extracting, right-click the downloaded
+.zip file, select **Properties**, check the **Unblock** box at the
+bottom, and click **Apply**. *Failure to do this may cause Windows
+to block the demo scripts*.
+
+2. Extract the contained folder to any destination you like.
+3. Keep the folder contents together, as you do with the SpikeGLX folder.
+4. Read the contained `ReadMe.txt` for instructions.
+5. Look at the `runit.bat` example batch script.
 
 ------
 
@@ -298,10 +308,10 @@ Related help:
 Descriptions of metafile items for each phase:
 
 * [Metadata_Help (latest)](Sgl_help/Metadata_Help.html)
-* [Metadata_20](Support/Metadata_20.html)
-* [Metadata_3B2 (NP 1.0)](Support/Metadata_3B2.html)
-* [Metadata_3B1](Support/Metadata_3B1.html)
-* [Metadata_3A](Support/Metadata_3A.html)
+* [Metadata_20](More_help/Metadata_20.html)
+* [Metadata_3B2 (NP 1.0)](More_help/Metadata_3B2.html)
+* [Metadata_3B1](More_help/Metadata_3B1.html)
+* [Metadata_3A](More_help/Metadata_3A.html)
 
 ------
 
@@ -330,7 +340,7 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.
 * [Neuropixels Support Page](https://www.neuropixels.org/support)
 * [Noise: Reference and Ground](help/Ref_gnd/)
 * [Noise: Learn How To Solder](help/solder/solder/)
-* [Sharpening Apparatus (MS.Word.docx)](Support/NPix_sharpening.docx)
+* [Sharpening Apparatus (MS.Word.docx)](More_help/NPix_sharpening.docx)
 * [PXIe Quickstart](Sgl_help/SpikeGLX_PXIe_Quickstart.html)
 * [OneBox Quickstart](Sgl_help/SpikeGLX_OneBox_Quickstart.html)
 * [Quadbase Quickstart](Sgl_help/SpikeGLX_Quadbase_Quickstart.html)
@@ -338,9 +348,9 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.
 * [SpikeGLX UserManual](Sgl_help/UserManual.html)
 * [SpikeGLX Dirs and Files](help/SpikeGLX_dirs_files/)
 * [SpikeGLX Broken Shank Support](Sgl_help/SpikeGLX_Broken_Shank_Support.html)
-* [SpikeGLX QuickRef](Support/SpikeGLX_QuickRef.html)
-* [SpikeGLX UCL Course 2025](Support/UCL-Course-BillKarsh-2025.html)
-* [SpikeGLX UCL Course 2024](Support/UCL-Course-BillKarsh-2024.html)
+* [SpikeGLX QuickRef](More_help/SpikeGLX_QuickRef.html)
+* [SpikeGLX UCL Course 2025](More_help/UCL-Course-BillKarsh-2025.html)
+* [SpikeGLX UCL Course 2024](More_help/UCL-Course-BillKarsh-2024.html)
 * [SpikeGLX FAQ](Sgl_help/SpikeGLX_FAQ.html)
 * [Metadata Help](Sgl_help/Metadata_Help.html)
 * [CatGT ReadMe](More_help/CatGT_ReadMe.html)
