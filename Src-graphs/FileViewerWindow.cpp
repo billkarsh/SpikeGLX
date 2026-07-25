@@ -4022,8 +4022,23 @@ void FileViewerWindow::printStatusMessage()
 
     double  t = sav.all.fOffset + tMouseOver,
             y = yMouseOver;
-    QString msg,
+    QString time,
+            msg,
             stat;
+
+    if( scanGrp->isHMS() ) {
+        int h, m;
+        h = int(t / 3600);
+        t = t - h * 3600;
+        m = int(t / 60);
+        t = t - m * 60;
+        time = QString("%1 : %2 : %3")
+                .arg( h, 2, 10, QChar('0') )
+                .arg( m, 2, 10, QChar('0') )
+                .arg( t, 0, 'f', 4 );
+    }
+    else
+        time = QString("%1 s").arg( t, 0, 'f', 4 );
 
     if( grfY[ig].usrType <= 1 ) {
 
@@ -4036,9 +4051,9 @@ void FileViewerWindow::printStatusMessage()
 
         computeGraphMouseOverVars( ig, y, vmax, mean, stdev, rms, unit );
 
-        msg = QString("%1  (X,Y)= (%2 s, %3 / %4 %5)")
+        msg = QString("%1  (X,Y)= (%2, %3 / %4 %5)")
                 .arg( grfY[ig].lhsLabel )
-                .arg( t, 0, 'f', 4 )
+                .arg( time )
                 .arg( y, 0, 'f', 3 )
                 .arg( vmax, 0, 'f', 3 )
                 .arg( unit );
@@ -4055,9 +4070,9 @@ void FileViewerWindow::printStatusMessage()
         // Digital
         // -------
 
-        msg = QString("%1  X= %2 s")
+        msg = QString("%1  X= %2")
                 .arg( grfY[ig].lhsLabel )
-                .arg( t, 0, 'f', 4 );
+                .arg( time );
     }
 
     if( dragR > dragL ) {

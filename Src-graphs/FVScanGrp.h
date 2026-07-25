@@ -13,7 +13,7 @@ class QSlider;
 
 // The scan group is a duo of linked controls, with range text:
 //
-// [secs^] to X (of Y) [---|------] Update
+// HMS [secs^] to X (of Y) [---|------] Update
 //
 // The sec spinner allows millisecond advance.
 // The slider allows chunked advance depending on pscale factor.
@@ -35,6 +35,8 @@ public:
     FVScanGrp( FileViewerWindow *fv );
 
     void setRanges( bool newFile );
+
+    bool isHMS() const;
 
     const QObject* getSliderObj() const {return (QObject*)slider;}
     qint64 curPos() const               {return pos;}

@@ -5,6 +5,7 @@
 #include "DataFile.h"
 #include "SignalBlocker.h"
 
+#include <QCheckBox>
 #include <QDoubleSpinBox>
 #include <QLabel>
 #include <QPushButton>
@@ -17,11 +18,18 @@
 FVScanGrp::FVScanGrp( FileViewerWindow *fv )
     :   fv(fv), pos(0), pscale(1)
 {
+    QCheckBox       *C;
     QDoubleSpinBox  *S;
     QPushButton     *B;
     QLabel          *L;
 
     QHBoxLayout *HL = new QHBoxLayout( this );
+
+// HMS
+
+    C = new QCheckBox( "HMS", this );
+    C->setObjectName( "hms" );
+    HL->addWidget( C );
 
 // 'File position'
 
@@ -61,6 +69,17 @@ FVScanGrp::FVScanGrp( FileViewerWindow *fv )
     B->setToolTip( "Redraw graphs now" );
     ConnectUI( B, SIGNAL(clicked()), this, SLOT(manualUpdateClicked()) );
     HL->addWidget( B );
+}
+
+
+bool FVScanGrp::isHMS() const
+{
+    QCheckBox   *C = findChild<QCheckBox*>( "hms" );
+
+    if( C )
+        return C->isChecked();
+
+    return false;
 }
 
 
