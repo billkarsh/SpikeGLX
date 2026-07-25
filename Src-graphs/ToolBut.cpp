@@ -61,6 +61,24 @@ LVE_dbl::LVE_dbl( const QString &help, const QString &val, QWidget *parent )
 }
 
 
+LVE_dbl_chk::LVE_dbl_chk(
+    const QString   &help,
+    const QString   &val,
+    const QString   &chkName,
+    QWidget         *parent )
+    :   LVEditor(help, val, parent)
+{
+    m_spinBox = new QDoubleSpinBox( this );
+    m_spinBox->setStyleSheet( "font-size: 24px; color: #000000;" );
+    m_spinBox->setValue( val.toDouble() );
+    layout()->addWidget( m_spinBox );
+    connect( m_spinBox, &QSpinBox::editingFinished, this, &LVE_dbl_chk::onFinished );
+    m_checkBox = new QCheckBox( chkName, this );
+    m_checkBox->setStyleSheet( "font-size: 16px; color: #000000;" );
+    layout()->addWidget( m_checkBox );
+}
+
+
 LVE_cb::LVE_cb( const QString &help, QWidget *parent )
     :   LVEditor(help, "", parent)
 {

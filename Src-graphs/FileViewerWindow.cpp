@@ -1413,13 +1413,16 @@ void FileViewerWindow::tbSetYScale( double d )
 
     updateNDivText();
 
-#if 1
-// new
-    tbApplyAll();
-#else
-// old
-    mscroll->theM->update();
-#endif
+    QCheckBox   *C = findChild<QCheckBox*>( "applyall" );
+
+    if( C && !C->isChecked() ) {
+        // old
+        mscroll->theM->update();
+    }
+    else {
+        // new
+        tbApplyAll();
+    }
 }
 
 

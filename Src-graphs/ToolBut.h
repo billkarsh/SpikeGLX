@@ -98,6 +98,34 @@ private:
 };
 
 
+class LVE_dbl_chk : public LVEditor {
+    Q_OBJECT
+public:
+    QDoubleSpinBox  *m_spinBox;
+    QCheckBox       *m_checkBox;
+public:
+    LVE_dbl_chk(
+        const QString   &help,
+        const QString   &val,
+        const QString   &chkName,
+        QWidget         *parent );
+    virtual void setValue( const QString &val )
+    {this->val = val; m_spinBox->setValue( val.toDouble() );}
+public slots:
+    virtual void setFocus() {
+        if( m_spinBox->isEnabled() ) {
+            m_spinBox->setFocus();
+            m_spinBox->selectAll();
+        }
+    }
+private:
+    void onFinished() {
+        val = QString("%1").arg( m_spinBox->value() );
+        emit finished( val );
+    }
+};
+
+
 class LVE_cb : public LVEditor {
     Q_OBJECT
 public:

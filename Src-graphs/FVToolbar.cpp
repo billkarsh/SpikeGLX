@@ -27,6 +27,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
     LVE_chk         *LVC;
     LVE_int         *LVI;
     LVE_dbl         *LVD;
+    LVE_dbl_chk     *LVDC;
     LVE_cb          *LVB;
     QPushButton     *B;
     QAction         *A;
@@ -98,18 +99,21 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
 
 // YScale
 
-    LVD = new LVE_dbl(
+    LVDC = new LVE_dbl_chk(
                 "Set vertical magnification factor.",
-                "1", this );
+                "1", "Apply To All", this );
 
-    LVD->m_spinBox->setRange( 0.0, 999.0 );
-    LVD->m_spinBox->setSingleStep( 0.25 );
-    ConnectUI( LVD->m_spinBox, SIGNAL(valueChanged(double)), fv, SLOT(tbSetYScale(double)) );
+    LVDC->m_spinBox->setRange( 0.0, 999.0 );
+    LVDC->m_spinBox->setSingleStep( 0.25 );
+    ConnectUI( LVDC->m_spinBox, SIGNAL(valueChanged(double)), fv, SLOT(tbSetYScale(double)) );
+
+    LVDC->m_checkBox->setObjectName( "applyall" );
+    LVDC->m_checkBox->setChecked( true );
 
     LV = new LVBut(
             "Ymag", "1",
             LVBUT_STYLE, LVLBL_STYLE, LVVAL_STYLE,
-            LVD, this );
+            LVDC, this );
     LV->setObjectName( "ymag" );
     addWidget( LV );
 

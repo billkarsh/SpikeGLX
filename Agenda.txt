@@ -7,7 +7,8 @@
 + OPTO trace labels.
 + OPTO ShankView emitters.
 + IMRO editor site conflict resolver tool.
-+ HMS time option in FileViewer.
++ FileViewer: Can set individual Ymag.
++ FileViewer: HMS time option.
 
 20260115
 --------
