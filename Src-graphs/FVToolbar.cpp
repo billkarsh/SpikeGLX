@@ -108,7 +108,8 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
     ConnectUI( LVDC->m_spinBox, SIGNAL(valueChanged(double)), fv, SLOT(tbSetYScale(double)) );
 
     LVDC->m_checkBox->setObjectName( "applyall" );
-    LVDC->m_checkBox->setChecked( true );
+    LVDC->m_checkBox->setChecked( fv->tbGetMagChkOn() );
+    connect( LVDC->m_checkBox, &QCheckBox::checkStateChanged, fv, &FileViewerWindow::tbSetMagChk );
 
     LV = new LVBut(
             "Ymag", "1",

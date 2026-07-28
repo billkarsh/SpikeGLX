@@ -213,7 +213,8 @@ private:
     struct SaveOb {
         int     yPix,
                 binMax;     // {0=Off, 1=slow, 2=fast, 3=faster}
-        bool    txChkOn;
+        bool    magChkOn,
+                txChkOn;
 
         void loadSettings( QSettings &S );
         void saveSettings( QSettings &S ) const;
@@ -225,7 +226,8 @@ private:
                 bandSel,    // {0=off, 1=AP, 2=LF}
                 sAveSel,    // {0=off, 1=lcl, 2=lcl', 3=gbl, 4=dmx}
                 binMax;     // {0=Off, 1=slow, 2=fast, 3=faster}
-        bool    tnChkOn,
+        bool    magChkOn,
+                tnChkOn,
                 txChkOn;
 
         void loadSettings( QSettings &S );
@@ -358,6 +360,14 @@ public:
                 default:   return sav.all.ySclAux;
             }
         }
+    bool tbGetMagChkOn() const
+        {
+            switch( fType ) {
+                case fvOB: return sav.ob.magChkOn;
+                case fvNI: return sav.ni.magChkOn;
+                default:   return true;
+            }
+        }
     int     tbGetNDivs() const      {return sav.all.nDivs;}
     int     tbGetBandSel() const
         {
@@ -432,6 +442,7 @@ public slots:
     void tbSetXScale( double d );
     void tbSetYPix( int n );
     void tbSetYScale( double d );
+    void tbSetMagChk();
     void tbSetMuxGain( double d );
     void tbSetNDivs( int n );
     void tbTnClicked( bool b );
@@ -520,6 +531,7 @@ private:
 
     void loadSettings();
     void saveSettings() const;
+    void magSaveRestore( bool save );
 
     int nSampsPerGraph() const;
     void updateNDivText();

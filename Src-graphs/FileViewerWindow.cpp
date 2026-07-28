@@ -448,9 +448,10 @@ void FileViewerWindow::SaveIm::saveSettings( QSettings &S, int fType ) const
 void FileViewerWindow::SaveOb::loadSettings( QSettings &S )
 {
     S.beginGroup( "FileViewer_Obx" );
-    yPix    = S.value( "yPix", 100 ).toInt();
-    binMax  = S.value( "binMax", 0 ).toInt();
-    txChkOn = S.value( "txChkOn", false ).toBool();
+    yPix     = S.value( "yPix", 100 ).toInt();
+    binMax   = S.value( "binMax", 0 ).toInt();
+    magChkOn = S.value( "magChkOn", true ).toBool();
+    txChkOn  = S.value( "txChkOn", false ).toBool();
     S.endGroup();
 
     yPix   = qMax( yPix, 4 );
@@ -463,6 +464,7 @@ void FileViewerWindow::SaveOb::saveSettings( QSettings &S ) const
     S.beginGroup( "FileViewer_Obx" );
     S.setValue( "yPix", qMax( yPix, 4 ) );
     S.setValue( "binMax", binMax );
+    S.setValue( "magChkOn", magChkOn );
     S.setValue( "txChkOn", txChkOn );
     S.endGroup();
 }
@@ -471,13 +473,14 @@ void FileViewerWindow::SaveOb::saveSettings( QSettings &S ) const
 void FileViewerWindow::SaveNi::loadSettings( QSettings &S )
 {
     S.beginGroup( "FileViewer_Nidq" );
-    ySclNeu = S.value( "ySclNeu", 1.0 ).toDouble();
-    yPix    = S.value( "yPix", 100 ).toInt();
-    bandSel = S.value( "bandSel", 0 ).toInt();
-    sAveSel = S.value( "sAveSel", 0 ).toInt();
-    binMax  = S.value( "binMax", 0 ).toInt();
-    tnChkOn = S.value( "tnChkOn", true ).toBool();
-    txChkOn = S.value( "txChkOn", false ).toBool();
+    ySclNeu  = S.value( "ySclNeu", 1.0 ).toDouble();
+    yPix     = S.value( "yPix", 100 ).toInt();
+    bandSel  = S.value( "bandSel", 0 ).toInt();
+    sAveSel  = S.value( "sAveSel", 0 ).toInt();
+    binMax   = S.value( "binMax", 0 ).toInt();
+    magChkOn = S.value( "magChkOn", true ).toBool();
+    tnChkOn  = S.value( "tnChkOn", true ).toBool();
+    txChkOn  = S.value( "txChkOn", false ).toBool();
     S.endGroup();
 
     yPix   = qMax( yPix, 4 );
@@ -493,6 +496,7 @@ void FileViewerWindow::SaveNi::saveSettings( QSettings &S ) const
     S.setValue( "bandSel", bandSel );
     S.setValue( "sAveSel", sAveSel );
     S.setValue( "binMax", binMax );
+    S.setValue( "magChkOn", magChkOn );
     S.setValue( "tnChkOn", tnChkOn );
     S.setValue( "txChkOn", txChkOn );
     S.endGroup();
@@ -716,6 +720,7 @@ bool FileViewerWindow::viewFile( QString &error, const QString &fname )
     grfVisBits.fill( true, nG );
 
     initGraphs();
+    magSaveRestore( false );
 
     tbBandSelChanged( tbGetBandSel(), false );
     sAveTable( tbGetSAveSel() );
@@ -943,9 +948,9 @@ const double* FileViewerWindow::svyAllBanks(
     double              *d = &D[0];
 
     switch( what ) {
-        case 0: S = &svySpikes; break;
-        case 1: S = &svyAPPkPk; break;
-        case 2: S = &svyLFPkPk;
+        case 0:          S = &svySpikes; break;
+        case 1:          S = &svyAPPkPk; break;
+        default /* 2 */: S = &svyLFPkPk;
     }
 
     S->clear();
@@ -1415,13 +1420,36 @@ void FileViewerWindow::tbSetYScale( double d )
 
     QCheckBox   *C = findChild<QCheckBox*>( "applyall" );
 
-    if( C && !C->isChecked() ) {
-        // old
-        mscroll->theM->update();
+    if( C ) {
+        bool    b = C->isChecked();
+        switch( fType ) {
+            case fvOB: sav.ob.magChkOn = b; break;
+            case fvNI: sav.ni.magChkOn = b; break;
+            default: break;
+        }
+        if( !b ) {
+            saveSettings();
+            mscroll->theM->update();
+            return;
+        }
     }
-    else {
-        // new
-        tbApplyAll();
+
+    tbApplyAll();
+}
+
+
+void FileViewerWindow::tbSetMagChk()
+{
+    QCheckBox   *C = findChild<QCheckBox*>( "applyall" );
+
+    if( C ) {
+        bool b = C->isChecked();
+        switch( fType ) {
+            case fvOB: sav.ob.magChkOn = b; break;
+            case fvNI: sav.ni.magChkOn = b; break;
+            default: return;
+        }
+        saveSettings();
     }
 }
 
@@ -2763,6 +2791,7 @@ void FileViewerWindow::closeEvent( QCloseEvent *event )
             if( shankCtl )
                 shankCtl->close();
 
+            magSaveRestore( true );
             linkRemoveMe();
             mainApp()->modelessClosed( this );
             deleteLater();
@@ -2940,10 +2969,10 @@ bool FileViewerWindow::openFile( QString &error, const QString &fname )
         delete df;
 
     switch( fType ) {
-        case fvAP: df = new DataFileIMAP( ip ); break;
-        case fvLF: df = new DataFileIMLF( ip ); break;
-        case fvOB: df = new DataFileOB( ip ); break;
-        case fvNI: df = new DataFileNI;
+        case fvAP:           df = new DataFileIMAP( ip ); break;
+        case fvLF:           df = new DataFileIMLF( ip ); break;
+        case fvOB:           df = new DataFileOB( ip ); break;
+        default /*  fvNI */: df = new DataFileNI;
     }
 
 // ----------------------------
@@ -3197,6 +3226,81 @@ void FileViewerWindow::saveSettings() const
     }
 
     exportCtl->saveSettings( S );
+}
+
+
+void FileViewerWindow::magSaveRestore( bool save )
+{
+    if( tbGetMagChkOn() )
+        return;
+
+    QString fname;
+    int     nAna = nAnaChans - nNeurChans;
+
+    if( !nAna )
+        return;
+
+    switch( fType ) {
+        case fvOB:
+            fname = QString("fvw_ob_%1")
+                    .arg( df->getParam("imDatBsc_sn").toString() );
+                    break;
+        case fvNI:
+            fname = QString("fvw_ni_%1")
+                    .arg( df->getParam("niDev1").toString() );
+                    break;
+        default:
+            return;
+    }
+
+    STDSETTINGS( S, fname );
+    S.beginGroup( "Analog_Mags" );
+
+// im type: {0=AP, 1=LF, 2=SY}
+// ob type: {      1=AN, 2=DG}
+// ni type: {0=NU, 1=AN, 2=DG}
+
+    if( save ) {
+
+        QString sMags, m0;
+        bool    diff = false;
+
+        sMags = m0 = QString("%1").arg( grfY[0].yscl );
+
+        for( int ig = 1, nG = (int)grfParams.size(); ig < nG; ++ig ) {
+            if( grfY[ig].usrType == 1 ) {
+                QString m = QString("%1").arg( grfY[ig].yscl );
+                sMags += " " + m;
+                if( m != m0 )
+                    diff = true;
+            }
+        }
+
+        if( diff ) {
+            S.setValue( "nMags", nAna );
+            S.setValue( "sMags", sMags.trimmed() );
+        }
+    }
+    else {
+        QString sMags;
+        int     nMags = S.value( "nMags", 0 ).toInt();
+
+        if( nMags == nAna ) {
+            sMags = S.value( "sMags", "" ).toString();
+            QStringList sl = sMags.split(
+                                    QRegularExpression("\\s+"),
+                                    Qt::SkipEmptyParts );
+            if( sl.size() == nAna ) {
+                int im = 0;
+                for( int ig = 0, nG = (int)grfParams.size(); ig < nG; ++ig ) {
+                    if( grfY[ig].usrType == 1 )
+                        grfY[ig].yscl = sl[im++].toDouble();
+                }
+            }
+        }
+    }
+
+    S.endGroup();
 }
 
 
