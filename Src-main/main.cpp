@@ -1,4 +1,5 @@
 
+#include "Util.h"
 #include "MainApp.h"
 #include "KVParams.h"
 #include "FileViewerWindow.h"
@@ -11,6 +12,8 @@
 
 int main( int argc, char *argv[] )
 {
+    etwRegister();
+
     qRegisterMetaType<KeyValMap>("KeyValMap");
     qRegisterMetaType<QProcess::ExitStatus>("QProcess::ExitStatus");
     qRegisterMetaType<QProcess::ProcessError>("QProcess::ProcessError");
@@ -39,7 +42,11 @@ int main( int argc, char *argv[] )
     app.setStyle( "fusion" );
 #endif
 
-    return app.exec();
+    int result = app.exec();
+
+    etwUnregister();
+
+    return result;
 }
 
 

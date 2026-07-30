@@ -39,6 +39,29 @@ namespace Util
 {
 
 /* ---------------------------------------------------------------- */
+/* ETW TRACE ------------------------------------------------------ */
+/* ---------------------------------------------------------------- */
+
+void etwRegister();
+void etwUnregister();
+
+void etwStartRecording();
+void etwStopRecording( int msMargin = 0 );
+
+class Logt
+{
+private:
+    QTextStream     stream;
+    QString         str;
+public:
+    Logt();
+    virtual ~Logt();
+
+    template <class T>
+    Logt &operator<<( const T &t ) {stream << t; return *this;}
+};
+
+/* ---------------------------------------------------------------- */
 /* Log messages to file ------------------------------------------- */
 /* ---------------------------------------------------------------- */
 

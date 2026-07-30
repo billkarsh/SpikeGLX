@@ -2563,6 +2563,17 @@ if( S.ip == 0 ) {
     if( nE && !S.simType )
         S.checkErrs_EPack( E, nE );
 
+#if DO_TRACE
+    int pops = S.errPOP[0];
+    if( pops ) {
+        QString msg = QString("POP ip %1").arg( S.ip );
+        Logt()<<msg;
+        etwStopRecording( 0 );
+        runError( msg );
+        return false;
+    }
+#endif
+
     return true;
 }
 
@@ -2698,6 +2709,18 @@ if( S.ip == 0 && shank == SourceAP ) {
 
     if( nT && !S.simType )
         S.checkErrs_PInfo( H, nT, shank );
+
+#if DO_TRACE
+    int pops = 0;
+    for( int is = 0; is < 4; ++is ) pops += S.errPOP[is];
+    if( pops ) {
+        QString msg = QString("POP ip %1").arg( S.ip );
+        Logt()<<msg;
+        etwStopRecording( 0 );
+        runError( msg );
+        return false;
+    }
+#endif
 
     return true;
 }

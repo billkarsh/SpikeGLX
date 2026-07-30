@@ -666,6 +666,8 @@ bool Run::startRun( QString &err )
     Status() << s;
     Log() << s;
 
+    etwStartRecording();
+
     ml.unlock();    // ensure runMtx available to startup agents
 
     gate->startRun();

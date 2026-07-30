@@ -6,6 +6,9 @@
 # Diagnostics
 # DEFINES += DO_SNAPSHOTS
 
+# Event Tracing for Windows (ETW)
+# DEFINES += DO_TRACE
+
 # Select real or simulated {IM,NI}:
 DEFINES += HAVE_IMEC
 DEFINES += HAVE_VISA

@@ -10,7 +10,8 @@
 #include "Util.h"
 #include "MainApp.h"
 
-#include <QThread>
+#include <QProcess>
+#include <QThreadPool>
 
 /* ---------------------------------------------------------------- */
 /* Includes single OS --------------------------------------------- */
@@ -20,6 +21,9 @@
     #include <QDir>
     #include <windows.h>
     #include <GL/gl.h>
+#ifdef DO_TRACE
+    #include "C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\TraceLoggingProvider.h"
+#endif
 #elif defined(Q_WS_X11)
     #include <GL/gl.h>
     #include <GL/glx.h>
@@ -78,6 +82,127 @@ static struct Init_getTime {
 /* ---------------------------------------------------------------- */
 
 namespace Util {
+
+/* ---------------------------------------------------------------- */
+/* ETW TRACE ------------------------------------------------------ */
+/* ---------------------------------------------------------------- */
+
+// Using PowerShell generation command:
+// [System.Diagnostics.Tracing.EventSource]::new("SpikeGLX").Guid
+// GUID: 16c3fd1c-2369-5c5a-b448-7ffb69200320
+
+#ifdef DO_TRACE
+
+TRACELOGGING_DEFINE_PROVIDER(
+    g_hProvider,
+    "SpikeGLX",
+    (0x16c3fd1c, 0x2369, 0x5c5a, 0xb4, 0x48, 0x7f, 0xfb, 0x69, 0x20, 0x03, 0x20));
+
+void etwRegister()
+{
+    TraceLoggingRegister( g_hProvider );
+}
+#else
+void etwRegister()
+{
+}
+#endif
+
+#ifdef DO_TRACE
+void etwUnregister()
+{
+    TraceLoggingUnregister( g_hProvider );
+}
+#else
+void etwUnregister()
+{
+}
+#endif
+
+[[maybe_unused]]
+static bool etwRunning = false;
+
+#ifdef DO_TRACE
+void etwStartRecording()
+{
+    etwRunning = true;
+
+    QThreadPool::globalInstance()->start(QRunnable::create([]()
+    {
+        QStringList cmd;
+        cmd << "/run" << "/tn" << "sglxStartLog";
+        QProcess::execute( "schtasks.exe", cmd );
+    }));
+}
+#else
+void etwStartRecording()
+{
+}
+#endif
+
+
+#ifdef DO_TRACE
+void etwStopRecording( int msMargin )
+{
+    static QMutex   stopMtx;
+    stopMtx.lock();
+
+    if( etwRunning ) {
+
+        etwRunning = false;
+
+        QThreadPool::globalInstance()->start(QRunnable::create([msMargin]()
+        {
+            if( msMargin > 0 )
+                QThread::msleep( msMargin );
+            QStringList cmd;
+            cmd << "/run" << "/tn" << "sglxStopLog";
+            QProcess::execute( "schtasks.exe", cmd );
+        }));
+    }
+
+    stopMtx.unlock();
+}
+#else
+void etwStopRecording()
+{
+}
+#endif
+
+
+Logt::Logt() : stream(&str, QIODevice::WriteOnly)
+{
+}
+
+
+#ifdef DO_TRACE
+Logt::~Logt()
+{
+    static QMutex logMtx;
+    logMtx.lock();
+
+    QString msg =
+        QString("[Thd %1 CPU %2 %3] %4")
+            .arg( quint64(QThread::currentThreadId()) )
+            .arg( getCurProcessorIdx() )
+            .arg( dateTime2Str(
+                    QDateTime::currentDateTime(),
+                    "M/dd/yy hh:mm:ss.zzz" ) )
+            .arg( str );
+
+    TraceLoggingWrite(
+        g_hProvider,
+        "SpikeGLX",
+        TraceLoggingString( STR2CHR(msg), "Msg" ) );
+
+    qDebug( STR2CHR(msg) );
+    logMtx.unlock();
+}
+#else
+Logt::~Logt()
+{
+}
+#endif
 
 /* ---------------------------------------------------------------- */
 /* Resources ------------------------------------------------------ */
