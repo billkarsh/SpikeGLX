@@ -721,7 +721,8 @@ ImAcqStream::ImAcqStream(
     int                         js,
     int                         ip )
     :   tLastErrFlagsReport(0), tLastFifoReport(0), peakDT(0),
-        sumTot(0), totPts(0ULL), Q(Q), QFlt(0), tStampLastFetch(0),
+        sumTot(0), totPts(0ULL), Q(Q), QFlt(0),
+        tStampLastFetch(0),
         errCOUNT{0,0,0,0}, errSERDES{0,0,0,0}, errLOCK{0,0,0,0},
         errPOP{0,0,0,0}, errSYNC{0,0,0,0}, errMISS{0,0,0,0},
         fifoAve(0), fifoN(0), sumN(0), js(js), ip(ip),
@@ -1177,10 +1178,10 @@ void ImAcqWorker::run()
         // acq voltage chans (D)
 
         switch( S.fetchType ) {
-            case t_fetch_np1: ++nT0; lfLast[iID].assign( S.nLF, 0 ); break;
-            case t_fetch_qb:  nSY = 4;[[fallthrough]];
-            case t_fetch_np2: ++nT2; T2Chans = qMax( T2Chans, S.nAP ); break;
-            case t_fetch_obx: ++nT2; T2Chans = qMax( T2Chans, OBX_N_ACQ ); break;
+            case t_fetch_np1:   ++nT0; lfLast[iID].assign( S.nLF, 0 ); break;
+            case t_fetch_qb:    nSY = 4;    [[fallthrough]];
+            case t_fetch_np2:   ++nT2; T2Chans = qMax( T2Chans, S.nAP ); break;
+            case t_fetch_obx:   ++nT2; T2Chans = qMax( T2Chans, OBX_N_ACQ ); break;
         }
 
         // GENSERDES
@@ -1240,10 +1241,10 @@ void ImAcqWorker::run()
             bool    ok;
 
             switch( S.fetchType ) {
-                case t_fetch_np1: ok = doProbe_T0( &lfLast[iID][0], i16Buf, S ); break;
+                case t_fetch_np1:   ok = doProbe_T0( &lfLast[iID][0], i16Buf, S ); break;
                 case t_fetch_np2:
-                case t_fetch_qb:  ok = doProbe_T2( i16Buf, S ); break;
-                case t_fetch_obx: ok = do_obx( i16Buf, S ); break;
+                case t_fetch_qb:    ok = doProbe_T2( i16Buf, S ); break;
+                case t_fetch_obx:   ok = do_obx( i16Buf, S ); break;
             }
 
             if( !ok )
@@ -2167,7 +2168,6 @@ void CimAcqImec::run()
 void CimAcqImec::update( int ip )
 {
     const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
-    NP_ErrorCode                err;
 
     pauseSlot( P.adr.slot );
 
@@ -2178,13 +2178,17 @@ void CimAcqImec::update( int ip )
 // Stop streams this slot
 // ----------------------
 
-    err = np_arm( P.adr.slot );
+    if( 0 ) {
+    }
+    else {
+        NP_ErrorCode    err = np_arm( P.adr.slot );
 
-    if( err != SUCCESS ) {
-        runError(
-            QString("IMEC arm(%1)%2")
-            .arg( P.adr.tx_s() ).arg( makeErrorString( err ) ) );
-        return;
+        if( err != SUCCESS ) {
+            runError(
+                QString("IMEC arm(%1)%2")
+                .arg( P.adr.tx_s() ).arg( makeErrorString( err ) ) );
+            return;
+        }
     }
 
 // --------------------------
@@ -2213,49 +2217,61 @@ void CimAcqImec::update( int ip )
 // Set slot to software triggering
 // -------------------------------
 
-    err = np_switchmatrix_clear( P.adr.slot, SM_Output_AcquisitionTrigger );
-
-    if( err != SUCCESS  ) {
-        runError(
-            QString("IMEC switchmatrix_clear(%1)%2")
-            .arg( P.adr.tx_s() ).arg( makeErrorString( err ) ) );
-        return;
+    if( 0 ) {
     }
+    else {
+        NP_ErrorCode    err = np_switchmatrix_clear( P.adr.slot, SM_Output_AcquisitionTrigger );
 
-    err = np_switchmatrix_set(
-            P.adr.slot, SM_Output_AcquisitionTrigger, SM_Input_SWTrigger1, true );
+        if( err != SUCCESS  ) {
+            runError(
+                QString("IMEC switchmatrix_clear(%1)%2")
+                .arg( P.adr.tx_s() ).arg( makeErrorString( err ) ) );
+            return;
+        }
 
-    if( err != SUCCESS  ) {
-        runError(
-            QString("IMEC switchmatrix_set(%1)%2")
-            .arg( P.adr.tx_s() ).arg( makeErrorString( err ) ) );
-        return;
+        err = np_switchmatrix_set(
+                P.adr.slot, SM_Output_AcquisitionTrigger, SM_Input_SWTrigger1, true );
+
+        if( err != SUCCESS  ) {
+            runError(
+                QString("IMEC switchmatrix_set(%1)%2")
+                .arg( P.adr.tx_s() ).arg( makeErrorString( err ) ) );
+            return;
+        }
     }
 
 // ------------
 // Arm the slot
 // ------------
 
-    err = np_arm( P.adr.slot );
+    if( 0 ) {
+    }
+    else {
+        NP_ErrorCode    err = np_arm( P.adr.slot );
 
-    if( err != SUCCESS ) {
-        runError(
-            QString("IMEC arm(%1)%2")
-            .arg( P.adr.tx_s() ).arg( makeErrorString( err ) ) );
-        return;
+        if( err != SUCCESS ) {
+            runError(
+                QString("IMEC arm(%1)%2")
+                .arg( P.adr.tx_s() ).arg( makeErrorString( err ) ) );
+            return;
+        }
     }
 
 // ----------------
 // Restart the slot
 // ----------------
 
-    err = np_setSWTrigger( P.adr.slot );
+    if( 0 ) {
+    }
+    else {
+        NP_ErrorCode    err = np_setSWTrigger( P.adr.slot );
 
-    if( err != SUCCESS ) {
-        runError(
-            QString("IMEC setSWTrigger(%1)%2")
-            .arg( P.adr.tx_s() ).arg( makeErrorString( err ) ) );
-        return;
+        if( err != SUCCESS ) {
+            runError(
+                QString("IMEC setSWTrigger(%1)%2")
+                .arg( P.adr.tx_s() ).arg( makeErrorString( err ) ) );
+            return;
+        }
     }
 
 // -----------------
