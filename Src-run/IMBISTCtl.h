@@ -21,7 +21,7 @@ class IMBISTCtl : public QDialog
 
 private:
     Ui::IMBISTDlg       *bistUI;
-    std::vector<int>    openSlots;
+    std::vector<int>    openSlots4;
     QString             pn;
     int                 type;
     bool                testEEPROM;
@@ -39,15 +39,16 @@ private slots:
 private:
     void write( const QString &s );
     void writeMapMsg( int slot );
-    bool okVersions();
     bool _openSlot();
     void _closeSlots();
-    bool _openProbe();
-    void _closeProbe();
+    bool okVersions();
     bool probeType();
     bool EEPROMCheck();
-    bool stdStart( int itest, int secs = 0 );
-    void stdFinish( Neuropixels::NP_ErrorCode err );
+    bool openProbe();
+    void closeProbe();
+    void stdStart( int itest, int secs = 0 );
+    void stdFinish4( Neuropixels::NP_ErrorCode err );
+    void stdFinish();
     bool test_bistBS();
     void test_bistHB();
     void test_bistPRBS();

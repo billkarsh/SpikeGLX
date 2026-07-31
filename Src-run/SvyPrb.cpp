@@ -249,7 +249,13 @@ bool SvyPrbRun::nextBank()
         run->grfWaitPaused();
 
         E.roTbl->fillShankAndBank( S, B );
-        E.roTbl->selectSites4( P.adr, true, false );
+
+        if( 0 ) {
+        }
+        else {
+            E.roTbl->selectSites4( P.adr, true, false );
+        }
+
         E.sns.chanMapFile.clear();
         cfg->validImMaps( err, E, ip );
         run->grfUpdateProbe( ip, true, true );

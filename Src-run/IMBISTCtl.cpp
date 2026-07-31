@@ -3,8 +3,8 @@
 
 #include "ui_IMBISTDlg.h"
 
-#include "IMBISTCtl.h"
 #include "IMROTbl.h"
+#include "IMBISTCtl.h"
 #include "Util.h"
 #include "MainApp.h"
 
@@ -18,7 +18,7 @@ using namespace Neuropixels;
 /* Statics -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-static QString getNPErrorString()
+static QString getNPErrorString4()
 {
     char    buf[2048];
     size_t  n = np_getLastErrorMessage( buf, sizeof(buf) );
@@ -49,8 +49,6 @@ IMBISTCtl::IMBISTCtl() : QDialog(0)
     ConnectUI( bistUI->clearBut, SIGNAL(clicked()), this, SLOT(clear()) );
     ConnectUI( bistUI->saveBut, SIGNAL(clicked()), this, SLOT(save()) );
 
-    _closeSlots();
-
     exec();
 }
 
@@ -77,12 +75,15 @@ void IMBISTCtl::go()
     guiBreathe();
     guiBreathe();
 
-    if( !okVersions() || !probeType() )
+    if( !_openSlot() || !okVersions() )
         goto exit;
 
     if( !itest ) {
 
         if( !test_bistBS() )
+            goto exit;
+
+        if( !probeType() || !openProbe() )
             goto exit;
 
         test_bistHB();
@@ -98,6 +99,12 @@ void IMBISTCtl::go()
         write( "If any tests failed, click Help button for assistance." );
     }
     else {
+
+        if( itest > 1 ) {
+            if( !probeType() || !openProbe() )
+                goto exit;
+        }
+
         switch( itest ) {
             case 1: test_bistBS(); break;
             case 2: test_bistHB(); break;
@@ -112,6 +119,7 @@ void IMBISTCtl::go()
     }
 
 exit:
+    closeProbe();
     QGuiApplication::restoreOverrideCursor();
 }
 
@@ -174,6 +182,34 @@ void IMBISTCtl::writeMapMsg( int slot )
 }
 
 
+bool IMBISTCtl::_openSlot()
+{
+    write( "Open slot..." );
+
+    int     slot = bistUI->slotSB->value();
+    bool    ok   = true;
+
+    if( 0 ) {
+    }
+    else if( openSlots4.end() == std::find( openSlots4.begin(), openSlots4.end(), slot ) )
+        openSlots4.push_back( slot );
+
+    if( 0 ) {
+    }
+    else
+        write( "API4 slot..." );
+
+    return ok;
+}
+
+
+void IMBISTCtl::_closeSlots()
+{
+    for( int is : openSlots4 )
+        np_closeBS( is );
+}
+
+
 bool IMBISTCtl::okVersions()
 {
     basestationID   bs;
@@ -183,6 +219,8 @@ bool IMBISTCtl::okVersions()
     int             bstech,
                     slot = bistUI->slotSB->value();
     NP_ErrorCode    err;
+
+    write( "Check slot firmware..." );
 
     np_scanBS();
     np_getDeviceInfo( slot, &bs );
@@ -195,7 +233,7 @@ bool IMBISTCtl::okVersions()
         write(
             QString("IMEC bs_getFirmwareInfo(slot %1) error %2:")
             .arg( slot ).arg( err ) );
-        write( getNPErrorString() );
+        write( getNPErrorString4() );
         return false;
     }
     bsfw = QString("%1.%2.%3")
@@ -207,7 +245,7 @@ bool IMBISTCtl::okVersions()
         write(
             QString("IMEC bsc_getFirmwareInfo(slot %1) error %2:")
             .arg( slot ).arg( err ) );
-        write( getNPErrorString() );
+        write( getNPErrorString4() );
         return false;
     }
     bscfw = QString("%1.%2.%3")
@@ -219,7 +257,7 @@ bool IMBISTCtl::okVersions()
         write(
             QString("IMEC getBSCHardwareID(slot %1) error %2:")
             .arg( slot ).arg( err ) );
-        write( getNPErrorString() );
+        write( getNPErrorString4() );
         return false;
     }
     bstech = IMROTbl::bscpnToTech( hID.ProductNumber );
@@ -240,117 +278,88 @@ bool IMBISTCtl::okVersions()
 }
 
 
-bool IMBISTCtl::_openSlot()
-{
-    int slot = bistUI->slotSB->value();
-
-    if( openSlots.end() == std::find( openSlots.begin(), openSlots.end(), slot ) )
-        openSlots.push_back( slot );
-
-    return true;
-}
-
-
-void IMBISTCtl::_closeSlots()
-{
-    for( int is : openSlots )
-        np_closeBS( is );
-
-    openSlots.clear();
-}
-
-
-bool IMBISTCtl::_openProbe()
-{
-    type        = -1;
-    testEEPROM  = true;
-
-    int             slot = bistUI->slotSB->value(),
-                    port = bistUI->portSB->value(),
-                    dock = bistUI->dockSB->value();
-    NP_ErrorCode    err  = np_openProbe( slot, port, dock );
-
-    if( err != SUCCESS && err != ALREADY_OPEN ) {
-        write(
-            QString("IMEC openProbe(slot %1, port %2, dock %3) error %4 '%5'.")
-            .arg( slot ).arg( port ).arg( dock )
-            .arg( err ).arg( getNPErrorString() ) );
-        return false;
-    }
-
-    write( "Probe: open" );
-    return true;
-}
-
-
-void IMBISTCtl::_closeProbe()
-{
-    write( "-----------------------------------" );
-    np_closeBS( bistUI->slotSB->value() );
-}
-
-
 bool IMBISTCtl::probeType()
 {
-    int             slot = bistUI->slotSB->value(),
-                    port = bistUI->portSB->value(),
-                    dock = bistUI->dockSB->value();
-    NP_ErrorCode    err;
-    HardwareID      hID;
+    write( "Check probe type..." );
+
+    pn.clear();
+
+    int slot = bistUI->slotSB->value(),
+        port = bistUI->portSB->value(),
+        dock = bistUI->dockSB->value();
+
+    if( 0 ) {
+    }
+    else {
+        NP_ErrorCode    err;
+        HardwareID      hID;
+
+        // ----
+        // HSPN
+        // ----
+
+        err = np_getHeadstageHardwareID( slot, port, &hID );
+
+        if( err != SUCCESS ) {
+            write(
+                QString("IMEC getHeadstageHardwareID(slot %1, port %2) error %3 '%4'.")
+                .arg( slot ).arg( port )
+                .arg( err ).arg( getNPErrorString4() ) );
+
+            if( err == NO_SLOT )
+                writeMapMsg( slot );
+
+            return false;
+        }
+
+        // -------------------------------
+        // Test for NHP 128-channel analog
+        // -------------------------------
+
+        QString prod(hID.ProductNumber);
+
+        if( prod == "NPNH_HS_30" || prod == "NPNH_HS_31" ) {
+            type = 1200;
+            goto exit;
+        }
+
+        // ---------------------------
+        // Test for Quad port (2 or 4)
+        // ---------------------------
+
+        else if( prod.contains( "ext" ) ) {
+            write("For Quad-probes (NP2020) only test ports (1 or 3).");
+            return false;
+        }
+
+        write(
+            QString("Headstage: pn %1 sn %2")
+            .arg( hID.ProductNumber ).arg( hID.SerialNumber ) );
+
+        // --
+        // PN
+        // --
+
+        err = np_getProbeHardwareID( slot, port, dock, &hID );
+
+        if( err != SUCCESS ) {
+            write(
+                QString("IMEC getProbeHardwareID(slot %1, port %2, dock %3) error %4 '%5'.")
+                .arg( slot ).arg( port ).arg( dock )
+                .arg( err ).arg( getNPErrorString4() ) );
+            return false;
+        }
+
+        pn = hID.ProductNumber;
+
+        write(
+            QString("Probe: pn %1 sn %2")
+            .arg( hID.ProductNumber ).arg( hID.SerialNumber ) );
+    }
 
 // ----
-// HSPN
+// Type
 // ----
-
-    err = np_getHeadstageHardwareID( slot, port, &hID );
-
-    if( err != SUCCESS ) {
-        write(
-            QString("IMEC getHeadstageHardwareID(slot %1, port %2) error %3 '%4'.")
-            .arg( slot ).arg( port )
-            .arg( err ).arg( getNPErrorString() ) );
-
-        if( err == NO_SLOT )
-            writeMapMsg( slot );
-
-        return false;
-    }
-
-// -------------------------------
-// Test for NHP 128-channel analog
-// -------------------------------
-
-    QString prod(hID.ProductNumber);
-
-    if( prod == "NPNH_HS_30" || prod == "NPNH_HS_31" ) {
-        type = 1200;
-        return true;
-    }
-
-// ---------------------------
-// Test for Quad port (2 or 4)
-// ---------------------------
-
-    else if( prod.contains( "ext" ) ) {
-        write("For Quad-probes (NP2020) only test ports (1 or 3).");
-        return false;
-    }
-
-// --
-// PN
-// --
-
-    err = np_getProbeHardwareID( slot, port, dock, &hID );
-
-    if( err != SUCCESS ) {
-        write(
-            QString("IMEC getProbeHardwareID(slot %1, port %2, dock %3) error %4 '%5'.")
-            .arg( slot ).arg( port ).arg( dock )
-            .arg( err ).arg( getNPErrorString() ) );
-        return false;
-    }
-
-    pn = hID.ProductNumber;
 
     if( !IMROTbl::pnToType( type, pn ) ) {
         write(
@@ -361,12 +370,15 @@ bool IMBISTCtl::probeType()
         return false;
     }
 
-    return true;
+exit:
+    return EEPROMCheck();
 }
 
 
 bool IMBISTCtl::EEPROMCheck()
 {
+    testEEPROM = true;
+
     if( type != 21 && type != 24 ) {
 
         if( type == 1200 )
@@ -394,7 +406,7 @@ bool IMBISTCtl::EEPROMCheck()
         write(
             QString("IMEC getHeadstageHardwareID(slot %1, port %2) error %3 '%4'.")
             .arg( slot ).arg( port )
-            .arg( err ).arg( getNPErrorString() ) );
+            .arg( err ).arg( getNPErrorString4() ) );
         return false;
     }
 
@@ -418,66 +430,97 @@ bool IMBISTCtl::EEPROMCheck()
 }
 
 
-bool IMBISTCtl::stdStart( int itest, int secs )
+bool IMBISTCtl::openProbe()
 {
-    if( !okVersions() )
-        return false;
+    write( "Open probe..." );
 
-    write( "-----------------------------------" );
-    write( QString("Test %1").arg( bistUI->testCB->itemText( itest ) ) );
+    if( 1 ) {
 
-    bool    ok = _openSlot();
+        int             slot = bistUI->slotSB->value(),
+                        port = bistUI->portSB->value(),
+                        dock = bistUI->dockSB->value();
+        NP_ErrorCode    err  = np_openProbe( slot, port, dock );
 
-    if( ok && itest != 1 ) {
-
-        ok = probeType() && EEPROMCheck() && _openProbe();
-
-        if( ok ) {
-
-            if( secs ) {
-                write( QString("Starting test, allow ~%1 seconds...")
-                        .arg( secs ) );
-            }
-            else
-                write( "Starting test..." );
+        if( err != SUCCESS && err != ALREADY_OPEN ) {
+            write(
+                QString("IMEC openProbe(slot %1, port %2, dock %3) error %4 '%5'.")
+                .arg( slot ).arg( port ).arg( dock )
+                .arg( err ).arg( getNPErrorString4() ) );
+            return false;
         }
-        else
-            _closeProbe();
     }
 
-    return ok;
+    return true;
 }
 
 
-void IMBISTCtl::stdFinish( NP_ErrorCode err )
+void IMBISTCtl::closeProbe()
+{
+    int slot = bistUI->slotSB->value();
+
+    if( 0 ) {
+    }
+    else
+        np_closeBS( slot );
+}
+
+
+void IMBISTCtl::stdStart( int itest, int secs )
+{
+    write( "-----------------------------------" );
+    write( QString("Test %1").arg( bistUI->testCB->itemText( itest ) ) );
+
+    if( itest > 1 ) {
+
+        if( secs ) {
+            write( QString("Starting test, allow ~%1 seconds...")
+                    .arg( secs ) );
+        }
+        else
+            write( "Starting test..." );
+    }
+}
+
+
+void IMBISTCtl::stdFinish4( NP_ErrorCode err )
 {
     if( err == SUCCESS )
         write( "result = 0 'SUCCESS'" );
     else {
         write( QString("result = %1 '%2'")
-            .arg( err ).arg( getNPErrorString() ) );
+            .arg( err ).arg( getNPErrorString4() ) );
     }
 
-    _closeProbe();
+    stdFinish();
+}
+
+
+void IMBISTCtl::stdFinish()
+{
+    write( "-----------------------------------" );
 }
 
 
 bool IMBISTCtl::test_bistBS()
 {
-    if( !stdStart( 1 ) )
-        return false;
+    stdStart( 1 );
 
-    int             slot = bistUI->slotSB->value();
-    NP_ErrorCode    err;
+    int slot = bistUI->slotSB->value();
 
-    err = np_bistBS( slot );
+    if( 0 ) {
+    }
+    else {
+        NP_ErrorCode    err;
 
-    stdFinish( err );
+        err = np_bistBS( slot );
 
-    if( err == NO_SLOT ) {
-        writeMapMsg( slot );
-        write( "" );
-        return false;
+        stdFinish4( err );
+
+        if( err == NO_SLOT ) {
+            writeMapMsg( slot );
+            write( "" );
+            return false;
+        }
     }
 
     return true;
@@ -486,163 +529,178 @@ bool IMBISTCtl::test_bistBS()
 
 void IMBISTCtl::test_bistHB()
 {
-    if( !stdStart( 2, 5 ) )
-        return;
+    stdStart( 2, 5 );
 
-    NP_ErrorCode    err;
+    int slot = bistUI->slotSB->value();
 
-    err = np_bistHB(
-            bistUI->slotSB->value(),
-            bistUI->portSB->value(),
-            bistUI->dockSB->value() );
+    if( 0 ) {
+    }
+    else {
+        NP_ErrorCode    err;
 
-    stdFinish( err );
+        err = np_bistHB(
+                slot,
+                bistUI->portSB->value(),
+                bistUI->dockSB->value() );
+
+        stdFinish4( err );
+    }
 }
 
 
 void IMBISTCtl::test_bistPRBS()
 {
-    if( !stdStart( 3, 10 ) )
-        return;
+    stdStart( 3, 10 );
 
-    NP_ErrorCode    err;
+    int slot = bistUI->slotSB->value();
 
-    err = np_bistStartPRBS(
-            bistUI->slotSB->value(),
-            bistUI->portSB->value() );
+    if( 0 ) {
+    }
+    else {
+        NP_ErrorCode    err;
 
-    if( err != SUCCESS ) {
+        err = np_bistStartPRBS( slot, bistUI->portSB->value() );
 
-        write( QString("Error %1 starting test: '%2'")
-                .arg( err ).arg( getNPErrorString() ) );
-        _closeProbe();
-        return;
+        if( err != SUCCESS ) {
+            write( QString("Error %1 starting test: '%2'")
+                    .arg( err ).arg( getNPErrorString4() ) );
+            stdFinish();
+            return;
+        }
+
+        QThread::msleep( 10000 );
+
+        int prbs_err;
+
+        err = np_bistStopPRBS( slot, bistUI->portSB->value(), &prbs_err );
+
+        if( err != SUCCESS ) {
+            write( QString("Error %1 stopping test: '%2'")
+                    .arg( err ).arg( getNPErrorString4() ) );
+        }
+
+        write( QString("Test result: serDes error count = %1")
+                .arg( prbs_err ) );
+
+        if( !prbs_err )
+            write( "result = 0 'SUCCESS'" );
+        else
+            write( "result = 'FAILED'" );
     }
 
-    QThread::msleep( 10000 );
-
-    int prbs_err;
-
-    err = np_bistStopPRBS(
-            bistUI->slotSB->value(),
-            bistUI->portSB->value(),
-            &prbs_err );
-
-    if( err != SUCCESS ) {
-
-        write( QString("Error %1 stopping test: '%2'")
-                .arg( err ).arg( getNPErrorString() ) );
-    }
-
-    write( QString("Test result: serDes error count = %1")
-            .arg( prbs_err ) );
-
-    if( !prbs_err )
-        write( "result = 0 'SUCCESS'" );
-    else
-        write( "result = 'FAILED'" );
-
-    _closeProbe();
+    stdFinish();
 }
 
 
 void IMBISTCtl::test_bistI2CMM()
 {
-    if( !stdStart( 4 ) )
-        return;
+    stdStart( 4 );
 
-    NP_ErrorCode    err;
+    int slot = bistUI->slotSB->value();
 
-    err = np_bistI2CMM(
-            bistUI->slotSB->value(),
-            bistUI->portSB->value(),
-            bistUI->dockSB->value() );
+    if( 0 ) {
+    }
+    else {
+        NP_ErrorCode    err;
 
-    stdFinish( err );
+        err = np_bistI2CMM( slot, bistUI->portSB->value(), bistUI->dockSB->value() );
+
+        stdFinish4( err );
+    }
 }
 
 
 void IMBISTCtl::test_bistEEPROM()
 {
-    if( !stdStart( 5 ) )
-        return;
+    stdStart( 5 );
 
-    NP_ErrorCode    err = SUCCESS;
+    int slot = bistUI->slotSB->value();
 
-    if( testEEPROM ) {
-        err = np_bistEEPROM(
-                bistUI->slotSB->value(),
-                bistUI->portSB->value() );
+    if( 0 ) {
     }
+    else {
+        NP_ErrorCode    err = SUCCESS;
 
-    stdFinish( err );
+        if( testEEPROM )
+            err = np_bistEEPROM( slot, bistUI->portSB->value() );
+
+        stdFinish4( err );
+    }
 }
 
 
 void IMBISTCtl::test_bistSR()
 {
-    if( !stdStart( 6 ) )
-        return;
-
-    NP_ErrorCode    err = SUCCESS;
+    stdStart( 6 );
 
     IMROTbl *R      = IMROTbl::alloc( pn );
-    int     nShnk   = R->nShank();
+    int     slot    = bistUI->slotSB->value(),
+            nShnk   = R->nShank();
     bool    testSR  = (R->nBanks() > 1);
     uint8_t mask    = 0;
     delete R;
 
-    if( testSR ) {
-        err = np_bistSR(
-                bistUI->slotSB->value(),
-                bistUI->portSB->value(),
-                bistUI->dockSB->value(), &mask );
-    }
-
-    if( err == SUCCESS )
-        write( "result = 0 'SUCCESS'" );
-    else if( err == TIMEOUT ) {
-        write( QString("result = %1 '%2'")
-            .arg( err ).arg( getNPErrorString() ) );
-        write( "Test inconclusive." );
-        write( "Check connections and try again." );
+    if( 0 ) {
     }
     else {
-        write( QString("result = %1 '%2'")
-            .arg( err ).arg( getNPErrorString() ) );
-        QString s;
-        int     ngood = 0;
-        for( int is = 0; is < nShnk; ++is ) {
-            if( mask & (1<<is) ) {
-                s += QString(" %1").arg( is );
-                ++ngood;
-            }
+        NP_ErrorCode    err = SUCCESS;
+
+        if( testSR ) {
+            err = np_bistSR(
+                    slot,
+                    bistUI->portSB->value(),
+                    bistUI->dockSB->value(), &mask );
         }
-        write( QString("Zero-based good shank list = { %1 }")
-            .arg( s.trimmed() ) );
-        if( ngood == 0 )
-            write( "You cannot use this probe." );
-        else if( ngood < nShnk )
-            write( "You can use this probe by selecting sites only on good shanks." );
+
+        if( err == SUCCESS )
+            write( "result = 0 'SUCCESS'" );
+        else if( err == TIMEOUT ) {
+            write( QString("result = %1 '%2'")
+                .arg( err ).arg( getNPErrorString4() ) );
+            write( "Test inconclusive." );
+            write( "Check connections and try again." );
+        }
+        else {
+            write( QString("result = %1 '%2'")
+                .arg( err ).arg( getNPErrorString4() ) );
+
+            QString s;
+            int     ngood = 0;
+            for( int is = 0; is < nShnk; ++is ) {
+                if( mask & (1<<is) ) {
+                    s += QString(" %1").arg( is );
+                    ++ngood;
+                }
+            }
+
+            write( QString("Zero-based good shank list = { %1 }")
+                .arg( s.trimmed() ) );
+            if( ngood == 0 )
+                write( "You cannot use this probe." );
+            else if( ngood < nShnk )
+                write( "You can use this probe by selecting sites only on good shanks." );
+        }
     }
 
-    _closeProbe();
+    stdFinish();
 }
 
 
 void IMBISTCtl::test_bistPSB()
 {
-    if( !stdStart( 7 ) )
-        return;
+    stdStart( 7 );
 
-    NP_ErrorCode    err;
+    int slot = bistUI->slotSB->value();
 
-    err = np_bistPSB(
-            bistUI->slotSB->value(),
-            bistUI->portSB->value(),
-            bistUI->dockSB->value() );
+    if( 0 ) {
+    }
+    else {
+        NP_ErrorCode    err;
 
-    stdFinish( err );
+        err = np_bistPSB( slot, bistUI->portSB->value(), bistUI->dockSB->value() );
+
+        stdFinish4( err );
+    }
 }
 
 
@@ -650,11 +708,10 @@ void IMBISTCtl::test_bistPSB()
 #if 0
 void IMBISTCtl::test_bistSignal()
 {
-    if( !stdStart( 8, 40 ) )
-        return;
+    stdStart( 8, 40 );
 
     write( "Signal test -- not yet implemented --" );
-    _closeProbe();
+    stdFinish();
 }
 #endif
 
@@ -663,23 +720,22 @@ void IMBISTCtl::test_bistSignal()
 #if 0
 void IMBISTCtl::test_bistSignal()
 {
-    if( !stdStart( 8, 40 ) )
-        return;
+    stdStart( 8, 40 );
 
+    int             slot = bistUI->slotSB->value();
     NP_ErrorCode    err;
     bool            pass = false;
 
     std::vector<bistElectrodeStats> S( 960 );
 
     err = bistSignal(
-            bistUI->slotSB->value(),
+            slot,
             bistUI->portSB->value(),
             bistUI->dockSB->value(),
             &pass,
             &S[0] );
 
     if( err != SUCCESS ) {
-
         write( QString("Error %1 running test: '%2'")
                 .arg( err ).arg( getNPErrorString() ) );
     }
@@ -696,7 +752,7 @@ void IMBISTCtl::test_bistSignal()
         .arg( S[i].avg, 0, 'f', 4 ) );
     }
 
-    _closeProbe();
+    stdFinish();
 }
 #endif
 
@@ -705,34 +761,38 @@ void IMBISTCtl::test_bistSignal()
 #if 1
 void IMBISTCtl::test_bistSignal()
 {
-    if( !stdStart( 8, 40 ) )
-        return;
+    stdStart( 8, 40 );
 
-    NP_ErrorCode    err;
+    int slot = bistUI->slotSB->value();
 
-    err = np_bistSignal(
-            bistUI->slotSB->value(),
-            bistUI->portSB->value(),
-            bistUI->dockSB->value() );
+    if( 0 ) {
+    }
+    else {
+        NP_ErrorCode    err;
 
-    stdFinish( err );
+        err = np_bistSignal( slot, bistUI->portSB->value(), bistUI->dockSB->value() );
+
+        stdFinish4( err );
+    }
 }
 #endif
 
 
 void IMBISTCtl::test_bistNoise()
 {
-    if( !stdStart( 9, 40 ) )
-        return;
+    stdStart( 9, 40 );
 
-    NP_ErrorCode    err;
+    int slot = bistUI->slotSB->value();
 
-    err = np_bistNoise(
-            bistUI->slotSB->value(),
-            bistUI->portSB->value(),
-            bistUI->dockSB->value() );
+    if( 0 ) {
+    }
+    else {
+        NP_ErrorCode    err;
 
-    stdFinish( err );
+        err = np_bistNoise( slot, bistUI->portSB->value(), bistUI->dockSB->value() );
+
+        stdFinish4( err );
+    }
 }
 
 #endif  // HAVE_IMEC

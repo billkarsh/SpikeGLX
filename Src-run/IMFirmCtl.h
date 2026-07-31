@@ -42,7 +42,7 @@ private:
     void verEval();
     bool paths( QString &bs, QString &bsc );
     QString verToBuild( const QString &vers );
-    static int callback( size_t bytes );
+    static int callback4( size_t bytes );
 };
 
 #endif  // HAVE_IMEC

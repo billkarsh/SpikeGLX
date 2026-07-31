@@ -6,8 +6,8 @@
 #include "IMEC/NeuropixAPI.h"
 using namespace Neuropixels;
 
-#include "IMFirmCtl.h"
 #include "IMROTbl.h"
+#include "IMFirmCtl.h"
 #include "Util.h"
 
 #include <QDirIterator>
@@ -172,16 +172,20 @@ void IMFirmCtl::update()
 #ifdef BYFILE
         bsBytes = QFileInfo( sbs ).size();
 #else
-        size_t bytes;
-        err = np_bs_getFirmwareSize( slot, &bytes );
-        if( err != SUCCESS ) {
-            Error() <<
-                QString("IMEC np_bs_getFirmwareSize(slot %1)%2")
-                .arg( slot ).arg( makeErrorString( err ) );
-            beep( "Error updating BS" );
-            goto exit;
+        if( 0 ) {
         }
-        bsBytes = bytes;
+        else {
+            size_t bytes;
+            err = np_bs_getFirmwareSize( slot, &bytes );
+            if( err != SUCCESS ) {
+                Error() <<
+                    QString("IMEC np_bs_getFirmwareSize(slot %1)%2")
+                    .arg( slot ).arg( makeErrorString( err ) );
+                beep( "Error updating BS" );
+                goto exit;
+            }
+            bsBytes = int(bytes);
+        }
 #endif
     }
 
@@ -193,16 +197,20 @@ void IMFirmCtl::update()
 #ifdef BYFILE
         bscBytes = QFileInfo( sbsc ).size();
 #else
-        size_t bytes;
-        err = np_bsc_getFirmwareSize( slot, &bytes );
-        if( err != SUCCESS ) {
-            Error() <<
-                QString("IMEC np_bsc_getFirmwareSize(slot %1)%2")
-                .arg( slot ).arg( makeErrorString( err ) );
-            beep( "Error updating BSC" );
-            goto exit;
+        if( 0 ) {
         }
-        bscBytes = bytes;
+        else {
+            size_t bytes;
+            err = np_bsc_getFirmwareSize( slot, &bytes );
+            if( err != SUCCESS ) {
+                Error() <<
+                    QString("IMEC np_bsc_getFirmwareSize(slot %1)%2")
+                    .arg( slot ).arg( makeErrorString( err ) );
+                beep( "Error updating BSC" );
+                goto exit;
+            }
+            bscBytes = int(bytes);
+        }
 #endif
     }
 
@@ -218,22 +226,30 @@ void IMFirmCtl::update()
 
 #ifdef BYFILE
         sbs.replace( "/", "\\" );
-        err = np_bs_updateFirmware( slot, STR2CHR( sbs ), callback );
-        if( err != SUCCESS ) {
-            Error() <<
-                QString("IMEC bs_updateFirmware(slot %1)%2")
-                .arg( slot ).arg( makeErrorString( err ) );
-            beep( "Error updating BS" );
-            goto close;
+        if( 0 ) {
+        }
+        else {
+            err = np_bs_updateFirmware( slot, STR2CHR( sbs ), callback4 );
+            if( err != SUCCESS ) {
+                Error() <<
+                    QString("IMEC bs_updateFirmware(slot %1)%2")
+                    .arg( slot ).arg( makeErrorString( err ) );
+                beep( "Error updating BS" );
+                goto close;
+            }
         }
 #else
-        err = np_bs_resetFirmware( slot, callback );
-        if( err != SUCCESS ) {
-            Error() <<
-                QString("IMEC bs_resetFirmware(slot %1)%2")
-                .arg( slot ).arg( makeErrorString( err ) );
-            beep( "Error updating BS" );
-            goto close;
+        if( 0 ) {
+        }
+        else {
+            err = np_bs_resetFirmware( slot, callback4 );
+            if( err != SUCCESS ) {
+                Error() <<
+                    QString("IMEC bs_resetFirmware(slot %1)%2")
+                    .arg( slot ).arg( makeErrorString( err ) );
+                beep( "Error updating BS" );
+                goto close;
+            }
         }
 #endif
 
@@ -251,22 +267,30 @@ void IMFirmCtl::update()
 
 #ifdef BYFILE
         sbsc.replace( "/", "\\" );
-        err = np_bsc_updateFirmware( slot, STR2CHR( sbsc ), callback );
-        if( err != SUCCESS ) {
-            Error() <<
-                QString("IMEC bsc_updateFirmware(slot %1)%2")
-                .arg( slot ).arg( makeErrorString( err ) );
-            beep( "Error updating BSC" );
-            goto close;
+        if( 0 ) {
+        }
+        else {
+            err = np_bsc_updateFirmware( slot, STR2CHR( sbsc ), callback4 );
+            if( err != SUCCESS ) {
+                Error() <<
+                    QString("IMEC bsc_updateFirmware(slot %1)%2")
+                    .arg( slot ).arg( makeErrorString( err ) );
+                beep( "Error updating BSC" );
+                goto close;
+            }
         }
 #else
-        err = np_bsc_resetFirmware( slot, callback );
-        if( err != SUCCESS ) {
-            Error() <<
-                QString("IMEC bsc_resetFirmware(slot %1)%2")
-                .arg( slot ).arg( makeErrorString( err ) );
-            beep( "Error updating BSC" );
-            goto close;
+        if( 0 ) {
+        }
+        else {
+            err = np_bsc_resetFirmware( slot, callback4 );
+            if( err != SUCCESS ) {
+                Error() <<
+                    QString("IMEC bsc_resetFirmware(slot %1)%2")
+                    .arg( slot ).arg( makeErrorString( err ) );
+                beep( "Error updating BSC" );
+                goto close;
+            }
         }
 #endif
 
@@ -347,53 +371,56 @@ void IMFirmCtl::verInit( const QString &s )
 
 bool IMFirmCtl::verGet( int slot )
 {
-    firmware_Info   info;
-    HardwareID      hID;
-    QString         bs, bsc;
-    NP_ErrorCode    err;
-
     verInit( "???" );
 
-    err = np_getBSCHardwareID( slot, &hID );
-    if( err != SUCCESS ) {
-        Error() <<
-            QString("IMEC getBSCHardwareID(slot %1)%2")
-            .arg( slot ).arg( makeErrorString( err ) );
-        beep( "Error identifying BSC" );
-        return false;
-    }
-    tech = IMROTbl::bscpnToTech( hID.ProductNumber );
-    firmUI->techLE->setText( IMROTbl::strTech( tech ) );
+    QString s_bs, s_bsc, bsreq, bscreq;
 
-    QString bsreq,
-            bscreq;
-    IMROTbl::bscReqVers( bsreq, bscreq, tech );
-    firmUI->bsreqLE->setText( bsreq );
-    firmUI->bscreqLE->setText( bscreq );
-
-    err = np_bs_getFirmwareInfo( slot, &info );
-    if( err != SUCCESS ) {
-        Error() <<
-            QString("IMEC bs_getFirmwareInfo(slot %1)%2")
-            .arg( slot ).arg( makeErrorString( err ) );
-        beep( "Error reading BS version" );
-        return false;
+    if( 0 ) {
     }
-    bs = QString("%1.%2.%3")
-            .arg( info.major ).arg( info.minor ).arg( info.build );
-    firmUI->bscurLE->setText( bs );
+    else {
+        firmware_Info   info;
+        HardwareID      hID;
+        NP_ErrorCode    err;
 
-    err = np_bsc_getFirmwareInfo( slot, &info );
-    if( err != SUCCESS ) {
-        Error() <<
-            QString("IMEC bsc_getFirmwareInfo(slot %1)%2")
-            .arg( slot ).arg( makeErrorString( err ) );
-        beep( "Error reading BSC version" );
-        return false;
+        err = np_getBSCHardwareID( slot, &hID );
+        if( err != SUCCESS ) {
+            Error() <<
+                QString("IMEC getBSCHardwareID(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) );
+            beep( "Error identifying BSC" );
+            return false;
+        }
+        tech = IMROTbl::bscpnToTech( hID.ProductNumber );
+        firmUI->techLE->setText( IMROTbl::strTech( tech ) );
+
+        IMROTbl::bscReqVers( bsreq, bscreq, tech );
+        firmUI->bsreqLE->setText( bsreq );
+        firmUI->bscreqLE->setText( bscreq );
+
+        err = np_bs_getFirmwareInfo( slot, &info );
+        if( err != SUCCESS ) {
+            Error() <<
+                QString("IMEC bs_getFirmwareInfo(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) );
+            beep( "Error reading BS version" );
+            return false;
+        }
+        s_bs = QString("%1.%2.%3")
+                .arg( info.major ).arg( info.minor ).arg( info.build );
+        firmUI->bscurLE->setText( s_bs );
+
+        err = np_bsc_getFirmwareInfo( slot, &info );
+        if( err != SUCCESS ) {
+            Error() <<
+                QString("IMEC bsc_getFirmwareInfo(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) );
+            beep( "Error reading BSC version" );
+            return false;
+        }
+        s_bsc = QString("%1.%2.%3")
+                .arg( info.major ).arg( info.minor ).arg( info.build );
+        firmUI->bsccurLE->setText( s_bsc );
     }
-    bsc = QString("%1.%2.%3")
-            .arg( info.major ).arg( info.minor ).arg( info.build );
-    firmUI->bsccurLE->setText( bsc );
 
     return true;
 }
@@ -516,7 +543,7 @@ QString IMFirmCtl::verToBuild( const QString &vers )
 }
 
 
-int IMFirmCtl::callback( size_t bytes )
+int IMFirmCtl::callback4( size_t bytes )
 {
     QMetaObject::invokeMethod(
         ME->firmUI->PBar,
