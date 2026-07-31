@@ -33,40 +33,44 @@ bool CimAcqImec::_1t_simProbe( const CimCfg::ImProbeDat &P )
 
 bool CimAcqImec::_1t_openProbe( const CimCfg::ImProbeDat &P )
 {
-    NP_ErrorCode    err = np_openProbe( P.adr.slot, P.adr.port, P.adr.dock );
-
-    if( err != SUCCESS ) {
-        runError(
-            QString("IMEC openProbe(%1)%2")
-            .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) ) );
-        return false;
+    if( 0 ) {
     }
+    else {
+        NP_ErrorCode    err = np_openProbe( P.adr.slot, P.adr.port, P.adr.dock );
 
-    for( int itry = 1; itry <= 10; ++itry ) {
+        if( err != SUCCESS ) {
+            runError(
+                QString("IMEC openProbe(%1)%2")
+                .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) ) );
+            return false;
+        }
 
-        err = np_init( P.adr.slot, P.adr.port, P.adr.dock );
+        for( int itry = 1; itry <= 10; ++itry ) {
 
-        if( err == SUCCESS ) {
-            if( itry > 1 ) {
-                Warning() <<
-                QString("Probe %1: init() took %2 tries.")
-                .arg( P.ip ).arg( itry );
+            err = np_init( P.adr.slot, P.adr.port, P.adr.dock );
+
+            if( err == SUCCESS ) {
+                if( itry > 1 ) {
+                    Warning() <<
+                    QString("Probe %1: init() took %2 tries.")
+                    .arg( P.ip ).arg( itry );
+                }
+                break;
             }
-            break;
-        }
-        else if( err == ERROR_SR_CHAIN ) {
-            if( !p.im.prbAll.srAtDetect || !P.srDoCheck() )
-                return true;
+            else if( err == ERROR_SR_CHAIN ) {
+                if( !p.im.prbAll.srAtDetect || !P.srDoCheck() )
+                    return true;
+            }
+
+            QThread::msleep( 100 );
         }
 
-        QThread::msleep( 100 );
-    }
-
-    if( err != SUCCESS ) {
-        runError(
-            QString("IMEC init(%1)%2")
-            .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) ) );
-        return false;
+        if( err != SUCCESS ) {
+            runError(
+                QString("IMEC init(%1)%2")
+                .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) ) );
+            return false;
+        }
     }
 
     return true;
@@ -171,17 +175,21 @@ warn:
 
     path.replace( "/", "\\" );
 
-    NP_ErrorCode    err;
+    if( 0 ) {
+    }
+    else {
+        NP_ErrorCode    err;
 
-    err = np_setGainCalibration(
-            P.adr.slot, P.adr.port, P.adr.dock, STR2CHR( path ) );
+        err = np_setGainCalibration(
+                P.adr.slot, P.adr.port, P.adr.dock, STR2CHR( path ) );
 
-    if( err != SUCCESS ) {
-        runError(
-            QString(
-            "IMEC setGainCalibration(%1)%2")
-            .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) ) );
-        return false;
+        if( err != SUCCESS ) {
+            runError(
+                QString(
+                "IMEC setGainCalibration(%1)%2")
+                .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) ) );
+            return false;
+        }
     }
 
     return true;
@@ -248,15 +256,19 @@ warn:
 
 bool CimAcqImec::_1t_setLEDs( const CimCfg::ImProbeDat &P )
 {
-    NP_ErrorCode    err;
+    if( 0 ) {
+    }
+    else {
+        NP_ErrorCode    err;
 
-    err = np_setHSLed( P.adr.slot, P.adr.port, p.im.prbj[P.ip].LEDEnable );
+        err = np_setHSLed( P.adr.slot, P.adr.port, p.im.prbj[P.ip].LEDEnable );
 
-    if( err != SUCCESS ) {
-        runError(
-            QString("IMEC setHSLed(%1)%2")
-            .arg( P.adr.tx_sp() ).arg( makeErrorString( err ) ) );
-        return false;
+        if( err != SUCCESS ) {
+            runError(
+                QString("IMEC setHSLed(%1)%2")
+                .arg( P.adr.tx_sp() ).arg( makeErrorString( err ) ) );
+            return false;
+        }
     }
 
     return true;
@@ -265,15 +277,19 @@ bool CimAcqImec::_1t_setLEDs( const CimCfg::ImProbeDat &P )
 
 bool CimAcqImec::_1t_selectElectrodes( const CimCfg::ImProbeDat &P )
 {
-    NP_ErrorCode    err = NP_ErrorCode(p.im.prbj[P.ip].roTbl->
-                            selectSites4( P.adr, false, true ));
+    if( 0 ) {
+    }
+    else {
+        NP_ErrorCode    err = NP_ErrorCode(p.im.prbj[P.ip].roTbl->
+                                selectSites4( P.adr, false, true ));
 
-    if( err != SUCCESS ) {
-        runError(
-            QString(
-            "IMEC selectSites4(%1)%2")
-            .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) ) );
-        return false;
+        if( err != SUCCESS ) {
+            runError(
+                QString(
+                "IMEC selectSites4(%1)%2")
+                .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) ) );
+            return false;
+        }
     }
 
     return true;
@@ -282,15 +298,19 @@ bool CimAcqImec::_1t_selectElectrodes( const CimCfg::ImProbeDat &P )
 
 bool CimAcqImec::_1t_selectReferences( const CimCfg::ImProbeDat &P )
 {
-    NP_ErrorCode    err = NP_ErrorCode(p.im.prbj[P.ip].roTbl->
-                            selectRefs4( P.adr ));
+    if( 0 ) {
+    }
+    else {
+        NP_ErrorCode    err = NP_ErrorCode(p.im.prbj[P.ip].roTbl->
+                                selectRefs4( P.adr ));
 
-    if( err != SUCCESS ) {
-        runError(
-            QString(
-            "IMEC selectRefs4(%1)%2")
-            .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) ) );
-        return false;
+        if( err != SUCCESS ) {
+            runError(
+                QString(
+                "IMEC selectRefs4(%1)%2")
+                .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) ) );
+            return false;
+        }
     }
 
     return true;
@@ -299,14 +319,18 @@ bool CimAcqImec::_1t_selectReferences( const CimCfg::ImProbeDat &P )
 
 bool CimAcqImec::_1t_selectGains( const CimCfg::ImProbeDat &P )
 {
-    NP_ErrorCode    err = NP_ErrorCode(p.im.prbj[P.ip].roTbl->
-                            selectGains4( P.adr ));
+    if( 0 ) {
+    }
+    else {
+        NP_ErrorCode    err = NP_ErrorCode(p.im.prbj[P.ip].roTbl->
+                                selectGains4( P.adr ));
 
-    if( err != SUCCESS ) {
-        runError(
-            QString("IMEC selectGains4(%1)%2")
-            .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) ) );
-        return false;
+        if( err != SUCCESS ) {
+            runError(
+                QString("IMEC selectGains4(%1)%2")
+                .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) ) );
+            return false;
+        }
     }
 
     return true;
@@ -315,15 +339,19 @@ bool CimAcqImec::_1t_selectGains( const CimCfg::ImProbeDat &P )
 
 bool CimAcqImec::_1t_selectAPFilters( const CimCfg::ImProbeDat &P )
 {
-    NP_ErrorCode    err = NP_ErrorCode(p.im.prbj[P.ip].roTbl->
-                            selectAPFlts4( P.adr ));
+    if( 0 ) {
+    }
+    else {
+        NP_ErrorCode    err = NP_ErrorCode(p.im.prbj[P.ip].roTbl->
+                                selectAPFlts4( P.adr ));
 
-    if( err != SUCCESS ) {
-        runError(
-            QString(
-            "IMEC selectAPFlts4(%1)%2")
-            .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) ) );
-        return false;
+        if( err != SUCCESS ) {
+            runError(
+                QString(
+                "IMEC selectAPFlts4(%1)%2")
+                .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) ) );
+            return false;
+        }
     }
 
     return true;
@@ -336,20 +364,25 @@ bool CimAcqImec::_1t_setStandby( const CimCfg::ImProbeDat &P )
 // Turn ALL channels on or off according to stdbyBits
 // --------------------------------------------------
 
-    int nC = p.im.prbj[P.ip].roTbl->nAP();
+    const QBitArray&    bits = p.im.prbj[P.ip].stdbyBits;
+    int                 nC   = p.im.prbj[P.ip].roTbl->nAP();
 
-    for( int ic = 0; ic < nC; ++ic ) {
+    if( 0 ) {
+    }
+    else {
+        for( int ic = 0; ic < nC; ++ic ) {
 
-        NP_ErrorCode    err;
+            NP_ErrorCode    err;
 
-        err = np_setStdb( P.adr.slot, P.adr.port, P.adr.dock, ic,
-                p.im.prbj[P.ip].stdbyBits.testBit( ic ) );
+            err = np_setStdb( P.adr.slot, P.adr.port, P.adr.dock, ic,
+                    bits.testBit( ic ) );
 
-        if( err != SUCCESS ) {
-            runError(
-                QString("IMEC setStdb(%1)%2")
-                .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) ) );
-            return false;
+            if( err != SUCCESS ) {
+                runError(
+                    QString("IMEC setStdb(%1)%2")
+                    .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) ) );
+                return false;
+            }
         }
     }
 
@@ -359,32 +392,37 @@ bool CimAcqImec::_1t_setStandby( const CimCfg::ImProbeDat &P )
 
 bool CimAcqImec::_1t_writeProbe( const CimCfg::ImProbeDat &P )
 {
-    NP_ErrorCode    err;
-    bool            check = p.im.prbAll.srAtDetect && P.srDoCheck();
+    bool    check = p.im.prbAll.srAtDetect && P.srDoCheck();
 
-    for( int itry = 1; itry <= 10; ++itry ) {
+    if( 0 ) {
+    }
+    else {
+        NP_ErrorCode    err;
 
-        err = np_writeProbeConfiguration(
-                P.adr.slot, P.adr.port, P.adr.dock, check );
+        for( int itry = 1; itry <= 10; ++itry ) {
 
-        if( err == SUCCESS ) {
-            if( itry > 1 ) {
-                Warning() <<
-                QString("Probe %1: writeConfig() took %2 tries.")
-                .arg( P.ip ).arg( itry );
+            err = np_writeProbeConfiguration(
+                    P.adr.slot, P.adr.port, P.adr.dock, check );
+
+            if( err == SUCCESS ) {
+                if( itry > 1 ) {
+                    Warning() <<
+                    QString("Probe %1: writeConfig() took %2 tries.")
+                    .arg( P.ip ).arg( itry );
+                }
+                break;
             }
-            break;
+
+            QThread::msleep( 100 );
         }
 
-        QThread::msleep( 100 );
-    }
-
-    if( err != SUCCESS ) {
-        runError(
-            QString(
-            "IMEC writeProbeConfiguration(%1)%2")
-            .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) ) );
-        return false;
+        if( err != SUCCESS ) {
+            runError(
+                QString(
+                "IMEC writeProbeConfiguration(%1)%2")
+                .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) ) );
+            return false;
+        }
     }
 
     return true;
