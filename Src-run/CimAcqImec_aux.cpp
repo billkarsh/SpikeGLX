@@ -202,47 +202,50 @@ bool CimAcqImec::_aux_open( const CimCfg::ImProbeTable &T )
         if( T.simprb.isSimSlot( slot ) )
             continue;
 
-        NP_ErrorCode    err = np_openBS( slot );
+        if( 1 ) {
 
-        if( err != SUCCESS ) {
-            runError(
-                QString("IMEC openBS(slot %1)%2")
-                .arg( slot ).arg( makeErrorString( err ) ) );
-            return false;
-        }
+            NP_ErrorCode    err = np_openBS( slot );
 
-        // ----------------------------------
-        // @@@ Experiment to fix NXT timeouts
-        // ----------------------------------
+            if( err != SUCCESS ) {
+                runError(
+                    QString("IMEC openBS(slot %1)%2")
+                    .arg( slot ).arg( makeErrorString( err ) ) );
+                return false;
+            }
+
+            // ----------------------------------
+            // @@@ Experiment to fix NXT timeouts
+            // ----------------------------------
 
 #if 0
-        if( T.slot2Vers[slot].bsctech == t_tech_nxt_pa ) {
-            HardwareID      H;
-            int             np = p.stream_nIM();
-            NP_ErrorCode    res;
-            for( int itry = 1; itry <= 10; ++itry ) {
-                np_closeBS( slot );
-                QThread::msleep( 1000 );
-                np_openBS( slot );
-                QThread::msleep( 1000 );
-                bool ok = true;
-                for( int ip = 0; ip < np; ++ip ) {
-                    const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
-                    if( P.adr.slot != slot )
-                        continue;
-                    res = np_getFlexHardwareID( P.adr.slot, P.adr.port, 1, &H );
-                    Log()<<"run ip try result "<<ip<<" "<<itry<<" "<<res;
-                    if( res != Neuropixels::SUCCESS ) {
-                        ok = false;
-                        break;
+            if( T.slot2Vers[slot].bsctech == t_tech_nxt_pa ) {
+                HardwareID      H;
+                int             np = p.stream_nIM();
+                NP_ErrorCode    res;
+                for( int itry = 1; itry <= 10; ++itry ) {
+                    np_closeBS( slot );
+                    QThread::msleep( 1000 );
+                    np_openBS( slot );
+                    QThread::msleep( 1000 );
+                    bool ok = true;
+                    for( int ip = 0; ip < np; ++ip ) {
+                        const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
+                        if( P.adr.slot != slot )
+                            continue;
+                        res = np_getFlexHardwareID( P.adr.slot, P.adr.port, 1, &H );
+                        Log()<<"run ip try result "<<ip<<" "<<itry<<" "<<res;
+                        if( res != Neuropixels::SUCCESS ) {
+                            ok = false;
+                            break;
+                        }
                     }
+                    if( ok )
+                        break;
+                    QThread::msleep( 200 );
                 }
-                if( ok )
-                    break;
-                QThread::msleep( 200 );
             }
-        }
 #endif
+        }
 
         if( T.isSlotUSBType( slot ) ) {
             if( !_aux_initObxSlot( slot ) )
@@ -341,33 +344,37 @@ bool CimAcqImec::_aux_setObxSyncAsInput( int slot )
 
 bool CimAcqImec::_aux_clrPXISync( int slot )
 {
-    NP_ErrorCode    err;
-
-    err = np_switchmatrix_clear( slot, SM_Output_StatusBit );
-
-    if( err != SUCCESS ) {
-        runError(
-            QString("IMEC switchmatrix_clear(slot %1, PXIBIT6SYNC)%2")
-            .arg( slot ).arg( makeErrorString( err ) ) );
-        return false;
+    if( 0 ) {
     }
+    else {
+        NP_ErrorCode    err;
 
-    err = np_switchmatrix_clear( slot, SM_Output_PXI7 );
+        err = np_switchmatrix_clear( slot, SM_Output_StatusBit );
 
-    if( err != SUCCESS ) {
-        runError(
-            QString("IMEC switchmatrix_clear(slot %1, PXIBKPLSYNC)%2")
-            .arg( slot ).arg( makeErrorString( err ) ) );
-        return false;
-    }
+        if( err != SUCCESS ) {
+            runError(
+                QString("IMEC switchmatrix_clear(slot %1, PXIBIT6SYNC)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
+            return false;
+        }
 
-    err = np_switchmatrix_clear( slot, SM_Output_SMA );
+        err = np_switchmatrix_clear( slot, SM_Output_PXI7 );
 
-    if( err != SUCCESS ) {
-        runError(
-            QString("IMEC switchmatrix_clear(slot %1, PXISMASYNC)%2")
-            .arg( slot ).arg( makeErrorString( err ) ) );
-        return false;
+        if( err != SUCCESS ) {
+            runError(
+                QString("IMEC switchmatrix_clear(slot %1, PXIBKPLSYNC)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
+            return false;
+        }
+
+        err = np_switchmatrix_clear( slot, SM_Output_SMA );
+
+        if( err != SUCCESS ) {
+            runError(
+                QString("IMEC switchmatrix_clear(slot %1, PXISMASYNC)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
+            return false;
+        }
     }
 
     return true;
@@ -379,43 +386,47 @@ bool CimAcqImec::_aux_setPXISyncAsOutput( int slot )
     if( !_aux_clrPXISync( slot ) )
         return false;
 
-    NP_ErrorCode    err;
-
-    err = np_setSyncClockPeriod( slot, 1000 );
-
-    if( err != SUCCESS ) {
-        runError(
-            QString("IMEC setSyncClockPeriod(slot %1)%2")
-            .arg( slot ).arg( makeErrorString( err ) ) );
-        return false;
+    if( 0 ) {
     }
+    else {
+        NP_ErrorCode    err;
 
-    err = np_switchmatrix_set( slot,
-            SM_Output_StatusBit, SM_Input_SyncClk, true );
+        err = np_setSyncClockPeriod( slot, 1000 );
 
-    if( err != SUCCESS ) {
-        runError(
-            QString("IMEC switchmatrix_set(slot %1, PXIOUTBIT6SYNC)%2")
-            .arg( slot ).arg( makeErrorString( err ) ) );
-        return false;
-    }
+        if( err != SUCCESS ) {
+            runError(
+                QString("IMEC setSyncClockPeriod(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
+            return false;
+        }
 
-    err = np_switchmatrix_set( slot, SM_Output_PXI7, SM_Input_SyncClk, true );
+        err = np_switchmatrix_set( slot,
+                SM_Output_StatusBit, SM_Input_SyncClk, true );
 
-    if( err != SUCCESS ) {
-        runError(
-            QString("IMEC switchmatrix_set(slot %1, PXIOUTBKPLSYNC)%2")
-            .arg( slot ).arg( makeErrorString( err ) ) );
-        return false;
-    }
+        if( err != SUCCESS ) {
+            runError(
+                QString("IMEC switchmatrix_set(slot %1, PXIOUTBIT6SYNC)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
+            return false;
+        }
 
-    err = np_switchmatrix_set( slot, SM_Output_SMA, SM_Input_SyncClk, true );
+        err = np_switchmatrix_set( slot, SM_Output_PXI7, SM_Input_SyncClk, true );
 
-    if( err != SUCCESS ) {
-        runError(
-            QString("IMEC switchmatrix_set(slot %1, PXIOUTSMASYNC)%2")
-            .arg( slot ).arg( makeErrorString( err ) ) );
-        return false;
+        if( err != SUCCESS ) {
+            runError(
+                QString("IMEC switchmatrix_set(slot %1, PXIOUTBKPLSYNC)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
+            return false;
+        }
+
+        err = np_switchmatrix_set( slot, SM_Output_SMA, SM_Input_SyncClk, true );
+
+        if( err != SUCCESS ) {
+            runError(
+                QString("IMEC switchmatrix_set(slot %1, PXIOUTSMASYNC)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
+            return false;
+        }
     }
 
     return true;
@@ -427,24 +438,28 @@ bool CimAcqImec::_aux_setPXISyncAsInput( int slot )
     if( !_aux_clrPXISync( slot ) )
         return false;
 
-    NP_ErrorCode    err;
-
-    err = np_switchmatrix_set( slot, SM_Output_StatusBit, SM_Input_SMA, true );
-
-    if( err != SUCCESS ) {
-        runError(
-            QString("IMEC switchmatrix_set(slot %1, PXIINBIT6SYNC)%2")
-            .arg( slot ).arg( makeErrorString( err ) ) );
-        return false;
+    if( 0 ) {
     }
+    else {
+        NP_ErrorCode    err;
 
-    err = np_switchmatrix_set( slot, SM_Output_PXI7, SM_Input_SMA, true );
+        err = np_switchmatrix_set( slot, SM_Output_StatusBit, SM_Input_SMA, true );
 
-    if( err != SUCCESS ) {
-        runError(
-            QString("IMEC switchmatrix_set(slot %1, PXIINBKPLSYNC)%2")
-            .arg( slot ).arg( makeErrorString( err ) ) );
-        return false;
+        if( err != SUCCESS ) {
+            runError(
+                QString("IMEC switchmatrix_set(slot %1, PXIINBIT6SYNC)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
+            return false;
+        }
+
+        err = np_switchmatrix_set( slot, SM_Output_PXI7, SM_Input_SMA, true );
+
+        if( err != SUCCESS ) {
+            runError(
+                QString("IMEC switchmatrix_set(slot %1, PXIINBKPLSYNC)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
+            return false;
+        }
     }
 
     return true;
@@ -456,15 +471,19 @@ bool CimAcqImec::_aux_setPXISyncAsListener( int slot )
     if( !_aux_clrPXISync( slot ) )
         return false;
 
-    NP_ErrorCode    err;
+    if( 0 ) {
+    }
+    else {
+        NP_ErrorCode    err;
 
-    err = np_switchmatrix_set( slot, SM_Output_StatusBit, SM_Input_PXI7, true );
+        err = np_switchmatrix_set( slot, SM_Output_StatusBit, SM_Input_PXI7, true );
 
-    if( err != SUCCESS ) {
-        runError(
-            QString("IMEC switchmatrix_set(slot %1, PXILSTNBIT6SYNC)%2")
-            .arg( slot ).arg( makeErrorString( err ) ) );
-        return false;
+        if( err != SUCCESS ) {
+            runError(
+                QString("IMEC switchmatrix_set(slot %1, PXILSTNBIT6SYNC)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
+            return false;
+        }
     }
 
     return true;
