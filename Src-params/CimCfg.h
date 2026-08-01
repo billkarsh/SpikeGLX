@@ -540,36 +540,40 @@ public:
     static bool detect_slots(
         ERRLVL                  &R,
         ImProbeTable            &T );
-    static bool detect_slot_type(
+    static bool detect_slot4_type(
         ERRLVL                  &R,
         ImProbeTable            &T,
         int                     slot );
-    static bool detect_slot_openBS(
+    static bool detect_slot4_openBS(
         ERRLVL                  &R,
         int                     slot );
-    static bool detect_slot_BSFW(
-        ERRLVL                  &R,
-        ImSlotVers              &V,
-        int                     slot );
-    static bool detect_slot_BSC_hID(
+    static bool detect_slot4_BSFW(
         ERRLVL                  &R,
         ImSlotVers              &V,
         int                     slot );
-    static bool detect_slot_BSCFW(
+    static bool detect_slot4_BSC_hID(
+        ERRLVL                  &R,
+        ImSlotVers              &V,
+        int                     slot );
+    static bool detect_slot4_BSCFW(
         ERRLVL                  &R,
         ImProbeTable            &T,
         ImSlotVers              &V,
         int                     slot );
-    static void detect_simSlot(
-        QStringList             &slVers,
-        ImProbeTable            &T,
-        int                     slot );
+    static void detect_simSlot( ImSlotVers &V );
     static bool detect_headstages(
         ERRLVL                  &R,
         QMap<int,QString>       &qbMap,
         QVector<int>            &vHSpsv,
         QVector<int>            &vHS20,
         ImProbeTable            &T );
+    static bool detect_headstage4(
+        ERRLVL                  &R,
+        QMap<int,QString>       &qbMap,
+        QVector<int>            &vHSpsv,
+        QVector<int>            &vHS20,
+        ImProbeTable            &T,
+        int                     ip );
     static bool detect_probes(
         ERRLVL                  &R,
         QStringList             &slBIST,
@@ -578,6 +582,21 @@ public:
         ImProbeTable            &T,
         bool                    srCheck,
         bool                    psbCheck );
+    static bool detect_probe4(
+        ERRLVL                  &R,
+        const QVector<int>      &vHSpsv,
+        ImProbeTable            &T,
+        int                     ip );
+    static bool detect_SR4(
+        ERRLVL                  &R,
+        QStringList             &slBIST,
+        ImProbeTable            &T,
+        int                     ip );
+    static bool detect_PSB4(
+        ERRLVL                  &R,
+        QStringList             &slBIST,
+        ImProbeTable            &T,
+        int                     ip );
     static bool detect_simProbe(
         ERRLVL                  &R,
         ImProbeTable            &T,

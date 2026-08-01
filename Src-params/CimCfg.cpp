@@ -445,7 +445,8 @@ bool CimCfg::ImProbeTable::scanCfgSlots( QVector<CfgSlot> &vCS, QString &msg ) c
                 vCS.push_back( CfgSlot( imSlotNone, ID, 0, true ) );
         }
     }
-#endif
+
+#endif  // HAVE_IMEC
 
 // ----------
 // Final sort
@@ -1972,17 +1973,15 @@ guiBreathe();
 #endif
 
 #ifdef HAVE_IMEC
-// @@@ FIX closeAllBS is preferred but disrupts OneBox mapping
-//    closeAllBS( false );
     for( int is = 0, ns = T.nSelSlots(); is < ns; ++is ) {
         int slot = T.getEnumSlot( is );
         if( !T.simprb.isSimSlot( slot ) )
             np_closeBS( slot );
     }
-#endif
+#endif  // HAVE_IMEC
 
 #if DBG
-Log()<<"  np_closeBS all slots";
+Log()<<"  close all slots";
 Log()<<"End Detect ]]";
 guiBreathe();
 #endif
@@ -2020,30 +2019,74 @@ bool CimCfg::detect_slots(
 
         ImSlotVers  V;
         int         slot = T.getEnumSlot( is );
+        bool        sim = false,
+                    ok  = true;
 #if DBG
 Log()<<"start slot "<<slot;
 guiBreathe();
 #endif
 
+        // ------
+        // Gather
+        // ------
+
         if( T.simprb.isSimSlot( slot ) ) {
-            detect_simSlot( *R.sl, T, slot );
-            continue;
+            detect_simSlot( V );
+            sim = true;
+        }
+        else if( 0 )
+            ;
+        else {
+            ok = detect_slot4_type( R, T, slot );
+            ok = ok && detect_slot4_openBS( R, slot );
+            ok = ok && detect_slot4_BSFW( R, V, slot );
+            ok = ok && detect_slot4_BSC_hID( R, V, slot );
+            ok = ok && detect_slot4_BSCFW( R, T, V, slot );
         }
 
-        if( !detect_slot_type( R, T, slot ) )
+        // ------
+        // Report
+        // ------
+
+        if( !V.bsfw.isEmpty() ) {
+            R.append(
+            QString("BS(slot %1) firmware version %2")
+            .arg( slot ).arg( V.bsfw ) );
+        }
+        if( !V.bscpn.isEmpty() ) {
+            R.append(
+            QString("BSC(slot %1) part number %2")
+            .arg( slot ).arg( V.bscpn ) );
+        }
+        if( V.bsctech != -1 ) {
+            R.append(
+            QString("BSC(slot %1) tech %2")
+            .arg( slot ).arg( IMROTbl::strTech( V.bsctech ) ) );
+        }
+        if( !V.bscsn.isEmpty() ) {
+            R.append(
+            QString("BSC(slot %1) serial number %2")
+            .arg( slot ).arg( V.bscsn ) );
+        }
+        if( !V.bschw.isEmpty() ) {
+            R.append(
+            QString("BSC(slot %1) hardware version %2")
+            .arg( slot ).arg( V.bschw ) );
+        }
+        if( !V.bscfw.isEmpty() ) {
+            R.append(
+            QString("BSC(slot %1) firmware version %2")
+            .arg( slot ).arg( V.bscfw ) );
+        }
+
+        if( sim )
+            goto addV;
+        if( !ok )
             return false;
 
-        if( !detect_slot_openBS( R, slot ) )
-            return false;
-
-        if( !detect_slot_BSFW( R, V, slot ) )
-            return false;
-
-        if( !detect_slot_BSC_hID( R, V, slot ) )
-            return false;
-
-        if( !detect_slot_BSCFW( R, T, V, slot ) )
-            return false;
+        // ----
+        // Tech
+        // ----
 
 #ifdef HAVE_IMEC
         if( T.getSlotType( slot ) == NPPlatform_PXI )
@@ -2054,6 +2097,7 @@ guiBreathe();
         // Add map entry
         // -------------
 
+addV:
         T.slot2Vers[slot] = V;
     }
 
@@ -2078,7 +2122,7 @@ guiBreathe();
 }
 
 
-bool CimCfg::detect_slot_type(
+bool CimCfg::detect_slot4_type(
     ERRLVL                  &R,
     ImProbeTable            &T,
     int                     slot )
@@ -2105,7 +2149,7 @@ bool CimCfg::detect_slot_type(
 #endif
 
 #if DBG
-Log()<<"  np_getDeviceInfo done";
+Log()<<"  detect slot type done";
 guiBreathe();
 #endif
 
@@ -2113,7 +2157,7 @@ guiBreathe();
 }
 
 
-bool CimCfg::detect_slot_openBS(
+bool CimCfg::detect_slot4_openBS(
     ERRLVL                  &R,
     int                     slot )
 {
@@ -2134,7 +2178,7 @@ bool CimCfg::detect_slot_openBS(
 #endif
 
 #if DBG
-Log()<<"  np_openBS done";
+Log()<<"  openBS done";
 guiBreathe();
 #endif
 
@@ -2142,7 +2186,7 @@ guiBreathe();
 }
 
 
-bool CimCfg::detect_slot_BSFW(
+bool CimCfg::detect_slot4_BSFW(
     ERRLVL                  &R,
     ImSlotVers              &V,
     int                     slot )
@@ -2161,15 +2205,13 @@ bool CimCfg::detect_slot_BSFW(
     V.bsfw = QString("%1.%2.%3")
                 .arg( info.major ).arg( info.minor ).arg( info.build );
 #else
+    Q_UNUSED( R )
+    Q_UNUSED( slot )
     V.bsfw = "0.0.0";
 #endif
 
-    R.append(
-        QString("BS(slot %1) firmware version %2")
-        .arg( slot ).arg( V.bsfw ) );
-
 #if DBG
-Log()<<"  np_bs_getFirmwareInfo done";
+Log()<<"  detect basestation FW done";
 guiBreathe();
 #endif
 
@@ -2177,7 +2219,7 @@ guiBreathe();
 }
 
 
-bool CimCfg::detect_slot_BSC_hID(
+bool CimCfg::detect_slot4_BSC_hID(
     ERRLVL                  &R,
     ImSlotVers              &V,
     int                     slot )
@@ -2199,12 +2241,10 @@ bool CimCfg::detect_slot_BSC_hID(
 
     V.bscpn = hID.ProductNumber;
 #else
+    Q_UNUSED( R )
+    Q_UNUSED( slot )
     V.bscpn = "sim";
 #endif
-
-    R.append(
-        QString("BSC(slot %1) part number %2")
-        .arg( slot ).arg( V.bscpn ) );
 
 // ----
 // Tech
@@ -2216,10 +2256,6 @@ bool CimCfg::detect_slot_BSC_hID(
     V.bsctech = t_tech_sim;
 #endif
 
-    R.append(
-        QString("BSC(slot %1) tech %2")
-        .arg( slot ).arg( IMROTbl::strTech( V.bsctech ) ) );
-
 // -----
 // BSCSN
 // -----
@@ -2229,10 +2265,6 @@ bool CimCfg::detect_slot_BSC_hID(
 #else
     V.bscsn = "0";
 #endif
-
-    R.append(
-        QString("BSC(slot %1) serial number %2")
-        .arg( slot ).arg( V.bscsn ) );
 
 // -----
 // BSCHW
@@ -2244,12 +2276,8 @@ bool CimCfg::detect_slot_BSC_hID(
     V.bschw = "0.0";
 #endif
 
-    R.append(
-        QString("BSC(slot %1) hardware version %2")
-        .arg( slot ).arg( V.bschw ) );
-
 #if DBG
-Log()<<"  np_getBSCHardwareID done";
+Log()<<"  detect bs hardware done";
 guiBreathe();
 #endif
 
@@ -2257,7 +2285,7 @@ guiBreathe();
 }
 
 
-bool CimCfg::detect_slot_BSCFW(
+bool CimCfg::detect_slot4_BSCFW(
     ERRLVL                  &R,
     ImProbeTable            &T,
     ImSlotVers              &V,
@@ -2298,16 +2326,14 @@ bool CimCfg::detect_slot_BSCFW(
                     .arg( info.build );
     }
 #else
+    Q_UNUSED( R )
     Q_UNUSED( T )
+    Q_UNUSED( slot )
     V.bscfw = "0.0.0";
 #endif
 
-    R.append(
-        QString("BSC(slot %1) firmware version %2")
-        .arg( slot ).arg( V.bscfw ) );
-
 #if DBG
-Log()<<"  np_bsc_getFirmwareInfo done";
+Log()<<"  detect bsc firmware done";
 guiBreathe();
 #endif
 
@@ -2315,40 +2341,14 @@ guiBreathe();
 }
 
 
-void CimCfg::detect_simSlot(
-    QStringList             &slVers,
-    ImProbeTable            &T,
-    int                     slot )
+void CimCfg::detect_simSlot( ImSlotVers &V )
 {
-    ImSlotVers  V;
-
     V.bsfw      = "0.0.0";
     V.bscpn     = "sim";
     V.bscsn     = "0";
     V.bschw     = "0.0";
     V.bscfw     = "0.0.0";
     V.bsctech   = t_tech_sim;
-
-    slVers.append(
-        QString("BS(slot %1) firmware version %2")
-        .arg( slot ).arg( V.bsfw ) );
-    slVers.append(
-        QString("BSC(slot %1) part number %2")
-        .arg( slot ).arg( V.bscpn ) );
-    slVers.append(
-        QString("BSC(slot %1) tech %2")
-        .arg( slot ).arg( IMROTbl::strTech( V.bsctech ) ) );
-    slVers.append(
-        QString("BSC(slot %1) serial number %2")
-        .arg( slot ).arg( V.bscsn ) );
-    slVers.append(
-        QString("BSC(slot %1) hardware version %2")
-        .arg( slot ).arg( V.bschw ) );
-    slVers.append(
-        QString("BSC(slot %1) firmware version %2")
-        .arg( slot ).arg( V.bscfw ) );
-
-    T.slot2Vers[slot] = V;
 }
 
 
@@ -2396,284 +2396,81 @@ bool CimCfg::detect_headstages(
     QVector<int>            &vHS20,
     ImProbeTable            &T )
 {
-#ifdef HAVE_IMEC
-    NP_ErrorCode    err;
-    HardwareID      hID;
-#else
-    Q_UNUSED( qbMap )
-    Q_UNUSED( vHSpsv )
-    Q_UNUSED( vHS20 )
-#endif
-
-// -------------------
-// Identify headstages
-// -------------------
-
     for( int ip = 0, np = T.nSelProbes(); ip < np; ++ip ) {
 
         ImProbeDat  &P = T.mod_iProbe( ip );
-        QString     techMsg;
-#ifdef XX_HAVE_IMEC
-        bool        isHS;
-#endif
+        bool        ok = true;
+
 #if DBG
 Log()<<"headstage: start probe "<<ip;
 guiBreathe();
 #endif
 
-        // ----------
-        // Simulated?
-        // ----------
+        // ----------------
+        // Dock-2 <- Dock-1
+        // ----------------
+
+        if( P.adr.dock == 2 && ip > 0 ) {
+            const ImProbeDat    &Q = T.get_iProbe( ip - 1 );
+            if( P.adr.eq_sp( Q.adr ) ) {
+                P.hspn = Q.hspn;
+                P.hssn = Q.hssn;
+                P.hshw = Q.hshw;
+                P.hsfw = Q.hsfw;
+                continue;
+            }
+        }
+
+        // ------
+        // Gather
+        // ------
 
         if( T.simprb.isSimProbe( P.adr ) )
             continue;
 
-        // ----------------------------------
-        // @@@ Experiment to fix NXT timeouts
-        // ----------------------------------
+        if( 0 )
+            ;
+        else
+            ok = detect_headstage4( R, qbMap, vHSpsv, vHS20, T, ip );
 
-#if 0
-        if( T.slot2Vers[P.adr.slot].bsctech == t_tech_nxt_pa ) {
+        // ------
+        // Report
+        // ------
 
-#if 0
-            HardwareID  H;
-            np_closeBS( P.adr.slot );
-            np_openBS( P.adr.slot );
-        //    Log()<<np_getProbeHardwareID( P.adr.slot, P.adr.port, 1, &H );
-            Log()<<np_getFlexHardwareID( P.adr.slot, P.adr.port, 1, &H );
-
-            np_closeBS( P.adr.slot );
-            np_openBS( P.adr.slot );
-        //    Log()<<np_getProbeHardwareID( P.adr.slot, P.adr.port, 1, &H );
-            Log()<<np_getFlexHardwareID( P.adr.slot, P.adr.port, 1, &H );
-#else
-            HardwareID      H;
-            NP_ErrorCode    res;
-            for( int itry = 1; itry <= 10; ++itry ) {
-                np_closeBS( P.adr.slot );
-                QThread::msleep( 1000 );
-                np_openBS( P.adr.slot );
-                QThread::msleep( 1000 );
-                res = np_getFlexHardwareID( P.adr.slot, P.adr.port, 1, &H );
-                Log()<<"detect ip try result "<<ip<<" "<<itry<<" "<<res;
-                if( res == Neuropixels::SUCCESS )
-                    break;
-                QThread::msleep( 200 );
-            }
-#endif
+        if( !P.hspn.isEmpty() ) {
+            R.append(
+            QString("HS(%1) part number %2")
+            .arg( P.adr.tx_sp() ).arg( P.hspn ) );
         }
-#endif
-
-        // ----
-        // isHS
-        // ----
-
-#ifdef XX_HAVE_IMEC
-        err = np_detectHeadStage( P.adr.slot, P.adr.port, &isHS );
-
-        if( err != SUCCESS ) {
-            R.app_put(
-                QString("IMEC np_detectHeadStage(%1)%2")
-                .arg( P.adr.tx_sp() ).arg( makeErrorString( err ) ) );
-            return false;
+        if( !P.hshw.isEmpty() ) {
+            R.append(
+            QString("HS(%1) hardware version %2")
+            .arg( P.adr.tx_sp() ).arg( P.hshw ) );
+        }
+        if( !P.hsfw.isEmpty() ) {
+            R.append(
+            QString("HS(%1) firmware version %2")
+            .arg( P.adr.tx_sp() ).arg( P.hsfw ) );
         }
 
-        if( !isHS ) {
-            R.append("");
-            R.app_put(QString("No headstage at (%1)").arg( P.adr.tx_sp() ));
-            R.app_put("Only check boxes for hardware you intend to run.");
-            return false;
-        }
-#endif
+        if( ok ) {
 
-        // ----
-        // HSPN
-        // ----
+            // ----
+            // Tech
+            // ----
 
-#ifdef HAVE_IMEC
-        err = np_getHeadstageHardwareID( P.adr.slot, P.adr.port, &hID );
-
-        if( err != SUCCESS ) {
-            R.app_put(
-                QString("IMEC getHeadstageHardwareID(%1)%2")
-                .arg( P.adr.tx_sp() ).arg( makeErrorString( err ) ) );
-            if( err == NO_LINK ) {
-                R.append("");
-                R.append("Only check boxes for hardware you intend to run. If you indeed plugged");
-                R.append("something in here, error 44 DOES NOT mean the headstage is bad. Rather,");
-                R.append("there is a poor connection somewhere on the path from the port to the probe flex.");
-                R.append("Top things to try:");
-                R.append(" 1. Reconnect flex to headstage firmly and squarely; try several times.");
-                R.append(" 2. Try different pairing of probe/headstage for better mechanical fit.");
-                R.append(" 3. Try different 5-meter cable.");
-            }
-            else if( err == TIMEOUT ) {
-                R.append("");
-                R.append("Error 8 will occur if you detect with a headstage tester attached.");
-                R.append("Use the headstage test dongle only with command: Tools/HST.");
-            }
-            return false;
-        }
-
-        // ----
-        // Tech
-        // ----
-
-        QString prod(hID.ProductNumber);
-
-        techMsg =
+            QString techMsg =
             IMROTbl::hsCompatTech(
-                IMROTbl::hspnToTech( prod ),
+                    IMROTbl::hspnToTech( P.hspn ),
                 T.slot2Vers[P.adr.slot].bsctech, P.adr );
 
         if( !techMsg.isEmpty() ) {
             R.app_put( techMsg );
             return false;
         }
-
-        // -------------------------------
-        // Test for NHP 128-channel analog
-        // -------------------------------
-
-        if( prod == "NPNH_HS_30" || prod == "NPNH_HS_31" ) {
-
-            if( vHSpsv.isEmpty() )
-                vHSpsv.push_back( ip );
-            else {
-
-                const PAddr&    Z =
-                T.get_iProbe( vHSpsv[vHSpsv.size() - 1] ).adr;
-
-                if( !Z.eq_sp( P.adr ) )
-                    vHSpsv.push_back( ip );
-            }
-
-            if( R.isRemote() && P.pn.isEmpty() ) {
-                R.app_put(
-                QString("Passive PN missing for (%1)")
-                .arg( P.adr.tx_sp() ) );
-                return false;
-            }
-        }
-        else if( R.isRemote() && !P.pn.isEmpty() ) {
-            R.app_put(
-            QString("Passive PN %1 misassigned to (%2)")
-            .arg( P.pn ).arg( P.adr.tx_sp() ) );
-            return false;
-        }
-
-        // ---------------------------
-        // Record Quad-probe plug-type
-        // ---------------------------
-
-        else if( qbAdd( qbMap, P.adr.slot, P.adr.port, prod ) )
-            continue;
-
-        P.hspn = prod;
-#else
-        P.hspn = "sim";
-#endif
-#if DBG
-Log()<<"  headstage: np_getHeadstageHardwareID done";
-guiBreathe();
-#endif
-
-        R.append(
-            QString("HS(%1) part number %2")
-            .arg( P.adr.tx_sp() ).arg( P.hspn ) );
-
-        // -----------
-        // Wrong dock?
-        // -----------
-
-        if( P.adr.dock > 1 && P.nHSDocks() == 1 ) {
-            R.app_put(
-                QString("SpikeGLX nHSDocks(%1)"
-                " error 'Only select dock 1 with this head stage'.")
-                .arg( P.adr.tx_spd() ) );
-            return false;
-        }
-
-        // ----
-        // HSSN
-        // ----
-
-#ifdef HAVE_IMEC
-        P.hssn = hID.SerialNumber;
-#else
-        P.hssn = 0;
-#endif
-
-        // ----
-        // HSHW
-        // ----
-
-#ifdef HAVE_IMEC
-        P.hshw = QString("%1.%2").arg( hID.version_Major ).arg( hID.version_Minor );
-
-        // --------------------------
-        // HS20 (tests for no EEPROM)
-        // --------------------------
-
-        QString smaj(hID.version_Major), smin(hID.version_Minor);
-        bool    noEEPROM =
-                    (smaj == "" || smaj == "0" || smaj == "1") &&
-                    (smin == "" || smin == "0");
-
-        if( !P.hssn && noEEPROM ) {
-
-            if( vHS20.isEmpty() )
-                vHS20.push_back( ip );
-            else {
-
-                const PAddr&    Z =
-                T.get_iProbe( vHS20[vHS20.size() - 1] ).adr;
-
-                if( !Z.eq_sp( P.adr ) )
-                    vHS20.push_back( ip );
-            }
-        }
-
-#else
-        P.hshw = "0.0";
-#endif
-#if DBG
-Log()<<"  headstage: vHS20 check done";
-guiBreathe();
-#endif
-
-        R.append(
-            QString("HS(%1) hardware version %2")
-            .arg( P.adr.tx_sp() ).arg( P.hshw ) );
-
-        // ----
-        // HSFW
-        // ----
-
-#ifdef HAVE_IMEC
-        if( P.hspn.contains( "NXT" ) ) {
-
-            firmware_Info   info;
-
-            err = np_hs_getFirmwareInfo( P.adr.slot, P.adr.port, &info );
-
-            if( err != SUCCESS ) {
-                R.app_put(
-                    QString("IMEC hs_getFirmwareInfo(%1)%2")
-                    .arg( P.adr.tx_sp() ).arg( makeErrorString( err ) ) );
-                return false;
-            }
-
-            P.hsfw = QString("%1.%2.%3")
-                        .arg( info.major ).arg( info.minor ).arg( info.build );
         }
         else
-#endif
-            P.hsfw = "0.0.0";
-
-        R.append(
-            QString("HS(%1) firmware version %2")
-            .arg( P.adr.tx_sp() ).arg( P.hsfw ) );
+            return false;
     }
 
 // ------------------------
@@ -2724,7 +2521,245 @@ guiBreathe();
             }
         }
     }
+#else
+    Q_UNUSED( qbMap )
+    Q_UNUSED( vHSpsv )
+    Q_UNUSED( vHS20 )
 #endif
+
+    return true;
+}
+
+
+bool CimCfg::detect_headstage4(
+    ERRLVL                  &R,
+    QMap<int,QString>       &qbMap,
+    QVector<int>            &vHSpsv,
+    QVector<int>            &vHS20,
+    ImProbeTable            &T,
+    int                     ip )
+{
+#ifdef HAVE_IMEC
+    NP_ErrorCode    err;
+    HardwareID      hID;
+#else
+    Q_UNUSED( R )
+    Q_UNUSED( qbMap )
+    Q_UNUSED( vHSpsv )
+    Q_UNUSED( vHS20 )
+#endif
+
+    ImProbeDat  &P = T.mod_iProbe( ip );
+
+// ----------------------------------
+// @@@ Experiment to fix NXT timeouts
+// ----------------------------------
+
+#if 0
+        if( T.slot2Vers[P.adr.slot].bsctech == t_tech_nxt_pa ) {
+
+#if 0
+            HardwareID  H;
+            np_closeBS( P.adr.slot );
+            np_openBS( P.adr.slot );
+        //    Log()<<np_getProbeHardwareID( P.adr.slot, P.adr.port, 1, &H );
+            Log()<<np_getFlexHardwareID( P.adr.slot, P.adr.port, 1, &H );
+
+            np_closeBS( P.adr.slot );
+            np_openBS( P.adr.slot );
+        //    Log()<<np_getProbeHardwareID( P.adr.slot, P.adr.port, 1, &H );
+            Log()<<np_getFlexHardwareID( P.adr.slot, P.adr.port, 1, &H );
+#else
+            HardwareID      H;
+            NP_ErrorCode    res;
+            for( int itry = 1; itry <= 10; ++itry ) {
+                np_closeBS( P.adr.slot );
+                QThread::msleep( 1000 );
+                np_openBS( P.adr.slot );
+                QThread::msleep( 1000 );
+                res = np_getFlexHardwareID( P.adr.slot, P.adr.port, 1, &H );
+                Log()<<"detect ip try result "<<ip<<" "<<itry<<" "<<res;
+                if( res == Neuropixels::SUCCESS )
+                    break;
+                QThread::msleep( 200 );
+            }
+#endif
+        }
+#endif
+
+// ----
+// isHS
+// ----
+
+#ifdef XX_HAVE_IMEC
+    bool    isHS;
+    err = np_detectHeadStage( P.adr.slot, P.adr.port, &isHS );
+
+    if( err != SUCCESS ) {
+        R.app_put(
+            QString("IMEC np_detectHeadStage(%1)%2")
+            .arg( P.adr.tx_sp() ).arg( makeErrorString( err ) ) );
+        return false;
+    }
+
+    if( !isHS ) {
+        R.append("");
+        R.app_put(QString("No headstage at (%1)").arg( P.adr.tx_sp() ));
+        R.app_put("Only check boxes for hardware you intend to run.");
+        return false;
+    }
+#endif
+
+// ----
+// HSPN
+// ----
+
+#ifdef HAVE_IMEC
+    err = np_getHeadstageHardwareID( P.adr.slot, P.adr.port, &hID );
+
+    if( err != SUCCESS ) {
+        R.app_put(
+            QString("IMEC getHeadstageHardwareID(%1)%2")
+            .arg( P.adr.tx_sp() ).arg( makeErrorString( err ) ) );
+        if( err == NO_LINK ) {
+            R.append("");
+            R.append("Only check boxes for hardware you intend to run. If you indeed plugged");
+            R.append("something in here, error 44 DOES NOT mean the headstage is bad. Rather,");
+            R.append("there is a poor connection somewhere on the path from the port to the probe flex.");
+            R.append("Top things to try:");
+            R.append(" 1. Reconnect flex to headstage firmly and squarely; try several times.");
+            R.append(" 2. Try different pairing of probe/headstage for better mechanical fit.");
+            R.append(" 3. Try different 5-meter cable.");
+        }
+        else if( err == TIMEOUT ) {
+            R.append("");
+            R.append("Error 8 will occur if you detect with a headstage tester attached.");
+            R.append("Use the headstage test dongle only with command: Tools/HST.");
+        }
+        return false;
+    }
+
+// -------------------------------
+// Test for NHP 128-channel analog
+// -------------------------------
+
+    QString prod(hID.ProductNumber);
+
+    if( prod == "NPNH_HS_30" || prod == "NPNH_HS_31" ) {
+
+        if( vHSpsv.isEmpty() )
+            vHSpsv.push_back( ip );
+        else {
+
+            const PAddr&    Z =
+            T.get_iProbe( vHSpsv[vHSpsv.size() - 1] ).adr;
+
+            if( !Z.eq_sp( P.adr ) )
+                vHSpsv.push_back( ip );
+        }
+
+        if( R.isRemote() && P.pn.isEmpty() ) {
+            R.app_put(
+            QString("Passive PN missing for (%1)")
+            .arg( P.adr.tx_sp() ) );
+            return false;
+        }
+    }
+    else if( R.isRemote() && !P.pn.isEmpty() ) {
+        R.app_put(
+        QString("Passive PN %1 misassigned to (%2)")
+        .arg( P.pn ).arg( P.adr.tx_sp() ) );
+        return false;
+    }
+
+// ---------------------------
+// Record Quad-probe plug-type
+// ---------------------------
+
+    else if( qbAdd( qbMap, P.adr.slot, P.adr.port, prod ) )
+        return true;
+
+    P.hspn = prod;
+#else
+    P.hspn = "sim";
+#endif
+#if DBG
+Log()<<"  headstage: np_getHeadstageHardwareID done";
+guiBreathe();
+#endif
+
+// ----
+// HSSN
+// ----
+
+#ifdef HAVE_IMEC
+    P.hssn = hID.SerialNumber;
+#else
+    P.hssn = 0;
+#endif
+
+// ----
+// HSHW
+// ----
+
+#ifdef HAVE_IMEC
+    P.hshw = QString("%1.%2").arg( hID.version_Major ).arg( hID.version_Minor );
+
+// --------------------------
+// HS20 (tests for no EEPROM)
+// --------------------------
+
+    QString smaj(hID.version_Major), smin(hID.version_Minor);
+    bool    noEEPROM =
+                (smaj == "" || smaj == "0" || smaj == "1") &&
+                (smin == "" || smin == "0");
+
+    if( !P.hssn && noEEPROM ) {
+
+        if( vHS20.isEmpty() )
+            vHS20.push_back( ip );
+        else {
+
+            const PAddr&    Z =
+            T.get_iProbe( vHS20[vHS20.size() - 1] ).adr;
+
+            if( !Z.eq_sp( P.adr ) )
+                vHS20.push_back( ip );
+        }
+    }
+
+#else
+    P.hshw = "0.0";
+#endif
+#if DBG
+Log()<<"  headstage: vHS20 check done";
+guiBreathe();
+#endif
+
+// ----
+// HSFW
+// ----
+
+#ifdef HAVE_IMEC
+    if( P.hspn.contains( "NXT" ) ) {
+
+        firmware_Info   info;
+
+        err = np_hs_getFirmwareInfo( P.adr.slot, P.adr.port, &info );
+
+        if( err != SUCCESS ) {
+            R.app_put(
+                QString("IMEC hs_getFirmwareInfo(%1)%2")
+                .arg( P.adr.tx_sp() ).arg( makeErrorString( err ) ) );
+            return false;
+        }
+
+        P.hsfw = QString("%1.%2.%3")
+                    .arg( info.major ).arg( info.minor ).arg( info.build );
+    }
+    else
+#endif
+        P.hsfw = "0.0.0";
 
     return true;
 }
@@ -2739,26 +2774,12 @@ bool CimCfg::detect_probes(
     bool                    srCheck,
     bool                    psbCheck )
 {
-#ifdef HAVE_IMEC
-    NP_ErrorCode    err;
-    HardwareID      hID;
-#else
-    Q_UNUSED( slBIST )
-    Q_UNUSED( qbMap )
-    Q_UNUSED( vHSpsv )
-#endif
-
-// ------------------------
-// Identify flex and probes
-// ------------------------
-
     for( int ip = 0, np = T.nSelProbes(); ip < np; ++ip ) {
 
         ImProbeDat  &P = T.mod_iProbe( ip );
         QString     techMsg;
-#ifdef HAVE_IMEC
-        bool        isHSpsv = vHSpsv.contains( ip );
-#endif
+        bool        ok = true;
+
 #if DBG
 Log()<<"probe: start probe "<<ip;
 guiBreathe();
@@ -2783,14 +2804,27 @@ guiBreathe();
         if( P.hspn.isEmpty() )
             continue;
 
+        // -----------
+        // Wrong dock?
+        // -----------
+
+        if( P.adr.dock > 1 && P.nHSDocks() == 1 ) {
+            R.app_put(
+                QString("SpikeGLX nHSDocks(%1)"
+                " error 'Only select dock 1 with this head stage'.")
+                .arg( P.adr.tx_spd() ) );
+            return false;
+        }
+
         // ----------------------------------
         // Can't mix QB and other in PXI slot
         // ----------------------------------
 
-#ifdef HAVE_IMEC
         if( T.isSlotPXIType( P.adr.slot ) && qbMap.contains( P.adr.slot ) ) {
 
-            if( P.hspn != "sim" && P.hspn != "NPM_HS_32" ) {
+            int tech = IMROTbl::hspnToTech( P.hspn );
+
+            if( tech != t_tech_qb && tech != t_tech_sim ) {
                 R.app_put(
                     QString("Quadbase error: Mixed types(%1)")
                     .arg( P.adr.tx_spd() ) );
@@ -2798,126 +2832,38 @@ guiBreathe();
                 return false;
             }
         }
-#endif
 
-        // ----
-        // FXPN
-        // ----
+        // ------
+        // Gather
+        // ------
 
-#ifdef HAVE_IMEC
-        if( !isHSpsv ) {
-
-            err = np_getFlexHardwareID(
-                    P.adr.slot, P.adr.port, P.adr.dock, &hID );
-
-            if( err != SUCCESS ) {
-                R.app_put(
-                    QString("IMEC getFlexHardwareID(%1)%2")
-                    .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) ) );
-                if( err == TIMEOUT ) {
-                    R.append("");
-                    R.append("Error 8 will occur if you detect with a headstage tester attached.");
-                    R.append("Use the headstage test dongle only with command: Tools/HST.");
-                }
-                else if( err == DESERIALIZER_MODE_ERROR ) {
-                    R.append("");
-                    R.append("Reinitialize chassis ports:");
-                    R.append("1. Shut down computer and chassis.");
-                    R.append("2. Plug USB-C cable into each port you will use.");
-                    R.append("3. Power up with plugs in.");
-                }
-                return false;
-            }
-
-            P.fxpn = hID.ProductNumber;
-        }
+        if( 0 )
+            ;
         else
-            P.fxpn = "NHP128A";
-#else
-        P.fxpn = "sim";
-#endif
-#if DBG
-Log()<<"  probe: np_getFlexHardwareID done";
-guiBreathe();
-#endif
+            ok = detect_probe4( R, vHSpsv, T, ip );
 
-        R.append(
+        // ------
+        // Report
+        // ------
+
+        if( !P.fxpn.isEmpty() ) {
+            R.append(
             QString("FX(%1) part number %2")
             .arg( P.adr.tx_spd() ).arg( P.fxpn ) );
-
-        // ----
-        // FXSN
-        // ----
-
-#ifdef HAVE_IMEC
-        if( !isHSpsv )
-            P.fxsn = QString::number( hID.SerialNumber );
-        else
-            P.fxsn = "0";
-#else
-        P.fxsn = "0";
-#endif
-
-        R.append(
+        }
+        if( !P.fxsn.isEmpty() ) {
+            R.append(
             QString("FX(%1) serial number %2")
             .arg( P.adr.tx_spd() ).arg( P.fxsn ) );
-
-        // ----
-        // FXHW
-        // ----
-
-#ifdef HAVE_IMEC
-        if( !isHSpsv )
-            P.fxhw = QString("%1.%2").arg( hID.version_Major ).arg( hID.version_Minor );
-        else
-            P.fxhw = "0.0";
-#else
-        P.fxhw = "0.0";
-#endif
-
-        R.append(
+        }
+        if( !P.fxhw.isEmpty() ) {
+            R.append(
             QString("FX(%1) hardware version %2")
             .arg( P.adr.tx_spd() ).arg( P.fxhw ) );
-
-        // --
-        // PN
-        // --
-
-#ifdef HAVE_IMEC
-        if( !isHSpsv ) {
-
-            err = np_getProbeHardwareID(
-                    P.adr.slot, P.adr.port, P.adr.dock, &hID );
-
-            if( err != SUCCESS ) {
-                R.app_put(
-                    QString("IMEC getProbeHardwareID(%1)%2")
-                    .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) ) );
-                return false;
-            }
-
-            P.pn = hID.ProductNumber;
         }
-        else if( !R.isRemote() )
-            P.pn = "NP1200";
-#else
-        P.pn = "NP1000";
-#endif
-#if DBG
-Log()<<"  probe: np_getProbeHardwareID done";
-guiBreathe();
-#endif
 
-        // --
-        // SN
-        // --
-
-#ifdef HAVE_IMEC
-        if( !isHSpsv )
-            P.sn = hID.SerialNumber;
-#else
-        P.sn = 10 * P.adr.slot + P.adr.port;
-#endif
+        if( !ok )
+            return false;
 
         // ----
         // Type
@@ -2939,8 +2885,8 @@ guiBreathe();
         P.prbtech = IMROTbl::prbpnToTech( P.pn );
 
         techMsg =
-            IMROTbl::prbCompatTech(
-                P.prbtech, T.slot2Vers[P.adr.slot].bsctech, P.adr );
+        IMROTbl::prbCompatTech(
+            P.prbtech, T.slot2Vers[P.adr.slot].bsctech, P.adr );
 
         if( !techMsg.isEmpty() ) {
             R.app_put( techMsg );
@@ -2966,110 +2912,257 @@ Log()<<"  probe: calibPath done";
 guiBreathe();
 #endif
 
-        // ------------------------
-        // BIST SR (shift register)
-        // ------------------------
+        // ----
+        // BIST
+        // ----
 
-        if( srCheck ) {
-#ifdef HAVE_IMEC
-#if DBG
-Log()<<"probe: SR check";
-guiBreathe();
-#endif
-            IMROTbl *imro   = IMROTbl::alloc( P.pn );
-            bool    testSR  = (imro->nBanks() > 1);
-            P.sr_nshk       = imro->nShank();
-            delete imro;
+        IMROTbl *imro   = IMROTbl::alloc( P.pn );
+        bool    testSR  = (imro->nBanks() > 1);
+        P.sr_nshk       = imro->nShank();
+        delete imro;
+        P.sr_nok        = P.sr_nshk;
+        P.sr_mask       = (P.sr_nshk == 4 ? 0xF : 1);
 
-            if( testSR ) {
-                P.sr_mask = 0;
-                err = np_bistSR( P.adr.slot, P.adr.port, P.adr.dock, &P.sr_mask );
-
-                if( err != SUCCESS ) {
-                    if( err == TIMEOUT ) {
-                        slBIST.append(
-                            QString(
-                            "SR: (%1) sn=%2 pn=%3 shanks=%4 ok={ ? }")
-                            .arg( P.adr.tx_spd() )
-                            .arg( P.sn ).arg( P.pn ).arg( P.sr_nshk ) );
-                        R.app_put(
-                            QString("Error: BIST Shift Register(%1)"
-                            " not conclusive due to a timeout error.")
-                            .arg( P.adr.tx_spd() ) );
-                        R.app_put("Check connections and try again.");
-                        if( R.isRemote() )
-                            return false;
-                        goto setsrok;
-                    }
-                    else {
-                        QString s;
-                        P.sr_nok = 0;
-                        for( int is = 0; is < P.sr_nshk; ++is ) {
-                            if( P.sr_mask & (1 << is) ) {
-                                s += QString(" %1").arg( is );
-                                ++P.sr_nok;
-                            }
-                        }
-                        slBIST.append(
-                            QString(
-                            "SR: (%1) sn=%2 pn=%3 shanks=%4 ok={ %5 }")
-                            .arg( P.adr.tx_spd() )
-                            .arg( P.sn ).arg( P.pn )
-                            .arg( P.sr_nshk ).arg( s.trimmed() ) );
-                        R.app_put(
-                            QString("Error: BIST Shift Register(%1).")
-                            .arg( P.adr.tx_spd() ), 2 );
-                    }
-                }
-                else
-                    goto setsrok;
-            }
-            else {
-setsrok:
-                P.sr_nok    = P.sr_nshk;
-                P.sr_mask   = (P.sr_nshk == 4 ? 0xF : 1);
-            }
-#if DBG
-Log()<<"  probe: SR done";
-guiBreathe();
-#endif
-#endif  // HAVE_IMEC
+        if( srCheck && testSR ) {
+            if( 0 )
+                ;
+            else
+                ok = detect_SR4( R, slBIST, T, ip );
         }
-        else {
-            IMROTbl *imro   = IMROTbl::alloc( P.pn );
-            P.sr_nshk       = imro->nShank();
-            delete imro;
-            P.sr_nok        = P.sr_nshk;
-            P.sr_mask       = (P.sr_nshk == 4 ? 0xF : 1);
-        }
-
-        // ------------------------------
-        // BIST PSB (parallel serial bus)
-        // ------------------------------
 
         if( psbCheck ) {
-#ifdef HAVE_IMEC
-#if DBG
-Log()<<"probe: PSB check";
-guiBreathe();
-#endif
-            err = np_bistPSB( P.adr.slot, P.adr.port, P.adr.dock );
+            if( 0 )
+                ;
+            else
+                ok = detect_PSB4( R, slBIST, T, ip ) && ok;
+        }
 
-            if( err != SUCCESS ) {
-                slBIST.append(
-                    QString("PSB: (%1)")
-                    .arg( P.adr.tx_spd() ) );
-                R.app_put(
-                    QString("Error: BIST Parallel Serial Bus(%1).")
-                    .arg( P.adr.tx_spd() ) );
-            }
+        if( !ok )
+            return false;
 #if DBG
-Log()<<"  probe: PSB done";
+Log()<<"  probe: bist done";
 guiBreathe();
 #endif
-#endif  // HAVE_IMEC
+    }
+
+    return true;
+}
+
+
+bool CimCfg::detect_probe4(
+    ERRLVL                  &R,
+    const QVector<int>      &vHSpsv,
+    ImProbeTable            &T,
+    int                     ip )
+{
+#ifdef HAVE_IMEC
+    NP_ErrorCode    err;
+    HardwareID      hID;
+#else
+    Q_UNUSED( R )
+    Q_UNUSED( vHSpsv )
+#endif
+
+    ImProbeDat  &P = T.mod_iProbe( ip );
+#ifdef HAVE_IMEC
+    bool        isHSpsv = vHSpsv.contains( ip );
+#endif
+
+// ----
+// FXPN
+// ----
+
+#ifdef HAVE_IMEC
+    if( !isHSpsv ) {
+
+        err = np_getFlexHardwareID(
+                P.adr.slot, P.adr.port, P.adr.dock, &hID );
+
+        if( err != SUCCESS ) {
+            R.app_put(
+                QString("IMEC getFlexHardwareID(%1)%2")
+                .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) ) );
+            if( err == TIMEOUT ) {
+                R.append("");
+                R.append("Error 8 will occur if you detect with a headstage tester attached.");
+                R.append("Use the headstage test dongle only with command: Tools/HST.");
+            }
+            else if( err == DESERIALIZER_MODE_ERROR ) {
+                R.append("");
+                R.append("Reinitialize chassis ports:");
+                R.append("1. Shut down computer and chassis.");
+                R.append("2. Plug USB-C cable into each port you will use.");
+                R.append("3. Power up with plugs in.");
+            }
+            return false;
+        }
+
+        P.fxpn = hID.ProductNumber;
+    }
+    else
+        P.fxpn = "NHP128A";
+#else
+    P.fxpn = "sim";
+#endif
+#if DBG
+Log()<<"  probe: np_getFlexHardwareID done";
+guiBreathe();
+#endif
+
+// ----
+// FXSN
+// ----
+
+#ifdef HAVE_IMEC
+    if( !isHSpsv )
+        P.fxsn = QString::number( hID.SerialNumber );
+    else
+        P.fxsn = "0";
+#else
+    P.fxsn = "0";
+#endif
+
+// ----
+// FXHW
+// ----
+
+#ifdef HAVE_IMEC
+    if( !isHSpsv )
+        P.fxhw = QString("%1.%2").arg( hID.version_Major ).arg( hID.version_Minor );
+    else
+        P.fxhw = "0.0";
+#else
+    P.fxhw = "0.0";
+#endif
+
+// --
+// PN
+// --
+
+#ifdef HAVE_IMEC
+    if( !isHSpsv ) {
+
+        err = np_getProbeHardwareID(
+                P.adr.slot, P.adr.port, P.adr.dock, &hID );
+
+        if( err != SUCCESS ) {
+            R.app_put(
+                QString("IMEC getProbeHardwareID(%1)%2")
+                .arg( P.adr.tx_spd() ).arg( makeErrorString( err ) ) );
+            return false;
+        }
+
+        P.pn = hID.ProductNumber;
+    }
+    else if( !R.isRemote() )
+        P.pn = "NP1200";
+#else
+    P.pn = "NP1000";
+#endif
+#if DBG
+Log()<<"  probe: np_getProbeHardwareID done";
+guiBreathe();
+#endif
+
+// --
+// SN
+// --
+
+#ifdef HAVE_IMEC
+    if( !isHSpsv )
+        P.sn = hID.SerialNumber;
+#else
+    P.sn = 10 * P.adr.slot + P.adr.port;
+#endif
+
+    return true;
+}
+
+
+bool CimCfg::detect_SR4(
+    ERRLVL                  &R,
+    QStringList             &slBIST,
+    ImProbeTable            &T,
+    int                     ip )
+{
+#ifdef HAVE_IMEC
+    ImProbeDat      &P      = T.mod_iProbe( ip );
+    NP_ErrorCode    err;
+    uint8_t         mask    = 0;
+
+    err = np_bistSR( P.adr.slot, P.adr.port, P.adr.dock, &mask );
+
+    if( err != SUCCESS ) {
+        if( err == TIMEOUT ) {
+            slBIST.append(
+                QString(
+                "SR: (%1) sn=%2 pn=%3 shanks=%4 ok={ ? }")
+                .arg( P.adr.tx_spd() )
+                .arg( P.sn ).arg( P.pn ).arg( P.sr_nshk ) );
+            R.app_put(
+                QString("Error: BistSR(%1)"
+                " not conclusive due to a timeout error.")
+                .arg( P.adr.tx_spd() ) );
+            R.app_put("Check connections and try again.");
+            return false;
+        }
+        else {
+            QString s;
+            P.sr_mask   = mask;
+            P.sr_nok    = 0;
+            for( int is = 0; is < P.sr_nshk; ++is ) {
+                if( mask & (1 << is) ) {
+                    s += QString(" %1").arg( is );
+                    ++P.sr_nok;
+                }
+            }
+            slBIST.append(
+                QString(
+                "SR: (%1) sn=%2 pn=%3 shanks=%4 ok={ %5 }")
+                .arg( P.adr.tx_spd() )
+                .arg( P.sn ).arg( P.pn )
+                .arg( P.sr_nshk ).arg( s.trimmed() ) );
+            R.app_put(
+                QString("Error: BIST Shift Register(%1).")
+                .arg( P.adr.tx_spd() ), 2 );
         }
     }
+#else
+    Q_UNUSED( R )
+    Q_UNUSED( slBIST )
+    Q_UNUSED( T )
+    Q_UNUSED( ip )
+#endif
+
+    return true;
+}
+
+
+bool CimCfg::detect_PSB4(
+    ERRLVL                  &R,
+    QStringList             &slBIST,
+    ImProbeTable            &T,
+    int                     ip )
+{
+#ifdef HAVE_IMEC
+    const ImProbeDat    &P = T.get_iProbe( ip );
+    NP_ErrorCode        err = np_bistPSB( P.adr.slot, P.adr.port, P.adr.dock );
+
+    if( err != SUCCESS ) {
+        slBIST.append(
+            QString("PSB: (%1)")
+            .arg( P.adr.tx_spd() ) );
+        R.app_put(
+            QString("Error: BIST Parallel Serial Bus(%1).")
+            .arg( P.adr.tx_spd() ) );
+        return false;
+    }
+#else
+    Q_UNUSED( R )
+    Q_UNUSED( slBIST )
+    Q_UNUSED( T )
+    Q_UNUSED( ip )
+#endif
 
     return true;
 }
