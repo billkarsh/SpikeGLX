@@ -9,6 +9,7 @@
 + IMRO editor site conflict resolver tool.
 + FileViewer: Can set individual Ymag.
 + FileViewer: HMS time option.
++ Save tab: Write separate shanks checkbox.
 
 20260115
 --------

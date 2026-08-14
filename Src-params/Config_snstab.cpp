@@ -44,6 +44,8 @@ void Config_snstab::toGUI( const DAQ::Params &p )
     snsTabUI->runNameLE->setText( p.sns.runName );
     snsTabUI->fldChk->setChecked( p.sns.fldPerPrb );
     snsTabUI->fldChk->setEnabled( app->cfgCtl()->usingIM );
+    snsTabUI->shkChk->setChecked( p.sns.sepShanks );
+    snsTabUI->shkChk->setEnabled( app->cfgCtl()->usingIM );
 
     snsTabUI->diskSB->setValue( p.sns.reqMins );
 
@@ -58,6 +60,7 @@ void Config_snstab::fromGUI( DAQ::Params &q )
     q.sns.notes     = snsTabUI->notesTE->toPlainText().trimmed();
     q.sns.runName   = snsTabUI->runNameLE->text().trimmed();
     q.sns.fldPerPrb = snsTabUI->fldChk->isChecked();
+    q.sns.sepShanks = snsTabUI->shkChk->isChecked();
     q.sns.reqMins   = snsTabUI->diskSB->value();
 }
 

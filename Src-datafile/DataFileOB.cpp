@@ -45,6 +45,21 @@ ChanMap* DataFileOB::chanMap() const
 }
 
 
+int DataFileOB::subclassGetAcqChanCount( const DAQ::Params &p )
+{
+    return p.stream_nChans( jsOB, ip );
+}
+
+
+void DataFileOB::subclassGetSavChanCount( const DAQ::Params &p )
+{
+    nSavedChans = 0;
+
+    if( subclassGetAcqChanCount( p ) )
+        nSavedChans = p.im.get_iStrOneBox( ip ).sns.saveBits.count( true );
+}
+
+
 // - sRate is this substream.
 // - nSavedChans is this substream.
 //
@@ -113,23 +128,6 @@ void DataFileOB::subclassStoreMetaData( const DAQ::Params &p )
     }
 
     subclassSetSNSChanCounts( &p, 0 );
-}
-
-
-int DataFileOB::subclassGetAcqChanCount( const DAQ::Params &p )
-{
-    return p.stream_nChans( jsOB, ip );
-}
-
-
-int DataFileOB::subclassGetSavChanCount( const DAQ::Params &p )
-{
-    int nSaved = 0;
-
-    if( subclassGetAcqChanCount( p ) )
-        nSaved = p.im.get_iStrOneBox( ip ).sns.saveBits.count( true );
-
-    return nSaved;
 }
 
 

@@ -8,7 +8,7 @@
 #include "SHA1.h"
 #undef TCHAR
 
-#include <QFile>
+#include <QFileInfo>
 #include <QMutex>
 
 class DFWriter;
@@ -31,23 +31,34 @@ private:
         Output
     };
 
+    struct ORec {
+        DFWriter                *dfw;
+        QFile                   binFile;
+        QVector<uint>           iKeep;
+        CSHA1                   sha;
+        mutable QMutex          statsMtx;
+        mutable QVector<uint>   statsBytes;
+        KVParams                kvp;
+        QString                 metaName;
+        ORec() : dfw(0) {}
+        virtual ~ORec();
+    };
+
     // Input and Output mode
-    QFile                   binFile;
-    QString                 metaName;
+    QFile                   i_binFile;
+    QString                 o_baseName,
+                            metaName;
     quint64                 sampCt;
     IOMode                  mode;
 
     // Input mode
-    QString                 trgStream;
-    int                     trgChan;    // neg if not using
+    QString                 i_trgStream;
+    int                     i_trgChan;      // neg if not using
 
     // Output mode only
-    mutable QMutex          statsMtx;
-    mutable QVector<uint>   statsBytes;
-    CSHA1                   sha;
-    DFWriter                *dfw;
-    int                     nMeasMax;
-    bool                    wrAsync;
+    std::vector<std::unique_ptr<ORec>> o_rec;
+    int                     o_nAcqChans;
+    bool                    o_wrAsync;
 
 protected:
     // Input and Output mode
@@ -77,17 +88,27 @@ public:
         const QString       &filename,
         const QVector<uint> &indicesOfSrcChans );
 
-    bool isOpen() const         {return binFile.isOpen();}
-    bool isOpenForRead() const  {return isOpen() && mode == Input;}
-    bool isOpenForWrite() const {return isOpen() && mode == Output;}
+    bool isOpenForRead() const  {return mode == Input;}
+    bool isOpenForWrite() const {return mode == Output;}
 
     virtual QString subtypeFromObj() const = 0;
     virtual QString streamFromObj() const = 0;
     virtual QString fileLblFromObj() const = 0;
     int streamip() const                {return ip;}
 
-    QString binFileName() const         {return binFile.fileName();}
-    const QString &metaFileName() const {return metaName;}
+    QString inBinFileName() const               {return i_binFile.fileName();}
+    QString outBinFileName( int j = 0 ) const
+    {
+        if( j >= 0 && o_rec.size() )
+            return o_rec[j]->binFile.fileName();
+        return QString();
+    }
+    const QString &metaFileName() const         {return metaName;}
+
+    bool matchedBinFileName( const QFileInfo &fi ) const
+    {
+        return mode == Output && fi.filePath().contains( o_baseName );
+    }
 
     bool closeAndFinalize();
 
@@ -97,10 +118,8 @@ public:
     // Output
     // ------
 
-    void setAsyncWriting( bool async )  {wrAsync = async;}
-
+    void setAsyncWriting( bool async )  {o_wrAsync = async;}
     bool writeAndInvalSamps( vec_i16 &samps );
-    bool writeAndInvalSubset( const DAQ::Params &p, vec_i16 &samps );
 
     // -----
     // Input
@@ -131,7 +150,7 @@ public:
     int numChans() const                    {return nSavedChans;}
     const QVector<uint> &fileChans() const  {return snsFileChans;}
     double ig2Gain( int ig ) const          {return origID2Gain( snsFileChans[ig] );}
-    bool trig_isChan( int acqChan ) const   {return acqChan == trgChan;}
+    bool trig_isChan( int acqChan ) const   {return acqChan == i_trgChan;}
 
     virtual int numNeuralChans() const = 0;
     virtual const IMROTbl* imro() const = 0;
@@ -162,10 +181,10 @@ public:
     double requiredBps() const  {return sRate*nSavedChans*sizeof(qint16);}
 
 protected:
+    virtual int subclassGetAcqChanCount( const DAQ::Params &p ) = 0;
+    virtual void subclassGetSavChanCount( const DAQ::Params &p ) = 0;
     virtual bool subclassParseMetaData( QString *error ) = 0;
     virtual void subclassStoreMetaData( const DAQ::Params &p ) = 0;
-    virtual int subclassGetAcqChanCount( const DAQ::Params &p ) = 0;
-    virtual int subclassGetSavChanCount( const DAQ::Params &p ) = 0;
 
     virtual void subclassSetSNSChanCounts(
         const DAQ::Params   *p,
@@ -186,7 +205,7 @@ protected:
         const QVector<uint> &indicesOfSrcChans ) = 0;
 
 private:
-    bool doFileWrite( const vec_i16 &samps );
+    bool doFileWrite( const vec_i16 &samps, int j = 0 );
 };
 
 #endif  // DATAFILE_H

@@ -170,6 +170,23 @@ ChanMap* DataFileIMAP::chanMap() const
 }
 
 
+// Currently this is whole stream chan count AP+LF+SY.
+//
+int DataFileIMAP::subclassGetAcqChanCount( const DAQ::Params &p )
+{
+    return p.stream_nChans( jsIM, ip );
+}
+
+
+void DataFileIMAP::subclassGetSavChanCount( const DAQ::Params &p )
+{
+    nSavedChans = 0;
+
+    if( subclassGetAcqChanCount( p ) )
+        nSavedChans = p.im.prbj[ip].apSaveChanCount();
+}
+
+
 // - sRate is this substream.
 // - nSavedChans is this substream.
 //
@@ -294,25 +311,6 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
     kvp["snsSaveChanSubset"]    = Subset::vec2RngStr( snsFileChans );
 
     subclassSetSNSChanCounts( &p, 0 );
-}
-
-
-// Currently this is whole stream chan count AP+LF+SY.
-//
-int DataFileIMAP::subclassGetAcqChanCount( const DAQ::Params &p )
-{
-    return p.stream_nChans( jsIM, ip );
-}
-
-
-int DataFileIMAP::subclassGetSavChanCount( const DAQ::Params &p )
-{
-    int nSaved = 0;
-
-    if( subclassGetAcqChanCount( p ) )
-        nSaved = p.im.prbj[ip].apSaveChanCount();
-
-    return nSaved;
 }
 
 

@@ -138,7 +138,7 @@ void ExportCtl::initDataFile( const DataFile *df )
 {
     dfSrc = df;
 
-    QFileInfo   fi( df->binFileName() );
+    QFileInfo   fi( df->inBinFileName() );
 
     E.filename  = QString("%1/%2.exported.%3.%4")
                     .arg( fi.absoluteDir().canonicalPath() )
@@ -724,7 +724,7 @@ bool ExportCtl::exportAsBinary(
 
         if( !ok || progress.wasCanceled() ) {
 
-            QString f = out->binFileName(),
+            QString f = out->outBinFileName(),
                     m = out->metaFileName();
 
             out->closeAndFinalize();

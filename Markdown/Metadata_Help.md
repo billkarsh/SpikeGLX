@@ -794,6 +794,25 @@ imDatPrb_sn=19011116444
 This is the probe serial number.
 
 ```
+imDatPrb_sr_mask=15
+```
+
+This details which shanks are good. It's a sum of these values:
+
+```
+shank-0 good = 1
+shank-1 good = 2
+shank-2 good = 4
+shank-3 good = 8
+```
+
+```
+imDatPrb_sr_nok=4
+```
+
+This is the count of good shanks.
+
+```
 imDatPrb_tech=std
 ```
 

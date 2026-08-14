@@ -98,6 +98,21 @@ ChanMap* DataFileNI::chanMap() const
 }
 
 
+int DataFileNI::subclassGetAcqChanCount( const DAQ::Params &p )
+{
+    return p.stream_nChans( jsNI, 0 );
+}
+
+
+void DataFileNI::subclassGetSavChanCount( const DAQ::Params &p )
+{
+    nSavedChans = 0;
+
+    if( subclassGetAcqChanCount( p ) )
+        nSavedChans = p.ni.sns.saveBits.count( true );
+}
+
+
 bool DataFileNI::subclassParseMetaData( QString *error )
 {
     Q_UNUSED( error )
@@ -188,23 +203,6 @@ void DataFileNI::subclassStoreMetaData( const DAQ::Params &p )
     }
 
     subclassSetSNSChanCounts( &p, 0 );
-}
-
-
-int DataFileNI::subclassGetAcqChanCount( const DAQ::Params &p )
-{
-    return p.stream_nChans( jsNI, 0 );
-}
-
-
-int DataFileNI::subclassGetSavChanCount( const DAQ::Params &p )
-{
-    int nSaved = 0;
-
-    if( subclassGetAcqChanCount( p ) )
-        nSaved = p.ni.sns.saveBits.count( true );
-
-    return nSaved;
 }
 
 

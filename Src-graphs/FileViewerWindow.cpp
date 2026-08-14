@@ -837,8 +837,8 @@ done_disable_mapping:;
 
 QString FileViewerWindow::file() const
 {
-    if( df && df->isOpen() )
-        return df->binFileName();
+    if( df && df->isOpenForRead() )
+        return df->inBinFileName();
 
     return QString();
 }
@@ -1125,7 +1125,7 @@ void FileViewerWindow::svyMenuExportHandler() const
 // Create top dir
 // --------------
 
-    DFRunTag    runTag( df->binFileName() );
+    DFRunTag    runTag( df->inBinFileName() );
     QString     err,
                 runName = runTag.runName,
                 top     = QString("%1%2_segs/")
@@ -4243,7 +4243,7 @@ FVOpen* FileViewerWindow::linkFindName(
 
         FVOpen  *W = &vOpen[iw];
 
-        if( W->fvw->df->binFileName().endsWith( brief ) )
+        if( W->fvw->df->inBinFileName().endsWith( brief ) )
             return W;
     }
 
@@ -4500,7 +4500,7 @@ bool FileViewerWindow::linkShowDialog( FVLinkRec &L )
     QDialog             dlg;
     Ui::FVW_LinkDialog  ui;
 
-    L.runTag = DFRunTag( df->binFileName() );
+    L.runTag = DFRunTag( df->inBinFileName() );
 
     dlg.setWindowFlags( dlg.windowFlags()
         & ~(Qt::WindowContextHelpButtonHint

@@ -368,7 +368,10 @@ void TrigSpike::run()
                     break;
                  }
 
-                setSyncWriteMode();
+// @@@ Disabled Aug 8, 2026 because new split shanks relies on async mode...
+// @@@ And isn't async mode better for this trigger type anyway?
+
+                // setSyncWriteMode();
             }
 
             SETSTATE_Write();

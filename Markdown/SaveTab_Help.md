@@ -34,6 +34,75 @@ in all of the current `Data Directories`.
 If the name is decorated, then those indices must be unused. That is,
 `run-name_gN_tM` must not exist in any of the current `Data Directories`.
 
+### Folder per probe
+
+Create a run subfolder for each probe.
+
+Suppose you have two 2.0 probes {0,1} in myrun...
+
+Box unchecked, flat file organization in run folder:
+
+```
+data_dir/
+    myrun_g0/
+        myrun_g0_t0.imec0.ap.bin
+        myrun_g0_t0.imec0.ap.meta
+        myrun_g0_t0.imec1.ap.bin
+        myrun_g0_t0.imec1.ap.meta
+        // other non-probe stream files
+```
+
+Box checked, probe subfolders:
+
+```
+data_dir/
+    myrun_g0/
+        myrun_g0_imec0/
+            myrun_g0_t0.imec0.ap.bin
+            myrun_g0_t0.imec0.ap.meta
+        myrun_g0_imec1/
+            myrun_g0_t0.imec1.ap.bin
+            myrun_g0_t0.imec1.ap.meta
+        // other non-probe stream files
+```
+
+### Separate shanks
+
+Write separate bin/meta for each shank of your 4-shank probes...
+
+- This only affects 4-shank probes.
+- Each 4-shank probe has an original probe-ip.
+- Multidisk directory selection is based on original ip.
+- Folder per probe option is based on original ip.
+- The filename for {ip,shank-s} is: `1000 + 10*ip + s`.
+- Only non-empty files are written.
+- Adjusted metadata reflect intersection of {original saved chans, chans on that shank}.
+- The original probe-ip meta file is also written as a settings record.
+
+Suppose you have two 2.0 probes {0,1} in myrun, and probe-1 is 4-shank...
+
+- Folder per probe: checked.
+- Separate shanks: checked.
+
+```
+data_dir/
+    myrun_g0/
+        myrun_g0_imec0/
+            myrun_g0_t0.imec0.ap.bin
+            myrun_g0_t0.imec0.ap.meta
+        myrun_g0_imec1/
+            myrun_g0_t0.imec1.ap.meta       // ref meta named per original ip
+            myrun_g0_t0.imec1010.ap.bin
+            myrun_g0_t0.imec1010.ap.meta
+            myrun_g0_t0.imec1011.ap.bin
+            myrun_g0_t0.imec1011.ap.meta
+            myrun_g0_t0.imec1012.ap.bin
+            myrun_g0_t0.imec1012.ap.meta
+            myrun_g0_t0.imec1013.ap.bin
+            myrun_g0_t0.imec1013.ap.meta
+        // other non-probe stream files
+```
+
 
 _fin_
 

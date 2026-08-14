@@ -120,7 +120,8 @@ struct SeeNSave {
                     runName;
     int             reqMins;
     bool            lfPairChk,
-                    fldPerPrb;
+                    fldPerPrb,
+                    sepShanks;
 };
 
 struct Params {

@@ -69,18 +69,18 @@ bool TrigBase::isInUse( const QFileInfo &fi ) const
     QMutexLocker    ml( &dfMtx );
 
     for( int ip = 0, np = (int)firstCtIm.size(); ip < np; ++ip ) {
-        if( dfImAp[ip] && fi == QFileInfo( dfImAp[ip]->binFileName() ) )
+        if( dfImAp[ip] && dfImAp[ip]->matchedBinFileName( fi ) )
             return true;
-        if( dfImLf[ip] && fi == QFileInfo( dfImLf[ip]->binFileName() ) )
+        if( dfImLf[ip] && dfImLf[ip]->matchedBinFileName( fi ) )
             return true;
     }
 
     for( int ip = 0, np = (int)firstCtOb.size(); ip < np; ++ip ) {
-        if( dfOb[ip] && fi == QFileInfo( dfOb[ip]->binFileName() ) )
+        if( dfOb[ip] && dfOb[ip]->matchedBinFileName( fi ) )
             return true;
     }
 
-    if( dfNi && fi == QFileInfo( dfNi->binFileName() ) )
+    if( dfNi && dfNi->matchedBinFileName( fi ) )
         return true;
 
     return false;
@@ -102,7 +102,7 @@ QString TrigBase::curNiFilename() const
 {
     QMutexLocker    ml( &dfMtx );
 
-    return (dfNi ? dfNi->binFileName() : QString());
+    return (dfNi && dfNi->isOpenForWrite() ? dfNi->outBinFileName() : QString());
 }
 
 
@@ -1039,7 +1039,7 @@ bool TrigBase::writeDataLF(
 
     dst->resize( D - &dst->front() );
 
-    if( dst->size() && !dfImLf[ip]->writeAndInvalSubset( p, *dst ) )
+    if( dst->size() && !dfImLf[ip]->writeAndInvalSamps( *dst ) )
         return false;
 
     return true;
@@ -1088,7 +1088,7 @@ bool TrigBase::writeDataIM( vec_i16 &data, quint64 headCt, int ip )
     if( isLF && !writeDataLF( data, headCt, ip, !isAP, xtra ) )
         return false;
 
-    if( isAP && !dfImAp[ip]->writeAndInvalSubset( p, data ) )
+    if( isAP && !dfImAp[ip]->writeAndInvalSamps( data ) )
         return false;
 
     return true;
@@ -1107,7 +1107,7 @@ bool TrigBase::writeDataOB( vec_i16 &data, quint64 headCt, int ip )
         dfOb[ip]->setFirstSample( headCt, true );
     }
 
-    return dfOb[ip]->writeAndInvalSubset( p, data );
+    return dfOb[ip]->writeAndInvalSamps( data );
 }
 
 
@@ -1121,7 +1121,7 @@ bool TrigBase::writeDataNI( vec_i16 &data, quint64 headCt )
         dfNi->setFirstSample( headCt, true );
     }
 
-    return dfNi->writeAndInvalSubset( p, data );
+    return dfNi->writeAndInvalSamps( data );
 }
 
 

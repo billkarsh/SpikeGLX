@@ -176,6 +176,23 @@ ChanMap* DataFileIMLF::chanMap() const
 }
 
 
+// Currently this is whole stream chan count AP+LF+SY.
+//
+int DataFileIMLF::subclassGetAcqChanCount( const DAQ::Params &p )
+{
+    return p.stream_nChans( jsIM, ip );
+}
+
+
+void DataFileIMLF::subclassGetSavChanCount( const DAQ::Params &p )
+{
+    nSavedChans = 0;
+
+    if( subclassGetAcqChanCount( p ) )
+        nSavedChans = p.im.prbj[ip].lfSaveChanCount();
+}
+
+
 // - sRate is this substream.
 // - nSavedChans is this substream.
 //
@@ -299,25 +316,6 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
     kvp["snsSaveChanSubset"]    = Subset::vec2RngStr( snsFileChans );
 
     subclassSetSNSChanCounts( &p, 0 );
-}
-
-
-// Currently this is whole stream chan count AP+LF+SY.
-//
-int DataFileIMLF::subclassGetAcqChanCount( const DAQ::Params &p )
-{
-    return p.stream_nChans( jsIM, ip );
-}
-
-
-int DataFileIMLF::subclassGetSavChanCount( const DAQ::Params &p )
-{
-    int nSaved = 0;
-
-    if( subclassGetAcqChanCount( p ) )
-        nSaved = p.im.prbj[ip].lfSaveChanCount();
-
-    return nSaved;
 }
 
 

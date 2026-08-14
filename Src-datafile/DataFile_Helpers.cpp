@@ -12,7 +12,7 @@
 
 void DFWriterWorker::run()
 {
-    Debug() << "DFWriter started for " << d->binFileName();
+    Debug() << "DFWriter started for " << d->outBinFileName( j );
 
     for(;;) {
 
@@ -26,7 +26,7 @@ void DFWriterWorker::run()
             break;
     }
 
-    Debug() << "DFWriter stopped for " << d->binFileName();
+    Debug() << "DFWriter stopped for " << d->outBinFileName( j );
 
     emit finished();
 }
@@ -37,17 +37,17 @@ bool DFWriterWorker::write( const vec_i16 &samps )
     if( !d )
         return false;
 
-    return d->doFileWrite( samps );
+    return d->doFileWrite( samps, j );
 }
 
 /* ---------------------------------------------------------------- */
 /* DFWriter ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-DFWriter::DFWriter( DataFile *df, int maxQSize )
+DFWriter::DFWriter( DataFile *df, int j, int maxQSize )
 {
     thread  = new QThread;
-    worker  = new DFWriterWorker( df, maxQSize );
+    worker  = new DFWriterWorker( df, j, maxQSize );
 
     worker->moveToThread( thread );
 

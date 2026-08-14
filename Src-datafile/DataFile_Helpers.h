@@ -23,14 +23,14 @@ class DFWriterWorker : public QObject, public SampleBufQ
 private:
     DataFile        *d;
     mutable QMutex  runMtx;
+    int             j;
     volatile bool   _waitData,
                     pleaseStop;
 
 public:
-    DFWriterWorker( DataFile *df, int maxQSize )
-    :   QObject(0), SampleBufQ(maxQSize),
-        d(df), _waitData(true),
-        pleaseStop(false)   {}
+    DFWriterWorker( DataFile *df, int j, int maxQSize )
+    :   QObject(0), SampleBufQ(maxQSize), d(df), j(j),
+        _waitData(true), pleaseStop(false)  {}
 
     void stayAwake()        {QMutexLocker ml( &runMtx ); _waitData = false;}
     bool waitData() const   {QMutexLocker ml( &runMtx ); return _waitData;}
@@ -55,7 +55,7 @@ public:
     DFWriterWorker  *worker;
 
 public:
-    DFWriter( DataFile *df, int maxQSize );
+    DFWriter( DataFile *df, int j, int maxQSize );
     virtual ~DFWriter();
 };
 

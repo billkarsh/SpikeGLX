@@ -12,24 +12,30 @@
 
 
 /* ---------------------------------------------------------------- */
+/* ORec ----------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+DataFile::ORec::~ORec()
+{
+    if( dfw )
+        delete dfw;
+}
+
+/* ---------------------------------------------------------------- */
 /* DataFile ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
 DataFile::DataFile( int ip )
     :   sampCt(0), mode(Undefined),
-        trgStream(DAQ::Params::jsip2stream( jsNI, 0 )),
-        trgChan(-1), dfw(0), wrAsync(true), sRate(0),
-        ip(ip), nSavedChans(0)
+        i_trgStream(DAQ::Params::jsip2stream( jsNI, 0 )),
+        i_trgChan(-1), o_wrAsync(true),
+        sRate(0), ip(ip), nSavedChans(0)
 {
 }
 
 
 DataFile::~DataFile()
 {
-    if( dfw ) {
-        delete dfw;
-        dfw = 0;
-    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -63,11 +69,11 @@ bool DataFile::openForRead( QString &error, const QString &filename )
 // Open files
 // ----------
 
-    binFile.setFileName( bFile );
+    i_binFile.setFileName( bFile );
 
-    if( !binFile.open( QIODevice::ReadOnly ) ) {
+    if( !i_binFile.open( QIODevice::ReadOnly ) ) {
         error = QString("File error <%1> opening(read) '%2'.")
-                .arg( binFile.errorString() ).arg ( bFile );
+                .arg( i_binFile.errorString() ).arg ( bFile );
         Error() << error;
         return false;
     }
@@ -123,31 +129,31 @@ bool DataFile::openForRead( QString &error, const QString &filename )
 
     int trgMode = DAQ::stringToTrigMode( kvp["trigMode"].toString() );
 
-    trgChan = -1;
+    i_trgChan = -1;
 
     if( trgMode == DAQ::eTrigTTL ) {
 
-        trgStream = kvp["trgTTLStream"].toString();
+        i_trgStream = kvp["trgTTLStream"].toString();
 
         if( kvp["trgTTLIsAnalog"].toBool() )
-            trgChan = kvp["trgTTLAIChan"].toInt();
-        else if( DAQ::Params::stream_isNI( trgStream ) ) {
-            trgChan = cumTypCnt()[CniCfg::niSumAnalog]
+            i_trgChan = kvp["trgTTLAIChan"].toInt();
+        else if( DAQ::Params::stream_isNI( i_trgStream ) ) {
+            i_trgChan = cumTypCnt()[CniCfg::niSumAnalog]
                         + kvp["trgTTLBit"].toInt()/16;
         }
-        else if( DAQ::Params::stream_isOB( trgStream ) )
-            trgChan = cumTypCnt()[CimCfg::obSumAnalog];
+        else if( DAQ::Params::stream_isOB( i_trgStream ) )
+            i_trgChan = cumTypCnt()[CimCfg::obSumAnalog];
         else
-            trgChan = cumTypCnt()[CimCfg::imSumNeural];
+            i_trgChan = cumTypCnt()[CimCfg::imSumNeural];
     }
     else if( trgMode == DAQ::eTrigSpike ) {
-        trgStream   = kvp["trgSpikeStream"].toString();
-        trgChan     = kvp["trgSpikeAIChan"].toInt();
+        i_trgStream = kvp["trgSpikeStream"].toString();
+        i_trgChan   = kvp["trgSpikeAIChan"].toInt();
     }
 
-    if( trgChan != -1 ) {
-        if( trgStream != streamFromObj() || !snsFileChans.contains( (uint)trgChan ) )
-            trgChan = -1;
+    if( i_trgChan != -1 ) {
+        if( i_trgStream != streamFromObj() || !snsFileChans.contains( (uint)i_trgChan ) )
+            i_trgChan = -1;
     }
 
 // ----------
@@ -192,6 +198,21 @@ bool DataFile::openForRead( QString &error, const QString &filename )
 /* openForWrite --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// Writing gets ability to save 1 bin/meta per probe shank.
+// - Original ip1 used for multidisk saving: ip1 % ndir.
+// - Original ip1 used for probe folder naming.
+// - Original ip1 meta file always written as record.
+// - Altered bin/meta files gets name ip2 = 1000 + 10*ip1 + s.
+//
+// Edited metadata in per-shank mode:
+// - fileName
+// - nSavedChans
+// - snsSaveChanSubset
+// - snsApLfSy
+// - typeIMEnabled
+// - ~snsChanMap
+// - ~snsGeomMap
+//
 bool DataFile::openForWrite(
     const DAQ::Params   &p,
     int                 ig,
@@ -214,37 +235,21 @@ bool DataFile::openForWrite(
 // Channel count?
 // --------------
 
-    QString brevname;
+    o_nAcqChans = subclassGetAcqChanCount( p );
+    subclassGetSavChanCount( p );
 
-    if( forceName.isEmpty() ) {
-
-        brevname = QString("%1_g%2_t%3.%4.bin")
-                    .arg( p.sns.runName )
-                    .arg( ig ).arg( it )
-                    .arg( fileLblFromObj() );
-    }
-    else {
-        brevname = QString("%1.%2.bin")
-                    .arg( forceName )
-                    .arg( fileLblFromObj() );
-    }
-
-    int nSaved = subclassGetSavChanCount( p );
-
-    if( !nSaved ) {
-
+    if( !nSavedChans ) {
         Error() <<
-            QString("openForWrite error: Zero channels for file '%1'.")
-            .arg( brevname );
+            QString("openForWrite error: Zero channels for stream '%1'.")
+            .arg( fileLblFromObj() );
         return false;
     }
 
-// ----
-// Open
-// ----
+// ---------
+// Multidisk
+// ---------
 
     MainApp *app    = mainApp();
-    QString bName;
     int     idir    = 0,
             ndir    = app->nDataDirs();
     bool    isIM    = p.stream_isIM( subtypeFromObj() );
@@ -252,43 +257,47 @@ bool DataFile::openForWrite(
     if( isIM && ndir > 1 )
         idir = ip % ndir;
 
-    if( !forceName.isEmpty() )
-        bName = brevname;
-    else if( !p.sns.fldPerPrb || !isIM ) {
+// ------
+// Naming
+// ------
 
-        bName = QString("%1/%2_g%3/%4")
+// (baseName)[lbl](ext)
+// e.g.
+// (dir/run_g0/run_g0_imec0/run_g0_t0.)[imec0.ap](.bin)
+//
+// Note: baseName only contains ip1; label may contain ip1 or ip2.
+
+    if( !forceName.isEmpty() )
+        o_baseName = forceName + ".";
+    else if( !isIM || !p.sns.fldPerPrb ) {
+
+        o_baseName =
+            QString("%1/%2_g%3/%2_g%3_t%4.")
                 .arg( app->dataDir( idir ) )
-                .arg( p.sns.runName ).arg( ig )
-                .arg( brevname );
+                .arg( p.sns.runName )
+                .arg( ig )
+                .arg( it );
     }
     else {
 
-        bName = QString("%1/%2_g%3/%2_g%3_%4")
+        o_baseName =
+            QString("%1/%2_g%3/%2_g%3_%4")
                 .arg( app->dataDir( idir ) )
-                .arg( p.sns.runName ).arg( ig )
+                .arg( p.sns.runName )
+                .arg( ig )
                 .arg( streamFromObj() );
 
-        QDir().mkdir( bName );
+        QDir().mkdir( o_baseName );
 
-        bName += "/" + brevname;
+        o_baseName += QString("/%1_g%2_t%3.")
+                        .arg( p.sns.runName ).arg( ig ).arg( it );
     }
 
-    metaName = DFName::forceMetaSuffix( bName );
+    metaName = o_baseName + fileLblFromObj() + ".meta";
 
-    Debug() << "Outfile: " << bName;
-
-    binFile.setFileName( bName );
-
-    if( !binFile.open( QIODevice::WriteOnly ) ) {
-        Error() <<
-        QString("File error <%1> opening(write) '%2'.")
-        .arg( binFile.errorString() ).arg( bName );
-        return false;
-    }
-
-// --------
-// Metadata
-// --------
+// -----------------
+// Standard metadata
+// -----------------
 
 // To check completeness, here is full list of daq.ini settings.
 // Experiment parameters are also stored in _Calibration/
@@ -298,7 +307,6 @@ bool DataFile::openForWrite(
 //  [DAQSettings]
 //    niAiRangeMin=-2.5
 //    niAiRangeMax=2.5
-//    niSampRate=19737
 //    niSettle=7
 //    niMNGain=200
 //    niMAGain=1
@@ -367,6 +375,7 @@ bool DataFile::openForWrite(
 //    snsReqMins=10
 //    snsPairChk=true
 //    snsFldPerProbe=true
+//    niLowLatency=false
 //
 //  [DAQ_Imec_All]
 //    imQfSecs=.5
@@ -384,33 +393,31 @@ bool DataFile::openForWrite(
 //    imNProbes=1
 //    obNOneBox=0
 //    imEnabled=true
+//    imVigilant=false
 //
 //  [SerialNumberToProbe]
 //    SN21\imroFile=
 //    SN21\imStdby=
+//    SN21\imSvyMaxBnk=-1
 //    SN21\imLEDEnable=false
-//    SN21\imSnsShankMapFile=
 //    SN21\imSnsChanMapFile=
 //    SN21\imSnsSaveChanSubset=all
 //
 //  [SerialNumberToOneBox]
 //    SN0\obAiRangeMax=5
+//    SN0\obAOChans=0
+//    SN0\obA2DThresh="0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25"
 //    SN0\obXAChans=0:11
 //    SN0\obDigital=true
-//    SN0\obSnsShankMapFile=
 //    SN0\obSnsChanMapFile=
 //    SN0\obSnsSaveChanSubset=all
 //
 
-    nSavedChans = nSaved;
-
-    subclassStoreMetaData( p );
-
+    kvp["appVersion"]       = QString("%1").arg( VERS_SGLX, 0, 16 );
     kvp["nDataDirs"]        = ndir;
     kvp["nSavedChans"]      = nSavedChans;
     kvp["gateMode"]         = DAQ::gateModeToString( p.mode.mGate );
     kvp["trigMode"]         = DAQ::trigModeToString( p.mode.mTrig );
-    kvp["fileName"]         = bName;
     kvp["fileCreateTime"]   = dateTime2Str( tCreate, Qt::ISODate );
     kvp["syncSourcePeriod"] = p.sync.sourcePeriod;
     kvp["syncSourceIdx"]    = p.sync.sourceIdx;
@@ -464,23 +471,158 @@ bool DataFile::openForWrite(
         kvp["trgSpikeIsNInf"]   = p.trgSpike.isNInf;
     }
 
+    subclassStoreMetaData( p );
+
+// -----------------------------------------
+// Adjust typeImEnabled for all files in run
+// -----------------------------------------
+
+    if( p.sns.sepShanks ) {
+
+        int highestIP4 = -1;
+
+        for( int ip = 0, np = p.stream_nIM(); ip < np; ++ip ) {
+            if( p.im.prbj[ip].roTbl->nShank() > 1 )
+                highestIP4 = ip;
+        }
+
+        if( highestIP4 >= 0 )
+            kvp["typeImEnabled"] = 1000 + 10*highestIP4 + 4;
+    }
+
+// ------------------------
+// Splitting for this file?
+// ------------------------
+
+    if( isIM && p.sns.sepShanks && p.im.prbj[ip].roTbl->nShank() > 1 ) {
+
+        // ---------
+        // Splitting
+        // ---------
+
+        // Split channel lists
+
+        const CimCfg::PrbEach   &E = p.im.prbj[ip];
+
+        std::sort( snsFileChans.begin(), snsFileChans.end() );
+
+        QVector<uint>   shk[4];
+        IMROTbl         *T  = E.roTbl;
+        int             nAP = T->nAP(),
+                        nSY = T->nSY(),
+                        ic  = 0,
+                        nc  = int(snsFileChans.size()),
+                        C;
+
+        // Sort neurals
+        while( ic < nc && (C = snsFileChans[ic]) < nAP ) {
+            shk[T->shnk( C )].push_back( C );
+            ++ic;
+        }
+
+        // Append SY
+        if( nSY == 4 && (nc - ic) == 4 ) {
+            for( int is = 0; is < 4; ++is )
+                shk[is].push_back( snsFileChans[ic + is] );
+        }
+        else {
+            for( int is = 0; is < 4; ++is )
+                shk[is].push_back( C );
+        }
+
+        // Create non-empty ORec
+
+        for( int is = 0; is < 4; ++is ) {
+
+            if( shk[is].size() <= 1 )
+                continue;
+
+            o_rec.push_back( std::make_unique<ORec>() );
+            ORec    &R = *o_rec[o_rec.size() - 1];
+
+            QString bName = o_baseName +
+                                QString("imec%1.ap.bin").arg( 1000 + 10*ip + is );
+
+            R.binFile.setFileName( bName );
+
+            if( !R.binFile.open( QIODevice::WriteOnly ) ) {
+                Error() <<
+                QString("File error <%1> opening(write) '%2'.")
+                .arg( R.binFile.errorString() ).arg( bName );
+                return false;
+            }
+
+            R.iKeep     = shk[is];
+            R.kvp       = kvp;
+            R.metaName  = o_baseName +
+                            QString("imec%1.ap.meta").arg( 1000 + 10*ip + is );
+
+            GeomMap     G;
+            QBitArray   apBits;
+
+            Subset::vec2Bits( apBits, R.iKeep );
+            E.roTbl->toGeomMap_snsFileChans( G, R.iKeep, 0 );
+            G.andOutImStdby( E.stdbyBits, R.iKeep, 0 );
+
+            R.kvp["fileName"]           = bName;
+            R.kvp["nSavedChans"]        = R.iKeep.size();
+            R.kvp["snsSaveChanSubset"]  = Subset::vec2RngStr( R.iKeep );
+            R.kvp["snsApLfSy"]          = QString("%1,0,1").arg( R.iKeep.size() - 1 );
+            R.kvp["~snsChanMap"]        = E.sns.chanMap.toString( apBits );
+            R.kvp["~snsGeomMap"]        = G.toString();
+
+            // 1st meta write
+            if( !R.kvp.toMetaFile( R.metaName ) )
+                return false;
+
+            Debug() << "Outfile: " << bName;
+        }
+
+        // write meta master
+        kvp.toMetaFile( metaName );
+    }
+    else {
+
+        // ------
+        // Single
+        // ------
+
+        o_rec.push_back( std::make_unique<ORec>() );
+        ORec    &R = *o_rec[0];
+
+        QString bName = o_baseName + fileLblFromObj() + ".bin";
+
+        R.binFile.setFileName( bName );
+
+        if( !R.binFile.open( QIODevice::WriteOnly ) ) {
+            Error() <<
+            QString("File error <%1> opening(write) '%2'.")
+            .arg( R.binFile.errorString() ).arg( bName );
+            return false;
+        }
+
+        if( nSavedChans < o_nAcqChans )
+            R.iKeep = snsFileChans;
+
+        R.kvp       = kvp;
+        R.metaName  = metaName;
+
+        R.kvp["fileName"] = bName;
+
+        // 1st meta write
+        if( !R.kvp.toMetaFile( R.metaName ) )
+            return false;
+
+        Debug() << "Outfile: " << bName;
+    }
+
 // ----------
 // State data
 // ----------
 
-    nMeasMax = 2 * 30000/100;   // ~2sec worth of blocks
-
     mode = Output;
 
-// --------------------
-// Preliminary metadata
-// --------------------
-
-// Write everything except {size, duration, SHA1} tallies.
-
-    kvp["appVersion"] = QString("%1").arg( VERS_SGLX, 0, 16 );
-
-    return kvp.toMetaFile( metaName );
+    return true;
 }
 
 /* ---------------------------------------------------------------- */
@@ -516,6 +658,9 @@ bool DataFile::openForExport(
 // Open
 // ----
 
+    o_rec.push_back( std::make_unique<ORec>() );
+    ORec    &R = *o_rec[0];
+
     QString bName = filename;
 
     mainApp()->makePathAbsolute( bName );
@@ -524,12 +669,12 @@ bool DataFile::openForExport(
 
     Debug() << "Outfile: " << bName;
 
-    binFile.setFileName( bName );
+    R.binFile.setFileName( bName );
 
-    if( !binFile.open( QIODevice::WriteOnly ) ) {
+    if( !R.binFile.open( QIODevice::WriteOnly ) ) {
         Error() <<
         QString("File error <%1> opening(export bin) '%2'.")
-        .arg( binFile.errorString() ).arg( bName );
+        .arg( R.binFile.errorString() ).arg( bName );
         return false;
     }
 
@@ -539,8 +684,8 @@ bool DataFile::openForExport(
 
     sRate       = dfSrc.sRate;
     nSavedChans = (int)indicesOfSrcChans.size();
-    trgStream   = dfSrc.trgStream;
-    trgChan     = dfSrc.trgChan;
+    i_trgStream = dfSrc.i_trgStream;
+    i_trgChan   = dfSrc.i_trgChan;
 
     kvp                 = dfSrc.kvp;
     kvp["fileName"]     = bName;
@@ -577,9 +722,7 @@ bool DataFile::openForExport(
 // State data
 // ----------
 
-    nMeasMax = 2 * 30000/100;   // ~2sec worth of blocks
-
-    mode = Output;
+    mode= Output;
 
     return true;
 }
@@ -595,48 +738,50 @@ bool DataFile::closeAndFinalize()
 {
     bool    ok = true;
 
-    if( mode == Undefined || !isOpen() )
+    if( mode == Undefined )
         ok = false;
     else if( mode == Output ) {
 
-        if( dfw ) {
-            delete dfw;
-            dfw = 0;
+        for( int j = 0, n = int(o_rec.size()); j < n; ++j ) {
+
+            ORec    &R = *o_rec[j];
+
+            R.sha.Final();
+            std::basic_string<char> hStr;
+            R.sha.ReportHashStl( hStr, CSHA1::REPORT_HEX_SHORT );
+
+            R.kvp["fileSHA1"]         = hStr.c_str();
+            R.kvp["fileTimeSecs"]     = fileTimeSecs();
+            R.kvp["fileSizeBytes"]    = R.binFile.size();
+            R.kvp["appVersion"]       = QString("%1").arg( VERS_SGLX, 0, 16 );
+
+            ok = R.kvp.toMetaFile( R.metaName );
+
+            Log() << ">> Completed " << R.binFile.fileName();
+
+            if( R.dfw ) {
+                delete R.dfw;
+                R.dfw = 0;
+            }
+            R.binFile.close();
         }
-
-        sha.Final();
-
-        std::basic_string<char> hStr;
-        sha.ReportHashStl( hStr, CSHA1::REPORT_HEX_SHORT );
-
-        kvp["fileSHA1"]         = hStr.c_str();
-        kvp["fileTimeSecs"]     = fileTimeSecs();
-        kvp["fileSizeBytes"]    = binFile.size();
-        kvp["appVersion"]       = QString("%1").arg( VERS_SGLX, 0, 16 );
-
-        ok = kvp.toMetaFile( metaName );
-
-        Log() << ">> Completed " << binFile.fileName();
     }
 
 // -----
 // Reset
 // -----
 
-    binFile.close();
+    i_binFile.close();
     metaName.clear();
 
-    statsBytes.clear();
     kvp.clear();
     snsFileChans.clear();
-    sha.Reset();
 
     sampCt      = 0;
     mode        = Undefined;
-    trgStream   = DAQ::Params::jsip2stream( jsNI, 0 );
-    trgChan     = -1;
-    dfw         = 0;
-    wrAsync     = true;
+    i_trgStream = DAQ::Params::jsip2stream( jsNI, 0 );
+    i_trgChan   = -1;
+    o_wrAsync   = true;
     sRate       = 0;
     nSavedChans = 0;
 
@@ -670,19 +815,20 @@ bool DataFile::writeAndInvalSamps( vec_i16 &samps )
 // Check stupid errors
 // -------------------
 
-    if( !isOpen() )
+    if( mode != Output )
         return false;
 
-    if( !samps.size() )
+    int nsamp = int(samps.size());
+
+    if( !nsamp )
         return true;
 
-    if( samps.size() % nSavedChans ) {
-
+    if( nsamp % nSavedChans ) {
         Error()
             << "writeAndInval: Vector size not multiple of num chans ("
             << nSavedChans
-            << ") [dataFile: "
-            << QFileInfo( binFile.fileName() ).completeBaseName()
+            << ") [stream: "
+            << fileLblFromObj()
             << "].";
         return false;
     }
@@ -691,7 +837,7 @@ bool DataFile::writeAndInvalSamps( vec_i16 &samps )
 // Update counter
 // --------------
 
-    sampCt += samps.size() / nSavedChans;
+    sampCt += nsamp / nSavedChans;
 
 // -----
 // Write
@@ -701,37 +847,33 @@ bool DataFile::writeAndInvalSamps( vec_i16 &samps )
 // queue blocks, for spinning disks. Since writing generally uses
 // a 0.10 second activity period, the queue size is ~400 seconds.
 
-    if( wrAsync ) {
+    if( o_wrAsync ) {
 
-        if( !dfw )
-            dfw = new DFWriter( this, 4000 );
+        for( int j = 0, n = int(o_rec.size()); j < n; ++j ) {
 
-        dfw->worker->enqueue( samps );
+            ORec    &R = *o_rec[j];
 
-        if( dfw->worker->percentFull() >= 95.0 ) {
+            if( !R.dfw )
+                R.dfw = new DFWriter( this, j, 4000 );
 
-            Error() << "Datafile queue overflow; stopping run.";
-            return false;
+            if( R.iKeep.size() ) {
+                vec_i16 rsamps;
+                Subset::subset( rsamps, samps, R.iKeep, o_nAcqChans );
+                R.dfw->worker->enqueue( rsamps );
+            }
+            else
+                R.dfw->worker->enqueue( samps );
+
+            if( R.dfw->worker->percentFull() >= 95.0 ) {
+                Error() << "Datafile queue overflow; stopping run.";
+                return false;
+            }
         }
 
         return true;
     }
 
-    return doFileWrite( samps );
-}
-
-/* ---------------------------------------------------------------- */
-/* writeAndInvalSubset -------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-bool DataFile::writeAndInvalSubset( const DAQ::Params &p, vec_i16 &samps )
-{
-    int n16 = subclassGetAcqChanCount( p );
-
-    if( nSavedChans != n16 )
-        Subset::subset( samps, samps, snsFileChans, n16 );
-
-    return writeAndInvalSamps( samps );
+    return doFileWrite( samps, 0 );
 }
 
 /* ---------------------------------------------------------------- */
@@ -747,7 +889,7 @@ bool DataFile::writeAndInvalSubset( const DAQ::Params &p, vec_i16 &samps )
 // - File starts at (samp0 == 0).
 //
 // To apply 'const' to this method, seek() and read()
-// have to strip constness from binFile, since they
+// have to strip constness from i_binFile, since they
 // move the file pointer.
 //
 qint64 DataFile::readSamps(
@@ -771,13 +913,13 @@ qint64 DataFile::readSamps(
 
     int bytesPerSamp = nSavedChans * sizeof(qint16);
 
-    if( !((QFile*)&binFile)->seek( samp0 * bytesPerSamp ) ) {
+    if( !((QFile*)&i_binFile)->seek( samp0 * bytesPerSamp ) ) {
 
         Error()
             << "readSamps error: Failed seek to pos ["
             << samp0 * bytesPerSamp
             << "] file size ["
-            << binFile.size()
+            << i_binFile.size()
             << "].";
         return -1;
     }
@@ -792,18 +934,18 @@ qint64 DataFile::readSamps(
 //    double  q0=getTime();
 
     std::vector<const QFile*>   vF;
-    vF.push_back( &binFile );
+    vF.push_back( &i_binFile );
 
 //    QFile   f2, f3, f4;
-//    f2.setFileName( binFile.fileName() );
+//    f2.setFileName( i_binFile.fileName() );
 //    f2.open( QIODevice::ReadOnly );
 //    vF.push_back( &f2 );
 
-//    f3.setFileName( binFile.fileName() );
+//    f3.setFileName( i_binFile.fileName() );
 //    f3.open( QIODevice::ReadOnly );
 //    vF.push_back( &f3 );
 
-//    f4.setFileName( binFile.fileName() );
+//    f4.setFileName( i_binFile.fileName() );
 //    f4.open( QIODevice::ReadOnly );
 //    vF.push_back( &f4 );
 
@@ -814,11 +956,11 @@ qint64 DataFile::readSamps(
                     &dst[0], num2read * bytesPerSamp );
 #elif 0
 
-    qint64 nr = readChunky( binFile, &dst[0], num2read * bytesPerSamp );
+    qint64 nr = readChunky( i_binFile, &dst[0], num2read * bytesPerSamp );
 
 #else
 
-    qint64 nr = ((QFile*)&binFile)->read(
+    qint64 nr = ((QFile*)&i_binFile)->read(
                     (char*)&dst[0], num2read * bytesPerSamp );
 #endif
 
@@ -832,9 +974,9 @@ qint64 DataFile::readSamps(
             << "] pos ["
             << samp0 * bytesPerSamp
             << "] file size ["
-            << binFile.size()
+            << i_binFile.size()
             << "] msg ["
-            << binFile.errorString()
+            << i_binFile.errorString()
             << "].";
 
         dst.clear();
@@ -866,9 +1008,18 @@ qint64 DataFile::readSamps(
 void DataFile::setFirstSample( quint64 firstCt, bool write )
 {
     kvp["firstSample"] = firstCt;
+    for( int i = 0, n = int(o_rec.size()); i < n; ++i ) {
+        ORec    &R = *o_rec[i];
+        R.kvp["firstSample"] = firstCt;
+    }
 
-    if( write )
+    if( write ) {
         kvp.toMetaFile( metaName );
+        for( int i = 0, n = int(o_rec.size()); i < n; ++i ) {
+            ORec    &R = *o_rec[i];
+            R.kvp.toMetaFile( R.metaName );
+        }
+    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -894,9 +1045,19 @@ void DataFile::setRemoteParams( const KeyValMap &kvm )
             it.key().startsWith( "obErr" ) ) {
 
             kvp[it.key()] = it.value();
+            for( int i = 0, n = int(o_rec.size()); i < n; ++i ) {
+                ORec    &R = *o_rec[i];
+                R.kvp[it.key()] = it.value();
+            }
         }
-        else
-            kvp[QString("rmt_%1").arg( it.key() )] = it.value();
+        else {
+            QString key = QString("rmt_%1").arg( it.key() );
+            kvp[key] = it.value();
+            for( int i = 0, n = int(o_rec.size()); i < n; ++i ) {
+                ORec    &R = *o_rec[i];
+                R.kvp[key] = it.value();
+            }
+        }
     }
 }
 
@@ -1041,7 +1202,15 @@ bool DataFile::verifySHA1( const QString &filename )
 
 double DataFile::percentFull() const
 {
-    return (dfw ? dfw->worker->percentFull() : 0);
+    double  pct = 0.0;
+
+    for( int j = 0, n = int(o_rec.size()); j < n; ++j ) {
+        DFWriter    *dfw = o_rec[j]->dfw;
+        if( dfw )
+            pct = qMax( pct, dfw->worker->percentFull() );
+    }
+
+    return pct;
 }
 
 /* ---------------------------------------------------------------- */
@@ -1054,12 +1223,17 @@ double DataFile::writtenBytes() const
 {
     double  sum = 0;
 
-    QMutexLocker    ml( &statsMtx );
+    for( int j = 0, n = int(o_rec.size()); j < n; ++j ) {
 
-    foreach( uint bytes, statsBytes )
-        sum += bytes;
+        const ORec  &R = *o_rec[j];
 
-    statsBytes.clear();
+        QMutexLocker    ml( &R.statsMtx );
+
+        foreach( uint bytes, R.statsBytes )
+            sum += bytes;
+
+        R.statsBytes.clear();
+    }
 
     return sum;
 }
@@ -1068,25 +1242,27 @@ double DataFile::writtenBytes() const
 /* doFileWrite ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool DataFile::doFileWrite( const vec_i16 &samps )
+bool DataFile::doFileWrite( const vec_i16 &samps, int j )
 {
+    ORec    &R = *o_rec[j];
+
     int n2Write = int(samps.size()) * sizeof(qint16);
 
-//    int nWrit = writeChunky( binFile, &samps[0], n2Write );
-    int nWrit = binFile.write( (char*)&samps[0], n2Write );
+//    int nWrit = writeChunky( R->binFile, &samps[0], n2Write );
+    int nWrit = R.binFile.write( (char*)&samps[0], n2Write );
 
-    statsMtx.lock();
-        statsBytes.push_back( nWrit );
-    statsMtx.unlock();
+    R.statsMtx.lock();
+        R.statsBytes.push_back( nWrit );
+    R.statsMtx.unlock();
 
     if( nWrit != n2Write ) {
         Error() <<
         QString("File error <%1> writing(bin) '%2'.")
-        .arg( binFile.errorString() ).arg( binFile.fileName() );
+        .arg( R.binFile.errorString() ).arg( R.binFile.fileName() );
         return false;
     }
 
-    sha.Update( (const UINT_8*)&samps[0], n2Write );
+    R.sha.Update( (const UINT_8*)&samps[0], n2Write );
 
     return true;
 }

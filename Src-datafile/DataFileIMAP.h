@@ -39,10 +39,10 @@ public:
     virtual ChanMap* chanMap() const;
 
 protected:
+    virtual int subclassGetAcqChanCount( const DAQ::Params &p );
+    virtual void subclassGetSavChanCount( const DAQ::Params &p );
     virtual bool subclassParseMetaData( QString *error );
     virtual void subclassStoreMetaData( const DAQ::Params &p );
-    virtual int subclassGetAcqChanCount( const DAQ::Params &p );
-    virtual int subclassGetSavChanCount( const DAQ::Params &p );
 
     virtual void subclassSetSNSChanCounts(
         const DAQ::Params   *p,

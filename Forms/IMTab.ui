@@ -455,6 +455,9 @@
         </item>
         <item>
          <widget class="QCheckBox" name="vigilantChk">
+          <property name="toolTip">
+           <string>Don't sleep during a run</string>
+          </property>
           <property name="text">
            <string>Vigilant</string>
           </property>
