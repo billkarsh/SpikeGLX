@@ -59,6 +59,7 @@ HS and BSC parts are specific to phase3A.
 
 **API4**:
 
+* [Release 20260115-api4](../App/Release_v20260115-api4.zip)...[Readme](../Readme/Readme_v20260115-api4.txt) : Core Ultra, better QB, new look, api v4.1.3
 * [Release 20251218-api4](../App/Release_v20251218-api4.zip)...[Readme](../Readme/Readme_v20251218-api4.txt) : Export survey, SDK selectDevices, api v4.1.3
 * [Release 20251201-api4](../App/Release_v20251201-api4.zip)...[Readme](../Readme/Readme_v20251201-api4.txt) : Fix survey, aux BinMax, api v4.1.3
 * [Release 20250930-api4](../App/Release_v20250930-api4.zip)...[Readme](../Readme/Readme_v20250930-api4.txt) : Broken shanks, api v4.1.3

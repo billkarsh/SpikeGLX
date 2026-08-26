@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+August 26, 2026
+
+* SpikeGLX 20260709-api4 (OPTO labels, sep shanks, sep Ymags, api v4.1.3).
+
 July 21, 2026
 
 Add digital signatures to:

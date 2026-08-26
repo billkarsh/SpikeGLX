@@ -419,6 +419,14 @@ have this type of referencing.</p>
 <p>This is the probe slot number.</p>
 <pre><code>imDatPrb_sn=19011116444</code></pre>
 <p>This is the probe serial number.</p>
+<pre><code>imDatPrb_sr_mask=15</code></pre>
+<p>This details which shanks are good. It’s a sum of these values:</p>
+<pre><code>shank-0 good = 1
+shank-1 good = 2
+shank-2 good = 4
+shank-3 good = 8</code></pre>
+<pre><code>imDatPrb_sr_nok=4</code></pre>
+<p>This is the count of good shanks.</p>
 <pre><code>imDatPrb_tech=std</code></pre>
 <p>This is the probe technology {sim,std,opto,nxt}.</p>
 <pre><code>imDatPrb_type=21</code></pre>
