@@ -1441,7 +1441,7 @@ void MainApp::help_About()
         "<html>"
         "<body>"
         "<h2>" VERS_SGLX_STR "</h2>"
-        "<h3>Author: <a href=\"mailto:karshb@janelia.hhmi.org\">Bill Karsh</a></h3>"
+        "<h3>Author: <a href=\"mailto:billkarsh@protonmail.com\">Bill Karsh</a></h3>"
         "<p>Based on the SpikeGL extracellular data acquisition system originally developed by Calin A. Culianu.</p>"
         "<p>Copyright (c) 2025, Howard Hughes Medical Institute, All rights reserved.</p>"
         "<p>Use is subject to Janelia Research Campus Software Copyright license terms:<br><a href=\"http://license.janelia.org/license\">http://license.janelia.org/license</a>.</p>"

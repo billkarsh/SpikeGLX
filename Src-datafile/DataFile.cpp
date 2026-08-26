@@ -512,7 +512,7 @@ bool DataFile::openForWrite(
                         nSY = T->nSY(),
                         ic  = 0,
                         nc  = int(snsFileChans.size()),
-                        C;
+                        C   = 0;
 
         // Sort neurals
         while( ic < nc && (C = snsFileChans[ic]) < nAP ) {

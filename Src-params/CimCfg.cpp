@@ -2460,14 +2460,14 @@ guiBreathe();
             // ----
 
             QString techMsg =
-            IMROTbl::hsCompatTech(
+                IMROTbl::hsCompatTech(
                     IMROTbl::hspnToTech( P.hspn ),
-                T.slot2Vers[P.adr.slot].bsctech, P.adr );
+                    T.slot2Vers[P.adr.slot].bsctech, P.adr );
 
-        if( !techMsg.isEmpty() ) {
-            R.app_put( techMsg );
-            return false;
-        }
+            if( !techMsg.isEmpty() ) {
+                R.app_put( techMsg );
+                return false;
+            }
         }
         else
             return false;

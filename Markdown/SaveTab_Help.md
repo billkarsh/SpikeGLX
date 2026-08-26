@@ -79,7 +79,8 @@ Write separate bin/meta for each shank of your 4-shank probes...
 - Adjusted metadata reflect intersection of {original saved chans, chans on that shank}.
 - The original probe-ip meta file is also written as a settings record.
 
-Suppose you have two 2.0 probes {0,1} in myrun, and probe-1 is 4-shank...
+Suppose you have two 2.0 probes {0,1} in myrun, such that probe-0 is a single shank probe
+and probe-1 is 4-shank...
 
 - Folder per probe: checked.
 - Separate shanks: checked.

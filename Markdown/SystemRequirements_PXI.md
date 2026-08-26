@@ -752,7 +752,7 @@ Specs for a spike sorting machine:
 * Minimum 8 cores, 3.0 GHz CPU
 * Minimum 64 GB RAM
 * Data drive 1 TB (SSD or NVMe)
-* Graphics card: Nvidia CUDA-compliant, compute capability 6+, 8 GB RAM
+* Graphics card: Nvidia CUDA-compliant, compute capability 6+, 12 GB RAM
 
 ### Graphics Card (GPU)
 
