@@ -1,5 +1,10 @@
 # What's New On The Site?
 
+August 28, 2026
+
+* SpikeGLX 20260826-api4 (OPTO labels, sep shanks, sep Ymags, api v4.1.3).
+(20260826 fixes metadata writing bugs in 20260709 separate shanks feature). 
+
 August 26, 2026
 
 * SpikeGLX 20260709-api4 (OPTO labels, sep shanks, sep Ymags, api v4.1.3).
