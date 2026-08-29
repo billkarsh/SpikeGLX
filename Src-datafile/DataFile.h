@@ -110,7 +110,7 @@ public:
         return mode == Output && fi.filePath().contains( o_baseName );
     }
 
-    bool closeAndFinalize();
+    bool closeAndFinalize( bool update_R0 = false );
 
     DataFile *closeAsync( const KeyValMap &kvm );
 

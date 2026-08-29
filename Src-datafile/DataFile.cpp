@@ -665,7 +665,7 @@ bool DataFile::openForExport(
 
     mainApp()->makePathAbsolute( bName );
 
-    metaName = DFName::forceMetaSuffix( bName );
+    R.metaName = metaName = DFName::forceMetaSuffix( bName );
 
     Debug() << "Outfile: " << bName;
 
@@ -681,6 +681,9 @@ bool DataFile::openForExport(
 // --------
 // Metadata
 // --------
+
+// Only master kvp are written here.
+// Call closeAndFinalize( update_R0 ) to copy to R.kvp.
 
     sRate       = dfSrc.sRate;
     nSavedChans = (int)indicesOfSrcChans.size();
@@ -734,7 +737,7 @@ bool DataFile::openForExport(
 // Write metadata file including all {size, duration, SHA1} tallies.
 // In output mode, the file is actually overwritten.
 //
-bool DataFile::closeAndFinalize()
+bool DataFile::closeAndFinalize( bool update_R0 )
 {
     bool    ok = true;
 
@@ -745,6 +748,9 @@ bool DataFile::closeAndFinalize()
         for( int j = 0, n = int(o_rec.size()); j < n; ++j ) {
 
             ORec    &R = *o_rec[j];
+
+            if( j == 0 && update_R0 )
+                R.kvp = kvp;
 
             R.sha.Final();
             std::basic_string<char> hStr;
@@ -823,22 +829,6 @@ bool DataFile::writeAndInvalSamps( vec_i16 &samps )
     if( !nsamp )
         return true;
 
-    if( nsamp % nSavedChans ) {
-        Error()
-            << "writeAndInval: Vector size not multiple of num chans ("
-            << nSavedChans
-            << ") [stream: "
-            << fileLblFromObj()
-            << "].";
-        return false;
-    }
-
-// --------------
-// Update counter
-// --------------
-
-    sampCt += nsamp / nSavedChans;
-
 // -----
 // Write
 // -----
@@ -848,6 +838,9 @@ bool DataFile::writeAndInvalSamps( vec_i16 &samps )
 // a 0.10 second activity period, the queue size is ~400 seconds.
 
     if( o_wrAsync ) {
+
+        // Online writing
+        sampCt += nsamp / o_nAcqChans;
 
         for( int j = 0, n = int(o_rec.size()); j < n; ++j ) {
 
@@ -871,6 +864,10 @@ bool DataFile::writeAndInvalSamps( vec_i16 &samps )
         }
 
         return true;
+    }
+    else {
+        // Offline writing
+        sampCt += nsamp / nSavedChans;
     }
 
     return doFileWrite( samps, 0 );

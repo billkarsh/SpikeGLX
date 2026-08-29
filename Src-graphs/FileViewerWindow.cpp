@@ -1265,7 +1265,7 @@ void FileViewerWindow::svyMenuExportHandler() const
         // File done
         // ---------
 
-        out->closeAndFinalize();
+        out->closeAndFinalize( true );
         delete out;
 
         if( !err.isEmpty() )

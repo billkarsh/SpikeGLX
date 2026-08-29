@@ -727,7 +727,7 @@ bool ExportCtl::exportAsBinary(
             QString f = out->outBinFileName(),
                     m = out->metaFileName();
 
-            out->closeAndFinalize();
+            out->closeAndFinalize( true );
             QFile::remove( f );
             QFile::remove( m );
             ok = false;
@@ -743,7 +743,7 @@ bool ExportCtl::exportAsBinary(
             step = rem;
     }
 
-    out->closeAndFinalize();
+    out->closeAndFinalize( true );
     ok = true;
 
 exit:
