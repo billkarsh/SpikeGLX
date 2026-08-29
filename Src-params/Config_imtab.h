@@ -23,6 +23,7 @@ class Config_imtab : public QObject
 private:
     Ui::IMTab                       *imTabUI;
     ConfigCtl                       *cfg;
+    QWidget                         *shankWin;
     QMap<quint64,CimCfg::PrbEach>   sn2set;
     QVector<CimCfg::PrbEach>        each;
     QString                         imro_cancelName;

@@ -36,7 +36,7 @@ static const char *DEF_IMCHMP_LE = "*Default (shank by shank; tip to base)";
 /* ---------------------------------------------------------------- */
 
 Config_imtab::Config_imtab( ConfigCtl *cfg, QWidget *tab )
-    :   QObject(0), imTabUI(0), cfg(cfg)
+    :   QObject(0), imTabUI(0), cfg(cfg), shankWin(0)
 {
     imTabUI = new Ui::IMTab;
     imTabUI->setupUi( tab );
@@ -325,6 +325,7 @@ void Config_imtab::imro_done( ShankCtlBase *editor, QString fn, bool ok )
     }
 
     delete editor;
+    shankWin = 0;
 }
 
 /* ---------------------------------------------------------------- */
@@ -424,6 +425,7 @@ void Config_imtab::editIMRO()
         cfg->dialog(), cfg->prbTab.get_iProbe( ip ).sr_mask, true );
     ConnectUI( shankCtl, SIGNAL(runSaveChansDlg(QString)), this, SLOT(editSave(QString)) );
     ConnectUI( shankCtl, SIGNAL(modal_done(ShankCtlBase*,QString,bool)), this, SLOT(imro_done(ShankCtlBase*,QString,bool)) );
+    shankWin = shankCtl;
     shankCtl->baseInit( E.roTbl, false );
     shankCtl->setOriginal( E.imroFile );
     shankCtl->showDialog();
@@ -470,7 +472,7 @@ void Config_imtab::editSave( QString sInit )
 {
     int             ip = curProbe();
     CimCfg::PrbEach &E = each[ip];
-    SaveChansCtl    SV( cfg->dialog(), E, ip );
+    SaveChansCtl    SV( shankWin, E, ip );
     QString         saveStr = sInit;
 
 // Validate IMRO
