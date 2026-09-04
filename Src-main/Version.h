@@ -2,22 +2,25 @@
 #define VERSION_H
 
 #define APPNAME                 "SpikeGLX"
-#define VERS_SGLX               0x20260826
-#define VERS_SGLX_STR           "SpikeGLX v20260826 api v4.1.3"
+#define VERS_SGLX               0x20260901
+#define VERS_SGLX_STR           "SpikeGLX v20260901 api v4.1.3"
 
 #define VERS_PXI_STD_BS         "3.0.226"
 #define VERS_PXI_STD_BSC        "4.0.233"
 
 // API < 4.2.0
-// #define VERS_PXI_OPTO_P1_BS     "3.0.196"
-// #define VERS_PXI_OPTO_P1_BSC    "4.0.17"
-
+#define VERS_PXI_OPTO_P1_BS     "3.0.196"
+#define VERS_PXI_OPTO_P1_BSC    "4.0.17"
 // API >= 4.2.0
-#define VERS_PXI_OPTO_P1_BS     "3.0.226"
-#define VERS_PXI_OPTO_P1_BSC    "4.0.19"
+// #define VERS_PXI_OPTO_P1_BS     "3.0.226"
+// #define VERS_PXI_OPTO_P1_BSC    "4.0.19"
 
+// API < 4.2.0
 #define VERS_PXI_NXT_PA_BS      "3.0.196"
 #define VERS_PXI_NXT_PA_BSC     "4.0.216"
+// API >= 4.2.0
+// #define VERS_PXI_NXT_PA_BS      "3.0.226"
+// #define VERS_PXI_NXT_PA_BSC     "4.0.221"
 
 #endif  // VERSION_H
 
