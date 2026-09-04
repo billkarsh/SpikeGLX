@@ -657,7 +657,9 @@ and refuse to commit to a stated performance level. So this is what you do:
 
 > If you buy just an SSD, not a system, you'll have an easier time
 getting the specs for the thing you're buying. And note that a really
-good performer can be had for $200 US.
+good performer can be had for $200 US. The best drives have a dedicated
+onboard DRAM controller. Examples are {Samsung 990 Pro, WD Black SN850X,
+Solidigm P44 Pro}.
 
 [**Tom's Hardware**](https://www.tomshardware.com/) is a reliable source of
 testing data, including sustained write rates.
