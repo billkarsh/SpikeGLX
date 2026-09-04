@@ -7,8 +7,10 @@
 #include "IMBISTCtl.h"
 #include "Util.h"
 #include "MainApp.h"
+#include "CimCfg.h"
 
 #include <QFileDialog>
+#include <QSettings>
 #include <QThread>
 
 using namespace Neuropixels;
@@ -55,7 +57,7 @@ IMBISTCtl::IMBISTCtl() : QDialog(0)
 
 IMBISTCtl::~IMBISTCtl()
 {
-    _closeSlots();
+    closeSlots();
 
     if( bistUI ) {
         delete bistUI;
@@ -75,7 +77,7 @@ void IMBISTCtl::go()
     guiBreathe();
     guiBreathe();
 
-    if( !_openSlot() || !okVersions() )
+    if( !openSlot() || !okVersions() )
         goto exit;
 
     if( !itest ) {
@@ -120,6 +122,7 @@ void IMBISTCtl::go()
 
 exit:
     closeProbe();
+    write( "" );
     QGuiApplication::restoreOverrideCursor();
 }
 
@@ -182,7 +185,7 @@ void IMBISTCtl::writeMapMsg( int slot )
 }
 
 
-bool IMBISTCtl::_openSlot()
+bool IMBISTCtl::openSlot()
 {
     write( "Open slot..." );
 
@@ -203,10 +206,53 @@ bool IMBISTCtl::_openSlot()
 }
 
 
-void IMBISTCtl::_closeSlots()
+void IMBISTCtl::closeSlots()
 {
     for( int is : openSlots4 )
         np_closeBS( is );
+}
+
+
+bool IMBISTCtl::mapBus4()
+{
+    NP_ErrorCode    err;
+
+// Scan devices
+
+    err = np_scanBS();
+    if( err != SUCCESS ) {
+        write( QString("Error scanning device bus: error %1 '%2'.")
+                .arg( err ).arg( getNPErrorString4() ) );
+        write( "Check cables/power; visit Configure Slots dialog; try again." );
+        return false;
+    }
+
+// Table: ID -> slot
+
+    QMap<int,int>   onebx2slot;
+    onebx2slot.clear();
+    STDSETTINGS( settings, "imslottable" );
+    settings.beginGroup( "OneBoxIdToSlot" );
+    foreach( const QString &ID, settings.childKeys() )
+        onebx2slot[ID.toInt()] = settings.value( ID, 0 ).toInt();
+
+// Table: slot -> ID
+
+    QMap<int,int>                   inv;
+    QMap<int,int>::const_iterator   it, end = onebx2slot.end();
+
+    for( it = onebx2slot.begin(); it != end; ++it )
+        inv[it.value()] = it.key();
+
+// Loop over all OneBox slots
+
+    for( int slot = CimCfg::imSlotUSBMin; slot < CimCfg::imSlotPhyLim; ++slot ) {
+        int ID = inv.value( slot, -1 );
+        if( ID != -1 )
+            np_mapBS( ID, slot );
+    }
+
+    return true;
 }
 
 
@@ -222,18 +268,44 @@ bool IMBISTCtl::okVersions()
 
     write( "Check slot firmware..." );
 
-    np_scanBS();
-    np_getDeviceInfo( slot, &bs );
-    if( bs.platformid != NPPlatform_PXI )
-        return true;
+    if( !mapBus4() )
+        return false;
+
+    err = np_getDeviceInfo( slot, &bs );
+    if( err != SUCCESS ) {
+        write( QString("Error getting device info: error %1 '%2'.")
+                .arg( err ).arg( getNPErrorString4() ) );
+        write( "Check cables/power; visit Configure Slots dialog; try again." );
+        return false;
+    }
+    if( bs.platformid == NPPlatform_None ) {
+        write( QString("No device at slot %1").arg( slot ) );
+        return false;
+    }
+    else if( bs.platformid == NPPlatform_USB ) {
+        write( QString("OneBox at slot %1").arg( slot ) );
+        QString msg;
+        if( CimCfg::ftdiCheck( msg, true ) ) {
+            write( "FTDI driver version OK." );
+            return true;
+        }
+        else {
+            write( msg );
+            return false;
+        }
+    }
+    else if( bs.platformid != NPPlatform_PXI ) {
+        write( QString("Unknown device at slot %1").arg( slot ) );
+        return false;
+    }
+    write( QString("PXI device at slot %1").arg( slot ) );
 
     err = np_bs_getFirmwareInfo( slot, &info );
     if( err != SUCCESS ) {
         write( "Error checking firmware:" );
         write(
-            QString("IMEC bs_getFirmwareInfo(slot %1) error %2:")
-            .arg( slot ).arg( err ) );
-        write( getNPErrorString4() );
+            QString("IMEC bs_getFirmwareInfo(slot %1) error %2 '%3'.")
+            .arg( slot ).arg( err ).arg( getNPErrorString4() ) );
         return false;
     }
     bsfw = QString("%1.%2.%3")
@@ -243,9 +315,8 @@ bool IMBISTCtl::okVersions()
     if( err != SUCCESS ) {
         write( "Error checking firmware:" );
         write(
-            QString("IMEC bsc_getFirmwareInfo(slot %1) error %2:")
-            .arg( slot ).arg( err ) );
-        write( getNPErrorString4() );
+            QString("IMEC bsc_getFirmwareInfo(slot %1) error %2 '%3'.")
+            .arg( slot ).arg( err ).arg( getNPErrorString4() ) );
         return false;
     }
     bscfw = QString("%1.%2.%3")
@@ -255,9 +326,8 @@ bool IMBISTCtl::okVersions()
     if( err != SUCCESS ) {
         write( "Error identifying module:" );
         write(
-            QString("IMEC getBSCHardwareID(slot %1) error %2:")
-            .arg( slot ).arg( err ) );
-        write( getNPErrorString4() );
+            QString("IMEC getBSCHardwareID(slot %1) error %2 '%3'.")
+            .arg( slot ).arg( err ).arg( getNPErrorString4() ) );
         return false;
     }
     bstech = IMROTbl::bscpnToTech( hID.ProductNumber );
@@ -488,7 +558,7 @@ void IMBISTCtl::stdFinish4( NP_ErrorCode err )
         write( "result = 0 'SUCCESS'" );
     else {
         write( QString("result = %1 '%2'")
-            .arg( err ).arg( getNPErrorString4() ) );
+                .arg( err ).arg( getNPErrorString4() ) );
     }
 
     stdFinish();

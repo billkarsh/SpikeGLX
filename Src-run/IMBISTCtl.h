@@ -39,8 +39,9 @@ private slots:
 private:
     void write( const QString &s );
     void writeMapMsg( int slot );
-    bool _openSlot();
-    void _closeSlots();
+    bool openSlot();
+    void closeSlots();
+    bool mapBus4();
     bool okVersions();
     bool probeType();
     bool EEPROMCheck();

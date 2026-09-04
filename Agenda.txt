@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20260901
+--------
++ Improve BIST dialog.
+
 20260826
 --------
 + Bug-fix replacement for 20260709.
