@@ -87,7 +87,7 @@ struct IMROTbl_T2022 : public IMROTbl_T2020base
 
 // Hardware
 
-    virtual int selectSites4( const PAddr& adr, bool write, bool check ) const;
+    virtual int selectSites4( const PAddr& adr, int writeMode ) const;
 
 // Edit
 

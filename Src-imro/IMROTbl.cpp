@@ -789,7 +789,7 @@ QString IMROTbl::muxTable_toString() const
 
 // This method connects one electrode per channel.
 //
-int IMROTbl::selectSites4( const PAddr& adr, bool write, bool check ) const
+int IMROTbl::selectSites4( const PAddr& adr, int writeMode ) const
 {
 #ifdef HAVE_IMEC
 // ------------------------------------
@@ -812,12 +812,12 @@ int IMROTbl::selectSites4( const PAddr& adr, bool write, bool check ) const
             return err;
     }
 
-    if( write ) {
+    if( writeMode ) {
 
         for( int itry = 1; itry <= 10; ++itry ) {
 
             err = np_writeProbeConfiguration(
-                    adr.slot, adr.port, adr.dock, check );
+                    adr.slot, adr.port, adr.dock, writeMode == 1 );
 
             if( err == SUCCESS ) {
                 if( itry > 1 ) {
@@ -835,8 +835,7 @@ int IMROTbl::selectSites4( const PAddr& adr, bool write, bool check ) const
     }
 #else
     Q_UNUSED( adr )
-    Q_UNUSED( write )
-    Q_UNUSED( check )
+    Q_UNUSED( writeMode )
 #endif
 
     return 0;

@@ -168,7 +168,7 @@ public:
         bool setProbeType();
         int nHSDocks() const;
         quint64 calSN() const   {return (type == 1200 ? hssn : sn);}
-        bool srDoCheck() const  {return sr_nok >= sr_nshk;}
+        bool srAllOK() const    {return sr_nok >= sr_nshk;}
         int srFirstOK() const;
         int srNextOK( int is ) const;
 

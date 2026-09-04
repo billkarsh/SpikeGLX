@@ -253,9 +253,8 @@ bool SvyPrbRun::nextBank()
 
         if( 0 ) {
         }
-        else {
-            E.roTbl->selectSites4( P.adr, true, false );
-        }
+        else
+            E.roTbl->selectSites4( P.adr, 2 );
 
         E.sns.chanMapFile.clear();
         cfg->validImMaps( err, E, ip );

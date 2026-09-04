@@ -341,7 +341,7 @@ void IMROTbl_T21base::muxTable( int &nADC, int &nGrp, std::vector<int> &T ) cons
 
 // This method connects multiple electrodes per channel.
 //
-int IMROTbl_T21base::selectSites4( const PAddr& adr, bool write, bool check ) const
+int IMROTbl_T21base::selectSites4( const PAddr& adr, int writeMode ) const
 {
 #ifdef HAVE_IMEC
 // ------------------------------------
@@ -364,12 +364,12 @@ int IMROTbl_T21base::selectSites4( const PAddr& adr, bool write, bool check ) co
             return err;
     }
 
-    if( write ) {
+    if( writeMode ) {
 
         for( int itry = 1; itry <= 10; ++itry ) {
 
             err = np_writeProbeConfiguration(
-                    adr.slot, adr.port, adr.dock, check );
+                    adr.slot, adr.port, adr.dock, writeMode == 1 );
 
             if( err == SUCCESS ) {
                 if( itry > 1 ) {
@@ -387,8 +387,7 @@ int IMROTbl_T21base::selectSites4( const PAddr& adr, bool write, bool check ) co
     }
 #else
     Q_UNUSED( adr )
-    Q_UNUSED( write )
-    Q_UNUSED( check )
+    Q_UNUSED( writeMode )
 #endif
 
     return 0;

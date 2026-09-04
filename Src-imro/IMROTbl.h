@@ -264,7 +264,9 @@ public:
 
 // Hardware
 
-    virtual int selectSites4( const PAddr& adr, bool write, bool check ) const;
+    // selectSites writeMode {0=skip, 1=strict, 2=permissive}
+
+    virtual int selectSites4( const PAddr& adr, int writeMode ) const;
     virtual int selectRefs4( const PAddr& adr ) const;
     virtual int selectGains4( const PAddr& adr ) const;
     virtual int selectAPFlts4( const PAddr& adr ) const;

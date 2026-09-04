@@ -139,7 +139,7 @@ struct IMROTbl_T1110 : public IMROTbl
 
 // Hardware
 
-    virtual int selectSites4( const PAddr& adr, bool write, bool check ) const;
+    virtual int selectSites4( const PAddr& adr, int writeMode ) const;
     virtual int selectRefs4( const PAddr& adr ) const;
     virtual int selectGains4( const PAddr& adr ) const;
     virtual int selectAPFlts4( const PAddr& adr ) const;

@@ -3101,7 +3101,7 @@ bool CimCfg::detect_SR4(
                 .arg( P.sn ).arg( P.pn ).arg( P.sr_nshk ) );
             R.app_put(
                 QString("Error: BistSR(%1)"
-                " not conclusive due to a timeout error.")
+                " inconclusive due to a timeout error.")
                 .arg( P.adr.tx_spd() ) );
             R.app_put("Check connections and try again.");
             return false;

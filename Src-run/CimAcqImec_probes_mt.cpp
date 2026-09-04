@@ -138,6 +138,11 @@ bool ImCfgWorker::_mt_openProbe( const CimCfg::ImProbeDat &P )
 
             err = np_init( P.adr.slot, P.adr.port, P.adr.dock );
 
+            if( err == ERROR_SR_CHAIN ) {
+                if( !acq->p.im.prbAll.srAtDetect || !P.srAllOK() )
+                    err = SUCCESS;
+            }
+
             if( err == SUCCESS ) {
                 if( itry > 1 ) {
                     Warning() <<
@@ -145,10 +150,6 @@ bool ImCfgWorker::_mt_openProbe( const CimCfg::ImProbeDat &P )
                     .arg( P.ip ).arg( itry );
                 }
                 break;
-            }
-            else if( err == ERROR_SR_CHAIN ) {
-                if( !acq->p.im.prbAll.srAtDetect || !P.srDoCheck() )
-                    return true;
             }
 
             QThread::msleep( 100 );
@@ -370,7 +371,7 @@ bool ImCfgWorker::_mt_selectElectrodes( const CimCfg::ImProbeDat &P )
     }
     else {
         NP_ErrorCode    err = NP_ErrorCode(acq->p.im.prbj[P.ip].roTbl->
-                                selectSites4( P.adr, false, true ));
+                                selectSites4( P.adr, 0 ));
 
         if( err != SUCCESS ) {
             shr.seterror(
@@ -480,7 +481,7 @@ bool ImCfgWorker::_mt_setStandby( const CimCfg::ImProbeDat &P )
 
 bool ImCfgWorker::_mt_writeProbe( const CimCfg::ImProbeDat &P )
 {
-    bool    check = acq->p.im.prbAll.srAtDetect && P.srDoCheck();
+    bool    check = acq->p.im.prbAll.srAtDetect && P.srAllOK();
 
     if( 0 ) {
     }
