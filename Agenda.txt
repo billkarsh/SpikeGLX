@@ -4,6 +4,7 @@
 20260901
 --------
 + Improve BIST dialog.
++ Survey run can start if bad shanks.
 
 20260826
 --------

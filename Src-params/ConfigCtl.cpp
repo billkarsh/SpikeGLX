@@ -240,7 +240,7 @@ void ConfigCtl::graphSetsImroFile( const QString &file, int ip )
 
     E.imroFile = file;
 
-    if( validIMROTbl( err, E, ip, p.im.prbAll.srAtDetect ) ) {
+    if( validIMROTbl( err, E, ip, p.im.prbAll.srAtDetect, p.im.prbAll.isSvyRun ) ) {
 
         if( !E.roTbl->isConnectedSame( T_old ) )
             validImMaps( err, E, ip );
@@ -663,7 +663,7 @@ void ConfigCtl::streamCB_fillConfig( QComboBox *CB ) const
 }
 
 
-bool ConfigCtl::validIMROTbl( QString &err, CimCfg::PrbEach &E, int ip, bool srCheck ) const
+bool ConfigCtl::validIMROTbl( QString &err, CimCfg::PrbEach &E, int ip, bool srChk, bool isSvy ) const
 {
 // Pretties ini file, even if not using device
     if( E.imroFile.contains( "*" ) )
@@ -693,7 +693,7 @@ bool ConfigCtl::validIMROTbl( QString &err, CimCfg::PrbEach &E, int ip, bool srC
 
 // Check against SR
 
-    if( !srCheck )
+    if( !srChk )
         return true;
     if( P.sr_nok >= P.sr_nshk )
         return true;
@@ -717,23 +717,26 @@ bool ConfigCtl::validIMROTbl( QString &err, CimCfg::PrbEach &E, int ip, bool srC
 
 // Electrodes
 
-    ShankMap    S;
-    QSet<int>   bad;
-    R->toShankMap_hwr( S );
+    if( !isSvy ) {
 
-    for( int ie = 0, ne = (int)S.e.size(); ie < ne; ++ie ) {
-        int shk = S.e[ie].s;
-        if( !(P.sr_mask & (1 << shk)) )
-            bad.insert( shk );
-    }
+        ShankMap    S;
+        QSet<int>   bad;
+        R->toShankMap_hwr( S );
 
-    if( !bad.isEmpty() ) {
-        QString s;
-        foreach( int shk, bad )
-            s += QString(" %1").arg( shk );
-        err = QString("Imec%1: Sites selected on broken shank-id { %2 }.")
-                .arg( ip ).arg( s.trimmed() );
-        return false;
+        for( int ie = 0, ne = (int)S.e.size(); ie < ne; ++ie ) {
+            int shk = S.e[ie].s;
+            if( !(P.sr_mask & (1 << shk)) )
+                bad.insert( shk );
+        }
+
+        if( !bad.isEmpty() ) {
+            QString s;
+            foreach( int shk, bad )
+                s += QString(" %1").arg( shk );
+            err = QString("Imec%1: Sites selected on broken shank-id { %2 }.")
+                    .arg( ip ).arg( s.trimmed() );
+            return false;
+        }
     }
 
 // Refs
@@ -3115,7 +3118,7 @@ bool ConfigCtl::shankParamsToQ( QString &err, DAQ::Params &q, int ip ) const
 
     CimCfg::PrbEach &E = q.im.prbj[ip];
 
-    if( !validIMROTbl( err, E, ip, q.im.prbAll.srAtDetect ) )
+    if( !validIMROTbl( err, E, ip, q.im.prbAll.srAtDetect, q.im.prbAll.isSvyRun ) )
         return false;
 
     if( !validImStdbyBits( err, E, ip ) )
@@ -3176,7 +3179,7 @@ bool ConfigCtl::valid( QString &err, QWidget *parent, int iprb )
 
         CimCfg::PrbEach &E = q.im.prbj[ip];
 
-        if( !validIMROTbl( err, E, ip, q.im.prbAll.srAtDetect ) )
+        if( !validIMROTbl( err, E, ip, q.im.prbAll.srAtDetect, q.im.prbAll.isSvyRun ) )
             return false;
 
         if( !validImStdbyBits( err, E, ip ) )

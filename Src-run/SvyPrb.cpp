@@ -150,7 +150,7 @@ void SvyPrbRun::initRun()
         E.sns.uiSaveChanStr.clear();
 
         // Adopt user IMRO; set default bank
-        cfg->validIMROTbl( err, E, ip, p.im.prbAll.srAtDetect );
+        cfg->validIMROTbl( err, E, ip, p.im.prbAll.srAtDetect, true );
 
         if( E.roTbl->nSvyShank() == 1 )
             vCurShnk[ip] = 0;
