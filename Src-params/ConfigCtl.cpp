@@ -265,7 +265,7 @@ void ConfigCtl::graphSetsStdbyStr( const QString &sdtbyStr, int ip )
     if( validImStdbyBits( err, E, ip ) ) {
 
         E.sns.shankMap = E.sns.shankMap_orig;
-        E.sns.shankMap.andOutImStdby( E.stdbyBits );
+        E.sns.shankMap.andOutImStdby( E.stdbyBits() );
         imTab->updateProbe( E, ip );
         imTab->saveSettings();
     }
@@ -701,7 +701,12 @@ bool ConfigCtl::validIMROTbl( QString &err, CimCfg::PrbEach &E, int ip, bool srC
         err = QString("Imec%1 All shanks broken.").arg( ip );
         return false;
     }
-    else if( R->apiFetchType() == t_fetch_qb ) {
+
+    int     tech = IMROTbl::prbpnToTech( R->pn );
+    bool    checkElec = !isSvy,
+            checkRefs = true;
+
+    if( tech == t_tech_qb ) {
         QString s;
         for( int is = 0; is < P.sr_nshk; ++is ) {
             if( P.sr_mask & (1 << is) )
@@ -709,59 +714,74 @@ bool ConfigCtl::validIMROTbl( QString &err, CimCfg::PrbEach &E, int ip, bool srC
         }
         Warning() << QString("Imec%1: Quadbase with good shanks { %2 }.")
                         .arg( ip ).arg( s.trimmed() );
-        Warning() << "You can run, but should ignore data from bad shanks.";
+        Warning() << "You can run, but should ignore the data from bad shanks.";
         Warning() << "You can use the IMRO editor 'selective save' feature to"
         " save channels exclusively from good shanks.";
-        return true;
+        checkElec = false;
+        checkRefs = false;
     }
-
-// Electrodes
-
-    if( !isSvy ) {
-
-        ShankMap    S;
-        QSet<int>   bad;
-        R->toShankMap_hwr( S );
-
-        for( int ie = 0, ne = (int)S.e.size(); ie < ne; ++ie ) {
-            int shk = S.e[ie].s;
-            if( !(P.sr_mask & (1 << shk)) )
-                bad.insert( shk );
-        }
-
-        if( !bad.isEmpty() ) {
-            QString s;
-            foreach( int shk, bad )
-                s += QString(" %1").arg( shk );
-            err = QString("Imec%1: Sites selected on broken shank-id { %2 }.")
-                    .arg( ip ).arg( s.trimmed() );
-            return false;
-        }
-    }
-
-// Refs
-
-    uint8_t tips = 0;
-
-    for( int ic = 0, nc = R->nAP(); ic < nc; ++ic ) {
-
-        int shank, bank, type = R->refTypeAndFields( shank, bank, ic );
-
-        if( type == TIP_REF || type == INT_REF )
-            tips |= (1 << shank);
-    }
-
-    if( tips && !(tips & P.sr_mask) ) {
+    else if( tech >= t_tech_nxt_ppa ) {
         QString s;
         for( int is = 0; is < P.sr_nshk; ++is ) {
             if( P.sr_mask & (1 << is) )
                 s += QString(" %1").arg( is );
         }
-        err = QString(
-        "Imec%1: Uses tip (or on-shank) referencing...\r\n"
-        "but that must include one of shank-id { %2 }.")
-            .arg( ip ).arg( s.trimmed() );
+        Warning() << QString("Imec%1: NXT with good shanks { %2 }.")
+                        .arg( ip ).arg( s.trimmed() );
+        Warning() << "You can run, but should ignore the data from bad shanks.";
+        Warning() << "You can use the IMRO editor 'selective save' feature to"
+        " save channels exclusively from good shanks.";
+        checkElec = false;
+    }
+
+// Electrodes
+
+    QBitArray   badBits;
+    QSet<int>   badShks;
+
+    for( int ic = 0, nC = R->nAP(); ic < nC; ++ic ) {
+        int cl, rw, sh = R->elShankColRow( cl, rw, ic );
+        if( !(P.sr_mask & (1 << sh)) ) {
+            badBits.setBit( ic );
+            badShks.insert( sh );
+        }
+    }
+
+    E.setImroStdbyBits( badBits );
+
+    if( checkElec && !badShks.isEmpty() ) {
+        QString s;
+        foreach( int shk, badShks )
+            s += QString(" %1").arg( shk );
+        err = QString("Imec%1: Sites selected on broken shank-ID { %2 }.")
+                .arg( ip ).arg( s.trimmed() );
         return false;
+    }
+
+// Refs
+
+    if( checkRefs ) {
+
+        uint8_t tips = 0;
+
+        for( int ic = 0, nc = R->nAP(); ic < nc; ++ic ) {
+            int shank, bank, type = R->refTypeAndFields( shank, bank, ic );
+            if( type == TIP_REF || type == INT_REF )
+                tips |= (1 << shank);
+        }
+
+        if( tips && !(tips & P.sr_mask) ) {
+            QString s;
+            for( int is = 0; is < P.sr_nshk; ++is ) {
+                if( P.sr_mask & (1 << is) )
+                    s += QString(" %1").arg( is );
+            }
+            err = QString(
+            "Imec%1: Uses tip (or on-shank) referencing...\r\n"
+            "but that must include one of shank-ID { %2 }.")
+                .arg( ip ).arg( s.trimmed() );
+            return false;
+        }
     }
 
     return true;
@@ -772,7 +792,7 @@ bool ConfigCtl::validImMaps( QString &err, CimCfg::PrbEach &E, int ip ) const
 {
     validImShankMap( E );
 
-    return  validImChanMap( err, E, ip );
+    return validImChanMap( err, E, ip );
 }
 
 
@@ -1500,7 +1520,7 @@ bool ConfigCtl::validImStdbyBits( QString &err, CimCfg::PrbEach &E, int ip ) con
     if( !usingIM )
         return true;
 
-    return E.deriveStdbyBits(
+    return E.deriveUserStdbyBits(
             err, E.imCumTypCnt[CimCfg::imSumAP], ip );
 }
 
@@ -2031,7 +2051,7 @@ void ConfigCtl::validImShankMap( CimCfg::PrbEach &E ) const
         // Save in case stdby channels changed
         E.sns.shankMap_orig = M;
 
-        M.andOutImStdby( E.stdbyBits );
+        M.andOutImStdby( E.stdbyBits() );
     }
 }
 
@@ -3327,7 +3347,7 @@ void ConfigCtl::running_setProbe( DAQ::Params &q, int ip )
                     &E      = q.im.prbj[ip];
 
     bool    I = !E.roTbl->isConnectedSame( E0.roTbl ),
-            S = E.stdbyBits != E0.stdbyBits,
+            S = E.stdbyBits() != E0.stdbyBits(),
             C = E.sns.chanMapFile != E0.sns.chanMapFile;
 
     run->grfHardPause( true );

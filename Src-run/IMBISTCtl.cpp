@@ -705,7 +705,8 @@ void IMBISTCtl::test_bistSR()
 
     IMROTbl *R      = IMROTbl::alloc( pn );
     int     slot    = bistUI->slotSB->value(),
-            nShnk   = R->nShank();
+            nShnk   = R->nShank(),
+            tech    = IMROTbl::prbpnToTech( R->pn );
     bool    testSR  = (R->nBanks() > 1);
     uint8_t mask    = 0;
     delete R;
@@ -747,8 +748,14 @@ void IMBISTCtl::test_bistSR()
                 .arg( s.trimmed() ) );
             if( ngood == 0 )
                 write( "You cannot use this probe." );
-            else if( ngood < nShnk )
-                write( "You can use this probe by selecting sites only on good shanks." );
+            else if( ngood < nShnk ) {
+                if( tech == t_tech_qb || tech >= t_tech_nxt_ppa ) {
+                    write( "You can use this probe but, to read out 1536 channels," );
+                    write( "you have to select some sites on bad shanks and ignore them." );
+                }
+                else
+                    write( "You can use this probe by selecting sites only on good shanks." );
+            }
         }
     }
 

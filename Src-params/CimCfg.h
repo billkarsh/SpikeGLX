@@ -343,16 +343,20 @@ public:
     // --------------------------
 
     // derived:
-    // stdbyBits
+    // userStdbyBits
+    // imroStdbyBits
     // imCumTypCnt[]
 
     struct PrbEach {
+private:
+        QBitArray       userStdbyBits,
+                        imroStdbyBits;
+public:
         double          srate;
         QString         when,       // last set by user
                         imroFile,
                         stdbyStr;
         IMROTbl         *roTbl;
-        QBitArray       stdbyBits;
         int             imCumTypCnt[imNTypes],
                         svyMaxBnk;  // -1=all
         bool            LEDEnable;
@@ -363,14 +367,15 @@ public:
             svyMaxBnk(-1), LEDEnable(false) {}
         PrbEach( const PrbEach &rhs )
         {
-            srate       = rhs.srate;
-            when        = rhs.when;
-            imroFile    = rhs.imroFile;
-            stdbyStr    = rhs.stdbyStr;
-            stdbyBits   = rhs.stdbyBits;
-            svyMaxBnk   = rhs.svyMaxBnk;
-            LEDEnable   = rhs.LEDEnable;
-            sns         = rhs.sns;
+            userStdbyBits   = rhs.userStdbyBits;
+            imroStdbyBits   = rhs.imroStdbyBits;
+            srate           = rhs.srate;
+            when            = rhs.when;
+            imroFile        = rhs.imroFile;
+            stdbyStr        = rhs.stdbyStr;
+            svyMaxBnk       = rhs.svyMaxBnk;
+            LEDEnable       = rhs.LEDEnable;
+            sns             = rhs.sns;
 
             if( rhs.roTbl ) {
                 roTbl = IMROTbl::alloc( rhs.roTbl->pn );
@@ -384,14 +389,15 @@ public:
         }
         PrbEach& operator=( const PrbEach &rhs )
         {
-            srate       = rhs.srate;
-            when        = rhs.when;
-            imroFile    = rhs.imroFile;
-            stdbyStr    = rhs.stdbyStr;
-            stdbyBits   = rhs.stdbyBits;
-            svyMaxBnk   = rhs.svyMaxBnk;
-            LEDEnable   = rhs.LEDEnable;
-            sns         = rhs.sns;
+            userStdbyBits   = rhs.userStdbyBits;
+            imroStdbyBits   = rhs.imroStdbyBits;
+            srate           = rhs.srate;
+            when            = rhs.when;
+            imroFile        = rhs.imroFile;
+            stdbyStr        = rhs.stdbyStr;
+            svyMaxBnk       = rhs.svyMaxBnk;
+            LEDEnable       = rhs.LEDEnable;
+            sns             = rhs.sns;
 
             if( roTbl ) {
                 delete roTbl;
@@ -413,7 +419,14 @@ public:
         virtual ~PrbEach()  {if( roTbl ) {delete roTbl; roTbl = 0;}}
 
         void deriveChanCounts();
-        bool deriveStdbyBits( QString &err, int nAP, int ip );
+        bool deriveUserStdbyBits( QString &err, int nAP, int ip );
+
+        void setImroStdbyBits( QBitArray &badBits ) {imroStdbyBits = badBits;}
+
+        QBitArray stdbyBits( bool justUser = false ) const
+        {
+            return (justUser ? userStdbyBits : userStdbyBits | imroStdbyBits);
+        }
 
         void justAPBits(
             QBitArray       &apBits,

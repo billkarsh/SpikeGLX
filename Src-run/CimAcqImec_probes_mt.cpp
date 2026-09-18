@@ -453,7 +453,7 @@ bool ImCfgWorker::_mt_setStandby( const CimCfg::ImProbeDat &P )
 // Turn ALL channels on or off according to stdbyBits
 // --------------------------------------------------
 
-    const QBitArray&    bits = acq->p.im.prbj[P.ip].stdbyBits;
+    const QBitArray&    bits = acq->p.im.prbj[P.ip].stdbyBits();
     int                 nC   = acq->p.im.prbj[P.ip].roTbl->nAP();
 
     if( 0 ) {

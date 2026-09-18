@@ -1357,26 +1357,26 @@ void CimCfg::PrbEach::deriveChanCounts()
 // - nAP channels (parameter)
 //
 // Derive:
-// - stdbyBits
+// - userStdbyBits
 //
 // Return true if stdbyStr format OK.
 //
-bool CimCfg::PrbEach::deriveStdbyBits( QString &err, int nAP, int ip )
+bool CimCfg::PrbEach::deriveUserStdbyBits( QString &err, int nAP, int ip )
 {
     err.clear();
 
     if( stdbyStr.isEmpty() )
-        stdbyBits.fill( false, nAP );
+        userStdbyBits.fill( false, nAP );
     else if( Subset::isAllChansStr( stdbyStr ) ) {
 
         stdbyStr = "all";
-        Subset::defaultBits( stdbyBits, nAP );
+        Subset::defaultBits( userStdbyBits, nAP );
     }
-    else if( Subset::rngStr2Bits( stdbyBits, stdbyStr ) ) {
+    else if( Subset::rngStr2Bits( userStdbyBits, stdbyStr ) ) {
 
-        stdbyStr = Subset::bits2RngStr( stdbyBits );
+        stdbyStr = Subset::bits2RngStr( userStdbyBits );
 
-        if( stdbyBits.size() > nAP ) {
+        if( userStdbyBits.size() > nAP ) {
             err = QString(
                     "Imec %1: Bad-channel string includes channels"
                     " outside range [0..%2].")
@@ -1386,7 +1386,7 @@ bool CimCfg::PrbEach::deriveStdbyBits( QString &err, int nAP, int ip )
         }
 
         // in case smaller
-        stdbyBits.resize( nAP );
+        userStdbyBits.resize( nAP );
     }
     else {
         err = QString(
@@ -1526,7 +1526,7 @@ QString CimCfg::PrbEach::remoteGetGeomMap() const
         vC.push_back( ic );
 
     roTbl->toGeomMap_snsFileChans( G, vC, 0 );
-    G.andOutImStdby( stdbyBits, vC, 0 );
+    G.andOutImStdby( stdbyBits(), vC, 0 );
 
     s  = QString("head_partNumber=%1\n").arg( G.pn );
     s += QString("head_numShanks=%1\n").arg( G.ns );
@@ -3122,9 +3122,17 @@ bool CimCfg::detect_SR4(
                 .arg( P.adr.tx_spd() )
                 .arg( P.sn ).arg( P.pn )
                 .arg( P.sr_nshk ).arg( s.trimmed() ) );
-            R.app_put(
-                QString("Error: BIST Shift Register(%1).")
-                .arg( P.adr.tx_spd() ), 2 );
+            if( !P.sr_nok ) {
+                R.app_put(
+                    QString("Error: BIST Shift Register(%1).")
+                    .arg( P.adr.tx_spd() ) );
+                return false;
+            }
+            else {
+                R.app_put(
+                    QString("Warning: BIST Shift Register(%1).")
+                    .arg( P.adr.tx_spd() ), 2 );
+            }
         }
     }
 #else

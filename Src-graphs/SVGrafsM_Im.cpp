@@ -1016,10 +1016,10 @@ bool SVGrafsM_Im::stdbyDialog( QString &stdbyStr )
 
             E2.stdbyStr = ui.chansLE->text().trimmed();
 
-            if( E2.deriveStdbyBits(
+            if( E2.deriveUserStdbyBits(
                 err, E.imCumTypCnt[CimCfg::imSumAP], ip ) ) {
 
-                changed = E2.stdbyBits != E.stdbyBits;
+                changed = E2.stdbyBits( true ) != E.stdbyBits( true );
 
                 if( changed )
                     stdbyStr = E2.stdbyStr;

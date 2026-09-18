@@ -562,7 +562,7 @@ bool DataFile::openForWrite(
 
             Subset::vec2Bits( apBits, R.iKeep );
             E.roTbl->toGeomMap_snsFileChans( G, R.iKeep, 0 );
-            G.andOutImStdby( E.stdbyBits, R.iKeep, 0 );
+            G.andOutImStdby( E.stdbyBits(), R.iKeep, 0 );
 
             R.kvp["fileName"]           = bName;
             R.kvp["nSavedChans"]        = R.iKeep.size();

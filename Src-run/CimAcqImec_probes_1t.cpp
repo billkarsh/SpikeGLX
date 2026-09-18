@@ -365,7 +365,7 @@ bool CimAcqImec::_1t_setStandby( const CimCfg::ImProbeDat &P )
 // Turn ALL channels on or off according to stdbyBits
 // --------------------------------------------------
 
-    const QBitArray&    bits = p.im.prbj[P.ip].stdbyBits;
+    const QBitArray&    bits = p.im.prbj[P.ip].stdbyBits();
     int                 nC   = p.im.prbj[P.ip].roTbl->nAP();
 
     if( 0 ) {

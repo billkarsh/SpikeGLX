@@ -4,7 +4,10 @@
 20260901
 --------
 + Improve BIST dialog.
-+ Survey run can start if bad shanks.
++ Improve shank error reporting.
++ Permit survey if any good shanks.
++ Set bad shanks to stdby.
++ Zero geomMap used flags on bad shanks.
 
 20260826
 --------
