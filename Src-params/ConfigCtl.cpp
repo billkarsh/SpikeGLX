@@ -702,9 +702,10 @@ bool ConfigCtl::validIMROTbl( QString &err, CimCfg::PrbEach &E, int ip, bool srC
         return false;
     }
 
-    int     tech = IMROTbl::prbpnToTech( R->pn );
-    bool    checkElec = !isSvy,
-            checkRefs = true;
+    int     nC          = R->nAP(),
+            tech        = IMROTbl::prbpnToTech( R->pn );
+    bool    checkElec   = !isSvy,
+            checkRefs   = true;
 
     if( tech == t_tech_qb ) {
         QString s;
@@ -736,10 +737,10 @@ bool ConfigCtl::validIMROTbl( QString &err, CimCfg::PrbEach &E, int ip, bool srC
 
 // Electrodes
 
-    QBitArray   badBits;
+    QBitArray   badBits( nC );
     QSet<int>   badShks;
 
-    for( int ic = 0, nC = R->nAP(); ic < nC; ++ic ) {
+    for( int ic = 0; ic < nC; ++ic ) {
         int cl, rw, sh = R->elShankColRow( cl, rw, ic );
         if( !(P.sr_mask & (1 << sh)) ) {
             badBits.setBit( ic );
@@ -764,7 +765,7 @@ bool ConfigCtl::validIMROTbl( QString &err, CimCfg::PrbEach &E, int ip, bool srC
 
         uint8_t tips = 0;
 
-        for( int ic = 0, nc = R->nAP(); ic < nc; ++ic ) {
+        for( int ic = 0; ic < nC; ++ic ) {
             int shank, bank, type = R->refTypeAndFields( shank, bank, ic );
             if( type == TIP_REF || type == INT_REF )
                 tips |= (1 << shank);
