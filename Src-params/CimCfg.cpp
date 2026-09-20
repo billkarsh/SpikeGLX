@@ -72,6 +72,9 @@ int CimCfg::ImProbeDat::nHSDocks() const
 
 int CimCfg::ImProbeDat::srFirstOK() const
 {
+    if( prbtech == t_tech_qb || prbtech >= t_tech_nxt_ppa )
+        return 0;
+
     for( int is = 0; is < sr_nshk; ++is ) {
         if( sr_mask & (1 << is) )
             return is;
@@ -83,6 +86,9 @@ int CimCfg::ImProbeDat::srFirstOK() const
 
 int CimCfg::ImProbeDat::srNextOK( int is ) const
 {
+    if( prbtech == t_tech_qb || prbtech >= t_tech_nxt_ppa )
+        return is + 1;
+
     while( ++is < sr_nshk ) {
         if( sr_mask & (1 << is) )
             return is;
