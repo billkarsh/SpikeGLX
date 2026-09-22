@@ -260,7 +260,7 @@ void AOCtl::predelete()
 //
 // Callable from any thread.
 //
-bool AOCtl::uniqueChans(std::vector<int> &vChan, const QString &stream ) const
+bool AOCtl::uniqueChans( std::vector<int> &vChan, const QString &stream ) const
 {
     vChan.clear();
 

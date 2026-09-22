@@ -225,10 +225,10 @@ void GraphsWindow::updateProbe( int ip, bool shankMap, bool chanMap )
 {
     int _ip;
 
-    if( lW && SEL->ljsip( _ip ) == 2 && _ip == ip )
+    if( lW && SEL->ljsip( _ip ) == jsIM && _ip == ip )
         lW->updateProbe( shankMap, chanMap );
 
-    if( rW && SEL->rjsip( _ip ) == 2 && _ip == ip )
+    if( rW && SEL->rjsip( _ip ) == jsIM && _ip == ip )
         rW->updateProbe( shankMap, chanMap );
 }
 
@@ -266,10 +266,10 @@ void GraphsWindow::remoteSetAnatomyPP( const QString &elems, int ip, int sk )
 {
     int _ip;
 
-    if( lW && SEL->ljsip( _ip ) == 2 && _ip == ip )
+    if( lW && SEL->ljsip( _ip ) == jsIM && _ip == ip )
         lW->setAnatomyPP( elems, sk );
 
-    if( rW && SEL->rjsip( _ip ) == 2 && _ip == ip )
+    if( rW && SEL->rjsip( _ip ) == jsIM && _ip == ip )
         rW->setAnatomyPP( elems, sk );
 }
 
