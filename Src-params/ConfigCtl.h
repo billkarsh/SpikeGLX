@@ -95,7 +95,13 @@ public:
     void syncNiDevChanged()
         {syncTab->syncSourceCBChanged();}
 
-    bool validIMROTbl( QString &err, CimCfg::PrbEach &E, int ip, bool srChk, bool isSvy ) const;
+    bool validIMROTbl(
+        QString         &err,
+        CimCfg::PrbEach &E,
+        int             ip,
+        bool            srChk,
+        bool            isSvy,
+        bool            warn ) const;
     bool validImMaps( QString &err, CimCfg::PrbEach &E, int ip ) const;
     bool validDataDir( QString &err ) const;
     bool diskParamsToQ( QString &err, DAQ::Params &q ) const;

@@ -150,7 +150,7 @@ void SvyPrbRun::initRun()
         E.sns.uiSaveChanStr.clear();
 
         // Adopt user IMRO; set default bank
-        cfg->validIMROTbl( err, E, ip, p.im.prbAll.srAtDetect, true );
+        cfg->validIMROTbl( err, E, ip, p.im.prbAll.srAtDetect, true, false );
 
         if( E.roTbl->nSvyShank() == 1 )
             vCurShnk[ip] = 0;
@@ -158,6 +158,7 @@ void SvyPrbRun::initRun()
             vCurShnk[ip] = cfg->prbTab.get_iProbe( ip ).srFirstOK();
 
         E.roTbl->fillShankAndBank( vCurShnk[ip], 0 );
+        E.setImroStdbyBits( P.sr_mask );
 
         cfg->validImMaps( err, E, ip );
 
@@ -250,6 +251,7 @@ bool SvyPrbRun::nextBank()
         run->grfWaitPaused();
 
         E.roTbl->fillShankAndBank( S, B );
+        E.setImroStdbyBits( P.sr_mask );
 
         if( 0 ) {
         }

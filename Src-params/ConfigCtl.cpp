@@ -240,7 +240,7 @@ void ConfigCtl::graphSetsImroFile( const QString &file, int ip )
 
     E.imroFile = file;
 
-    if( validIMROTbl( err, E, ip, p.im.prbAll.srAtDetect, p.im.prbAll.isSvyRun ) ) {
+    if( validIMROTbl( err, E, ip, p.im.prbAll.srAtDetect, p.im.prbAll.isSvyRun, false ) ) {
 
         if( !E.roTbl->isConnectedSame( T_old ) )
             validImMaps( err, E, ip );
@@ -663,7 +663,13 @@ void ConfigCtl::streamCB_fillConfig( QComboBox *CB ) const
 }
 
 
-bool ConfigCtl::validIMROTbl( QString &err, CimCfg::PrbEach &E, int ip, bool srChk, bool isSvy ) const
+bool ConfigCtl::validIMROTbl(
+    QString         &err,
+    CimCfg::PrbEach &E,
+    int             ip,
+    bool            srChk,
+    bool            isSvy,
+    bool            warn ) const
 {
 // Pretties ini file, even if not using device
     if( E.imroFile.contains( "*" ) )
@@ -681,6 +687,8 @@ bool ConfigCtl::validIMROTbl( QString &err, CimCfg::PrbEach &E, int ip, bool srC
         delete E.roTbl;
 
     IMROTbl *R = E.roTbl = IMROTbl::alloc( P.pn );
+
+    E.clrImroStdbyBits();
 
 // Set intended imro file
 
@@ -713,13 +721,15 @@ bool ConfigCtl::validIMROTbl( QString &err, CimCfg::PrbEach &E, int ip, bool srC
             if( P.sr_mask & (1 << is) )
                 s += QString(" %1").arg( is );
         }
-        Warning() << QString("Imec%1: Quadbase with good shanks { %2 }.")
-                        .arg( ip ).arg( s.trimmed() );
-        Warning() << "You can run, but should ignore the data from bad shanks.";
-        Warning() << "You can use the IMRO editor 'selective save' feature to"
-        " save channels exclusively from good shanks.";
         checkElec = false;
         checkRefs = false;
+        if( warn ) {
+            Warning() << QString("Imec%1: Quadbase with good shanks { %2 }.")
+                            .arg( ip ).arg( s.trimmed() );
+            Warning() << "You can run, but should ignore the data from bad shanks.";
+            Warning() << "You can use the IMRO editor 'selective save' feature to"
+            " save channels exclusively from good shanks.";
+        }
     }
     else if( tech >= t_tech_nxt_ppa ) {
         QString s;
@@ -727,28 +737,19 @@ bool ConfigCtl::validIMROTbl( QString &err, CimCfg::PrbEach &E, int ip, bool srC
             if( P.sr_mask & (1 << is) )
                 s += QString(" %1").arg( is );
         }
-        Warning() << QString("Imec%1: NXT with good shanks { %2 }.")
-                        .arg( ip ).arg( s.trimmed() );
-        Warning() << "You can run, but should ignore the data from bad shanks.";
-        Warning() << "You can use the IMRO editor 'selective save' feature to"
-        " save channels exclusively from good shanks.";
         checkElec = false;
+        if( warn ) {
+            Warning() << QString("Imec%1: NXT with good shanks { %2 }.")
+                            .arg( ip ).arg( s.trimmed() );
+            Warning() << "You can run, but should ignore the data from bad shanks.";
+            Warning() << "You can use the IMRO editor 'selective save' feature to"
+            " save channels exclusively from good shanks.";
+        }
     }
 
 // Electrodes
 
-    QBitArray   badBits( nC );
-    QSet<int>   badShks;
-
-    for( int ic = 0; ic < nC; ++ic ) {
-        int cl, rw, sh = R->elShankColRow( cl, rw, ic );
-        if( !(P.sr_mask & (1 << sh)) ) {
-            badBits.setBit( ic );
-            badShks.insert( sh );
-        }
-    }
-
-    E.setImroStdbyBits( badBits );
+    QSet<int>   badShks = E.setImroStdbyBits( P.sr_mask );
 
     if( checkElec && !badShks.isEmpty() ) {
         QString s;
@@ -3139,7 +3140,7 @@ bool ConfigCtl::shankParamsToQ( QString &err, DAQ::Params &q, int ip ) const
 
     CimCfg::PrbEach &E = q.im.prbj[ip];
 
-    if( !validIMROTbl( err, E, ip, q.im.prbAll.srAtDetect, q.im.prbAll.isSvyRun ) )
+    if( !validIMROTbl( err, E, ip, q.im.prbAll.srAtDetect, q.im.prbAll.isSvyRun, true ) )
         return false;
 
     if( !validImStdbyBits( err, E, ip ) )
@@ -3200,7 +3201,7 @@ bool ConfigCtl::valid( QString &err, QWidget *parent, int iprb )
 
         CimCfg::PrbEach &E = q.im.prbj[ip];
 
-        if( !validIMROTbl( err, E, ip, q.im.prbAll.srAtDetect, q.im.prbAll.isSvyRun ) )
+        if( !validIMROTbl( err, E, ip, q.im.prbAll.srAtDetect, q.im.prbAll.isSvyRun, true ) )
             return false;
 
         if( !validImStdbyBits( err, E, ip ) )

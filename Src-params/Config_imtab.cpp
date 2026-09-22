@@ -1004,18 +1004,20 @@ bool Config_imtab::checkImro( CimCfg::PrbEach &E, int ip )
 
 // Check file issue alone
 
-    if( !cfg->validIMROTbl( err, E, ip, false, false ) ) {
+    if( !cfg->validIMROTbl( err, E, ip, false, false, false ) ) {
 
         err += "\r\n>> Reverting to default imro.";
 
         E.imroFile.clear();
-        cfg->validIMROTbl( err, E, ip, false, false );
+        cfg->validIMROTbl( err, E, ip, false, false, false );
     }
 
 // Check against SR
 
-    if( srAtDetect && !cfg->validIMROTbl( errSR, E, ip, true, imTabUI->svyChk->isChecked() ) )
+    if( srAtDetect &&
+        !cfg->validIMROTbl( errSR, E, ip, true, imTabUI->svyChk->isChecked(), true ) ) {
         err += QString("%1%2").arg( err.isEmpty() ? "" : "\r\n\r\n" ).arg( errSR );
+    }
 
     if( !err.isEmpty() )
         QMessageBox::critical( cfg->dialog(), "IMRO File Error", err );

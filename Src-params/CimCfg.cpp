@@ -1405,6 +1405,39 @@ bool CimCfg::PrbEach::deriveUserStdbyBits( QString &err, int nAP, int ip )
 }
 
 
+void CimCfg::PrbEach::clrImroStdbyBits()
+{
+    imroStdbyBits.fill( 0, roTbl->nAP() );
+}
+
+
+// Set imroStdbyBits according to imro channels on bad shanks.
+// Return QSet of referenced bad shanks.
+//
+QSet<int> CimCfg::PrbEach::setImroStdbyBits( uint8_t sr_mask )
+{
+    QSet<int>   badShanks;
+
+    clrImroStdbyBits();
+
+    for( int ic = 0, nC = roTbl->nAP(); ic < nC; ++ic ) {
+        int cl, rw, sh = roTbl->elShankColRow( cl, rw, ic );
+        if( !(sr_mask & (1 << sh)) ) {
+            imroStdbyBits.setBit( ic );
+            badShanks.insert( sh );
+        }
+    }
+
+    return badShanks;
+}
+
+
+QBitArray CimCfg::PrbEach::stdbyBits( bool justUser ) const
+{
+    return (justUser ? userStdbyBits : userStdbyBits | imroStdbyBits);
+}
+
+
 void CimCfg::PrbEach::justAPBits(
     QBitArray       &apBits,
     const QBitArray &saveBits ) const

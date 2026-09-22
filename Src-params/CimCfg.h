@@ -421,12 +421,9 @@ public:
         void deriveChanCounts();
         bool deriveUserStdbyBits( QString &err, int nAP, int ip );
 
-        void setImroStdbyBits( QBitArray &badBits ) {imroStdbyBits = badBits;}
-
-        QBitArray stdbyBits( bool justUser = false ) const
-        {
-            return (justUser ? userStdbyBits : userStdbyBits | imroStdbyBits);
-        }
+        void clrImroStdbyBits();
+        QSet<int> setImroStdbyBits( uint8_t sr_mask );
+        QBitArray stdbyBits( bool justUser = false ) const;
 
         void justAPBits(
             QBitArray       &apBits,
