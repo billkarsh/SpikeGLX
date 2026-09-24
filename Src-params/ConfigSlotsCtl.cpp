@@ -164,7 +164,7 @@ void ConfigSlotsCtl::slotCBChanged( int sel )
     if( ID ) {
 
         if( !sel ) {
-            csUI->statusLbl->setText( "Assign a slot for this OneBox" );
+            csUI->statusLbl->setText( "Assign a slot for this OneBox, or click 'Remove'" );
             return;
         }
 
@@ -409,7 +409,7 @@ bool ConfigSlotsCtl::fromGUI()
         if( s.contains( "???" ) ) {
 none:
             csUI->statusLbl->setText(
-                QString("Assign a slot for row %1").arg( i ) );
+                QString("Assign a slot for row %1, or click 'Remove'").arg( i ) );
             return false;
         }
         else {

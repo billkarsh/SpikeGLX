@@ -320,7 +320,7 @@ dism /online /get-drivers /format:table | findstr /i ftdi
 ```
 
 The output should include a field like `oem4.inf`. Take note of that value
-for the next step.
+for the next step. *This command may take a while to complete.*
 
 5. At the command prompt, type (replace oem4.inf with value from step (4)).
 ```
