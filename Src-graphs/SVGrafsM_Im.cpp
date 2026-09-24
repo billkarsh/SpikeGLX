@@ -912,7 +912,7 @@ void SVGrafsM_Im::loadSettings()
     set.sAveSel     = settings.value( "sAveSel", 0 ).toInt();
     set.tnChkOn     = settings.value( "tnChkOn", false ).toBool();
     set.txChkOn     = false;
-    set.binMaxOn    = settings.value( "binMaxOn", false ).toBool();
+    set.binMaxOn    = settings.value( "binMaxOn", true ).toBool();
     set.usrOrder    = settings.value( "usrOrder", true ).toBool();
     settings.endGroup();
 }

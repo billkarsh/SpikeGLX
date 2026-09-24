@@ -3,6 +3,7 @@
 
 20260901
 --------
++ BinMax on by default for probes.
 + Improve BIST dialog.
 + Improve shank error reporting.
 + Permit survey if any good shanks.

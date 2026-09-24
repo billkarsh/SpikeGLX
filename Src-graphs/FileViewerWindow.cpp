@@ -412,7 +412,7 @@ void FileViewerWindow::SaveIm::loadSettings( QSettings &S )
     yPixLf      = S.value( "yPixLf", 100 ).toInt();
     bandSel     = S.value( "bandSel", 0 ).toInt();
     sAveSel     = S.value( "sAveSel", 0 ).toInt();
-    binMax      = S.value( "binMax", 0 ).toInt();
+    binMax      = S.value( "binMax", 1 ).toInt();
     tnChkOnAp   = S.value( "tnChkOnAp", true ).toBool();
     tnChkOnLf   = S.value( "tnChkOnLf", true ).toBool();
     S.endGroup();
