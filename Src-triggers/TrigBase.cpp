@@ -325,7 +325,7 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
                 firstCtIm.push_back( 0 );
                 getErrFlags( jsIM, ip );
                 dfImAp.push_back(
-                    p.im.prbj[ip].apSaveChanCount() ?
+                    p.im.prbj[ip].apSaveChanCount( p.sns.exclBadShks ) ?
                     new DataFileIMAP( ip ) : 0 );
                 dfImLf.push_back(
                     p.im.prbj[ip].lfIsSaving() ?

@@ -816,8 +816,9 @@ void CalSRRun::initRun()
     p.sns.runName   =
         QString("CalSRate_%1")
         .arg( dateTime2Str( tCreate, Qt::ISODate ).replace( ":", "." ) );
-    p.sns.fldPerPrb = false;
-    p.sns.sepShanks = false;
+    p.sns.exclBadShks   = false;
+    p.sns.fldPerPrb     = false;
+    p.sns.sepShanks     = false;
 
     cfg->setParams( p, false );
 }

@@ -401,29 +401,32 @@ void ConfigCtl::graphSetsNiChanMap( const QString &cmFile )
 }
 
 
-void ConfigCtl::graphSetsImSaveStr( const QString &saveStr, int ip, bool lfPairChk )
+void ConfigCtl::graphSetsImSaveStr( const QString &saveStr, int ip, bool lfPairChk, bool exclBad )
 {
     DAQ::Params     &p  = acceptedParams;
     CimCfg::PrbEach &E  = p.im.prbj[ip];
     QString         oldStr, err;
-    bool            oldlfC;
+    bool            oldlfC, oldexc;
 
     oldStr = E.sns.uiSaveChanStr;
     oldlfC = p.sns.lfPairChk;
+    oldexc = p.sns.exclBadShks;
     E.sns.uiSaveChanStr = saveStr;
     p.sns.lfPairChk     = lfPairChk;
+    p.sns.exclBadShks   = exclBad;
 
     if( validImSaveBits( err, p, ip ) ) {
 
         imTab->updateSaveChans( E, ip );
         imTab->saveSettings();
 
-        if( lfPairChk != oldlfC )
+        if( lfPairChk != oldlfC || exclBad != oldexc )
             p.saveSettings();
     }
     else {
         E.sns.uiSaveChanStr = oldStr;
         p.sns.lfPairChk     = oldlfC;
+        p.sns.exclBadShks   = oldexc;
         Error() << err;
         validImSaveBits( err, p, ip );
     }
@@ -880,17 +883,26 @@ bool ConfigCtl::diskParamsToQ( QString &err, DAQ::Params &q ) const
 //
 QString ConfigCtl::cmdSrvGetsSaveChansIm( int ip ) const
 {
-    QString     s;
-    QTextStream ts( &s, QIODevice::WriteOnly );
+    const DAQ::Params   &p  = acceptedParams;
+    QString             s;
+    QTextStream         ts( &s, QIODevice::WriteOnly );
 
-    if( ip < acceptedParams.stream_nIM() ) {
+    if( ip < p.stream_nIM() ) {
 
-        const QBitArray &B = acceptedParams.im.prbj[ip].sns.saveBits;
-        int             nb = B.size();
+        const CimCfg::PrbEach   &E = p.im.prbj[ip];
+        const QBitArray         *B;
+        QBitArray               bits;
 
-        for( int i = 0; i < nb; ++i ) {
+        if( E.imCumTypCnt[CimCfg::imSumNeural] == E.imCumTypCnt[CimCfg::imSumAP] ) {
+            bits    = E.saveBits( p.sns.exclBadShks );
+            B       = &bits;
+        }
+        else
+            B = &E.sns.saveBits;
 
-            if( B.testBit( i ) )
+        for( int i = 0, nb = B->size(); i < nb; ++i ) {
+
+            if( B->testBit( i ) )
                 ts << i << " ";
         }
     }
@@ -915,9 +927,8 @@ QString ConfigCtl::cmdSrvGetsSaveChansOb( int ip ) const
     if( ip < acceptedParams.stream_nOB() ) {
 
         const QBitArray &B = acceptedParams.im.get_iStrOneBox( ip ).sns.saveBits;
-        int             nb = B.size();
 
-        for( int i = 0; i < nb; ++i ) {
+        for( int i = 0, nb = B.size(); i < nb; ++i ) {
 
             if( B.testBit( i ) )
                 ts << i << " ";
@@ -941,9 +952,8 @@ QString ConfigCtl::cmdSrvGetsSaveChansNi() const
     QString         s;
     QTextStream     ts( &s, QIODevice::WriteOnly );
     const QBitArray &B = acceptedParams.ni.sns.saveBits;
-    int             nb = B.size();
 
-    for( int i = 0; i < nb; ++i ) {
+    for( int i = 0, nb = B.size(); i < nb; ++i ) {
 
         if( B.testBit( i ) )
             ts << i << " ";
@@ -2879,7 +2889,7 @@ bool ConfigCtl::validDiskAvail( QString &err, DAQ::Params &q ) const
 
                 const CimCfg::PrbEach   &E = q.im.prbj[ip];
 
-                BPS += E.apSaveChanCount() * E.srate * 2;
+                BPS += E.apSaveChanCount( q.sns.exclBadShks ) * E.srate * 2;
 
                 if( E.lfIsSaving() )
                     BPS += E.lfSaveChanCount() * E.srate/12 * 2;

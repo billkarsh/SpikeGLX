@@ -9,6 +9,7 @@
 + Permit survey if any good shanks.
 + Set bad shanks to stdby.
 + Zero geomMap used flags on bad shanks.
++ Option to not save channels on bad shanks.
 
 20260826
 --------

@@ -1004,10 +1004,22 @@ void CmdWorker::fetch( const QStringList &toks )
     else if( toks.at( 4 ) == "-2#" ) {
 
         switch( js ) {
-            case jsNI:  chanBits = p.ni.sns.saveBits; break;
-            case jsOB:  chanBits = p.im.get_iStrOneBox( ip ).sns.saveBits; break;
+            case jsNI:
+                chanBits = p.ni.sns.saveBits;
+                break;
+            case jsOB:
+                chanBits = p.im.get_iStrOneBox( ip ).sns.saveBits;
+                break;
             case jsIM:
-            case -jsIM: chanBits = p.im.prbj[ip].sns.saveBits; break;
+            case -jsIM:
+                {
+                    const CimCfg::PrbEach   &E  = p.im.prbj[ip];
+                    if( E.imCumTypCnt[CimCfg::imSumNeural] == E.imCumTypCnt[CimCfg::imSumAP] )
+                        chanBits = E.saveBits( p.sns.exclBadShks );
+                    else
+                        chanBits = E.sns.saveBits;
+                }
+                break;
         }
     }
     else {

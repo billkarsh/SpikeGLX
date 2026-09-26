@@ -64,12 +64,13 @@ SaveChansCtl::~SaveChansCtl()
 
 // Return true if changed.
 //
-bool SaveChansCtl::edit( QString &uistr, bool &lfPairChk )
+bool SaveChansCtl::edit( QString &uistr, bool &lfPairChk, bool &exclBadShks )
 {
     if( !uistr.isEmpty() )
         svUI->saveChansLE->setText( uistr );
 
     svUI->pairChk->setChecked( lfPairChk );
+    svUI->shanksChk->setChecked( exclBadShks );
 
 // Run dialog until ok or cancel
 
@@ -92,10 +93,14 @@ bool SaveChansCtl::edit( QString &uistr, bool &lfPairChk )
                     err, DAQ::Params::jsip2stream( jsIM, ip ),
                     nAP+nLF+nSY, _nAP, nSY ) ) {
 
-                lfPairChk = svUI->pairChk->isChecked();
+                changed = lfPairChk   != svUI->pairChk->isChecked() ||
+                          exclBadShks != svUI->shanksChk->isChecked();
 
-                changed = E.sns.saveBits != sns.saveBits;
-                uistr   = sns.uiSaveChanStr;
+                lfPairChk   = svUI->pairChk->isChecked();
+                exclBadShks = svUI->shanksChk->isChecked();
+
+                changed |= E.sns.saveBits != sns.saveBits;
+                uistr    = sns.uiSaveChanStr;
                 QGuiApplication::clipboard()->setText( uistr );
                 break;
             }

@@ -176,7 +176,7 @@ void AppData::loadDataDir( QSettings &S )
     slDataDir   = S.value( "dataDir" ).toStringList();
     multidrive  = S.value( "multidrive", false ).toBool();
 
-    if( slDataDir.isEmpty() || !QFileInfo( slDataDir[0] ).exists() ) {
+    if( slDataDir.isEmpty() || !QFileInfo::exists( slDataDir[0] ) ) {
 
         const char  *defDataDir = "SGL_DATA";
 
@@ -1192,7 +1192,7 @@ void MainApp::tools_VerifySha1()
 {
 // Sha1Verifier is self-deleting object
 
-    new Sha1Verifier;
+    new Sha1Verifier;   // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks)
 }
 
 

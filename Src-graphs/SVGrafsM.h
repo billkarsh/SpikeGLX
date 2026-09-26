@@ -193,7 +193,7 @@ protected:
     virtual double mySampRate() const = 0;
     virtual void mySort_ig2ic() = 0;
     virtual QString myChanName( int ic ) const = 0;
-    virtual const QBitArray& mySaveBits() const = 0;
+    virtual const QBitArray mySaveBits() const = 0;
     virtual int mySetUsrTypes() = 0;
     virtual void computeGraphMouseOverVars(
         int         ic,

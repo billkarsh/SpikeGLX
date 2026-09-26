@@ -105,7 +105,8 @@ void Config_imtab::toGUI( const DAQ::Params &p )
     sel = imTabUI->qfHiCB->findText( p.im.prbAll.qf_hiCutStr );
     imTabUI->qfHiCB->setCurrentIndex( sel > -1 ? sel : imTabUI->qfHiCB->count()-1 );
 
-    lfPairChk = p.sns.lfPairChk;
+    lfPairChk   = p.sns.lfPairChk;
+    exclBadShks = p.sns.exclBadShks;
 
 // ----
 // Each
@@ -147,6 +148,7 @@ void Config_imtab::fromGUI( DAQ::Params &q )
     q.im.prbAll.qf_on           = imTabUI->qfGB->isChecked();
 
     q.sns.lfPairChk             = lfPairChk;
+    q.sns.exclBadShks           = exclBadShks;
 
     fromTbl();
 
@@ -485,7 +487,7 @@ void Config_imtab::editSave( QString sInit )
 
 // Save dialog
 
-    if( SV.edit( saveStr, lfPairChk ) ) {
+    if( SV.edit( saveStr, lfPairChk, exclBadShks ) ) {
         E.sns.uiSaveChanStr = saveStr;
         updateSaveChans( E, ip );
     }

@@ -183,7 +183,7 @@ void DataFileIMAP::subclassGetSavChanCount( const DAQ::Params &p )
     nSavedChans = 0;
 
     if( subclassGetAcqChanCount( p ) )
-        nSavedChans = p.im.prbj[ip].apSaveChanCount();
+        nSavedChans = p.im.prbj[ip].apSaveChanCount( p.sns.exclBadShks );
 }
 
 
@@ -300,7 +300,7 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
     GeomMap     G;
     QBitArray   apBits;
 
-    E.apSaveBits( apBits );
+    E.apSaveBits( apBits, p.sns.exclBadShks );
     Subset::bits2Vec( snsFileChans, apBits );
 
     E.roTbl->toGeomMap_snsFileChans( G, snsFileChans, 0 );

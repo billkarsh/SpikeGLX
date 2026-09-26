@@ -447,7 +447,7 @@ QString SVGrafsM_Ob::myChanName( int ic ) const
 }
 
 
-const QBitArray& SVGrafsM_Ob::mySaveBits() const
+const QBitArray SVGrafsM_Ob::mySaveBits() const
 {
     return p.im.get_iStrOneBox( ip ).sns.saveBits;
 }

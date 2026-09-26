@@ -29,7 +29,8 @@ private:
     QString                         imro_cancelName;
     int                             imro_ip;
     bool                            srAtDetect, // hidden 'control'
-                                    lfPairChk;
+                                    lfPairChk,
+                                    exclBadShks;
 
 public:
     Config_imtab( ConfigCtl *cfg, QWidget *tab );

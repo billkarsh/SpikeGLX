@@ -30,7 +30,7 @@ public:
     SaveChansCtl( QWidget *parent, const CimCfg::PrbEach &E, int ip );
     virtual ~SaveChansCtl();
 
-    bool edit( QString &uistr, bool &lfPairChk );
+    bool edit( QString &uistr, bool &lfPairChk, bool &exclBadShks );
 
 private slots:
     void applyBut();

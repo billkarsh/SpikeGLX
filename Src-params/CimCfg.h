@@ -424,6 +424,7 @@ public:
         void clrImroStdbyBits();
         QSet<int> setImroStdbyBits( uint8_t sr_mask );
         QBitArray stdbyBits( bool justUser = false ) const;
+        QBitArray saveBits( bool exclBad ) const;
 
         void justAPBits(
             QBitArray       &apBits,
@@ -433,10 +434,10 @@ public:
             QBitArray       &lfBits,
             const QBitArray &saveBits ) const;
 
-        void apSaveBits( QBitArray &apBits ) const;
+        void apSaveBits( QBitArray &apBits, bool exclBad ) const;
         void lfSaveBits( QBitArray &lfBits ) const;
 
-        int apSaveChanCount() const;
+        int apSaveChanCount( bool exclBad ) const;
         int lfSaveChanCount() const;
 
         bool lfIsSaving() const;

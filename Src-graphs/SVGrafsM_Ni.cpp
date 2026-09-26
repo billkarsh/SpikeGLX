@@ -641,7 +641,7 @@ QString SVGrafsM_Ni::myChanName( int ic ) const
 }
 
 
-const QBitArray& SVGrafsM_Ni::mySaveBits() const
+const QBitArray SVGrafsM_Ni::mySaveBits() const
 {
     return p.ni.sns.saveBits;
 }

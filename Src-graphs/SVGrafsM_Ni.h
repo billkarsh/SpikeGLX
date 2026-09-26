@@ -50,7 +50,7 @@ protected:
     virtual double mySampRate() const;
     virtual void mySort_ig2ic();
     virtual QString myChanName( int ic ) const;
-    virtual const QBitArray& mySaveBits() const;
+    virtual const QBitArray mySaveBits() const;
     virtual int mySetUsrTypes();
     virtual void computeGraphMouseOverVars(
         int         ic,

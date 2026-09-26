@@ -1811,9 +1811,10 @@ void FileViewerWindow::editSave( QString sInit )
 
     SaveChansCtl    SV( this, E, df->streamip() );
     QString         saveStr = sInit;
-    bool            lfPair  = false;
+    bool            lfPair  = false,
+                    exclBad = false;
 
-    if( SV.edit( saveStr, lfPair ) )
+    if( SV.edit( saveStr, lfPair, exclBad ) )
         shankCtl->setStatus( "Save chans string copied to clipboard" );
 }
 

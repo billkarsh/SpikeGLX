@@ -128,7 +128,7 @@ void Config_snstab::diskBut()
 
                 const CimCfg::PrbEach   &E = q.im.prbj[ip];
 
-                int     ch  = E.apSaveChanCount();
+                int     ch  = E.apSaveChanCount( q.sns.exclBadShks );
                 double  bps = ch * E.srate * 2;
 
                 BPS += bps;

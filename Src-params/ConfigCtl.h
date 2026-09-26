@@ -69,7 +69,7 @@ public:
     void graphSetsImChanMap( const QString &cmFile, int ip );
     void graphSetsObChanMap( const QString &cmFile, int ip );
     void graphSetsNiChanMap( const QString &cmFile );
-    void graphSetsImSaveStr( const QString &saveStr, int ip, bool lfPairChk );
+    void graphSetsImSaveStr( const QString &saveStr, int ip, bool lfPairChk, bool exclBad );
     void graphSetsObSaveStr( const QString &saveStr, int ip );
     void graphSetsNiSaveStr( const QString &saveStr );
     void graphSetsImSaveBit( int chan, bool setOn, int ip );

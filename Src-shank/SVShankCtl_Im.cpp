@@ -138,6 +138,7 @@ void SVShankCtl_Im::imroChanged( QString newName )
         run->grfWaitPaused();
 
         mainApp()->cfgCtl()->graphSetsImroFile( newName, ip );
+        run->grfUpdateRHSFlagsAll();
         run->grfUpdateProbe( ip, true, true );
         run->imecUpdate( ip );
 

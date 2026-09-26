@@ -1407,7 +1407,7 @@ bool CimCfg::PrbEach::deriveUserStdbyBits( QString &err, int nAP, int ip )
 
 void CimCfg::PrbEach::clrImroStdbyBits()
 {
-    imroStdbyBits.fill( 0, roTbl->nAP() );
+    imroStdbyBits.fill( 0, roTbl->nAP() + roTbl->nSY() );
 }
 
 
@@ -1438,6 +1438,12 @@ QBitArray CimCfg::PrbEach::stdbyBits( bool justUser ) const
 }
 
 
+QBitArray CimCfg::PrbEach::saveBits( bool exclBad ) const
+{
+    return (exclBad ? sns.saveBits & ~imroStdbyBits : sns.saveBits);
+}
+
+
 void CimCfg::PrbEach::justAPBits(
     QBitArray       &apBits,
     const QBitArray &saveBits ) const
@@ -1456,9 +1462,9 @@ void CimCfg::PrbEach::justLFBits(
 }
 
 
-void CimCfg::PrbEach::apSaveBits( QBitArray &apBits ) const
+void CimCfg::PrbEach::apSaveBits( QBitArray &apBits, bool exclBad ) const
 {
-    justAPBits( apBits, sns.saveBits );
+    justAPBits( apBits, saveBits( exclBad ) );
 }
 
 
@@ -1468,10 +1474,10 @@ void CimCfg::PrbEach::lfSaveBits( QBitArray &lfBits ) const
 }
 
 
-int CimCfg::PrbEach::apSaveChanCount() const
+int CimCfg::PrbEach::apSaveChanCount( bool exclBad ) const
 {
     QBitArray   apBits;
-    apSaveBits( apBits );
+    apSaveBits( apBits, exclBad );
     return apBits.count( true );
 }
 

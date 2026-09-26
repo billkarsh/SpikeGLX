@@ -12,7 +12,7 @@ for DAQ applications.
 * [Sleep States](#sleep-states)
 * [Good Ultra Mobile Models](#good-ultra-mobile-models)
 * [Better Ultra Mobile Models](#better-ultra-mobile-models)
-* [Ultra Desktop Models](#ultra-desktope-models)
+* [Ultra Desktop Models](#ultra-desktop-models)
 * [Optimal Graphics For DAQ](#optimal-graphics-for-daq)
 * [Test My Graphics Port](#test-my-graphics-port)
 

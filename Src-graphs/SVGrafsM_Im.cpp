@@ -432,11 +432,19 @@ void SVGrafsM_Im::updateRHSFlags()
 
 // Init and do save flags
 
-    const CimCfg::PrbEach   &E          = p.im.prbj[ip];
-    const QBitArray         &saveBits   = E.sns.saveBits;
+    const CimCfg::PrbEach   &E = p.im.prbj[ip];
+    const QBitArray         *B;
+    QBitArray               bits;
+
+    if( E.imCumTypCnt[CimCfg::imSumNeural] == E.imCumTypCnt[CimCfg::imSumAP] ) {
+        bits    = E.saveBits( p.sns.exclBadShks );
+        B       = &bits;
+    }
+    else
+        B = &E.sns.saveBits;
 
     for( int ic = 0, nC = (int)ic2Y.size(); ic < nC; ++ic )
-        ic2Y[ic].rhsLabel = (saveBits.testBit( ic ) ? rhsSave : 0);
+        ic2Y[ic].rhsLabel = (B->testBit( ic ) ? rhsSave : 0);
 
 // Audio
 
@@ -741,10 +749,11 @@ void SVGrafsM_Im::editSaved( QString sInit )
 
     SaveChansCtl    SV( this, p.im.prbj[ip], ip );
     QString         saveStr = sInit;
-    bool            lfPair  = p.sns.lfPairChk;
+    bool            lfPair  = p.sns.lfPairChk,
+                    exclBad = p.sns.exclBadShks;
 
-    if( SV.edit( saveStr, lfPair ) ) {
-        mainApp()->cfgCtl()->graphSetsImSaveStr( saveStr, ip, lfPair );
+    if( SV.edit( saveStr, lfPair, exclBad ) ) {
+        mainApp()->cfgCtl()->graphSetsImSaveStr( saveStr, ip, lfPair, exclBad );
         updateRHSFlags();
     }
 }
@@ -812,9 +821,14 @@ QString SVGrafsM_Im::myChanName( int ic ) const
 }
 
 
-const QBitArray& SVGrafsM_Im::mySaveBits() const
+const QBitArray SVGrafsM_Im::mySaveBits() const
 {
-    return p.im.prbj[ip].sns.saveBits;
+    const CimCfg::PrbEach   &E = p.im.prbj[ip];
+
+    if( E.imCumTypCnt[CimCfg::imSumNeural] == E.imCumTypCnt[CimCfg::imSumAP] )
+        return E.saveBits( p.sns.exclBadShks );
+    else
+        return E.sns.saveBits;
 }
 
 
