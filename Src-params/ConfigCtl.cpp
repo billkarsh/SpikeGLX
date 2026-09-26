@@ -730,8 +730,8 @@ bool ConfigCtl::validIMROTbl(
             Warning() << QString("Imec%1: Quadbase with good shanks { %2 }.")
                             .arg( ip ).arg( s.trimmed() );
             Warning() << "You can run, but should ignore the data from bad shanks.";
-            Warning() << "You can use the IMRO editor 'selective save' feature to"
-            " save channels exclusively from good shanks.";
+            Warning() << "The 'Save Channels' dialog has a policy checkbox:"
+            " 'Don't save channels on bad shanks'.";
         }
     }
     else if( tech >= t_tech_nxt_ppa ) {
@@ -745,8 +745,8 @@ bool ConfigCtl::validIMROTbl(
             Warning() << QString("Imec%1: NXT with good shanks { %2 }.")
                             .arg( ip ).arg( s.trimmed() );
             Warning() << "You can run, but should ignore the data from bad shanks.";
-            Warning() << "You can use the IMRO editor 'selective save' feature to"
-            " save channels exclusively from good shanks.";
+            Warning() << "The 'Save Channels' dialog has a policy checkbox:"
+            " 'Don't save channels on bad shanks'.";
         }
     }
 

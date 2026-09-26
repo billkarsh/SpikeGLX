@@ -13,7 +13,7 @@
     + [Updated Validation](#updated-validation)
     + [Updated Programming](#updated-programming)
     + [Survey Mode](#survey-mode)
-* [Quad-Base File Saving](#quad-base-file-saving)
+* [Quad-Base and NP3 File Saving](#quad-base-and-np3-file-saving)
 * [Pitfalls and Caveats (Non-Quad-Base)](#pitfalls-and-caveats-non-quad-base)
     + [Undetected Errors](#undetected-errors)
     + [Reference Noise](#reference-noise)
@@ -182,24 +182,28 @@ to be (0,0).*
 
 --------
 
-## Quad-Base File Saving
+## Quad-Base and NP3 File Saving
 
 With QB probes you must acquire 384 channels from each shank since the
 probe hardware acts like four single-shank probes. Therefore, you must
 select sites on each shank whether good or bad.
 
-On the other hand, you do not have to save bad shanks to runtime binary
-files. To exclude channels on bad shanks follow these steps in the
-IMRO editor:
+For multishank NP3 probes you must select 1536 sites in total and the
+selection rules may make it impossible to place them all on good shanks.
+That is, you may be forced to select some channels on bad shanks.
 
-1. Make your channel selections in the usual way on the good shanks.
-2. Clear all channels from the bad shanks.
-3. Click `Boxes => file chans`. The Save dialog will show with the list
-preset to channels on good shanks.
-4. Click `OK`.
-5. In the IMRO editor, set `Nrows`=192 and `New boxes`=`Full shank`.
-6. Click a single box of 384 sites on each bad shank.
-7. Save the IMRO file for the next run.
+In these cases, you do not have to save bad shanks to runtime binary
+files. To exclude channels on bad shanks follow these steps:
+
+1. Open the 'Save Channels' dialog.
+2. Check the policy box: 'All Probes: Don't save channels on bad shanks'.
+
+SpikeGLX (20260901 and later) further marks channels on bad shanks as follows:
+
+1. They are placed on hardware stand-by (their amplifiers are turned off)
+making them effectively zero volts in all views.
+2. Their geomMap and shankMap 'used' flags are zeroed, removing them from
+participation in spatial averaging operations (CAR). 
 
 --------
 
@@ -208,7 +212,7 @@ preset to channels on good shanks.
 Note that QB probes are actually four complete single-shank probes packaged
 together. When one or more of these shanks break the others are fully intact.
 
-However, the 4 shanks of a standard 2.0 probe share the same base electronics
+However, the 4 shanks of a non-QB probe share the same base electronics
 and the four shanks are cross-connected to allow flexible configuration.
 When one of these shanks is malfunctioning it can affect the whole probe
 as detailed below.

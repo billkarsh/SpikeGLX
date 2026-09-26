@@ -45,7 +45,8 @@ Support</h1>
 <li><a href="#updated-programming">Updated Programming</a></li>
 <li><a href="#survey-mode">Survey Mode</a></li>
 </ul></li>
-<li><a href="#quad-base-file-saving">Quad-Base File Saving</a></li>
+<li><a href="#quad-base-and-np3-file-saving">Quad-Base and NP3 File
+Saving</a></li>
 <li><a href="#pitfalls-and-caveats-non-quad-base">Pitfalls and Caveats
 (Non-Quad-Base)</a>
 <ul>
@@ -190,24 +191,28 @@ element giving the starting (shank,bank) for the survey, which can no
 longer be assumed to be (0,0).</em></p>
 </blockquote>
 <hr />
-<h2 id="quad-base-file-saving">Quad-Base File Saving</h2>
+<h2 id="quad-base-and-np3-file-saving">Quad-Base and NP3 File
+Saving</h2>
 <p>With QB probes you must acquire 384 channels from each shank since
 the probe hardware acts like four single-shank probes. Therefore, you
 must select sites on each shank whether good or bad.</p>
-<p>On the other hand, you do not have to save bad shanks to runtime
-binary files. To exclude channels on bad shanks follow these steps in
-the IMRO editor:</p>
+<p>For multishank NP3 probes you must select 1536 sites in total and the
+selection rules may make it impossible to place them all on good shanks.
+That is, you may be forced to select some channels on bad shanks.</p>
+<p>In these cases, you do not have to save bad shanks to runtime binary
+files. To exclude channels on bad shanks follow these steps:</p>
 <ol type="1">
-<li>Make your channel selections in the usual way on the good
-shanks.</li>
-<li>Clear all channels from the bad shanks.</li>
-<li>Click <code>Boxes =&gt; file chans</code>. The Save dialog will show
-with the list preset to channels on good shanks.</li>
-<li>Click <code>OK</code>.</li>
-<li>In the IMRO editor, set <code>Nrows</code>=192 and
-<code>New boxes</code>=<code>Full shank</code>.</li>
-<li>Click a single box of 384 sites on each bad shank.</li>
-<li>Save the IMRO file for the next run.</li>
+<li>Open the ‘Save Channels’ dialog.</li>
+<li>Check the policy box: ‘All Probes: Don’t save channels on bad
+shanks’.</li>
+</ol>
+<p>SpikeGLX (20260901 and later) further marks channels on bad shanks as
+follows:</p>
+<ol type="1">
+<li>They are placed on hardware stand-by (their amplifiers are turned
+off) making them effectively zero volts in all views.</li>
+<li>Their geomMap and shankMap ‘used’ flags are zeroed, removing them
+from participation in spatial averaging operations (CAR).</li>
 </ol>
 <hr />
 <h2 id="pitfalls-and-caveats-non-quad-base">Pitfalls and Caveats
@@ -215,7 +220,7 @@ with the list preset to channels on good shanks.</li>
 <p>Note that QB probes are actually four complete single-shank probes
 packaged together. When one or more of these shanks break the others are
 fully intact.</p>
-<p>However, the 4 shanks of a standard 2.0 probe share the same base
+<p>However, the 4 shanks of a non-QB probe share the same base
 electronics and the four shanks are cross-connected to allow flexible
 configuration. When one of these shanks is malfunctioning it can affect
 the whole probe as detailed below.</p>
