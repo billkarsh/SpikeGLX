@@ -61,7 +61,7 @@ int CimCfg::ImProbeDat::nHSDocks() const
         hspn == "NPM_HS_30" ||      // precommercial 2.0
         hspn == "NPM_HS_31" ||      //    commercial 2.0
         hspn == "NPM_HS_32" ||      // quad-base
-        hspn == "NPNXT_HS_03" ) {   // NXT pre-pre-alpha
+        hspn == "NPNP3_HS_03" ) {   // NP3 pre-pre-alpha
 
         return 2;
     }
@@ -72,7 +72,7 @@ int CimCfg::ImProbeDat::nHSDocks() const
 
 int CimCfg::ImProbeDat::srFirstOK() const
 {
-    if( prbtech == t_tech_qb || prbtech >= t_tech_nxt_ppa )
+    if( prbtech == t_tech_qb || prbtech >= t_tech_np3_ppa )
         return 0;
 
     for( int is = 0; is < sr_nshk; ++is ) {
@@ -86,7 +86,7 @@ int CimCfg::ImProbeDat::srFirstOK() const
 
 int CimCfg::ImProbeDat::srNextOK( int is ) const
 {
-    if( prbtech == t_tech_qb || prbtech >= t_tech_nxt_ppa )
+    if( prbtech == t_tech_qb || prbtech >= t_tech_np3_ppa )
         return is + 1;
 
     while( ++is < sr_nshk ) {
@@ -2597,11 +2597,11 @@ bool CimCfg::detect_headstage4(
     ImProbeDat  &P = T.mod_iProbe( ip );
 
 // ----------------------------------
-// @@@ Experiment to fix NXT timeouts
+// @@@ Experiment to fix NP3 timeouts
 // ----------------------------------
 
 #if 0
-        if( T.slot2Vers[P.adr.slot].bsctech == t_tech_nxt_pa ) {
+        if( T.slot2Vers[P.adr.slot].bsctech == t_tech_np3_pa ) {
 
 #if 0
             HardwareID  H;

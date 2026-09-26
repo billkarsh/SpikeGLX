@@ -16,11 +16,11 @@
 // #define VERS_PXI_OPTO_P1_BSC    "4.0.19"
 
 // API < 4.2.0
-#define VERS_PXI_NXT_PA_BS      "3.0.196"
-#define VERS_PXI_NXT_PA_BSC     "4.0.216"
+#define VERS_PXI_NP3_PA_BS      "3.0.196"
+#define VERS_PXI_NP3_PA_BSC     "4.0.216"
 // API >= 4.2.0
-// #define VERS_PXI_NXT_PA_BS      "3.0.226"
-// #define VERS_PXI_NXT_PA_BSC     "4.0.221"
+// #define VERS_PXI_NP3_PA_BS      "3.0.226"
+// #define VERS_PXI_NP3_PA_BSC     "4.0.221"
 
 #endif  // VERSION_H
 

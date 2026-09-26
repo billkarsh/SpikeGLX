@@ -37,7 +37,7 @@ down the PC in order to shut down the chassis.
 ### Update Procedure
 
 1. Select which PXIe slot you want to update. The dialog shows you that
-modules tech {std, opto, nxt} and the current and required firmware version
+modules tech {std, opto, np3} and the current and required firmware version
 numbers. The updater will automatically select the correct firmware tech
 and version.
 

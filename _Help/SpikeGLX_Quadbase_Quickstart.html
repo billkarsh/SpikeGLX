@@ -157,15 +157,15 @@ Multi-thread</a> score &gt;= 50000.</em></p>
 <p>With this version, SpikeGLX and imec move to major API revision 4.0,
 or <code>API4</code>. API4 allows imec to better support a wide variety
 of hardware technologies (<code>tech</code>). Probes/headstages have
-tech types {STD, QB, OPTO, NXT} and basestation-modules are {STD, OPTO,
-NXT}. These have to be matched to work properly. The rules are pretty
+tech types {STD, QB, OPTO, NP3} and basestation-modules are {STD, OPTO,
+NP3}. These have to be matched to work properly. The rules are pretty
 simple:</p>
 <ul>
 <li>OneBox is a STD tech.</li>
 <li>Existing STD-PXI modules are STD tech.</li>
 <li>Existing OPTO-PXI modules are OPTO tech.</li>
 <li>OPTO-probes ONLY work in OPTO modules.</li>
-<li>NXT-probes ONLY work in NXT modules.</li>
+<li>NP3-probes ONLY work in NP3 modules.</li>
 <li>QB-probes ONLY work in STD module tech.</li>
 <li>STD-probes work in any module.</li>
 </ul>

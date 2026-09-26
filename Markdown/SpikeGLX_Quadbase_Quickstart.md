@@ -100,15 +100,15 @@ The earliest SpikeGLX version to use with quad-probes is
 
 With this version, SpikeGLX and imec move to major API revision 4.0,
 or `API4`. API4 allows imec to better support a wide variety of hardware
-technologies (`tech`). Probes/headstages have tech types {STD, QB, OPTO, NXT}
-and basestation-modules are {STD, OPTO, NXT}. These have to be matched to
+technologies (`tech`). Probes/headstages have tech types {STD, QB, OPTO, NP3}
+and basestation-modules are {STD, OPTO, NP3}. These have to be matched to
 work properly. The rules are pretty simple:
 
 * OneBox is a STD tech.
 * Existing STD-PXI modules are STD tech.
 * Existing OPTO-PXI modules are OPTO tech.
 * OPTO-probes ONLY work in OPTO modules.
-* NXT-probes ONLY work in NXT modules.
+* NP3-probes ONLY work in NP3 modules.
 * QB-probes ONLY work in STD module tech.
 * STD-probes work in any module.
 

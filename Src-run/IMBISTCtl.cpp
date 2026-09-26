@@ -749,7 +749,7 @@ void IMBISTCtl::test_bistSR()
             if( ngood == 0 )
                 write( "You cannot use this probe." );
             else if( ngood < nShnk ) {
-                if( tech == t_tech_qb || tech >= t_tech_nxt_ppa ) {
+                if( tech == t_tech_qb || tech >= t_tech_np3_ppa ) {
                     write( "You can use this probe but, to read out 1536 channels," );
                     write( "you have to select some sites on bad shanks and ignore them." );
                 }

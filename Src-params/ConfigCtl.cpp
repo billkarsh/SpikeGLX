@@ -734,7 +734,7 @@ bool ConfigCtl::validIMROTbl(
             " 'Don't save channels on bad shanks'.";
         }
     }
-    else if( tech >= t_tech_nxt_ppa ) {
+    else if( tech >= t_tech_np3_ppa ) {
         QString s;
         for( int is = 0; is < P.sr_nshk; ++is ) {
             if( P.sr_mask & (1 << is) )
@@ -742,7 +742,7 @@ bool ConfigCtl::validIMROTbl(
         }
         checkElec = false;
         if( warn ) {
-            Warning() << QString("Imec%1: NXT with good shanks { %2 }.")
+            Warning() << QString("Imec%1: NP3 with good shanks { %2 }.")
                             .arg( ip ).arg( s.trimmed() );
             Warning() << "You can run, but should ignore the data from bad shanks.";
             Warning() << "The 'Save Channels' dialog has a policy checkbox:"

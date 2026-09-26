@@ -7,7 +7,7 @@
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// Neuropixels NXT pre-alpha multishank silicon cap
+// Neuropixels NP3 pre-alpha multishank silicon cap
 //
 struct IMROTbl_T3022 : public IMROTbl_T3020base
 {
@@ -19,7 +19,7 @@ struct IMROTbl_T3022 : public IMROTbl_T3020base
         :   IMROTbl_T3020base(pn, imType3022Type)   {}
 
     virtual int typeConst() const   {return imType3022Type;}
-    virtual int probeTech() const   {return t_tech_nxt_pa;}
+    virtual int probeTech() const   {return t_tech_np3_pa;}
 };
 
 #endif  // IMROTBL_T3022_H

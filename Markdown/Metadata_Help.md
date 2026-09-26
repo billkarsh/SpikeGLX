@@ -725,7 +725,7 @@ This is the PXI BSC serial number or OneBox physical ID number.
 imDatBsc_tech=std
 ```
 
-This is the PXI BSC or OneBox technology {sim,std,opto,nxt}.
+This is the PXI BSC or OneBox technology {sim,std,opto,np3}.
 
 ```
 imDatFx_hw=1.7
@@ -816,7 +816,7 @@ This is the count of good shanks.
 imDatPrb_tech=std
 ```
 
-This is the probe technology {sim,std,opto,nxt}.
+This is the probe technology {sim,std,opto,np3}.
 
 ```
 imDatPrb_type=21

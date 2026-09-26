@@ -99,10 +99,10 @@ options for your recording system:
 * More expandable.
 * Higher bandwidth, higher capacity.
 * Only way to run very large probe counts.
-* Only way to run future NXT (NP3) 1536-channel probes.
+* Only way to run future NP3 1536-channel probes.
 
 > *1536-channel quad-base probes (NP2020) are coming 2025 and CAN run in
-either PXI or OneBox. However, 1536-channel NXT probes are a super compact
+either PXI or OneBox. However, 1536-channel NP3 probes are a super compact
 model that is not expected before 2027 and requires PXI.*
 
 ### OneBox Overview
@@ -678,7 +678,7 @@ For OneBox:
 ### Settings and Behavior
 
 Most computers are going to do fine running (4) 384-channel probes. On the
-other hand running high channel count quad-base or NXT probes is demanding
+other hand running high channel count quad-base or NP3 probes is demanding
 and those labs should pay attention to each aspect of system configuration.
 
 All users should be mindful about things that can disrupt data flow and

@@ -49,7 +49,7 @@ Define your region(s) of interest (ROI):
 The `Rqd` readout reminds you how many total channels/sites you must
 select to make a valid table. Most probes have 384 channels that are
 shared over the whole probe surface. Some probes have fewer than 384
-readout channels, NXT probes have 912 or 1536 channels, and quad-probes
+readout channels, NP3 probes have 912 or 1536 channels, and quad-probes
 have 384 channels on each of the four shanks. In all cases, Rqd tells
 you the required total channel count.
 

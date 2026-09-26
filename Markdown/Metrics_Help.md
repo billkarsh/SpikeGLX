@@ -113,7 +113,7 @@ work is piling up the workers will have to go into overtime to catch up.
 If SpikeGLX can not catch up, the run may be stopped due to a FIFO
 overflow or other exceeded limit.
 
-> Note: High channel count probes, like quad-base NP202X or NXT NP30XX,
+> Note: High channel count probes, like quad-base NP202X or NP3 NP30XX,
 need more worker activity to keep up. Values greater than 75% are
 considered normal for these probes.
 
@@ -130,7 +130,7 @@ as few applications as possible to prevent overtaxing the CPUs.
 * **Filtered IM Streams**: This feature is accessed on the `IM Setup` tab.
 Although these streams dramatically improve signal to background for audio
 output and the ShankViewers, they are very compute intensive, especially
-for high channel count probes like the NP2020 Quad-base and NP3XXX NXT
+for high channel count probes like the NP2020 Quad-base and NP3XXX NP3
 probes.
 
 * **Audio**: Listening to audio channels is a huge burden on the system.

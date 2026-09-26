@@ -488,7 +488,7 @@ bool IMFirmCtl::paths( QString &bs, QString &bsc )
 
     switch( tech ) {
         case t_tech_opto_p1:    path += "NP_PXI_OPTO_P1_Firmware/"; break;
-        case t_tech_nxt_pa:     path += "NP_PXI_NXT_PA_Firmware/"; break;
+        case t_tech_np3_pa:     path += "NP_PXI_NP3_PA_Firmware/"; break;
         default:                path += "NP_PXI_STD_Firmware/"; break;
     }
 

@@ -214,11 +214,11 @@ bool CimAcqImec::_aux_open( const CimCfg::ImProbeTable &T )
             }
 
             // ----------------------------------
-            // @@@ Experiment to fix NXT timeouts
+            // @@@ Experiment to fix NP3 timeouts
             // ----------------------------------
 
 #if 0
-            if( T.slot2Vers[slot].bsctech == t_tech_nxt_pa ) {
+            if( T.slot2Vers[slot].bsctech == t_tech_np3_pa ) {
                 HardwareID      H;
                 int             np = p.stream_nIM();
                 NP_ErrorCode    res;
