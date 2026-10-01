@@ -35,7 +35,7 @@ Current release highlights
     The appearance is a little different; much improved on high resolution screens.
 
 + Tech detection and management.
-    Probes, headstages, basestations have a technology (tech) types, basically, {STD, OPTO, NXT}. SpikeGLX helps you install the appropriate firmware, and plug in the right types according to tech compatibility.
+    Probes, headstages, basestations have a technology (tech) types, basically, {STD, OPTO, NP3}. SpikeGLX helps you install the appropriate firmware, and plug in the right types according to tech compatibility.
 
 + Quad-base NP2020/1 probes fully supported.
     This is the earliest version you should use with the quad-base probes.

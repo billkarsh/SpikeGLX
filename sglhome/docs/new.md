@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+October 1, 2026
+
+* CatGT 5.4 (New imros, path bug fixes).
+
 August 28, 2026
 
 * SpikeGLX 20260826-api4 (OPTO labels, sep shanks, sep Ymags, api v4.1.3).

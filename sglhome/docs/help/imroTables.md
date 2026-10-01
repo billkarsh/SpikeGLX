@@ -215,18 +215,18 @@ And 24 entries following the header:
 * Bank-A
 * Bank-B
 
-## imro_np3010 (NP 3.0 NXT single shank)
+## imro_np3010 (NP 3.0 single shank)
 
 * Channel ID
 * Bank ID (range [0,1])
 * Reference ID index
 * Electrode ID (range [0,1279])
 
-NXT have 912 channels per full bank.
+NP3 have 912 channels per full bank.
 
 Type-3010 reference ID values are {0=ext, 1=gnd, 2=tip}.
 
-## imro_np3020 (NP 3.0 NXT 4-shank)
+## imro_np3020 (NP 3.0 4-shank)
 
 * Channel ID
 * Shank ID (with tips pointing down, shank-0 is left-most)
@@ -234,7 +234,7 @@ Type-3010 reference ID values are {0=ext, 1=gnd, 2=tip}.
 * Reference ID index
 * Electrode ID (range [0,1279] on each shank)
 
-NXT have 912 channels per full bank.
+NP3 have 912 channels per full bank.
 
 Type-3020 reference ID values are {0=ext, 1=gnd, [2..5]=tip[0..3]}.
 

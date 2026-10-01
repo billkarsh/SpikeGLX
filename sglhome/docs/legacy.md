@@ -16,7 +16,7 @@ file:///D:/github/Release_Page/sglhome/docs/index.md
 to oldest):
 
 * **API4**: (Main branch) In 2025 Imec introduced API 4.0, which extends
-support to three technologies (tech): {STD=NP1+NP2, OPTO, NXT=NP3}. There
+support to three technologies (tech): {STD=NP1+NP2, OPTO, NP3}. There
 are three corresponding PXI basestation-module techs which will each need
 specific firmware. The SpikeGLX 'Upload Firmware' dialog will help manage
 this. OneBox is considered a STD-tech module. Existing modules and OneBox
