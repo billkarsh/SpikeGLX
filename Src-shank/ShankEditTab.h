@@ -61,6 +61,7 @@ private:
                             vI;
     std::vector<IMRO_ROI>   vR,
                             vW;
+    std::vector<int>        cVis2Hwr;
     QString                 filename,
                             lastDir;
     bool                    canEdit;
@@ -79,7 +80,7 @@ public:
     void renameApplyRevert();
     void syncYPix( int y );
     void gridHover( int s, int r, bool quiet );
-    void gridClicked( int s, int c, int r, bool shift, bool ctrl );
+    void gridClicked( int s, int cVis, int r, bool shift, bool ctrl );
     void lbutReleased();
     void beep( const QString &msg );
 

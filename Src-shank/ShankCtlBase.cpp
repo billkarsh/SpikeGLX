@@ -233,10 +233,10 @@ void ShankCtlBase::gridHover( int s, int r, bool quiet )
 }
 
 
-void ShankCtlBase::gridClicked( int s, int c, int r, bool shift, bool ctrl )
+void ShankCtlBase::gridClicked( int s, int cVis, int r, bool shift, bool ctrl )
 {
     if( !scUI->tabsW->currentIndex() )
-        seTab->gridClicked( s, c, r, shift, ctrl );
+        seTab->gridClicked( s, cVis, r, shift, ctrl );
 }
 
 

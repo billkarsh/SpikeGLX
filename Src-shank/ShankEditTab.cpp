@@ -533,6 +533,12 @@ ShankEditTab::ShankEditTab(
     R->edit_init();
     R2GUI();
 
+    cVis2Hwr.assign( R->nCol_vis(), 0 );
+    for( int chwr = 0, nhwr = R->nCol_hwr(); chwr < nhwr; ++chwr ) {
+        cVis2Hwr[R->col2vis_ev()[chwr]] = chwr;
+        cVis2Hwr[R->col2vis_od()[chwr]] = chwr;
+    }
+
     ConnectUI( seTabUI->ypixSB, SIGNAL(valueChanged(int)), this, SLOT(ypixChanged(int)) );
     ConnectUI( seTabUI->loadBut, SIGNAL(clicked()), this, SLOT(loadBut()) );
     ConnectUI( seTabUI->defBut, SIGNAL(clicked()), this, SLOT(defBut()) );
@@ -627,8 +633,10 @@ void ShankEditTab::gridHover( int s, int r, bool quiet )
 }
 
 
-void ShankEditTab::gridClicked( int s, int c, int r, bool shift, bool ctrl )
+void ShankEditTab::gridClicked( int s, int cVis, int r, bool shift, bool ctrl )
 {
+    int c = cVis2Hwr[cVis];
+
 // Clear if shift
 
     if( shift ) {
