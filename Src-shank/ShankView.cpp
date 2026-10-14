@@ -246,6 +246,7 @@ void ShankView::paintGL()
     drawExcludes();
     drawIncludes();
     drawROIs();
+    drawActives();
     drawWheres();
     drawSel();
 
@@ -308,8 +309,22 @@ void ShankView::mousePressEvent( QMouseEvent *evt )
 
 void ShankView::mouseReleaseEvent( QMouseEvent *evt )
 {
-    if( !(evt->buttons() & Qt::LeftButton) )
-        emit( lbutReleased() );
+// Any release event stops drag action
+
+    emit( lbutReleased() );
+
+// Specific right-release for contect menu
+
+    if( evt->button() & Qt::RightButton ) {
+
+        int s, c, r;
+
+        if( evt2Pad( s, c, r, evt ) ) {
+            QMap<ShankMapDesc,uint>::iterator   it;
+            it = ISM.find( ShankMapDesc( s, c, r, 1 ) );
+            emit( rbutReleased( evt->globalPosition().toPoint(), s, c, r, it != ISM.end() ) );
+        }
+    }
 }
 
 
@@ -914,6 +929,69 @@ void ShankView::drawROIs()
     for( int ib = 0; ib < nb; ++ib ) {
 
         IMRO_ROI    &B      = vROI[ib];
+        float       *V;
+        float       vert[8];
+        int         nrow    = B.height(),
+                    c0      = B.c_0(),
+                    cL      = B.c_lim( _ncolhwr ) - 1;
+
+        if( nrow > 1 ) {
+            c0 = qMin( col2vis_ev[c0], col2vis_od[c0] );
+            cL = qMax( col2vis_ev[cL], col2vis_od[cL] );
+        }
+        else if( B.r0 & 1 ) {
+            c0 = col2vis_od[c0];
+            cL = col2vis_od[cL];
+        }
+        else {
+            c0 = col2vis_ev[c0];
+            cL = col2vis_ev[cL];
+        }
+
+        V  = &vG[8*(B.s*nc*nr+c0*nr)];
+        vert[0] = vert[2] = V[0] - dh;
+
+        V  = &vG[8*(B.s*nc*nr+cL*nr)];
+        vert[4] = vert[6] = V[6] + dh;
+
+        V = &vG[8*(B.rLim-1)];
+        vert[1] = vert[7] = V[1] + dv;
+
+        V = &vG[8*B.r0];
+        vert[3] = vert[5] = V[3] - dv;
+
+        glVertexPointer( 2, GL_FLOAT, 0, vert );
+        glDrawArrays( GL_QUADS, 0, 4 );
+    }
+
+    glLineWidth( 1.0f );
+}
+
+
+void ShankView::drawActives()
+{
+    if( !bnkRws )
+        return;
+
+    int nb = (int)vAct.size();
+
+    if( !nb )
+        return;
+
+    glLineWidth( 3.0f );
+
+    glColor3f( 0, 1.0f, 1.0f );
+    glPolygonMode( GL_FRONT, GL_LINE );
+
+    float   vsep    = ROWSEP/(1.0f+ROWSEP),
+            dv      = 0.05f * vsep * rowPix,
+            dh      = 0.05f * colWid*COLSEP;
+    int     nc      = smap->nc,
+            nr      = smap->nr;
+
+    for( int ib = 0; ib < nb; ++ib ) {
+
+        IMRO_ROI    &B      = vAct[ib];
         float       *V;
         float       vert[8];
         int         nrow    = B.height(),

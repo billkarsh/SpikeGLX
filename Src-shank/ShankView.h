@@ -52,6 +52,7 @@ private:
     std::vector<IMRO_Site>      vX,     // excludes
                                 vI;     // includes
     std::vector<IMRO_ROI>       vROI,
+                                vAct,   // active
                                 vW;     // where
     mutable QMutex              dataMtx;
     float                       shkWid,
@@ -86,6 +87,8 @@ public:
     void setImro( const IMROTbl *R, uint8_t sr_mask );
     void setROI( tconstImroROIs vR, tconstImroSites vX )
         {QMutexLocker ml( &dataMtx ); vROI = vR; this->vX = vX;}
+    void setActive( tconstImroROIs vA )
+        {QMutexLocker ml( &dataMtx ); vAct = vA;}
     void setWhere( tconstImroROIs vW, tconstImroSites vI )
         {QMutexLocker ml( &dataMtx ); this->vW = vW; this->vI = vI;}
 
@@ -99,6 +102,7 @@ signals:
     void cursorOver( int ic, bool shift );
     void lbutClicked( int ic, bool shift );
     void lbutReleased();
+    void rbutReleased( QPoint globalPos, int s, int c, int r, bool inMap );
     void gridHover( int s, int r, bool quiet = false );
     void gridClicked( int s, int c, int r, bool shift, bool ctrl );
 
@@ -132,6 +136,7 @@ private:
     void drawExcludes();
     void drawIncludes();
     void drawROIs();
+    void drawActives();
     void drawWheres();
     void drawTri( float l, float t, float w, float h, SColor c );
     void drawRect( float l, float t, float w, float h, SColor c );

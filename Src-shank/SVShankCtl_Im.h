@@ -3,6 +3,8 @@
 
 #include "SVShankCtl.h"
 
+#include <QMenu>
+
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -12,13 +14,7 @@ class SVShankCtl_Im : public SVShankCtl
     Q_OBJECT
 
 private:
-    QAction *audioLAction,
-            *audioBAction,
-            *audioRAction,
-            *spike1Action,
-            *spike2Action,
-            *spike3Action,
-            *spike4Action;
+    QMenu   m;
     int     ip;
 
 public:
@@ -38,6 +34,7 @@ public:
 public slots:
     virtual void cursorOver( int ic, bool shift );
     virtual void lbutClicked( int ic, bool shift );
+    virtual void rbutReleased( QPoint globalPos );
 
     void setAudioL();
     void setAudioB();

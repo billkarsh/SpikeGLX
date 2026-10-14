@@ -4,6 +4,7 @@
 20260901
 --------
 + Improve imro editor clicking.
++ Add method-2 imro editing.
 + BinMax on by default for probes.
 + Improve BIST dialog.
 + Improve shank error reporting.

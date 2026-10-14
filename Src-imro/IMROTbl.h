@@ -291,6 +291,8 @@ public:
     void edit_exclude( tImroSites vX, tconstImroROIs vR ) const;
     void edit_ROI2Bits( QBitArray &b, tconstImroROIs vR ) const;
 
+    static void edit_shankMap2ROI( tImroROIs vR, ShankMap &M, int ncolhwr );
+
 // Allocate
 
     static bool pnToType( int &type, const QString &pn );

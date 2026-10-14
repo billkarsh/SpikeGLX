@@ -36,10 +36,12 @@ void SVShankCtl_Im::init()
 {
     parInit( jsIM, ip );
 
+    initMenu();
+
     if( seTab )
         ConnectUI( seTab, SIGNAL(imroChanged(QString)), this, SLOT(imroChanged(QString)) );
 
-    initMenu();
+    ConnectUI( this, SIGNAL(rbutReleased(QPoint)), this, SLOT(rbutReleased(QPoint)) );
 
     scUI->statusLbl->setToolTip( "Shift-key -> LF; Right-click -> more options" );
 
@@ -125,6 +127,12 @@ void SVShankCtl_Im::lbutClicked( int ic, bool shift )
 
     cursorOver( ic, shift );
     emit selChanged( ic, shift );
+}
+
+
+void SVShankCtl_Im::rbutReleased( QPoint globalPos )
+{
+    m.exec( globalPos );
 }
 
 
@@ -239,39 +247,39 @@ QString SVShankCtl_Im::screenStateName() const
 
 void SVShankCtl_Im::initMenu()
 {
-    audioLAction = new QAction( "Listen Left Ear", this );
-    ConnectUI( audioLAction, SIGNAL(triggered()), this, SLOT(setAudioL()) );
+    QAction *A;
 
-    audioBAction = new QAction( "Listen Both Ears", this );
-    ConnectUI( audioBAction, SIGNAL(triggered()), this, SLOT(setAudioB()) );
+    A = new QAction( "Listen Left Ear", this );
+    ConnectUI( A, SIGNAL(triggered()), this, SLOT(setAudioL()) );
+    m.addAction( A );
 
-    audioRAction = new QAction( "Listen Right Ear", this );
-    ConnectUI( audioRAction, SIGNAL(triggered()), this, SLOT(setAudioR()) );
+    A = new QAction( "Listen Right Ear", this );
+    ConnectUI( A, SIGNAL(triggered()), this, SLOT(setAudioR()) );
+    m.addAction( A );
 
-    spike1Action = new QAction( "Spike Viewer 1", this );
-    ConnectUI( spike1Action, SIGNAL(triggered()), this, SLOT(setSpike1()) );
+    A = new QAction( "Listen Both Ears", this );
+    ConnectUI( A, SIGNAL(triggered()), this, SLOT(setAudioB()) );
+    m.addAction( A );
 
-    spike2Action = new QAction( "Spike Viewer 2", this );
-    ConnectUI( spike2Action, SIGNAL(triggered()), this, SLOT(setSpike2()) );
+    A = new QAction( this );
+    A->setSeparator( true );
+    m.addAction( A );
 
-    spike3Action = new QAction( "Spike Viewer 3", this );
-    ConnectUI( spike3Action, SIGNAL(triggered()), this, SLOT(setSpike3()) );
+    A = new QAction( "Spike Viewer 1", this );
+    ConnectUI( A, SIGNAL(triggered()), this, SLOT(setSpike1()) );
+    m.addAction( A );
 
-    spike4Action = new QAction( "Spike Viewer 4", this );
-    ConnectUI( spike4Action, SIGNAL(triggered()), this, SLOT(setSpike4()) );
+    A = new QAction( "Spike Viewer 2", this );
+    ConnectUI( A, SIGNAL(triggered()), this, SLOT(setSpike2()) );
+    m.addAction( A );
 
-    QAction *sep0 = new QAction( this );
-    sep0->setSeparator( true );
+    A = new QAction( "Spike Viewer 3", this );
+    ConnectUI( A, SIGNAL(triggered()), this, SLOT(setSpike3()) );
+    m.addAction( A );
 
-    view()->addAction( audioLAction );
-    view()->addAction( audioRAction );
-    view()->addAction( audioBAction );
-    view()->addAction( sep0 );
-    view()->addAction( spike1Action );
-    view()->addAction( spike2Action );
-    view()->addAction( spike3Action );
-    view()->addAction( spike4Action );
-    view()->setContextMenuPolicy( Qt::ActionsContextMenu );
+    A = new QAction( "Spike Viewer 4", this );
+    ConnectUI( A, SIGNAL(triggered()), this, SLOT(setSpike4()) );
+    m.addAction( A );
 }
 
 

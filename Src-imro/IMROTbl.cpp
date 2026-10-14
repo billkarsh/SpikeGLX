@@ -994,16 +994,65 @@ bool IMROTbl::edit_isCanonical( tImroROIs vR ) const
 }
 
 
+void IMROTbl::edit_tbl2ROI( tImroROIs vR ) const
+{
+    ShankMap    M;
+    toShankMap_hwr( M );
+    edit_shankMap2ROI( vR, M, _ncolhwr );
+}
+
+
+void IMROTbl::edit_exclude( tImroSites vX, tconstImroROIs vR ) const
+{
+    vX.clear();
+
+    for( int ib = 0, nb = (int)vR.size(); ib < nb; ++ib ) {
+
+        const IMRO_ROI  &B = vR[ib];
+
+        int c0 = B.c_0(),
+            cL = B.c_lim( _ncolhwr );
+
+        for( int r = B.r0; r < B.rLim; ++r ) {
+
+            for( int c = c0; c < cL; ++c )
+                edit_exclude_1( vX, IMRO_Site( B.s, c, r ) );
+        }
+    }
+
+    std::sort( vX.begin(), vX.end() );
+}
+
+
+void IMROTbl::edit_ROI2Bits( QBitArray &b, tconstImroROIs vR ) const
+{
+    b.clear();
+    b.resize( nAP() );
+
+    for( int ib = 0, nb = (int)vR.size(); ib < nb; ++ib ) {
+
+        const IMRO_ROI  &B = vR[ib];
+
+        int c0 = B.c_0(),
+            cL = B.c_lim( _ncolhwr );
+
+        for( int r = B.r0; r < B.rLim; ++r ) {
+
+            for( int c = c0; c < cL; ++c )
+                b.setBit( edit_site2Chan( IMRO_Site( B.s, c, r ) ) );
+        }
+    }
+}
+
+
 // Scan up for ranges of consecutive like rows.
 // Within range, scan across for contiguous 1s.
 // That defines ROI boxes.
 //
-void IMROTbl::edit_tbl2ROI( tImroROIs vR ) const
+void IMROTbl::edit_shankMap2ROI( tImroROIs vR, ShankMap &M, int ncolhwr )
 {
     vR.clear();
 
-    ShankMap    M;
-    toShankMap_hwr( M );
     std::sort( M.e.begin(), M.e.end() );    // s->r->c
 
     for( int ie = 0, ne = (int)M.e.size(); ie < ne; ) {
@@ -1068,7 +1117,7 @@ void IMROTbl::edit_tbl2ROI( tImroROIs vR ) const
         IMRO_ROI    roi( B0.s, B0.r, B0.r + nrow );
 
         // Note: c == nC kicks out last
-        for( int c = 0; c <= _ncolhwr; ++c ) {
+        for( int c = 0; c <= ncolhwr; ++c ) {
 
             if( pat0 & (1 << c) ) {
                 if( roi.c0 < 0 )
@@ -1080,49 +1129,6 @@ void IMROTbl::edit_tbl2ROI( tImroROIs vR ) const
                 vR.push_back( roi );
                 roi.c0 = -1;
             }
-        }
-    }
-}
-
-
-void IMROTbl::edit_exclude( tImroSites vX, tconstImroROIs vR ) const
-{
-    vX.clear();
-
-    for( int ib = 0, nb = (int)vR.size(); ib < nb; ++ib ) {
-
-        const IMRO_ROI  &B = vR[ib];
-
-        int c0 = B.c_0(),
-            cL = B.c_lim( _ncolhwr );
-
-        for( int r = B.r0; r < B.rLim; ++r ) {
-
-            for( int c = c0; c < cL; ++c )
-                edit_exclude_1( vX, IMRO_Site( B.s, c, r ) );
-        }
-    }
-
-    std::sort( vX.begin(), vX.end() );
-}
-
-
-void IMROTbl::edit_ROI2Bits( QBitArray &b, tconstImroROIs vR ) const
-{
-    b.clear();
-    b.resize( nAP() );
-
-    for( int ib = 0, nb = (int)vR.size(); ib < nb; ++ib ) {
-
-        const IMRO_ROI  &B = vR[ib];
-
-        int c0 = B.c_0(),
-            cL = B.c_lim( _ncolhwr );
-
-        for( int r = B.r0; r < B.rLim; ++r ) {
-
-            for( int c = c0; c < cL; ++c )
-                b.setBit( edit_site2Chan( IMRO_Site( B.s, c, r ) ) );
         }
     }
 }

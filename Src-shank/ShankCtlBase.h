@@ -70,6 +70,7 @@ signals:
     void runSaveChansDlg( QString sInit );
     void modal_done( ShankCtlBase *editor, QString fn, bool ok );
     void viewTabSyncYPix( int y );
+    void rbutReleased( QPoint globalPos );
     void gimmeTraces();
     void closed( QWidget *w );
 
@@ -77,6 +78,7 @@ public slots:
     void gridHover( int s, int r, bool quiet );
     void gridClicked( int s, int cVis, int r, bool shift, bool ctrl );
     void lbutReleased();
+    void rbutReleased( QPoint globalPos, int s, int cVis, int r, bool inMap );
 
 protected:
     virtual bool eventFilter( QObject *watched, QEvent *event );

@@ -32,15 +32,15 @@ private:
                         sel_edge0,  // dragging-edge initial row
                         code,       // {-1,0,1,2} = {vX,new,lower,upper}
                         gap0,       // lower bound
-                        gapLim;     // upper bound
-        bool            isW;
+                        gapLim,     // upper bound
+                        RAW;        // {0,1,2} = {R,A,W}
 
-        Click( ShankEditTab *se ) : se(se), sel_ib(-1), isW(false)  {}
+        Click( ShankEditTab *se ) : se(se), sel_ib(-1), RAW(0)  {}
         void down( int s, int c, int r, bool ctrl );
         void drag( int s, int r );
         void up();
     private:
-        bool selected( int c, int r, bool testW );
+        bool selected( int c, int r, int RAW );
         void sel_set_gap0( int sel_FLR );
         void sel_set_gapLim( int sel_FLR );
         void where( int c );
@@ -51,16 +51,18 @@ private:
 private:
     ShankCtlBase            *SC;
     Ui::ShankEditTab        *seTabUI;
-    QMenu                   *mClear;
+    QMenu                   *mClear,
+                            *mFill;
     IMROTbl                 *R0,
                             *Rfile,
                             *R;
     Click                   click;
     IMRO_GUI                G;
-    std::vector<IMRO_Site>  vX,
-                            vI;
-    std::vector<IMRO_ROI>   vR,
-                            vW;
+    std::vector<IMRO_Site>  vX,         // excludes
+                            vI;         // includes
+    std::vector<IMRO_ROI>   vR,         // ROI
+                            vA,         // active
+                            vW;         // where
     std::vector<int>        cVis2Hwr;
     QString                 filename,
                             lastDir;
@@ -82,6 +84,7 @@ public:
     void gridHover( int s, int r, bool quiet );
     void gridClicked( int s, int cVis, int r, bool shift, bool ctrl );
     void lbutReleased();
+    bool rbutReleased( QPoint globalPos, int s, int cVis, int r );
     void beep( const QString &msg );
 
 signals:
@@ -96,6 +99,15 @@ private slots:
     void clearShank1();
     void clearShank2();
     void clearShank3();
+    void fillFullLength();
+    void fillAll();
+    void fillEven();
+    void fillOdd();
+    void fillLin1();
+    void fillLin2();
+    void fillStag1();
+    void fillStag2();
+    void fillKill();
     void saveChansBut();
     bool saveBut();
     void helpBut();
@@ -105,7 +117,7 @@ private slots:
 private:
     int usageMode();
     void initItems();
-    void initClearMenu();
+    void initMenus();
     void initBoxes();
     void enableItems( bool enabled, bool clear = false );
     void clearShank( int s );
@@ -114,17 +126,21 @@ private:
     bool isDefault();
     bool isDone();
     bool isFull( int s );
-    void addBox( const IMRO_ROI &B );
-    void addW( const IMRO_ROI &B );
-    void updateAll( int s, int ib );
-    void updateW( int s, int ib );
+    bool excludedR( int s, int c, int r );
+    bool excludedX( tconstImroSites vX, int s, int c, int r );
+    void addRAW( const IMRO_ROI &B, int RAW );
+    void updateRAW( int s, int ib, int RAW );
     void updateSums( int s );
+    void vR2ShankMap( ShankMap &M );
+    void consolidate();
+    void finishFill( int s );
+    int shortFall( int s );
     int rowsShortfall( const IMRO_ROI &B );
     int rowsShortfallW( const IMRO_ROI &B );
     int getSum( int s );
     int getSumW( int s );
     int getRqd();
-    void setSel( int s, int ib, bool isW );
+    void setSel( int s, int ib, int RAW );
     QLabel *getSumObj( int s );
     void color();
     void loadSettings();
