@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+October 16, 2026
+
+* SpikeGLX_Linux_offline updated to 20260901.
+
 October 1, 2026
 
 * CatGT 5.4 (New imros, path bug fixes).

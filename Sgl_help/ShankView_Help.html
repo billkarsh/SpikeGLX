@@ -34,22 +34,26 @@ vertical-align: middle;
 <li>Navigate between probe and graphs.</li>
 <li>Edit IMRO tables.</li>
 </ul>
+<p><a href="#new-20260901"><strong>New: 20260901</strong></a></p>
 <p><strong>Topics:</strong></p>
 <ul>
 <li><a href="#edit-tab-quick-reference">Edit Tab</a>
 <ul>
+<li><a href="#edit-tab-quick-reference">Quick Ref</a></li>
+<li><a href="#editing-basics">Editing Basics</a></li>
 <li><a href="#boxes">Boxes</a>
 <ul>
 <li><a href="#readouts">Readouts</a></li>
 <li><a href="#making-new-boxes">Making New Boxes</a></li>
 <li><a href="#resizing-boxes">Resizing Boxes</a></li>
 <li><a href="#clearingerasing-boxes">Clearing/Erasing Boxes</a></li>
-<li><a href="#resolve-site-conflicts">Resolve Site Conflicts</a></li>
 <li><a href="#boxes-file-chans">Boxes =&gt; file chans</a></li>
 </ul></li>
+<li><a href="#third-party-tools">Third Party Tools</a></li>
 </ul></li>
 <li><a href="#view-tab-quick-reference">View Tab</a>
 <ul>
+<li><a href="#view-tab-quick-reference">Quick Ref</a></li>
 <li><a href="#online-data-flow">Online Data Flow</a></li>
 <li><a href="#file-viewer-data-flow">File Viewer Data Flow</a></li>
 <li><a href="#setting-a-spike-threshold-t-uv">Setting a Spike Threshold
@@ -60,6 +64,39 @@ vertical-align: middle;
 </ul></li>
 </ul>
 <hr />
+<h2 id="new-20260901">New: 20260901</h2>
+<ol type="1">
+<li>Bug-fix: Easier to place half-width boxes on the right.</li>
+<li>New <code>Method</code> menu adds capabilities…</li>
+</ol>
+<p>Set the <code>method</code> to <code>Lclk Center Green Here</code>
+and the behavior is the same as before. Placement of green ROI boxes
+works the same, and blue conflict boxes work the same.</p>
+<p>Set <code>method</code> to <code>Lclk Where =&gt; Rclk What</code> to
+make a cyan box, then right-click the cyan box for a pop-up menu of
+options:</p>
+<p><strong>Half- or Full-width cyan box</strong></p>
+<ul>
+<li><strong>Max Box Length</strong>: Extend cyan box to full shank
+length.</li>
+<li><strong>Fill All Rows</strong>: Place green at all available
+sites.</li>
+<li><strong>Fill Even Rows</strong>: Ditto, only on even rows.</li>
+<li><strong>Fill Odd Rows</strong>: Ditto, only on odd rows.</li>
+<li><strong>Delete Green</strong>: Erase any green inside the cyan
+box.</li>
+</ul>
+<p><strong>Smart fills, full-width only</strong></p>
+<ul>
+<li><strong>Linear; Row Step 1</strong>: Single linear “column” as long
+as possible.</li>
+<li><strong>Linear; Row Step 2</strong>: Ditto, every other row.</li>
+<li><strong>Staggered; Row Step 1</strong>: Checkerboard as long as
+possible.</li>
+<li><strong>Staggered; Row Step 2</strong>: Ditto, every other row.</li>
+</ul>
+<p>Filling works from tip to top and observes the <code>Rqd</code>
+maximum.</p>
 <h2 id="edit-tab-quick-reference">Edit Tab Quick Reference</h2>
 <ul>
 <li>The editor is resizable.</li>
@@ -67,9 +104,9 @@ vertical-align: middle;
 <li><code>Default</code> to {bank-0, ext ref, std gains, std filter}
 without applying.</li>
 <li><code>Save</code> as a file without applying.</li>
-<li><code>OK</code> applies changes to new configuration.</li>
+<li><code>OK</code> applies saved changes to new configuration.</li>
 <li><code>Cancel</code> reverts to prior configuration.</li>
-<li><code>Apply</code> changes to current run.</li>
+<li><code>Apply</code> saved changes to current run.</li>
 <li><code>Revert</code> to current settings.</li>
 <li>{Reference, Gains, Filter} are applied to all channels.</li>
 <li>Change the magnification with the <code>Pix/pad</code> box.</li>
@@ -77,13 +114,91 @@ without applying.</li>
 <li>When the scrollbar has focus you can navigate along the probe with
 the arrow or page keys.</li>
 </ul>
+<h3 id="editing-basics">Editing Basics</h3>
+<p>A typical probe has 1000+ electrode sites, but, to keep the probe
+thin, compact, lightweight, and preserve high sample rate, you must
+select a smaller subset (typically 384) for readout.</p>
+<p>The editor helps you visually select the sites you want: your region
+of interest (ROI). The ROI, your differential referencing choice, and a
+few other channel parameters are stored in an <code>imro table</code>
+data structure, and these are made portable by storing them in
+<code>imro files.</code></p>
+<p>The editor can be accessed from many situations:</p>
+<ul>
+<li>When configuring a run, <a href="IMTAB_Help.html#editing">here</a>.</li>
+<li>During an online run, <a href="Graphs_Help.html#page-toolbar-controls">here</a>.</li>
+<li>In the offline <a href="FileViewer_Help.html#shank-viewer">FileViewer</a>.</li>
+</ul>
+<blockquote>
+<p><em>You can use the included <strong>SpikeGLX_NISIM.exe</strong> to
+access the offline editor from any Windows PC. No need to install NI
+drivers or any additional environments or tool/library
+packages.</em></p>
+</blockquote>
+<blockquote>
+<p><em>A strictly offline, <strong>Linux version of
+SpikeGLX_NISIM</strong> is available <a href="https://billkarsh.github.io/SpikeGLX/#post-processing-tools">here</a>.</em></p>
+</blockquote>
+<p>How to choose sites?</p>
+<p><strong>Looking at overlays is best…</strong></p>
+<p>The best way is to (1) Do a survey run to sample activity everywhere
+on the probe. (2) Review the survey in the FileViewer which paints an
+activity heatmap on the probe. Use that context to select sites having
+desired levels of activity, or desired responses to stimuli. Learn about
+that <a href="IMTAB_Help.html#survey-all-probe-banks">here</a>.</p>
+<p>You can overlay the ShankViewer with <a href="UserManual.html#anatomy-pinpoint-trajectory-explorer">anatomy
+data</a>. Use that context to select sites in relevant brain regions. If
+using Pinpoint, anatomy can be applied in online or offline
+ShankViewers. Anatomy colors the space outside of shanks, so you can see
+anatomy and activity at the same time.</p>
+<p>During an online run, before you start recording files, you can open
+the editor tab and try several different ROIs to hunt for desired
+activity. This affords some degree of feedback.</p>
+<p>If you don’t have a clue yet, use a standard guess:</p>
+<ul>
+<li>Use the predefined <code>Default</code> imro, which is random, but
+super easy.</li>
+<li>Try a compact region on just one shank.</li>
+<li>Try a compact region near each shank tip.</li>
+<li>Try a sparse set of sites spanning the full probe length.</li>
+</ul>
 <h3 id="boxes">Boxes</h3>
-<p>Define your region(s) of interest (ROI):</p>
+<p>In the editor you don’t need to click on 384 individual sites, though
+you can. Rather, you work with larger boxes of sites. There are several
+types of boxes:</p>
+<ul>
+<li><p><strong>Green</strong>: These are your selected ROI boxes. You’ll
+create as many green boxes as needed to lasso interesting clusters of
+sites. The editor guides you so you won’t select more than the required
+site count (usually 384), and you won’t put boxes in forbidden
+places.</p></li>
+<li><p><strong>Heavy Black</strong>: Every probe has selection rules: If
+you choose this site, you can’t select those. As you make green boxes,
+the corresponding excluded sites are automatically outlined with heavy
+black boxes. This shows you which areas of the probe remain available
+for new green boxes. When your required site count is reached all the
+black boxes disappear, meaning “you’re done.”</p></li>
+<li><p><strong>Cyan</strong>: The recently added <code>Where/What</code>
+method uses cyan to indicate a potential action box. Right-click in a
+cyan box to get the pop-up menu. Fill the available space with new green
+boxes (several fill patterns available), or, delete the overlapped green
+space, so you can make alternate green boxes elsewhere. The filling
+actions work from tip toward the top and will not go over the
+<code>Rqd</code> limit. The cyan box is erased when an action
+completes.</p></li>
+<li><p><strong>Blue</strong>: These are visual aids that do not affect
+your site count. They help with conflict resolution. For example, you’ve
+created a number of green boxes and you see that a key activity hot spot
+is now in a forbidden area but you really want to include it…you’ll have
+to undo some of the green, but which green is involved? Control-click a
+blue box over the hot spot and all related sites are outlined with heavy
+blue boxes. You’ll be able to see what needs adjustment.</p></li>
+</ul>
 <h4 id="readouts">Readouts</h4>
 <p>The <code>Rqd</code> readout reminds you how many total
 channels/sites you must select to make a valid table. Most probes have
 384 channels that are shared over the whole probe surface. Some probes
-have fewer than 384 readout channels, NXT probes have 912 or 1536
+have fewer than 384 readout channels, NP3 probes have 912 or 1536
 channels, and quad-probes have 384 channels on each of the four shanks.
 In all cases, Rqd tells you the required total channel count.</p>
 <p><code>Sum</code> is the channel count summed over your current set of
@@ -92,56 +207,71 @@ Rqd</strong>.</p>
 <p>When you click in an existing box <code>Sel</code> reads out its
 size, in channels.</p>
 <h4 id="making-new-boxes">Making New Boxes</h4>
+<p><strong>All Boxes</strong></p>
 <ol type="1">
-<li>Use <code>Nrows</code> to set the number of rows you want a new box
-to have.</li>
-<li>Set the <code>New boxes</code> width either to full- or
-half-shank.</li>
-<li>Click where you want to place the center of the new box.</li>
+<li><code>Nrows</code> sets the height (in rows) of new boxes.</li>
+<li>Set the <code>Width</code> either to full- or half-shank.</li>
+<li>Click where you want to place the <strong>center</strong> of the new
+box.</li>
 </ol>
+<blockquote>
+<p><em>You can left- or right-click to make the new box.</em></p>
+</blockquote>
+<p><strong>Green: Lclk Center Green Here</strong></p>
+<p>Clicking directly makes green boxes:</p>
 <ul>
-<li>Dark outlines indicate excluded/forbidden sites.</li>
+<li>If a box overlaps a forbidden zone or another box, the box slides to
+available space.</li>
+<li>If a box goes off the top or bottom of the shank, the box slides to
+available space.</li>
 <li>If a box won’t fit where you clicked, the box is downsized.</li>
-<li>If a box overlaps a forbidden zone or another box, the box is
-moved.</li>
-<li>If a box goes off the top or bottom of the shank, the box is
-moved.</li>
+</ul>
+<p><strong>Cyan: Lclk Where =&gt; Rclk What</strong></p>
+<p>Clicking makes a cyan action box.</p>
+<ul>
+<li>If a box goes off the top or bottom of the shank, the box slides to
+available space.</li>
+<li>The box can overlap all other boxes.</li>
+<li>You can only make one cyan box at a time.</li>
+</ul>
+<blockquote>
+<p><em>Left-click to make a box (handy for resizing), right-click to
+make the box and immediately show the menu (fewer steps).</em></p>
+</blockquote>
+<p><strong>Blue: Control-click</strong></p>
+<ul>
+<li>If a box goes off the top or bottom of the shank, the box slides to
+available space.</li>
+<li>The box can overlap {green, cyan, black} boxes; not blue.</li>
+<li>You can make more than one blue, but the view gets crowded.</li>
 </ul>
 <h4 id="resizing-boxes">Resizing Boxes</h4>
+<p><strong>All Boxes</strong></p>
 <ul>
 <li><code>Click-and-drag</code> in the upper-half of a box to adjust its
 top edge.</li>
 <li><code>Click-and-drag</code> in the lower-half of a box to adjust its
 bottom edge.</li>
-<li>The size is limited by other objects, and by Rqd.</li>
 <li>The view will scroll as you drag beyond the top/bottom edge.</li>
-<li>Drag off the side of the shank to revert to the original size.</li>
-<li>Let the mouse button up to finish the operation.</li>
+<li>Drag off the side of the shank to cancel and revert to the original
+size.</li>
+<li>Release the mouse button to finish the operation.</li>
+</ul>
+<p><strong>Green: Lclk Center Green Here</strong></p>
+<ul>
+<li>The size is limited by other objects, and by Rqd.</li>
+</ul>
+<p><strong>Cyan: Lclk Where =&gt; Rclk What</strong></p>
+<ul>
+<li>Menu item <code>Max Box Length</code> extends the box to the full
+shank height.</li>
 </ul>
 <h4 id="clearingerasing-boxes">Clearing/Erasing Boxes</h4>
 <ul>
-<li>The <code>Clear All</code> button erases all boxes.</li>
-<li><code>Shift-click</code> in a box to clear it.</li>
+<li>The <code>Clear All</code> button erases green and cyan boxes; not
+blue.</li>
+<li><code>Shift-click</code> in any box to clear it.</li>
 </ul>
-<h4 id="resolve-site-conflicts">Resolve Site Conflicts</h4>
-<p>Suppose you’ve made a set of green ROI boxes but you’ve now got
-forbidden sites right over a key activity hotspot. Can you fix that?
-Place a blue box on the hotspot to see which green box is associated
-with that hotspot, and which other locations on the probe would be
-affected if you edit that green box.</p>
-<ul>
-<li>Ctrl-click to place a blue box and see its associated sites.</li>
-<li>The size and shape controls work on both green and blue boxes.</li>
-<li>You can make several blue boxes.</li>
-<li>Click-and-drag to resize them.</li>
-<li>Placement is limited by other blue objects, and by Rqd.</li>
-<li>Shift-click to erase them.</li>
-</ul>
-<blockquote>
-<p><em>Tip: To lasso a hotspot, set Nrows small and ctrl-click in the
-center of the target hotspot. Then click-and-drag just inside the
-top/bottom of the lasso to cover neatly.</em></p>
-</blockquote>
 <blockquote>
 <p><em>Note: Blue boxes only go away when you manually shift-click in
 them. Otherwise they stay put even if you load alternative IMRO
@@ -163,6 +293,16 @@ result is applied to current run settings. If you use this from the
 offline File Viewer, the resulting string is merely copied to the
 clipboard.</li>
 </ul>
+<h3 id="third-party-tools">Third Party Tools</h3>
+<p>Recently, other developers are making imro editor tools:</p>
+<ul>
+<li><a href="https://github.com/m-beau/pixelmap">PixelMap</a></li>
+<li><a href="https://neurocarto.readthedocs.io/en/latest/">NeuroCarto</a></li>
+</ul>
+<blockquote>
+<p><em>We do not test, endorse, or attest to the fitness of third party
+tools.</em></p>
+</blockquote>
 <hr />
 <h2 id="view-tab-quick-reference">View Tab Quick Reference</h2>
 <ul>
