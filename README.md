@@ -69,9 +69,9 @@ HS and BSC parts are specific to phase3A.
 
 ### Who
 
-SpikeGLX is developed by [Bill Karsh](https://www.janelia.org/people/bill-karsh)
-of the [Tim Harris Lab](https://www.janelia.org/lab/harris-lab-apig) at
-HHMI/Janelia Research Campus.
+SpikeGLX is developed by Bill Karsh and Jennifer Colonell of the Tim Harris lab.
+Initially hosted/funded by HHMI. Currently supported by {NIH, Wellcome Trust}
+grants via {JHU, UCL}.
 
 >*Based on the SpikeGL extracellular data acquisition system originally
 developed by Calin A. Culianu.*
