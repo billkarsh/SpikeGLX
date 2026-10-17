@@ -41,6 +41,10 @@ that SpikeGLX provides in selecting parameters and making custom output files.
 that you incorporate or at least consult the metadata parsing methods we have
 provided for both Python and MATLAB: [SpikeGLX_Datafile_Tools](https://github.com/jenniferColonell/SpikeGLX_Datafile_Tools).*
 
+SpikeGLX and associated tools are developed by Bill Karsh and Jennifer Colonell
+of the Tim Harris lab. Initially hosted/funded by HHMI. Currently supported by
+{NIH, Wellcome Trust} grants via {JHU, UCL}.
+
 ------
 
 ## System Requirements
@@ -320,7 +324,7 @@ Descriptions of metafile items for each phase:
 on this site, or pose your question to the
 [**Neuropixels Discord server**](https://discord.gg/jmnneS85CY)
 so everyone can learn together. *If there is any problem with the Discord
-invitation, email the [administrator](mailto:colonellj@hhmi.org).*
+invitation, email the [administrator](mailto:jcolonell@protonmail.com).*
 
 2) If the community can't help, try emailing me directly. I'm also happy
 to hear about new feature requests, and very eager to hear about suspected
