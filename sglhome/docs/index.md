@@ -86,7 +86,7 @@ Latest release highlights:
 
 >Important: Please read the `README` file in your download.
 
-* [Release 20260826-api4](App/Release_v20260826-api4.zip)...[Readme](Readme/Readme_v20260826-api4.txt) : OPTO labels, sep shanks, sep Ymags, api v4.1.3
+* [Release 20260901-api4](App/Release_v20260901-api4.zip)...[Readme](Readme/Readme_v20260901-api4.txt) : Improved IMRO editor, api v4.1.3
 
 >**IMPORTANT!!**: Before extracting, right-click the downloaded
 .zip file, select **Properties**, check the **Unblock** box at the
@@ -107,9 +107,9 @@ versions there as long as you run one at a time:
 
 ```
 SpikeGLX\
-    Release_v20260826-api4.zip
+    Release_v20260901-api4.zip
     Release_v20250325-phase30.zip
-    Release_v20260826-api4\
+    Release_v20260901-api4\
     Release_v20250325-phase30\
     Drivers\
         Enclustra_Windows_10&11\

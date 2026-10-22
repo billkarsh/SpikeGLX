@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+October 21, 2026
+
+* SpikeGLX 20260901-api4 (Improved IMRO editor, api v4.1.3).
+
 October 16, 2026
 
 * SpikeGLX_Linux_offline updated to 20260901.
