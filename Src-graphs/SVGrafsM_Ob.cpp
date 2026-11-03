@@ -536,6 +536,7 @@ void SVGrafsM_Ob::loadSettings()
     set.sAveSel     = 0;
     set.tnChkOn     = false;
     set.txChkOn     = settings.value( "txChkOn", false ).toBool();
+    set.binMaxOn    = settings.value( "binMaxOn", false ).toBool();
     set.binMaxOn    = false;
     set.usrOrder    = settings.value( "usrOrder", true ).toBool();
     settings.endGroup();
