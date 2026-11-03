@@ -298,7 +298,7 @@ void CimCfg::ImProbeTable::setCfgSlots( const QVector<CfgSlot> &vCS )
         if( CS.show == 0 )
             continue;
 
-        for( int iport = 1, np = (CS.ID ? 2 : 4); iport <= np; ++iport ) {
+        for( int iport = 1, nport = (CS.ID ? 2 : 4); iport <= nport; ++iport ) {
             for( int idock = 1; idock <= CS.show; ++idock ) {
 
                 bool    enab = setEnabled.has( PAddr(CS.slot, iport, idock) );

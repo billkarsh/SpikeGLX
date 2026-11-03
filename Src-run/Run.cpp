@@ -303,6 +303,36 @@ void Run::grfShowSpikes( int gp, int ip, int ch )
 }
 
 
+void Run::grfShowRaster( int jpanel, bool raster )
+{
+    GraphsWindow    *gw = 0;
+
+    runMtx.lock();
+
+    // if( raster && !imQf.size() ) {
+
+    //     runMtx.unlock();
+
+    //     QMessageBox::information( 0, "Feature Not Enabled",
+    //         "Raster view reads data from the Filtered AP-band Buffers."
+    //         " You have to enable this feature on the IM Setup tab before"
+    //         " starting the run." );
+
+    //     return;
+    // }
+
+    if( jpanel > 1 && vGW.size() > 1 )
+        gw = vGW[1].gw;
+    else if( !vGW.empty() )
+        gw = vGW[0].gw;
+
+    runMtx.unlock();
+
+    if( gw )
+        gw->rasterSwitch( (jpanel & 1) == 0, raster );
+}
+
+
 void Run::grfShowColorTTL()
 {
     GraphsWindow    *gw = 0;

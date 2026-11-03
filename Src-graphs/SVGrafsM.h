@@ -2,9 +2,10 @@
 #define SVGRAFSM_H
 
 #include "MGraph.h"
+#include "CAR.h"
 #include "GraphStats.h"
 #include "TimedTextUpdate.h"
-#include "CAR.h"
+#include "TSpikeEditor.h"   // IWYU pragma: keep
 
 #include <QWidget>
 
@@ -49,7 +50,8 @@ protected:
         int     navNChan,
                 bandSel,    // {0=off, 1=AP, 2=LF, 3=AP+LF}
                 sAveSel;    // {0=off, 1=lcl, 2=lcl', 3=gbl, 4=dmx}
-        bool    tnChkOn,
+        bool    blChkOn,
+                tnChkOn,
                 txChkOn,
                 binMaxOn,
                 usrOrder;
@@ -134,14 +136,16 @@ public:
     virtual void updateProbe( bool /*shankMap*/, bool /*chanMap*/ )     {}
     virtual void setAnatomyPP( const QString& /*elems*/, int /*sk*/ )   {}
 
-    virtual int chanCount()     const = 0;
-    virtual int neurChanCount() const = 0;
+    virtual int chanCount()       const = 0;
+    virtual int neurChanCount()   const = 0;
     virtual int analogChanCount() const = 0;
-    virtual bool isImec()       const = 0;
+    virtual bool isImec()         const = 0;
+    virtual bool isRaster() const   {return false;}
     int  navNChan()         const   {return set.navNChan;}
     int  curSel()           const   {return selected;}
     int  curBandSel()       const   {return set.bandSel;}
     int  curSAveSel()       const   {return set.sAveSel;}
+    bool isBlChkOn()        const   {return set.blChkOn;}
     bool isTnChkOn()        const   {return set.tnChkOn;}
     bool isTxChkOn()        const   {return set.txChkOn;}
     bool isBinMaxOn()       const   {return set.binMaxOn;}
@@ -155,11 +159,14 @@ public:
     virtual void nameLocalFilters( QComboBox* /*CB*/ ) const    {}
     virtual void setLocalFilters( int &rin, int &rout, int iflt ) = 0;
 
+    virtual void setTspike( const TSpikeSettings& /*T*/ )       {}
+    virtual void getTspike( TSpikeSettings& /*T*/ ) const       {}
+
 public slots:
     // Navbar
     void toggleSorting();
     void showShanks();
-    void closeShanks();
+    void closeShanks( bool force );
     void nchanChanged( int val, int first );
     void firstChanged( int first );
     // SVTools
@@ -169,11 +176,14 @@ public slots:
     void graphYScaleChanged( double d );
     void showColorDialog();
     void applyAll();
+    void blChkClicked( bool checked );
     void tnChkClicked( bool checked );
     void txChkClicked( bool checked );
     void binMaxChkClicked( bool checked );
     virtual void bandSelChanged( int /*sel*/ )  {}
     virtual void sAveSelChanged( int /*sel*/ )  {}
+    virtual void rasNMaxChanged( int /*val*/ )  {}
+    virtual void rasPMaxChanged( int /*val*/ )  {}
     // Right-click
     void refresh();
     void colorTTL();

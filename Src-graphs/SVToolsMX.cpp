@@ -67,7 +67,7 @@ void SVToolsMX::init()
         wA->setSizePolicy( QSizePolicy::Minimum, wA->sizePolicy().verticalPolicy() );
     }
 
-    // Color
+// Color
 
     B = new QPushButton( this );
     B->setObjectName( "colorbtn" );
@@ -88,7 +88,7 @@ void SVToolsMX::init()
 // Seconds
 
     LVD = new LVE_dbl(
-                "Set Graphs window time span in seconds.",
+                "Set graph time span in seconds.",
                 "1", this );
 
     LVD->m_spinBox->installEventFilter( gr->getGWWidget() );

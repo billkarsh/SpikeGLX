@@ -8,10 +8,11 @@
 #include <QSpinBox>
 #include <QDoubleSpinBox>
 #include <QStyleOptionToolButton>
+#include <QStylePainter>
 #include <QToolButton>
 
 /* ---------------------------------------------------------------- */
-/* Types ---------------------------------------------------------- */
+/* LV Single Item Controls ---------------------------------------- */
 /* ---------------------------------------------------------------- */
 
 class LVEditor : public QWidget
@@ -155,8 +156,7 @@ private:
     QLabel      *m_labelWidget;
     QLabel      *m_valueWidget;
     LVEditor    *editor;
-    QString     m_label,
-                m_value;
+    QString     m_value;
 public:
     LVBut(
         const QString   &label,
@@ -176,18 +176,81 @@ public:
         // Get the size required by our custom labels
         QSize contentSize = layout()->sizeHint();
 
-        QStyleOptionToolButton  opt;
+        QStyleOptionToolButton opt;
         initStyleOption( &opt );
         opt.text = "";
+
         QSize butSize = style()->sizeFromContents(
                             QStyle::CT_ToolButton, &opt, contentSize, this );
-
         return butSize;
     }
 signals:
     void valueChanged( QString val );
 private:
     void updateButtonValue()    {m_valueWidget->setText( m_value );}
+};
+
+/* ---------------------------------------------------------------- */
+/* Dlg Multi Item Controls ---------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+class DlgEditor : public QWidget
+{
+    Q_OBJECT
+public:
+    DlgEditor( QWidget *parent ) : QWidget(parent)  {}
+    virtual ~DlgEditor()                            {}
+public slots:
+    virtual void init() = 0;
+signals:
+    void finished();
+};
+
+
+// dialog button
+//
+class DlgBut : public QToolButton {
+    Q_OBJECT
+private:
+    QLabel      *m_labelWidget;
+    DlgEditor   *editor;
+public:
+    DlgBut(
+        const QString   &label,
+        const QString   &butStyle,
+        const QString   &lblStyle,
+        DlgEditor       *editor,
+        QWidget         *parent = nullptr );
+
+protected:
+    // Override paintEvent to force the native arrow to draw
+    void paintEvent (QPaintEvent * /*event*/ ) override
+    {
+        QStylePainter           painter( this );
+        QStyleOptionToolButton  opt;
+        initStyleOption( &opt );
+
+        // Trick Qt into painting the arrow even without a QMenu attached
+        opt.features |= QStyleOptionToolButton::HasMenu;
+
+        painter.drawComplexControl( QStyle::CC_ToolButton, opt );
+    }
+
+    // Override sizeHint so the toolbar gives the button enough width
+    QSize sizeHint() const override
+    {
+        // Get the size required by our custom labels
+        QSize contentSize = layout()->sizeHint();
+
+        QStyleOptionToolButton opt;
+        initStyleOption( &opt );
+        opt.text      = "";
+        opt.features |= QStyleOptionToolButton::HasMenu;
+
+        QSize butSize = style()->sizeFromContents(
+                            QStyle::CT_ToolButton, &opt, contentSize, this );
+        return butSize;
+    }
 };
 
 #endif  // TOOLBUT_H

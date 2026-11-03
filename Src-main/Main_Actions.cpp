@@ -134,8 +134,8 @@ void Main_Actions::initActions()
     spikeViewAct->setEnabled( false );
     ConnectUI( spikeViewAct, SIGNAL(triggered()), app, SLOT(window_SpikeView()) );
 
-    colorTTLAct = new QAction( "&Color TTL Events...", this );
-    colorTTLAct->setShortcut( QKeySequence( tr("Ctrl+R") ) );
+    colorTTLAct = new QAction( "Color TTL &Events...", this );
+    colorTTLAct->setShortcut( QKeySequence( tr("Ctrl+E") ) );
     colorTTLAct->setShortcutContext( Qt::ApplicationShortcut );
     colorTTLAct->setEnabled( false );
     ConnectUI( colorTTLAct, SIGNAL(triggered()), app, SLOT(window_ColorTTL()) );

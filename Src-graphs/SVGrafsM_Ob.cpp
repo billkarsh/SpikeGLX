@@ -534,10 +534,10 @@ void SVGrafsM_Ob::loadSettings()
     set.navNChan    = settings.value( "navNChan", 32 ).toInt();
     set.bandSel     = 0;
     set.sAveSel     = 0;
+    set.blChkOn     = true;
     set.tnChkOn     = false;
     set.txChkOn     = settings.value( "txChkOn", false ).toBool();
     set.binMaxOn    = settings.value( "binMaxOn", false ).toBool();
-    set.binMaxOn    = false;
     set.usrOrder    = settings.value( "usrOrder", true ).toBool();
     settings.endGroup();
 }
@@ -558,6 +558,7 @@ void SVGrafsM_Ob::saveSettings() const
     settings.setValue( "clr1", clrToString( set.clr1 ) );
     settings.setValue( "navNChan", set.navNChan );
     settings.setValue( "txChkOn", set.txChkOn );
+    settings.setValue( "binMaxOn", set.binMaxOn );
     settings.setValue( "usrOrder", set.usrOrder );
     settings.endGroup();
 }

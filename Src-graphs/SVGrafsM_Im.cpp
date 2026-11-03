@@ -38,6 +38,12 @@ SVGrafsM_Im::SVGrafsM_Im(
     ConnectUI( shankCtl, SIGNAL(gimmeTraces()), this, SLOT(colorTraces()) );
     ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
 
+    tracesAction = new QAction( "Traces", this );
+    ConnectUI( tracesAction, SIGNAL(triggered()), this, SLOT(setTraces()) );
+
+    rasterAction = new QAction( "Raster", this );
+    ConnectUI( rasterAction, SIGNAL(triggered()), this, SLOT(setRaster()) );
+
     audioLAction = new QAction( "Listen Left Ear", this );
     ConnectUI( audioLAction, SIGNAL(triggered()), this, SLOT(setAudioL()) );
 
@@ -657,6 +663,18 @@ void SVGrafsM_Im::colorTraces()
 }
 
 
+void SVGrafsM_Im::setTraces()
+{
+    return;
+}
+
+
+void SVGrafsM_Im::setRaster()
+{
+    mainApp()->getRun()->grfShowRaster( jpanel, true );
+}
+
+
 void SVGrafsM_Im::setAudioL()
 {
     setAudio( -1 );
@@ -772,26 +790,31 @@ void SVGrafsM_Im::myInit()
     QAction *sep0 = new QAction( this ),
             *sep1 = new QAction( this ),
             *sep2 = new QAction( this ),
-            *sep3 = new QAction( this );
+            *sep3 = new QAction( this ),
+            *sep4 = new QAction( this );
     sep0->setSeparator( true );
     sep1->setSeparator( true );
     sep2->setSeparator( true );
     sep3->setSeparator( true );
+    sep4->setSeparator( true );
 
+    theM->addAction( tracesAction );
+    theM->addAction( rasterAction );
+    theM->addAction( sep0 );
     theM->addAction( audioLAction );
     theM->addAction( audioRAction );
     theM->addAction( audioBAction );
-    theM->addAction( sep0 );
+    theM->addAction( sep1 );
     theM->addAction( spike1Action );
     theM->addAction( spike2Action );
     theM->addAction( spike3Action );
     theM->addAction( spike4Action );
-    theM->addAction( sep1 );
-    theM->addAction( stdbyAction );
     theM->addAction( sep2 );
+    theM->addAction( stdbyAction );
+    theM->addAction( sep3 );
     theM->addAction( sortAction );
     theM->addAction( saveAction );
-    theM->addAction( sep3 );
+    theM->addAction( sep4 );
     theM->addAction( refreshAction );
     theM->addAction( cTTLAction );
     theM->setContextMenuPolicy( Qt::ActionsContextMenu );
@@ -924,6 +947,7 @@ void SVGrafsM_Im::loadSettings()
     set.navNChan    = settings.value( "navNChan", 32 ).toInt();
     set.bandSel     = settings.value( "bandSel", 0 ).toInt();
     set.sAveSel     = settings.value( "sAveSel", 0 ).toInt();
+    set.blChkOn     = true;
     set.tnChkOn     = settings.value( "tnChkOn", false ).toBool();
     set.txChkOn     = false;
     set.binMaxOn    = settings.value( "binMaxOn", true ).toBool();

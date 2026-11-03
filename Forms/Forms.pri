@@ -51,6 +51,7 @@ FORMS += \
     $$PWD/TrigTCPPanel.ui \
     $$PWD/TrigTimedPanel.ui \
     $$PWD/TrigTTLPanel.ui \
+    $$PWD/TSpikeEditor.ui \
     $$PWD/WavePlanDialog.ui
 
 

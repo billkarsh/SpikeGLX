@@ -16,13 +16,16 @@ HEADERS += \
     $$PWD/SOGraph.h \
     $$PWD/SVGrafsM.h \
     $$PWD/SVGrafsM_Im.h \
+    $$PWD/SVGrafsM_ImR.h \
     $$PWD/SVGrafsM_Ni.h \
     $$PWD/SVGrafsM_Ob.h \
     $$PWD/SView.h \
     $$PWD/SVToolsM.h \
     $$PWD/SVToolsM0.h \
+    $$PWD/SVToolsMR.h \
     $$PWD/SVToolsMX.h \
     $$PWD/ToolBut.h \
+    $$PWD/TSpikeEditor.h \
     $$PWD/Vec2.h \
     $$PWD/WrapBuffer.h
 
@@ -43,11 +46,13 @@ SOURCES += \
     $$PWD/SOGraph.cpp \
     $$PWD/SVGrafsM.cpp \
     $$PWD/SVGrafsM_Im.cpp \
+    $$PWD/SVGrafsM_ImR.cpp \
     $$PWD/SVGrafsM_Ni.cpp \
     $$PWD/SVGrafsM_Ob.cpp \
     $$PWD/SView.cpp \
     $$PWD/SVToolsM.cpp \
     $$PWD/SVToolsM0.cpp \
+    $$PWD/SVToolsMR.cpp \
     $$PWD/SVToolsMX.cpp \
     $$PWD/ToolBut.cpp \
     $$PWD/WrapBuffer.cpp

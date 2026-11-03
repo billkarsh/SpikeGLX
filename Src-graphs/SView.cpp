@@ -1,6 +1,8 @@
 
 #include "SVToolsM0.h"   // IWYU pragma: keep
+#include "SVToolsMR.h"   // IWYU pragma: keep
 #include "SVToolsMX.h"   // IWYU pragma: keep
+#include "SVGrafsM_ImR.h"
 #include "SVGrafsM_Im.h"
 #include "SVGrafsM_Ob.h"
 #include "SVGrafsM_Ni.h"
@@ -9,6 +11,27 @@
 #include <QVBoxLayout>
 
 
+
+
+SViewM_ImR::SViewM_ImR(
+    SVGrafsM*           &vw,
+    GraphsWindow        *gw,
+    const DAQ::Params   &p,
+    int                 ip,
+    int                 jpanel )
+{
+    vw = new SVGrafsM_ImR( gw, p, ip, jpanel );
+    SVToolsM    *tb = new SVToolsMR( vw );
+
+    vw->init( tb );
+
+    QVBoxLayout *L = new QVBoxLayout( this );
+    L->setSpacing( 0 );
+    L->setContentsMargins( 0, 0, 0, 0 );
+    L->addWidget( tb );
+    L->addWidget( vw );
+    adjustSize();
+}
 
 
 SViewM_Im::SViewM_Im(

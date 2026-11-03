@@ -76,6 +76,7 @@ public:
     void grfWaitPaused( int igw = -1 );
     void grfSetFocusMain();
     void grfShowSpikes( int gp, int ip, int ch );
+    void grfShowRaster( int jpanel, bool raster );
     void grfShowColorTTL();
     void grfRefresh();
     void grfShowHideAll();

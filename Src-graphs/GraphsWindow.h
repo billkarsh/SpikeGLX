@@ -52,6 +52,7 @@ public:
     ColorTTLCtl *getTTLColorCtl()   {return TTLCC;}
     void soSetChan( int gp, int ip, int ch );
     void soStopFetching();
+    void rasterSwitch( bool left, bool raster );
 
 // Run
     void eraseGraphs();

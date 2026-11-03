@@ -294,9 +294,9 @@ struct LOOP {
         offset,
         nsamp;
     LOOP()
-        : reps(1), offset(0), nsamp(0)          {}
+        :   reps(1), offset(0), nsamp(0)            {}
     LOOP( int reps, int offset )
-        : reps(reps), offset(offset), nsamp(0)  {}
+        :   reps(reps), offset(offset), nsamp(0)    {}
 };
 
 enum {

@@ -68,6 +68,7 @@ public:
     void qf_audioClient( bool on ) const;
     void qf_shankClient( bool on ) const;
     void qf_spikeClient( bool on ) const;
+    void qf_rasterClient( bool on ) const;
     void qf_remoteClient( bool on ) const;
     bool qf_isClient() const;
 

@@ -3063,7 +3063,7 @@ void FileViewerWindow::initGraphs()
     QMenu           *subMenu        = 0;
     int             nG              = (int)grfY.size(),
                     igNewSubMenu    = 0,
-                    nAP             = 0,
+                    nAP             = 1,
                     maxInt;
 
     switch( fType ) {
@@ -3156,8 +3156,9 @@ void FileViewerWindow::initGraphs()
         Y.lhsLabel      = nameGraph( ig );
         Y.usrChan       = ig;
         Y.iclr          = (Y.usrType < 2 ? Y.usrType : 1);
-        Y.anaclr        = -1;
-        Y.drawBinMax    = false;
+        // Y.anaclr        = -1;
+        // Y.rasFlags      = 0;
+        // Y.drawBinMax    = false;
         Y.isDigType     = Y.usrType == 2;
 
         P.gain          = df->origID2Gain( C );

@@ -161,7 +161,7 @@ void SVGrafsM::init( SVToolsM *tb )
 // ----------------
 
     nv      = new MNavbar( this );
-    theX    = new MGraphX;
+    theX    = new MGraphX( isRaster() );
     theM    = new MGraph( "gw", this, theX );
 
     QVBoxLayout *V = new QVBoxLayout( this );
@@ -185,11 +185,17 @@ void SVGrafsM::init( SVToolsM *tb )
 // Init items
 // ----------
 
+    theX->drawBaseLines = set.blChkOn;
+
     tb->init();
     int nN = neurChanCount();
-    Tn.init( n, 0, nN );
+
+    if( !isRaster() ) {
+        Tn.init( n, 0, nN );
+        tnChkClicked( set.tnChkOn );
+    }
+
     Tx.init( n, nN, analogChanCount() );
-    tnChkClicked( set.tnChkOn );
     txChkClicked( set.txChkOn );
     binMaxChkClicked( set.binMaxOn );
     bandSelChanged( set.bandSel );
@@ -292,9 +298,11 @@ void SVGrafsM::showShanks()
 }
 
 
-void SVGrafsM::closeShanks()
+void SVGrafsM::closeShanks( bool force )
 {
-    if( shankCtl )
+    saveSettings();
+
+    if( shankCtl && (force || shankCtl->isVisible()) )
         shankCtl->close();
 }
 
@@ -437,6 +445,18 @@ void SVGrafsM::applyAll()
 }
 
 
+void SVGrafsM::blChkClicked( bool checked )
+{
+    drawMtx.lock();
+    set.blChkOn = checked;
+    theX->dataMtx.lock();
+    theX->drawBaseLines = checked;
+    theX->dataMtx.unlock();
+    saveSettings();
+    drawMtx.unlock();
+}
+
+
 void SVGrafsM::tnChkClicked( bool checked )
 {
     drawMtx.lock();
@@ -477,6 +497,7 @@ void SVGrafsM::colorTTL()
 {
     gw->getTTLColorCtl()->showDialog();
 }
+
 
 void SVGrafsM::myMouseOverGraph( double x, double y, int iy )
 {
@@ -687,8 +708,9 @@ void SVGrafsM::initGraphs()
         Y.lhsLabel      = myChanName( ic );
         Y.usrChan       = ic;
         Y.iclr          = (Y.usrType < 2 ? Y.usrType : 1);
-        Y.anaclr        = -1;
-        Y.drawBinMax    = false;
+        // Y.anaclr        = -1;
+        // Y.rasFlags      = 0;
+        // Y.drawBinMax    = false;
         Y.isDigType     = Y.usrType == digitalType;
     }
 

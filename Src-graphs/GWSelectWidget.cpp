@@ -19,7 +19,7 @@
 // Grid: > 0 if more than one stream.
 //
 GWSelectWidget::GWSelectWidget( GraphsWindow *gw, const DAQ::Params &p )
-    : gw(gw), p(p), lIdx(-1), rIdx(-1)
+    :   gw(gw), p(p), lIdx(-1), rIdx(-1), lRas(false), rRas(false)
 {
     QHBoxLayout *HBX = new QHBoxLayout;
     QPushButton *help;
@@ -84,6 +84,15 @@ GWSelectWidget::GWSelectWidget( GraphsWindow *gw, const DAQ::Params &p )
 // insert items into widget
 
     setLayout( HBX );
+}
+
+
+void GWSelectWidget::setRaster( bool left, bool raster )
+{
+    if( left )
+        lRas = raster;
+    else
+        rRas = raster;
 }
 
 

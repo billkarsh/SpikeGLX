@@ -15,7 +15,9 @@ class SVGrafsM_Im : public SVGrafsM
     Q_OBJECT
 
 private:
-    QAction *spike1Action,
+    QAction *tracesAction,
+            *rasterAction,
+            *spike1Action,
             *spike2Action,
             *spike3Action,
             *spike4Action,
@@ -53,6 +55,8 @@ private slots:
     void externSelectChan( int ic, bool shift );
     void colorTraces();
 
+    void setTraces();
+    void setRaster();
     void setAudioL();
     void setAudioB();
     void setAudioR();

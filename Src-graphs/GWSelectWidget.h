@@ -27,10 +27,15 @@ private:
                         *gCB;   // grid {0=L-only, 1=right, 2=bottom}
     int                 lIdx,
                         rIdx;
+    bool                lRas,
+                        rRas;
 
 public:
     GWSelectWidget( GraphsWindow *gw, const DAQ::Params &p );
 
+    void setRaster( bool left, bool raster );
+    bool lRaster()  {return lRas;}
+    bool rRaster()  {return rRas;}
     bool lChanged();
     bool rChanged();
     int grid();

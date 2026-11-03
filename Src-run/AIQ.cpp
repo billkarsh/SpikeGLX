@@ -230,7 +230,7 @@ void AIQ::qf_spikeClient( bool on ) const
 }
 
 
-void AIQ::qf_remoteClient( bool on ) const
+void AIQ::qf_rasterClient( bool on ) const
 {
     QMutexLocker    ml( &qfMtx );
 
@@ -238,6 +238,17 @@ void AIQ::qf_remoteClient( bool on ) const
         clients |= 8;
     else
         clients &= ~8;
+}
+
+
+void AIQ::qf_remoteClient( bool on ) const
+{
+    QMutexLocker    ml( &qfMtx );
+
+    if( on )
+        clients |= 16;
+    else
+        clients &= ~16;
 }
 
 

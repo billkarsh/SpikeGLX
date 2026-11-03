@@ -1,6 +1,11 @@
 // RELEASE NOTES
 // ==========================
 
+20261020
+--------
+- OBX Graphs remember BinMax setting.
+- Add online spike rasters.
+
 20260901
 --------
 + Improve imro editor clicking.

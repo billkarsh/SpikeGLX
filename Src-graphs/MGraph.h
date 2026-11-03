@@ -47,7 +47,7 @@ class MGraphY
 public:
     double          yscl;
     WrapT<float>    yval,
-                    yval2;          // used for binMax
+                    yval2;          // used for binMax, pos raster
     QString         lhsLabel;
     int             usrChan,
                     anarow,
@@ -55,7 +55,8 @@ public:
                     iclr;
     qint16          rhsLabel,
                     usrType,
-                    anashank;
+                    anashank,
+                    rasFlags;
     bool            drawBinMax,
                     isDigType;
 
@@ -103,11 +104,13 @@ public:
                             ypxPerGrf,
                             clipTop;
     ushort                  gridStipplePat;
-    bool                    drawCursor,
+    bool                    isRaster,
+                            drawBaseLines,
+                            drawCursor,
                             isXsel;
 
 public:
-    MGraphX();
+    MGraphX( bool isRaster = false );
 
     void attach( MGraph *newG );
     void detach()   {attach( 0 );}
@@ -221,6 +224,7 @@ private:
     void drawXSel();
     void drawEvents();
     void draw1Digital( int iy );
+    void draw1Ras( int iy, bool pos );
     void draw1BinMax( int iy );
     void draw1Analog( int iy );
     void drawPointsMain();

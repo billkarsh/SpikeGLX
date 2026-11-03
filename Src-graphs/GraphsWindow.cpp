@@ -113,12 +113,12 @@ void GraphsWindow::predelete()
 
     if( lW ) {
         lW->setDeleting();
-        lW->closeShanks();
+        lW->closeShanks( true );
     }
 
     if( rW ) {
         rW->setDeleting();
-        rW->closeShanks();
+        rW->closeShanks( true );
     }
 
 // ME save screen state
@@ -140,6 +140,17 @@ void GraphsWindow::soStopFetching()
     if( soctl ) {
         soctl->stopFetching();
         soctl->predelete();
+    }
+}
+
+
+void GraphsWindow::rasterSwitch( bool left, bool raster )
+{
+    if( (left  && lW && lW->isRaster() != raster) ||
+        (!left && rW && rW->isRaster() != raster) ) {
+
+        SEL->setRaster( left, raster );
+        initViews();
     }
 }
 
@@ -537,7 +548,7 @@ void GraphsWindow::closeEvent( QCloseEvent *e )
 
 void GraphsWindow::installLeft( QSplitter *sp )
 {
-    if( !SEL->lChanged() )
+    if( !SEL->lChanged() && lW && lW->isRaster() == SEL->lRaster() )
         return;
 
     QWidget *w      = 0;
@@ -547,13 +558,18 @@ void GraphsWindow::installLeft( QSplitter *sp )
 
     if( sp->count() > 0 ) {
 
-        if( (vis = lW->isShankVis()) )
-            lW->closeShanks();
+        vis = lW->isShankVis();
+        lW->closeShanks( false );
 
         switch( js ) {
             case jsNI: w = new SViewM_Ni( lW, this, p, jpanel ); break;
             case jsOB: w = new SViewM_Ob( lW, this, p, ip, jpanel ); break;
-            case jsIM: w = new SViewM_Im( lW, this, p, ip, jpanel ); break;
+            case jsIM:
+                if( SEL->lRaster() )
+                    w = new SViewM_ImR( lW, this, p, ip, jpanel );
+                else
+                    w = new SViewM_Im( lW, this, p, ip, jpanel );
+                break;
         }
 
         w = sp->replaceWidget( 0, w );
@@ -574,7 +590,12 @@ void GraphsWindow::installLeft( QSplitter *sp )
         switch( js ) {
             case jsNI: w = new SViewM_Ni( lW, this, p, jpanel ); break;
             case jsOB: w = new SViewM_Ob( lW, this, p, ip, jpanel ); break;
-            case jsIM: w = new SViewM_Im( lW, this, p, ip, jpanel ); break;
+            case jsIM:
+                if( SEL->lRaster() )
+                    w = new SViewM_ImR( lW, this, p, ip, jpanel );
+                else
+                    w = new SViewM_Im( lW, this, p, ip, jpanel );
+                break;
         }
 
         sp->addWidget( w );
@@ -592,20 +613,24 @@ bool GraphsWindow::installRight( QSplitter *sp )
 
         if( SEL->grid() ) {
 
-            if( SEL->rChanged() ) {
+            if( SEL->rChanged() || rW->isRaster() != SEL->rRaster() ) {
 
                 QWidget *w      = 0;
                 int     ip, js  = SEL->rjsip( ip ),
                         jpanel  = 2*igw + 1;
                 bool    vis     = rW->isShankVis();
 
-                if( vis )
-                    rW->closeShanks();
+                rW->closeShanks( false );
 
                 switch( js ) {
                     case jsNI: w = new SViewM_Ni( rW, this, p, jpanel ); break;
                     case jsOB: w = new SViewM_Ob( rW, this, p, ip, jpanel ); break;
-                    case jsIM: w = new SViewM_Im( rW, this, p, ip, jpanel ); break;
+                    case jsIM:
+                        if( SEL->rRaster() )
+                            w = new SViewM_ImR( rW, this, p, ip, jpanel );
+                        else
+                            w = new SViewM_Im( rW, this, p, ip, jpanel );
+                        break;
                 }
 
                 w = sp->replaceWidget( 1, w );
@@ -645,7 +670,12 @@ bool GraphsWindow::installRight( QSplitter *sp )
         switch( js ) {
             case jsNI: w = new SViewM_Ni( rW, this, p, jpanel ); break;
             case jsOB: w = new SViewM_Ob( rW, this, p, ip, jpanel ); break;
-            case jsIM: w = new SViewM_Im( rW, this, p, ip, jpanel ); break;
+            case jsIM:
+                if( SEL->rRaster() )
+                    w = new SViewM_ImR( rW, this, p, ip, jpanel );
+                else
+                    w = new SViewM_Im( rW, this, p, ip, jpanel );
+                break;
         }
 
         sp->addWidget( w );

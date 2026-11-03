@@ -14,8 +14,24 @@ class SVGrafsM;
 /* Stream Viewers ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// SVToolsMR toolbar
+// --------------------
+// SVGrafsM_ImR widget.
+//
+class SViewM_ImR : public QWidget
+{
+public:
+    SViewM_ImR(
+        SVGrafsM*           &vw,
+        GraphsWindow        *gw,
+        const DAQ::Params   &p,
+        int                 ip,
+        int                 jpanel );
+};
+
+
 // SVToolsM toolbar
-// -----------------
+// --------------------
 // SVGrafsM_Im widget.
 //
 class SViewM_Im : public QWidget
@@ -31,7 +47,7 @@ public:
 
 
 // SVToolsM toolbar
-// -----------------
+// --------------------
 // SVGrafsM_Ob widget.
 //
 class SViewM_Ob : public QWidget
@@ -47,7 +63,7 @@ public:
 
 
 // SVToolsM toolbar
-// -----------------
+// --------------------
 // SVGrafsM_Ni widget.
 //
 class SViewM_Ni : public QWidget

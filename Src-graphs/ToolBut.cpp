@@ -7,6 +7,10 @@
 #include <QWidgetAction>
 
 
+/* ---------------------------------------------------------------- */
+/* LV Single Item Controls ---------------------------------------- */
+/* ---------------------------------------------------------------- */
+
 LVEditor::LVEditor( const QString &help, const QString &val, QWidget *parent )
     :   QWidget(parent), val(val)
 {
@@ -97,14 +101,14 @@ LVBut::LVBut(
     const QString   &valStyle,
     LVEditor        *editor,
     QWidget         *parent )
-    :   QToolButton(parent), editor(editor), m_label(label), m_value(val)
+    :   QToolButton(parent), editor(editor), m_value(val)
 {
     setPopupMode( QToolButton::InstantPopup );
     setFocusPolicy( Qt::StrongFocus );
 
     // Create independent labels for the Label and the Value
-    m_labelWidget = new QLabel( m_label, this );
-    m_valueWidget = new QLabel( m_value, this );
+    m_labelWidget = new QLabel( label, this );
+    m_valueWidget = new QLabel( val, this );
 
     // Apply different colors using Qt Style Sheets
     setStyleSheet( butStyle );
@@ -145,6 +149,53 @@ LVBut::LVBut(
             emit valueChanged( val );
         }
         m_menu->close();
+    });
+}
+
+/* ---------------------------------------------------------------- */
+/* Dlg Multi Item Controls ---------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+DlgBut::DlgBut(
+    const QString   &label,
+    const QString   &butStyle,
+    const QString   &lblStyle,
+    DlgEditor       *editor,
+    QWidget         *parent )
+    :   QToolButton(parent), editor(editor)
+{
+    setPopupMode( QToolButton::InstantPopup );
+    setFocusPolicy( Qt::StrongFocus );
+
+    // Create button label
+    m_labelWidget = new QLabel( label, this );
+
+    // Apply different colors using Qt Style Sheets
+    setStyleSheet( butStyle );
+    m_labelWidget->setStyleSheet( lblStyle );
+
+    // Pass mouse clicks through the label to the underlying button
+    m_labelWidget->setAttribute( Qt::WA_TransparentForMouseEvents );
+
+    // Arrange button face
+    QHBoxLayout *layout = new QHBoxLayout( this );
+    layout->setContentsMargins( 4, 0, 0, 0 );
+    layout->setSpacing( 2 );
+    layout->addWidget( m_labelWidget );
+    layout->setAlignment( Qt::AlignLeft | Qt::AlignVCenter );
+
+    // Keep the native button text empty so it doesn't double-draw
+    setText("");
+
+    connect( this, &DlgBut::clicked, this, [this]() {
+        QPoint pos = this->mapToGlobal( QPoint(0, this->height()) );
+        this->editor->move( pos );
+        this->editor->init();
+        this->editor->setFocus();
+    });
+
+    connect( editor, &DlgEditor::finished, this, [this]() {
+        this->editor->hide();
     });
 }
 

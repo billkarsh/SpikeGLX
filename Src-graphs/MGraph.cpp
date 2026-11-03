@@ -22,6 +22,7 @@ MGraphY::MGraphY()
     anaclr      = -1;
     iclr        = 0;
     rhsLabel    = 0;
+    rasFlags    = 0;
     drawBinMax  = false;
     isDigType   = false;
 }
@@ -54,7 +55,7 @@ void MGraphY::resize( int n )
 // -----
 // fixedNGrf: If > 0, resize() uses this to set ypxPerGrf.
 //
-MGraphX::MGraphX()
+MGraphX::MGraphX( bool isRaster )
 {
     yColor.push_back( QColor( 0xee, 0xdd, 0x82 ) );
 
@@ -63,7 +64,12 @@ MGraphX::MGraphX()
     xSelBegin       = 0.0f;
     xSelEnd         = 0.0f;
     G               = 0;
-    bkgnd_Color     = QColor( 0x20, 0x3c, 0x3c );
+
+    if( isRaster )
+        bkgnd_Color = QColor( 0, 0, 0 );
+    else
+        bkgnd_Color = QColor( 0x20, 0x3c, 0x3c );
+
     grid_Color      = QColor( 0x53, 0x85, 0x96 );
     label_Color     = QColor( 0xff, 0xff, 0xff );
     dwnSmp          = 1;
@@ -72,6 +78,8 @@ MGraphX::MGraphX()
     ypxPerGrf       = 10;
     clipTop         = 0;
     gridStipplePat  = 0xf0f0; // 4pix on 4 off 4 on 4 off
+    this->isRaster  = isRaster;
+    drawBaseLines   = true;
     drawCursor      = true;
     isXsel          = false;
 
@@ -688,6 +696,8 @@ void MGraph::drawBaselines()
 
         h[1] = h[3] = y0;
 
+        X->applyGLTraceClr( iy );
+
         glVertexPointer( 2, GL_FLOAT, 0, h );
         glDrawArrays( GL_LINES, 0, 2 );
     }
@@ -734,7 +744,9 @@ void MGraph::drawGrid()
 // -----------
 
     glLineStipple( 1, 0xffff );
-    drawBaselines();
+
+    if( X->drawBaseLines )
+        drawBaselines();
 
 // -------
 // Restore
@@ -864,8 +876,15 @@ void MGraph::drawYSel()
 // Setup
 // -----
 
-    glLineWidth( 4.0f );
-    glColor3f( 0.0f, 0.0f, 0.0f );
+    if( X->isRaster ) {
+        glLineWidth( 1.0f );
+        glColor3f( 1.0f, 1.0f, 1.0f );
+    }
+    else {
+        glLineWidth( 4.0f );
+        glColor3f( 0.0f, 0.0f, 0.0f );
+    }
+
     glPolygonMode( GL_FRONT, GL_LINE );
 
 // ----
@@ -1099,6 +1118,63 @@ void MGraph::draw1Digital( int iy )
 // To scale that into the viewport, mult by 2/clipHgt.
 // Hence, scale = ypxPerGrf/clipHgt.
 //
+// A - D
+// |   |
+// B - C
+//
+void MGraph::draw1Ras( int iy, bool pos )
+{
+    std::vector<Vec2f>  &V      = X->verts;
+    MGraphY             *Y      = X->Y[iy];
+    const float         *y;
+    int                 clipHgt = height();
+
+    float   y0_px   = (iy+0.5f)*X->ypxPerGrf,
+            yscl    = 2.0f / clipHgt,
+            y0      = 1.0f - yscl*(y0_px - X->clipTop),
+            yhlf    = 0.75 * X->ypxPerGrf / clipHgt;
+    uint    len;
+
+    if( pos )
+        len = Y->yval2.all( (float* &)y );
+    else
+        len = Y->yval.all( (float* &)y );
+
+    glPolygonMode( GL_FRONT, GL_FILL );
+
+    GLfloat vert[8];
+
+    for( uint i = 0; i < len; ++i ) {
+
+        float   yi = y[i];
+
+        if( yi > 0 ) {
+
+            float intens = 0.2f + y[i]*0.8;
+            if( pos )
+                glColor3f( 0, intens, intens );
+            else
+                glColor3f( 0, intens, 0 );
+
+            vert[0] = vert[2] = V[i].x - 8;
+            vert[4] = vert[6] = V[i].x + 8;
+
+            vert[1] = vert[7] = y0 + yhlf;
+            vert[3] = vert[5] = y0 - yhlf;
+
+            glVertexPointer( 2, GL_FLOAT, 0, vert );
+            glDrawArrays( GL_QUADS, 0, 4 );
+        }
+    }
+}
+
+
+// The whole viewport logical span is [-1,1] and clipHgt pixel span.
+// yvals are in range [-1,1].
+// To scale yvals into pixels, mult by ypxPerGrf/2.
+// To scale that into the viewport, mult by 2/clipHgt.
+// Hence, scale = ypxPerGrf/clipHgt.
+//
 void MGraph::draw1BinMax( int iy )
 {
     std::vector<Vec2f>  &V      = X->verts2x;
@@ -1196,6 +1272,12 @@ void MGraph::drawPointsMain()
 
         if( X->Y[iy]->isDigType )
             draw1Digital( iy );
+        else if( X->isRaster ) {
+            if( X->Y[iy]->rasFlags & 2 )
+                draw1Ras( iy, true );
+            if( X->Y[iy]->rasFlags & 1 )
+                draw1Ras( iy, false );
+        }
         else if( X->Y[iy]->drawBinMax )
             draw1BinMax( iy );
         else

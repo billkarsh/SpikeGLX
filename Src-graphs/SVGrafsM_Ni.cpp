@@ -737,6 +737,7 @@ void SVGrafsM_Ni::loadSettings()
     set.navNChan    = settings.value( "navNChan", 32 ).toInt();
     set.bandSel     = settings.value( "bandSel", 0 ).toInt();
     set.sAveSel     = settings.value( "sAveSel", 0 ).toInt();
+    set.blChkOn     = true;
     set.tnChkOn     = settings.value( "tnChkOn", false ).toBool();
     set.txChkOn     = settings.value( "txChkOn", false ).toBool();
     set.binMaxOn    = settings.value( "binMaxOn", false ).toBool();

@@ -16,7 +16,7 @@ struct SVAnaRgn {
     int     row0, rowN;
     quint8  shk, r, g, b;
     SVAnaRgn( int row0, int rowN, int shk, int r, int g, int b )
-    : row0(row0), rowN(rowN), shk(shk), r(r), g(g), b(b)    {}
+    :   row0(row0), rowN(rowN), shk(shk), r(r), g(g), b(b)  {}
 };
 
 /* ---------------------------------------------------------------- */
