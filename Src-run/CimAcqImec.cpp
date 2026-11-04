@@ -2334,7 +2334,6 @@ QString CimAcqImec::opto_getAttens( int ip, int color )
         QString("OPTOGETATTENS: Probe (ip %1) is not an optical probe.").arg( ip );
     }
     else {
-
         for( int site = 0; site < nSite; ++site ) {
 
             err = np_getEmissionSiteAttenuation(
@@ -2359,13 +2358,19 @@ QString CimAcqImec::opto_getAttens( int ip, int color )
 QString CimAcqImec::opto_emit( int ip, int color, int site )
 {
     QString                     msg;
-    const CimCfg::ImProbeDat    &P  = T.get_iProbe( ip );
-    IMROTbl                     *R  = p.im.prbj[ip].roTbl;
-    NP_ErrorCode                err = FAILED;
+    const CimCfg::ImProbeDat    &P      = T.get_iProbe( ip );
+    IMROTbl                     *R      = p.im.prbj[ip].roTbl;
+    int                         nSite   = R->nOptoSites();
+    NP_ErrorCode                err     = FAILED;
 
-    if( !R->nOptoSites() ) {
+    if( !nSite ) {
         msg =
         QString("OPTOEMIT: Probe (ip %1) is not an optical probe.").arg( ip );
+    }
+    else if( site >= nSite ) {
+        msg =
+        QString("OPTOEMIT: Site %1 exceeds max %2 on probe %3.")
+        .arg( site ).arg( nSite - 1 ).arg( ip );
     }
     else if( site >= 0 ) {
         err = np_setEmissionSite(
@@ -2391,7 +2396,7 @@ QString CimAcqImec::opto_emit( int ip, int color, int site )
 
     if( err == SUCCESS ) {
         R->optoSetCur( color, site );
-        mainApp()->getRun()->grfUpdateRHSFlagsAll();
+        mainApp()->getRun()->grfUpdateRHSFlagsAll( false );
     }
 
     return msg;

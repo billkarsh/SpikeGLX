@@ -3,6 +3,8 @@
 
 #include "IMROTbl_T0base.h"
 
+#include <QMutex>
+
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -18,8 +20,9 @@ struct IMROTbl_T1300 : public IMROTbl_T0base
         imType1300Refids    = 5
     };
 
-    int curBlue,
-        curRed;
+    mutable QMutex  optoMtx;
+    int             curBlue,
+                    curRed;
 
     IMROTbl_T1300( const QString &pn )
         :   IMROTbl_T0base(pn, imType1300Type),

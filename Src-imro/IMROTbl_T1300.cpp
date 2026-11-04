@@ -37,6 +37,8 @@ void IMROTbl_T1300::optoGetEmts( std::vector<float> &vRows, int color ) const
 
 void IMROTbl_T1300::optoSetCur( int color, int site )
 {
+    QMutexLocker    ml( &optoMtx );
+
     if( color )
         curRed = site;
     else
@@ -46,6 +48,8 @@ void IMROTbl_T1300::optoSetCur( int color, int site )
 
 int IMROTbl_T1300::optoGetCur( int color ) const
 {
+    QMutexLocker    ml( &optoMtx );
+
     if( color )
         return curRed;
     else
@@ -62,6 +66,8 @@ int IMROTbl_T1300::optoGetCur( int color ) const
 int IMROTbl_T1300::optoGetNeib( std::vector<int> &vChan, int color ) const
 {
     vChan.clear();
+
+    QMutexLocker    ml( &optoMtx );
 
     if( color ) {
         if( curRed >= 0 ) {

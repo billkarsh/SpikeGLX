@@ -81,7 +81,7 @@ public:
     void grfRefresh();
     void grfShowHideAll();
     void grfMoreTraces();
-    void grfUpdateRHSFlagsAll();
+    void grfUpdateRHSFlagsAll( bool block = true );
     void grfUpdateProbe( int ip, bool shankMap, bool chanMap );
     void grfUpdateWindowTitles();
     void grfClose( GraphsWindow *gw );

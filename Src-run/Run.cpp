@@ -395,9 +395,10 @@ void Run::grfMoreTraces()
 }
 
 
-void Run::grfUpdateRHSFlagsAll()
+void Run::grfUpdateRHSFlagsAll( bool block )
 {
-    QMutexLocker    ml( &runMtx );
+    if( block )
+        runMtx.lock();
 
     for( int igw = 0, ngw = (int)vGW.size(); igw < ngw; ++igw ) {
 
@@ -405,6 +406,9 @@ void Run::grfUpdateRHSFlagsAll()
             vGW[igw].gw, "updateRHSFlags",
             Qt::QueuedConnection );
     }
+
+    if( block )
+        runMtx.unlock();
 }
 
 
