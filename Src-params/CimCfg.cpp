@@ -1407,7 +1407,7 @@ bool CimCfg::PrbEach::deriveUserStdbyBits( QString &err, int nAP, int ip )
 
 void CimCfg::PrbEach::clrImroStdbyBits()
 {
-    imroStdbyBits.fill( 0, roTbl->nAP() + roTbl->nSY() );
+    imroStdbyBits.fill( 0, roTbl->nAP() + roTbl->nLF() + roTbl->nSY() );
 }
 
 

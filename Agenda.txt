@@ -3,6 +3,7 @@
 
 20261020
 --------
+- Fix sync for probes with LF-band.
 - Fix SHA1 calculation.
 - OBX Graphs remember BinMax setting.
 - Add online spike rasters.
