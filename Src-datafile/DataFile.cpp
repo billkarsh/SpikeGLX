@@ -749,6 +749,11 @@ bool DataFile::closeAndFinalize( bool update_R0 )
 
             ORec    &R = *o_rec[j];
 
+            if( R.dfw ) {
+                delete R.dfw;
+                R.dfw = 0;
+            }
+
             if( j == 0 && update_R0 )
                 R.kvp = kvp;
 
@@ -761,14 +766,10 @@ bool DataFile::closeAndFinalize( bool update_R0 )
             R.kvp["fileSizeBytes"]    = R.binFile.size();
             R.kvp["appVersion"]       = QString("%1").arg( VERS_SGLX, 0, 16 );
 
-            ok = R.kvp.toMetaFile( R.metaName );
+            ok &= R.kvp.toMetaFile( R.metaName );
 
             Log() << ">> Completed " << R.binFile.fileName();
 
-            if( R.dfw ) {
-                delete R.dfw;
-                R.dfw = 0;
-            }
             R.binFile.close();
         }
     }
