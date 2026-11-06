@@ -111,55 +111,19 @@ from the four shanks within each sample clock period, which places
 additional demands on CPU performance. In particular, QB probes benefit
 more from single-thread performance than other types of probes because
 these operations need to be done within a single acquisition worker
-thread to maintain synchrony and low latency. The following is excerpted
-from our <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_PXI.md">general
-requirements</a> document.</p>
-<h3 id="for-1536-channel-probes">For 1536-channel probes</h3>
-<ul>
-<li><strong>CPU clock speed &gt;= 3.0 GHz</strong></li>
-<li><strong><a href="https://www.cpubenchmark.net/single-thread/">PassMark
-Single-thread</a> score &gt;= 3000</strong></li>
-</ul>
-<p><strong>To run N 1536-channel probes:</strong></p>
-<table>
-<thead>
-<tr>
-<th>Max Probes</th>
-<th>CPU Cores</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>2</td>
-<td>4</td>
-</tr>
-<tr>
-<td>4*</td>
-<td>6 (8 preferred)</td>
-</tr>
-<tr>
-<td>8*</td>
-<td>20 (<em>to be tested</em>)</td>
-</tr>
-</tbody>
-</table>
-<blockquote>
-<p><em>* Note: 6 cores (workstation or laptop) is marginally adequate
-for (4) 1536-channel probes, meaning that any other activity on the
-machine could easily cause the run to quit. We are more comfortable
-recommending 8 cores to run 4 probes. For 8 probes, you will be safe
-with a <a href="https://www.cpubenchmark.net/multithread/">PassMark
-Multi-thread</a> score &gt;= 50000.</em></p>
-</blockquote>
+thread to maintain synchrony and low latency.</p>
+<p>See the section on <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_PXI.md#for-1536-channel-probes">1536-channel
+probes</a> in our general system requirement document.</p>
 <h2 id="api4-and-tech-requirements">API4 and Tech Requirements</h2>
-<p>The earliest SpikeGLX version to use with quad-probes is
-<strong>20250525-API4</strong>.</p>
-<p>With this version, SpikeGLX and imec move to major API revision 4.0,
-or <code>API4</code>. API4 allows imec to better support a wide variety
-of hardware technologies (<code>tech</code>). Probes/headstages have
-tech types {STD, QB, OPTO, NP3} and basestation-modules are {STD, OPTO,
-NP3}. These have to be matched to work properly. The rules are pretty
-simple:</p>
+<p>Use the latest SpikeGLX (currently <strong>20260826-API4</strong>)
+with quad-probes. You’ll get the benefit of performance enhancements and
+features for multishank probes.</p>
+<p>With version 20250525-API4, SpikeGLX and imec move to major API
+revision 4.0, or <code>API4</code>. API4 allows imec to better support a
+wide variety of hardware technologies (<code>tech</code>).
+Probes/headstages have tech types {STD, QB, OPTO, NP3} and
+basestation-modules are {STD, OPTO, NP3}. These have to be matched to
+work properly. The rules are pretty simple:</p>
 <ul>
 <li>OneBox is a STD tech.</li>
 <li>Existing STD-PXI modules are STD tech.</li>
@@ -199,8 +163,10 @@ of consecutive ports, either (1,2) or (3,4). It doesn’t matter if you
 are using both docks of the headstage, always <strong>plug in both
 connectors</strong>.</p></li>
 <li><p>In the SpikeGLX <code>Probe Table</code> on the
-<code>Devices</code> tab (where you <code>Detect</code>) you have to
-<strong>check both boxes</strong>, (1,2) or (3,4).</p></li>
+<code>Devices</code> tab (where you <code>Detect</code>) check all the
+boxes for the docks you are running. So if the QB headstage has only one
+probe, put it in dock-1 and check the dock-1 boxes for both ports: (1,2)
+or (3,4). For both docks, check the corresponding 4 boxes.</p></li>
 </ul>
 <h2 id="imro-table">IMRO Table</h2>
 <h3 id="channels">Channels</h3>

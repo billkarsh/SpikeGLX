@@ -1,5 +1,17 @@
 # What's New On The Site?
 
+November 5, 2026
+
+**Critical bug found in SpikeGLX 20260901-api4**:
+
+For probes that have a separate LF-band, like 1.0 and NHP, the
+AP-files written to disk do not have the sync channel stored.
+This version will be replaced as soon as possible by its successor.
+For now, the previous version is offered.
+
+* SpikeGLX 20260826-api4 (OPTO labels, sep shanks, sep Ymags, api v4.1.3).
+(20260826 fixes metadata writing bugs in 20260709 separate shanks feature). 
+
 November 4, 2026
 
 * CatGT 5.4 (Fix AP2LF zero-filling).
