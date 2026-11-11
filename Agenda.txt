@@ -6,6 +6,7 @@
 - Fix sync for probes with LF-band.
 - Fix SHA1 calculation.
 - OBX Graphs remember BinMax setting.
+- More flexible QB configuration.
 - Add online spike rasters.
 
 20260901

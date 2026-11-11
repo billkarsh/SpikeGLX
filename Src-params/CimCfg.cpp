@@ -1982,14 +1982,12 @@ Log()<<"End detect_Slots ]";
 guiBreathe();
 #endif
 
-    QMap<int,QString>   qbMap;
-
 #if DBG
 Log()<<"[ Start detect_Headstages";
 guiBreathe();
 #endif
     if( ok )
-        ok = detect_headstages( R, qbMap, vHSpsv, vHS20, T );
+        ok = detect_headstages( R, vHSpsv, vHS20, T );
 #if DBG
 Log()<<"End detect_Headstages ]";
 guiBreathe();
@@ -2000,7 +1998,7 @@ Log()<<"[ Start detect_Probes";
 guiBreathe();
 #endif
     if( ok )
-        ok = detect_probes( R, slBIST, qbMap, vHSpsv, T, srCheck, psbCheck );
+        ok = detect_probes( R, slBIST, vHSpsv, T, srCheck, psbCheck );
 #if DBG
 Log()<<"End detect_Probes ]";
 guiBreathe();
@@ -2397,50 +2395,15 @@ void CimCfg::detect_simSlot( ImSlotVers &V )
 }
 
 
-// Map slot to string, where, string contains 1 to 4 entries
-// of form "p:j " where p is port={1,2,3,4} and j=plug-type,
-// where 1=plug-type 1,3 and 2=plug-type 2,4.
-//
-// Return true if plug-type 2,4.
-//
-#ifdef HAVE_IMEC
-static bool qbAdd(
-    QMap<int,QString>   &M,
-    int                 slot,
-    int                 port,
-    const QString       &prod )
-{
-    QString e;
-    bool    is24 = false;
-
-    if( prod == "NPM_HS_32" )
-        e = QString("%1:1").arg( port );
-    else if( prod.contains( "ext" ) ) {
-        e = QString("%1:2").arg( port );
-        is24 = true;
-    }
-    else
-        return false;
-
-    if( M.end() != M.find( slot ) ) {
-        if( !M[slot].contains( e ) )
-            M[slot] += e;
-    }
-    else
-        M[slot] = e;
-
-    return is24;
-}
-#endif
-
-
 bool CimCfg::detect_headstages(
     ERRLVL                  &R,
-    QMap<int,QString>       &qbMap,
     QVector<int>            &vHSpsv,
     QVector<int>            &vHS20,
     ImProbeTable            &T )
 {
+    int mixSlot = 0,    // can't mix qb and nonqb per slot
+        mixType = 0;    // {0=unset, 1=nonqb, 2=qb}
+
     for( int ip = 0, np = T.nSelProbes(); ip < np; ++ip ) {
 
         ImProbeDat  &P = T.mod_iProbe( ip );
@@ -2450,6 +2413,15 @@ bool CimCfg::detect_headstages(
 Log()<<"headstage: start probe "<<ip;
 guiBreathe();
 #endif
+
+        // --------------
+        // Reset mix test
+        // --------------
+
+        if( P.adr.slot != mixSlot ) {
+            mixSlot = P.adr.slot;
+            mixType = 0;
+        }
 
         // ----------------
         // Dock-2 <- Dock-1
@@ -2462,6 +2434,10 @@ guiBreathe();
                 P.hssn = Q.hssn;
                 P.hshw = Q.hshw;
                 P.hsfw = Q.hsfw;
+
+                if( !detect_qbPlugsTest( R, T, ip ) )
+                    return false;
+
                 continue;
             }
         }
@@ -2476,7 +2452,7 @@ guiBreathe();
         if( 0 )
             ;
         else
-            ok = detect_headstage4( R, qbMap, vHSpsv, vHS20, T, ip );
+            ok = detect_headstage4( R, vHSpsv, vHS20, T, ip );
 
         // ------
         // Report
@@ -2513,61 +2489,27 @@ guiBreathe();
                 R.app_put( techMsg );
                 return false;
             }
+
+            // -----------
+            // Mixed tech?
+            // -----------
+
+            int thisType = 1 + (P.hspn == "NPM_HS_32" );
+
+            if( mixType == 0 )
+                mixType = thisType;
+            else if( mixType != thisType ) {
+                R.app_put(
+                    QString("QB Config Error: Can't mix QB and non-QB in same slot(%1).")
+                    .arg( P.adr.tx_s() ) );
+                return false;
+            }
         }
         else
             return false;
     }
 
-// ------------------------
-// QB probes plugged right?
-// ------------------------
-
-#ifdef HAVE_IMEC
-    if( qbMap.size() ) {
-
-        QMap<int,QString>::const_iterator
-            it  = qbMap.begin(),
-            end = qbMap.end();
-
-        for( ; it != end; ++it ) {
-
-            QString v = it.value();
-
-            if( ( v.contains( "1:1" ) && !v.contains( "2:2" )) ||
-                (!v.contains( "1:1" ) &&  v.contains( "2:2" )) ) {
-                R.app_put(
-                    QString("Quadbase error: Both plugs required(slot %1, ports (1,2))")
-                    .arg( it.key() ) );
-                R.app_put("Always plug in both connectors {(1,2) or (3,4)} AND check the corresponding boxes.");
-                return false;
-            }
-
-            if( v.contains( "1:2" ) || v.contains( "2:1" ) ) {
-                R.app_put(
-                    QString("Quadbase error: Plugs reversed(slot %1, ports (1,2))")
-                    .arg( it.key() ) );
-                return false;
-            }
-
-            if( ( v.contains( "3:1" ) && !v.contains( "4:2" )) ||
-                (!v.contains( "3:1" ) &&  v.contains( "4:2" )) ) {
-                R.app_put(
-                    QString("Quadbase error: Both plugs required(slot %1, ports (3,4))")
-                    .arg( it.key() ) );
-                R.app_put("Always plug in both connectors {(1,2) or (3,4)} AND check the corresponding boxes.");
-                return false;
-            }
-
-            if( v.contains( "3:2" ) || v.contains( "4:1" ) ) {
-                R.app_put(
-                    QString("Quadbase error: Plugs reversed(slot %1, ports (3,4))")
-                    .arg( it.key() ) );
-                return false;
-            }
-        }
-    }
-#else
-    Q_UNUSED( qbMap )
+#ifndef HAVE_IMEC
     Q_UNUSED( vHSpsv )
     Q_UNUSED( vHS20 )
 #endif
@@ -2578,7 +2520,6 @@ guiBreathe();
 
 bool CimCfg::detect_headstage4(
     ERRLVL                  &R,
-    QMap<int,QString>       &qbMap,
     QVector<int>            &vHSpsv,
     QVector<int>            &vHS20,
     ImProbeTable            &T,
@@ -2589,7 +2530,6 @@ bool CimCfg::detect_headstage4(
     HardwareID      hID;
 #else
     Q_UNUSED( R )
-    Q_UNUSED( qbMap )
     Q_UNUSED( vHSpsv )
     Q_UNUSED( vHS20 )
 #endif
@@ -2684,11 +2624,22 @@ bool CimCfg::detect_headstage4(
         return false;
     }
 
+// --------------------------
+// Test for QB secondary plug
+// --------------------------
+
+    QString prod(hID.ProductNumber);
+
+    if( prod == "NPM_HS_32_ext" ) {
+        R.app_put(
+            QString("QB Config Error: (%1): Never check boxes for secondary plug.")
+            .arg( P.adr.tx_spd() ) );
+        return false;
+    }
+
 // -------------------------------
 // Test for NHP 128-channel analog
 // -------------------------------
-
-    QString prod(hID.ProductNumber);
 
     if( prod == "NPNH_HS_30" || prod == "NPNH_HS_31" ) {
 
@@ -2717,13 +2668,6 @@ bool CimCfg::detect_headstage4(
         return false;
     }
 
-// ---------------------------
-// Record Quad-probe plug-type
-// ---------------------------
-
-    else if( qbAdd( qbMap, P.adr.slot, P.adr.port, prod ) )
-        return true;
-
     P.hspn = prod;
 #else
     P.hspn = "sim";
@@ -2732,6 +2676,13 @@ bool CimCfg::detect_headstage4(
 Log()<<"  headstage: np_getHeadstageHardwareID done";
 guiBreathe();
 #endif
+
+// ----------------------------
+// QB plugs (needs stored hspn)
+// ----------------------------
+
+    if( !detect_qbPlugsTest( R, T, ip ) )
+        return false;
 
 // ----
 // HSSN
@@ -2810,10 +2761,73 @@ guiBreathe();
 }
 
 
+bool CimCfg::detect_qbPlugsTest(
+    ERRLVL                  &R,
+    ImProbeTable            &T,
+    int                     ip )
+{
+#ifdef HAVE_IMEC
+    NP_ErrorCode    err;
+    HardwareID      hID;
+#else
+    Q_UNUSED( R )
+#endif
+
+    ImProbeDat  &P = T.mod_iProbe( ip );
+
+    if( T.simprb.isSimProbe( P.adr ) )
+        return true;
+
+    if( P.hspn != "NPM_HS_32" )
+        return true;
+
+    if( P.adr.dock != 2 )
+        return true;
+
+    if( P.adr.port == 2 || P.adr.port == 4 ) {
+        R.app_put(
+            QString("QB Config Error: (%1): Select dock 2 only for port 1 or 3.")
+            .arg( P.adr.tx_spd() ) );
+        return false;
+    }
+
+    PAddr   B = P.adr;
+    ++B.port;
+
+// ----
+// HSPN
+// ----
+
+#ifdef HAVE_IMEC
+    err = np_getHeadstageHardwareID( B.slot, B.port, &hID );
+
+    if( err != SUCCESS ) {
+        R.app_put(
+            QString("IMEC getHeadstageHardwareID(%1)%2")
+            .arg( B.tx_sp() ).arg( makeErrorString( err ) ) );
+        if( err == NO_LINK ) {
+            R.append("");
+            R.append(
+                QString("QB probe (%1) requires secondary plug at (%2).")
+                .arg( P.adr.tx_spd() ).arg( B.tx_sp() ) );
+        }
+        return false;
+    }
+    else if( !QString(hID.ProductNumber).contains( "_ext" ) ) {
+        R.app_put(
+            QString("QB probe (%1) requires secondary plug at (%2).")
+            .arg( P.adr.tx_spd() ).arg( B.tx_sp() ) );
+        return false;
+    }
+#endif
+
+    return true;
+}
+
+
 bool CimCfg::detect_probes(
     ERRLVL                  &R,
     QStringList             &slBIST,
-    const QMap<int,QString> &qbMap,
     const QVector<int>      &vHSpsv,
     ImProbeTable            &T,
     bool                    srCheck,
@@ -2859,23 +2873,6 @@ guiBreathe();
                 " error 'Only select dock 1 with this head stage'.")
                 .arg( P.adr.tx_spd() ) );
             return false;
-        }
-
-        // ----------------------------------
-        // Can't mix QB and other in PXI slot
-        // ----------------------------------
-
-        if( T.isSlotPXIType( P.adr.slot ) && qbMap.contains( P.adr.slot ) ) {
-
-            int tech = IMROTbl::hspnToTech( P.hspn );
-
-            if( tech != t_tech_qb && tech != t_tech_sim ) {
-                R.app_put(
-                    QString("Quadbase error: Mixed types(%1)")
-                    .arg( P.adr.tx_spd() ) );
-                R.app_put("Can't mix quadbase(NP2020) and other types in PXI slot.");
-                return false;
-            }
         }
 
         // ------

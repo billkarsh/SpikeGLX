@@ -29,6 +29,9 @@ vertical-align: middle;
 </head>
 <body>
 <h1 id="spikeglx-quadbase-quickstart">SpikeGLX Quadbase Quickstart</h1>
+<p><em>&gt;&gt; Updated for version 20261020 &lt;&lt;</em></p>
+<p><em>&gt;&gt; <a href="#configure-run">New rules</a> for plugs and
+checkboxes &lt;&lt;</em></p>
 <p><strong>Topics</strong>:</p>
 <ul>
 <li><a href="#quad-base-hardware">Quad-base Hardware</a></li>
@@ -41,12 +44,14 @@ Requirements</a></li>
 </ul></li>
 <li><a href="#critical-rules">Critical Rules</a>
 <ul>
-<li><a href="#cant-mix-tech">Can’t Mix Tech</a></li>
+<li><a href="#cant-mix-qb-with-other-probes">Can’t Mix QB With Other
+Probes</a></li>
 <li><a href="#plugs-in-startup">Plugs-in Startup</a></li>
 </ul></li>
-<li><a href="#Configure-run">Configure Run</a>
+<li><a href="#configure-run">Configure Run</a>
 <ul>
-<li><a href="#two-consecutive-ports">Two Consecutive Ports</a></li>
+<li><a href="#one-or-two-plugs">One or Two Plugs</a></li>
+<li><a href="#checking-boxes">Checking Boxes</a></li>
 <li><a href="#imro-table">IMRO Table</a>
 <ul>
 <li><a href="#channels">Channels</a></li>
@@ -54,7 +59,7 @@ Requirements</a></li>
 </ul></li>
 <li><a href="#savefile-channels">Save/File Channels</a>
 <ul>
-<li><a href="#catgt-splits-shanks">CatGT Splits Shanks</a></li>
+<li><a href="#splitting-shanks">Splitting Shanks</a></li>
 </ul></li>
 </ul></li>
 <li><a href="#run-instability">Run Instability</a>
@@ -99,8 +104,8 @@ flags).</p>
 <p>The bespoke QB headstage accommodates two QB probes in its two
 docks.</p>
 <h3 id="cable">Cable</h3>
-<p>The bespoke QB cable must be plugged into two ports at the same
-time.</p>
+<p>The bespoke QB cable has two plugs; use of the plugs is discussed
+below.</p>
 <hr />
 <h1 id="system-hardware-requirements">System Hardware Requirements</h1>
 <h2 id="computer-requirements">Computer Requirements</h2>
@@ -111,55 +116,19 @@ from the four shanks within each sample clock period, which places
 additional demands on CPU performance. In particular, QB probes benefit
 more from single-thread performance than other types of probes because
 these operations need to be done within a single acquisition worker
-thread to maintain synchrony and low latency. The following is excerpted
-from our <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_PXI.md">general
-requirements</a> document.</p>
-<h3 id="for-1536-channel-probes">For 1536-channel probes</h3>
-<ul>
-<li><strong>CPU clock speed &gt;= 3.0 GHz</strong></li>
-<li><strong><a href="https://www.cpubenchmark.net/single-thread/">PassMark
-Single-thread</a> score &gt;= 3000</strong></li>
-</ul>
-<p><strong>To run N 1536-channel probes:</strong></p>
-<table>
-<thead>
-<tr>
-<th>Max Probes</th>
-<th>CPU Cores</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>2</td>
-<td>4</td>
-</tr>
-<tr>
-<td>4*</td>
-<td>6 (8 preferred)</td>
-</tr>
-<tr>
-<td>8*</td>
-<td>20 (<em>to be tested</em>)</td>
-</tr>
-</tbody>
-</table>
-<blockquote>
-<p><em>* Note: 6 cores (workstation or laptop) is marginally adequate
-for (4) 1536-channel probes, meaning that any other activity on the
-machine could easily cause the run to quit. We are more comfortable
-recommending 8 cores to run 4 probes. For 8 probes, you will be safe
-with a <a href="https://www.cpubenchmark.net/multithread/">PassMark
-Multi-thread</a> score &gt;= 50000.</em></p>
-</blockquote>
+thread to maintain synchrony and low latency.</p>
+<p>See the section on <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_PXI.md#for-1536-channel-probes">1536-channel
+probes</a> in our general system requirement document.</p>
 <h2 id="api4-and-tech-requirements">API4 and Tech Requirements</h2>
-<p>The earliest SpikeGLX version to use with quad-probes is
-<strong>20250525-API4</strong>.</p>
-<p>With this version, SpikeGLX and imec move to major API revision 4.0,
-or <code>API4</code>. API4 allows imec to better support a wide variety
-of hardware technologies (<code>tech</code>). Probes/headstages have
-tech types {STD, QB, OPTO, NP3} and basestation-modules are {STD, OPTO,
-NP3}. These have to be matched to work properly. The rules are pretty
-simple:</p>
+<p>Use the latest SpikeGLX (currently <strong>20261020-API4</strong>)
+with quad-probes. You’ll get the benefit of performance enhancements and
+features for multishank probes.</p>
+<p>With version 20250525-API4, SpikeGLX and imec move to major API
+revision 4.0, or <code>API4</code>. API4 allows imec to better support a
+wide variety of hardware technologies (<code>tech</code>).
+Probes/headstages have tech types {STD, QB, OPTO, NP3} and
+basestation-modules are {STD, OPTO, NP3}. These have to be matched to
+work properly. The rules are pretty simple:</p>
 <ul>
 <li>OneBox is a STD tech.</li>
 <li>Existing STD-PXI modules are STD tech.</li>
@@ -176,7 +145,8 @@ simple:</p>
 </ul>
 <hr />
 <h1 id="critical-rules">Critical Rules</h1>
-<h2 id="cant-mix-tech">Can’t Mix Tech</h2>
+<h2 id="cant-mix-qb-with-other-probes">Can’t Mix QB With Other
+Probes</h2>
 <p>You can’t run QB together with non-QB probes in the same module.</p>
 <h2 id="plugs-in-startup">Plugs-in Startup</h2>
 <p>The following is only for PXI modules, not OneBox…</p>
@@ -190,22 +160,86 @@ chassis</strong>. It doesn’t have to be a QB cable.</p>
 <p>Do this whenever you cycle power on the chassis.</p>
 <hr />
 <h1 id="configure-run">Configure Run</h1>
-<p>Think of a quad-probe as a 4-shank probe with more channels…but there
-are a few special considerations as follows.</p>
-<h2 id="two-consecutive-ports">Two Consecutive Ports</h2>
+<p>The maximum number of probes that can be run in a given basestation
+module is always 4. However, the updated configuration rules permit use
+of 1, 2, 3 or 4 headstages. This allows more flexible insertion
+geometries.</p>
+<h2 id="one-or-two-plugs">One or Two Plugs</h2>
+<p>The QB cable has two plugs with labels <code>PORT 1/3</code> and
+<code>PORT 2/4</code>. Plug 1/3 is the main one and is ALWAYS required.
+Plug 2/4 is the secondary one, needed only for use of dock 2. Usage
+examples:</p>
+<p><strong>If running dock 2 (with or without dock 1):</strong></p>
+<p>Both plugs required in specific ports…</p>
 <ul>
-<li><p>A QB cable has two USB-C port connectors. Plug them into a pair
-of consecutive ports, either (1,2) or (3,4). It doesn’t matter if you
-are using both docks of the headstage, always <strong>plug in both
-connectors</strong>.</p></li>
-<li><p>In the SpikeGLX <code>Probe Table</code> on the
-<code>Devices</code> tab (where you <code>Detect</code>) you have to
-<strong>check both boxes</strong>, (1,2) or (3,4).</p></li>
+<li>Plug <code>1/3</code> into port 1 AND plug <code>2/4</code> into
+port 2, or,</li>
+<li>Plug <code>1/3</code> into port 3 AND plug <code>2/4</code> into
+port 4.</li>
 </ul>
+<p><strong>If running ONLY dock 1:</strong></p>
+<ul>
+<li>Plug <code>1/3</code> into any of port {1,2,3,4} AND OMIT plug
+<code>2/4</code>, or,</li>
+</ul>
+<p>Follow the rules above for plugging both connectors…</p>
+<ul>
+<li>Plug <code>1/3</code> into port 1 AND plug <code>2/4</code> into
+port 2, or,</li>
+<li>Plug <code>1/3</code> into port 3 AND plug <code>2/4</code> into
+port 4.</li>
+</ul>
+<blockquote>
+<p><em>You can leave the <code>2/4</code> connector plugged-in even if
+running just dock 1…it’s fine, and more convenient if you sometimes run
+one and sometimes run two probes.</em></p>
+</blockquote>
+<h2 id="checking-boxes">Checking Boxes</h2>
+<ul>
+<li>You can insert a probe in either dock or both docks of the
+headstage.</li>
+<li>As directed above, that might require just one or both plugs,
+however…</li>
+</ul>
+<p>In the SpikeGLX <code>Probe Table</code> on the <code>Devices</code>
+tab (where you <code>Detect</code>), <strong>NEVER</strong> check boxes
+for the <code>PORT 2/4</code> cable plug. Rather, check
+<strong>ONLY</strong> the boxes corresponding to the main cable plug
+<code>PORT 1/3</code>. To see why it works like that, contrast these two
+example cases:</p>
+<p><strong>Case A: Run two probes in the same headstage:</strong></p>
+<ul>
+<li>Plug <code>1/3</code> into port 1 AND plug <code>2/4</code> into
+port 2.</li>
+<li>Insert a probe in dock 1 and dock 2.</li>
+<li>Check two boxes for port 1: (port,dock) = (1,1) and (1,2).</li>
+<li>DO NOT check any boxes for port 2!</li>
+</ul>
+<p><strong>Case B: Run two probes in different headstages:</strong></p>
+<ul>
+<li>Plug <code>1/3</code> of headstage (j) into port 1 AND OMIT plug
+<code>2/4</code>.</li>
+<li>Plug <code>1/3</code> of headstage (k) into port 2 AND OMIT plug
+<code>2/4</code>.</li>
+<li>Insert a probe in dock 1 of each headstage.</li>
+<li>Check one box for (j): (port,dock) = (1,1).</li>
+<li>Check one box for (k): (port,dock) = (2,1).</li>
+</ul>
+<p>Note that in both cases something is plugged in at port 2. Because
+boxes are only checked for <code>PORT 1/3</code> (main) plugs, SpikeGLX
+can discriminate these cases.</p>
 <h2 id="imro-table">IMRO Table</h2>
 <h3 id="channels">Channels</h3>
 <p>The IMRO editor for QB guides you to select 384 required channels for
 each of the four shanks.</p>
+<p>Note that the channel-to-site mapping is different between QB and a
+non-QB 2.0 4-shank probes. Besides the channel count (1536 vs. 384
+total), standard 4-shanks use a block addressing scheme so a channel can
+connect to any shank. So you’ll see very different patterns of excluded
+sites as you create your imro tables in the editor.</p>
+<p>Note too, that while a QB is very much like (4) 2.0 single-shank
+probes in one package, the channel-to-site mapping is also different
+between these types.</p>
 <h3 id="references">References</h3>
 <p>QB offers {ext, gnd, tip}, where tip means the tip on the same shank
 as that electrode. There is no join tips option as the shanks are
@@ -213,11 +247,18 @@ electrically separate.</p>
 <h2 id="savefile-channels">Save/File Channels</h2>
 <p>Per timepoint, the full channel set for QB includes 1536 full-band
 neural channels, followed by 4 SY channels, one from each shank.</p>
-<h2 id="catgt-splits-shanks">CatGT Splits Shanks</h2>
+<h2 id="splitting-shanks">Splitting Shanks</h2>
+<h3 id="online">Online</h3>
+<p>When you configure a run, on the <code>Save tab</code> check
+<code>Separate Shanks</code>. This will write a separate pair of
+bin/meta files for each shank of any multishank probe. Explained further
+<a href="SaveTab_Help.html#separate-shanks">here.</a></p>
+<h3 id="catgt">CatGT</h3>
 <p>If you prefer to work with the shanks individually in
 post-processing, use the following CatGT option to save each shank in a
 separate file:</p>
 <pre><code>-sepShanks=ip-in,ip-out0,ip-out1,ip-out2,ip-out3</code></pre>
+<p>More help <a href="https://billkarsh.github.io/SpikeGLX/More_help/CatGT_ReadMe.html#sepshanks-option">here.</a></p>
 <hr />
 <h1 id="run-instability">Run Instability</h1>
 <p>Quad-base require significant compute capacity to acquire data from

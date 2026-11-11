@@ -574,21 +574,22 @@ public:
     static void detect_simSlot( ImSlotVers &V );
     static bool detect_headstages(
         ERRLVL                  &R,
-        QMap<int,QString>       &qbMap,
         QVector<int>            &vHSpsv,
         QVector<int>            &vHS20,
         ImProbeTable            &T );
     static bool detect_headstage4(
         ERRLVL                  &R,
-        QMap<int,QString>       &qbMap,
         QVector<int>            &vHSpsv,
         QVector<int>            &vHS20,
+        ImProbeTable            &T,
+        int                     ip );
+    static bool detect_qbPlugsTest(
+        ERRLVL                  &R,
         ImProbeTable            &T,
         int                     ip );
     static bool detect_probes(
         ERRLVL                  &R,
         QStringList             &slBIST,
-        const QMap<int,QString> &qbMap,
         const QVector<int>      &vHSpsv,
         ImProbeTable            &T,
         bool                    srCheck,
