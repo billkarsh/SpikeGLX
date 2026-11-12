@@ -696,7 +696,8 @@ void MGraph::drawBaselines()
 
         h[1] = h[3] = y0;
 
-        X->applyGLTraceClr( iy );
+        if( X->isRaster )
+            X->applyGLTraceClr( iy );
 
         glVertexPointer( 2, GL_FLOAT, 0, h );
         glDrawArrays( GL_LINES, 0, 2 );
