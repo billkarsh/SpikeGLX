@@ -1,5 +1,10 @@
 # What's New On The Site?
 
+November 13, 2026
+
+* SpikeGLX 20261020-api4 (Improved IMRO editor, QB, api v4.1.3).
+* Revised Quadbase Quickstart. PLEASE READ!!
+
 November 5, 2026
 
 **Critical bug found in SpikeGLX 20260901-api4**:
