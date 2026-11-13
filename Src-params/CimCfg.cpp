@@ -3224,6 +3224,14 @@ bool CimCfg::detect_simProbe(
     ImProbeDat              &P )
 {
     QString name = T.simprb.file( P.adr );
+
+    if( name.isEmpty() ) {
+        R.app_put(
+            QString("Error: No sim file associated with (%1).")
+            .arg( P.adr.tx_spd() ) );
+        return false;
+    }
+
     QFile   f( name + ".ap.bin" );
 
     if( !f.exists() ) {
