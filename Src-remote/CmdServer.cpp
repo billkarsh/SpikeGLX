@@ -2300,7 +2300,8 @@ void CmdWorker::verifySha1( QString file )
 bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
 {
 
-#define DIRID       (toks.front().toInt())
+// Directory index; 0 (main directory) if omitted, as the SDKs default.
+#define DIRID       (toks.isEmpty() ? 0 : toks.front().toInt())
 #define RUN         (mainApp()->getRun())
 
 // --------
@@ -2410,7 +2411,8 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
 bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
 {
 
-#define DIRID       (toks.front().toInt())
+// Directory index; 0 (main directory) if omitted, as the SDKs default.
+#define DIRID       (toks.isEmpty() ? 0 : toks.front().toInt())
 
 // --------
 // Dispatch
@@ -2459,8 +2461,12 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
         setAnatomyPP( toks );
     else if( cmd == "SETAUDIOENABLE" )
         setAudioEnable( toks );
-    else if( cmd == "SETAUDIOPARAMS" )
-        setAudioParams( toks.front().trimmed() );
+    else if( cmd == "SETAUDIOPARAMS" ) {
+        if( toks.isEmpty() )
+            errMsg = "SETAUDIOPARAMS: Requires parameter {group}.";
+        else
+            setAudioParams( toks.front().trimmed() );
+    }
     else if( cmd == "SETDATADIR" )
         setDataDir( toks );
     else if( cmd == "SETMETADATA" )
