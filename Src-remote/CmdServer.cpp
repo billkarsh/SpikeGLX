@@ -1743,8 +1743,13 @@ void CmdWorker::setDataDir( QStringList toks )
     QString     path = toks.join( " " ).trimmed().replace( "\\", "/" );
     QFileInfo   info( path );
 
-    if( info.isDir() && info.exists() )
-        mainApp()->remoteSetsDataDir( path, i );
+    if( info.isDir() && info.exists() ) {
+        // On the GUI thread: it updates the menus (macOS aborts otherwise).
+        QMetaObject::invokeMethod(
+            mainApp(),
+            [path, i]() { mainApp()->remoteSetsDataDir( path, i ); },
+            Qt::BlockingQueuedConnection );
+    }
     else {
         errMsg =
         QString("SETDATADIR: Not a directory or does not exist '%1'.")
@@ -1799,7 +1804,13 @@ void CmdWorker::setMultiDriveEnable( const QStringList &toks )
         return;
     }
 
-    mainApp()->remoteSetsMultiDriveEnable( toks.front().toInt() );
+    bool    enable = toks.front().toInt();
+
+    // On the GUI thread: it updates the menus (macOS aborts otherwise).
+    QMetaObject::invokeMethod(
+        mainApp(),
+        [enable]() { mainApp()->remoteSetsMultiDriveEnable( enable ); },
+        Qt::BlockingQueuedConnection );
 }
 
 
