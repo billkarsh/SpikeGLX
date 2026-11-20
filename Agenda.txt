@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20261112
+--------
++ Improve remote function dispatch.
+
 20261020
 --------
 + Fix sync for probes with LF-band.

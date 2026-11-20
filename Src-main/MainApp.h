@@ -138,8 +138,6 @@ public:
     bool isShiftPressed() const;
 
     void dataDirCtlUpdate( QStringList &sl, bool isMD );
-    void remoteSetsMultiDriveEnable( bool enable );
-    bool remoteSetsDataDir( const QString &path, int i );
     int nDataDirs() const                       {return appData.nDirs();}
     const QString& dataDir( int i = 0 ) const   {return appData.getDataDir( i );}
     void makePathAbsolute(QString &path) const  {appData.makePathAbsolute( path );}
@@ -169,6 +167,8 @@ public slots:
         {appData.dataDirDlg();}
     void options_ExploreDataDir( int idir = 0 )
         {appData.explore( sender(), idir );}
+    void remoteSetsMultiDriveEnable( bool enable );
+    bool remoteSetsDataDir( const QString &path, int i );
 
 // Tools
     void tools_VerifySha1();

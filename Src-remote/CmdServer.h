@@ -89,6 +89,7 @@ private:
     ConfigCtl* okjsip( const QString &cmd, int js, int ip );
     ConfigCtl* okStreamToks( const QString &cmd, int &js, int &ip, const QStringList &toks );
     Run* okRunStarted( const QString &cmd );
+    void getDataDir( QString &resp, const QStringList &toks );
     void getGeomMap( QString &resp, const QStringList &toks );
     void getImecChanGains( QString &resp, const QStringList &toks );
     void getLastGT( QString &resp );
@@ -112,6 +113,7 @@ private:
     void mapSample( QString &resp, const QStringList &toks );
     void opto_getAttens( QString &resp, const QStringList &toks );
     void consoleShow( bool show );
+    void enumDirTop( const QStringList &toks );
     bool enumDir( const QString &path );
     void fetch( const QStringList &toks );
     void getStreamShankMap( const QStringList &toks );
@@ -129,7 +131,7 @@ private:
     void selectDevices( QStringList toks );
     void setAnatomyPP( const QStringList &toks );
     void setAudioEnable( const QStringList &toks );
-    void setAudioParams( const QString &group );
+    void setAudioParams( const QStringList &toks );
     void setDataDir( QStringList toks );
     void setMetaData();
     void setMultiDriveEnable( const QStringList &toks );

@@ -396,35 +396,6 @@ void MainApp::dataDirCtlUpdate( QStringList &sl, bool isMD )
 }
 
 
-void MainApp::remoteSetsMultiDriveEnable( bool enable )
-{
-    appData.setMulti( enable );
-    saveSettings();
-    act.ddExploreUpdate();
-}
-
-
-bool MainApp::remoteSetsDataDir( const QString &path, int i )
-{
-    if( i < 0 )
-        return false;
-
-    QString _path = rmvLastSlash( path );
-
-    if( !QDir( _path ).exists() )
-        return false;
-
-    appData.setDir( _path, i );
-    saveSettings();
-    act.ddExploreUpdate();
-
-    Log() << QString("Remote client set data dir (%1): '%2'")
-                .arg( i ).arg( path );
-
-    return true;
-}
-
-
 struct FV_IsViewingFile : public WindowTester
 {
     QString fn;
@@ -1185,6 +1156,35 @@ void MainApp::file_AskQuit()
     win.closeAll();
 
     quit(); // user requested
+}
+
+
+void MainApp::remoteSetsMultiDriveEnable( bool enable )
+{
+    appData.setMulti( enable );
+    saveSettings();
+    act.ddExploreUpdate();
+}
+
+
+bool MainApp::remoteSetsDataDir( const QString &path, int i )
+{
+    if( i < 0 )
+        return false;
+
+    QString _path = rmvLastSlash( path );
+
+    if( !QDir( _path ).exists() )
+        return false;
+
+    appData.setDir( _path, i );
+    saveSettings();
+    act.ddExploreUpdate();
+
+    Log() << QString("Remote client set data dir (%1): '%2'")
+                .arg( i ).arg( path );
+
+    return true;
 }
 
 

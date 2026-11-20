@@ -313,6 +313,25 @@ Run* CmdWorker::okRunStarted( const QString &cmd )
 }
 
 
+void CmdWorker::getDataDir( QString &resp, const QStringList &toks )
+{
+    if( toks.size() < 1 ) {
+        errMsg = "GETDATADIR: Requires parameter idir.";
+        return;
+    }
+
+    int idir = toks.front().toInt();
+
+    if( idir < 0 ) {
+        errMsg =
+        QString("GETDATADIR: idir '%1' must be >= 0.")
+        .arg( idir );
+    }
+    else
+        resp = QString("%1\n").arg( mainApp()->dataDir( idir ) );
+}
+
+
 void CmdWorker::getGeomMap( QString &resp, const QStringList &toks )
 {
     if( toks.size() < 1 ) {
@@ -916,13 +935,35 @@ void CmdWorker::consoleShow( bool show )
 }
 
 
-bool CmdWorker::enumDir( const QString &path )
+void CmdWorker::enumDirTop( const QStringList &toks )
 {
-    if( path.isEmpty() ) {
-        errMsg = "ENUMDATADIR: Directory index out of range.";
-        return false;
+    if( toks.size() < 1 ) {
+        errMsg = "ENUMDATADIR: Requires parameter idir.";
+        return;
     }
 
+    int idir = toks.front().toInt();
+
+    if( idir < 0 ) {
+        errMsg =
+        QString("ENUMDATADIR: idir '%1' must be >= 0.")
+        .arg( idir );
+        return;
+    }
+
+    QString path = mainApp()->dataDir( idir );
+
+    if( path.isEmpty() ) {
+        errMsg = "ENUMDATADIR: Directory index out of range.";
+        return;
+    }
+
+    enumDir( path );
+}
+
+
+bool CmdWorker::enumDir( const QString &path )
+{
     QDir    dir( path );
 
     if( !dir.exists() ) {
@@ -1685,12 +1726,20 @@ void CmdWorker::setAudioEnable( const QStringList &toks )
 }
 
 
+// Expected tok params:
+// 0) group
+//
 // Read one param line at a time from client,
 // append to str,
 // then set params en masse.
 //
-void CmdWorker::setAudioParams( const QString &group )
+void CmdWorker::setAudioParams( const QStringList &toks )
 {
+    if( toks.size() < 1 ) {
+        errMsg = "SETAUDIOPARAMS: Requires parameter ini_subgroup_name.";
+        return;
+    }
+
     MainApp *app = okAppValidated( "SETAUDIOPARAMS" );
 
     if( !app )
@@ -1698,7 +1747,9 @@ void CmdWorker::setAudioParams( const QString &group )
 
     if( SU.send( "READY\n", true ) ) {
 
-        QString params, line;
+        QString group = toks.front().trimmed(),
+                params,
+                line;
 
         while( !(line = SU.readLine()).isNull() ) {
 
@@ -1743,8 +1794,18 @@ void CmdWorker::setDataDir( QStringList toks )
     QString     path = toks.join( " " ).trimmed().replace( "\\", "/" );
     QFileInfo   info( path );
 
-    if( info.isDir() && info.exists() )
-        mainApp()->remoteSetsDataDir( path, i );
+    if( i < 0 ) {
+        errMsg =
+        QString("SETDATADIR: idir '%1' must be >= 0.")
+        .arg( i );
+    }
+    else if( info.isDir() && info.exists() ) {
+        QMetaObject::invokeMethod(
+            mainApp(), "remoteSetsDataDir",
+            Qt::BlockingQueuedConnection,
+            Q_ARG(QString, path),
+            Q_ARG(int, i) );
+    }
     else {
         errMsg =
         QString("SETDATADIR: Not a directory or does not exist '%1'.")
@@ -1799,7 +1860,10 @@ void CmdWorker::setMultiDriveEnable( const QStringList &toks )
         return;
     }
 
-    mainApp()->remoteSetsMultiDriveEnable( toks.front().toInt() );
+    QMetaObject::invokeMethod(
+        mainApp(), "remoteSetsMultiDriveEnable",
+        Qt::BlockingQueuedConnection,
+        Q_ARG(bool, toks.front().toInt()) );
 }
 
 
@@ -2300,8 +2364,7 @@ void CmdWorker::verifySha1( QString file )
 bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
 {
 
-#define DIRID       (toks.front().toInt())
-#define RUN         (mainApp()->getRun())
+#define RUN (mainApp()->getRun())
 
 // --------
 // Dispatch
@@ -2313,7 +2376,7 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
     if( cmd == "GETCURRUNFILE" )
         resp = QString("%1\n").arg( RUN->dfGetCurNiName() );
     else if( cmd == "GETDATADIR" )
-        resp = QString("%1\n").arg( mainApp()->dataDir( DIRID ) );
+        getDataDir( resp, toks );
     else if( cmd == "GETGEOMMAP" )
         getGeomMap( resp, toks );
     else if( cmd == "GETIMECCHANGAINS" )
@@ -2410,8 +2473,6 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
 bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
 {
 
-#define DIRID       (toks.front().toInt())
-
 // --------
 // Dispatch
 // --------
@@ -2426,7 +2487,7 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
     else if( cmd == "CONSOLESHOW" )
         consoleShow( true );
     else if( cmd == "ENUMDATADIR" )
-        enumDir( mainApp()->dataDir( DIRID ) );
+        enumDirTop( toks );
     else if( cmd == "FETCH" )
         fetch( toks );
     else if( cmd == "GETSTREAMSHANKMAP" )
@@ -2460,7 +2521,7 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
     else if( cmd == "SETAUDIOENABLE" )
         setAudioEnable( toks );
     else if( cmd == "SETAUDIOPARAMS" )
-        setAudioParams( toks.front().trimmed() );
+        setAudioParams( toks );
     else if( cmd == "SETDATADIR" )
         setDataDir( toks );
     else if( cmd == "SETMETADATA" )
