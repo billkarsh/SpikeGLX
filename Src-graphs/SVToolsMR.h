@@ -3,7 +3,7 @@
 
 #include "SVToolsM.h"
 #include "ToolBut.h"
-#include "TspikeEditor.h"
+#include "TSpikeEditor.h"
 
 /* ---------------------------------------------------------------- */
 /* Tspike --------------------------------------------------------- */

@@ -4,6 +4,7 @@
 20261112
 --------
 + Improve remote function dispatch.
++ Improve non-winOS compatibility.
 
 20261020
 --------

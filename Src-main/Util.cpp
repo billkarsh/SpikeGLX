@@ -153,7 +153,7 @@ Error::~Error()
         ConsoleWindow   *w = app->console();
         QMetaObject::invokeMethod( w, "showNormal", Qt::AutoConnection );
         QMetaObject::invokeMethod( w, "raise", Qt::AutoConnection );
-        w->activateWindow();
+        QMetaObject::invokeMethod( w, [w]() { w->activateWindow(); }, Qt::AutoConnection );
     }
 }
 
