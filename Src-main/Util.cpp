@@ -153,7 +153,11 @@ Error::~Error()
         ConsoleWindow   *w = app->console();
         QMetaObject::invokeMethod( w, "showNormal", Qt::AutoConnection );
         QMetaObject::invokeMethod( w, "raise", Qt::AutoConnection );
-        w->activateWindow();
+        // Queued like the two calls above: an Error can be logged from
+        // a worker thread (e.g. a remote command's error reply), and
+        // activating a window off the main thread aborts on macOS.
+        QMetaObject::invokeMethod(
+            w, [w]() { w->activateWindow(); }, Qt::AutoConnection );
     }
 }
 
