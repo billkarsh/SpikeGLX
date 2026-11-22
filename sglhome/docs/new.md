@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+November 22, 2026
+
+* CatGT 5.6 (Fix AP2LF ct_offset reporting).
+
 November 13, 2026
 
 * SpikeGLX 20261020-api4 (Improved IMRO editor, QB, api v4.1.3).
@@ -19,7 +23,7 @@ For now, the previous version is offered.
 
 November 4, 2026
 
-* CatGT 5.4 (Fix AP2LF zero-filling).
+* CatGT 5.5 (Fix AP2LF zero-filling).
 
 October 21, 2026
 
