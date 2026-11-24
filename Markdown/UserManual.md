@@ -167,13 +167,14 @@ SpikeGLX/
     styles/
     tls/
     translations/
-    D3Dcompiler_47.dll
     FpgaManager.dll
     FTD3XX.dll
     libgcc_s_seh-1.dll
     libstdc++-6.dll
     libwinpthread-1.dll
     msvcp(version).dll
+    msvcp(version_1).dll
+    msvcp(version_2).dll
     msvcp(version)-atomic-wait.dll
     NeuropixAPI_version_info.dll
     opengl32sw.dll

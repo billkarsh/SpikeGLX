@@ -3,6 +3,7 @@
 
 20261112
 --------
++ Qt 6.12.1.
 + Improve remote function dispatch.
 + Improve non-winOS compatibility.
 
@@ -780,7 +781,9 @@ API4    (tested):    Qt 6.9.3  MinGW 13.1.0  64bit.
 API4    (tested):    Qt 6.10.2 MinGW 13.1.0  64bit.
 API4    (tested):    Qt 6.10.2 MSVC  2026-18 64bit.
 API4    (build):     Qt 6.10.3 MinGW 13.1.0  64bit.
+API4    (build):     Qt 6.12.1 MinGW 15.1.0  64bit.
 API5    (build):     Qt 6.10.3 MSVC  2026-18 64bit.
+API5    (build):     Qt 6.12.1 MSVC  2026-18 64bit.
 
 
 // LOOSE ENDS

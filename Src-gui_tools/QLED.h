@@ -23,6 +23,9 @@
 // (3) Neatened white-space and style of QLed.cpp/.h for readability.
 // (4) Added resPath param to QLED ctor for flexible project organization.
 // (5) Added setValueNow() method for faster redrawing.
+// (6) Move Q_ENUMS (deprecated) to Q_ENUM after resp. enum{}.
+// (7) Add signal "NOTIFY xxxChanged" to Q_PROPERTY.
+// (8) Add namespace QLED:: to slot params.
 // No other library components are used.
 //
 
@@ -41,12 +44,10 @@ class QSvgRenderer;
 class QLED : public QWidget
 {
     Q_OBJECT
-    Q_ENUMS( ledShape )
-    Q_ENUMS( ledColor )
-    Q_PROPERTY( ledShape shape READ shape WRITE setShape )
-    Q_PROPERTY( ledColor onColor READ onColor WRITE setOnColor )
-    Q_PROPERTY( ledColor offColor READ offColor WRITE setOffColor )
-    Q_PROPERTY( bool value READ value WRITE setValue )
+    Q_PROPERTY( ledShape shape READ shape WRITE setShape NOTIFY shapeChanged )
+    Q_PROPERTY( ledColor onColor READ onColor WRITE setOnColor NOTIFY onColorChanged )
+    Q_PROPERTY( ledColor offColor READ offColor WRITE setOffColor NOTIFY offColorChanged )
+    Q_PROPERTY( bool value READ value WRITE setValue NOTIFY valueChanged )
 
 public:
     enum ledShape {
@@ -55,6 +56,8 @@ public:
         Triangle,
         Rounded
     };
+    Q_ENUM( ledShape )
+
     enum ledColor {
         Red     = 0,
         Green,
@@ -64,6 +67,8 @@ public:
         Purple,
         Blue
     };
+    Q_ENUM( ledColor )
+
 private:
     QSvgRenderer    *renderer;
 protected:
@@ -83,10 +88,16 @@ public:
     ledColor offColor() const   {return m_offColor;}
     bool value() const          {return m_value;}
 
+signals:
+    void shapeChanged( QLED::ledShape );
+    void onColorChanged( QLED::ledColor );
+    void offColorChanged( QLED::ledColor );
+    void valueChanged( bool );
+
 public slots:
-    void setShape( ledShape );
-    void setOnColor( ledColor );
-    void setOffColor( ledColor );
+    void setShape( QLED::ledShape );
+    void setOnColor( QLED::ledColor );
+    void setOffColor( QLED::ledColor );
     void setValue( bool );
     void setValueNow( bool );
     void toggleValue();
