@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+November 25, 2026
+
+* CatGT 5.7 (Rework AP2LF to fix phase issues).
+
 November 22, 2026
 
 * CatGT 5.6 (Fix AP2LF ct_offset reporting).
